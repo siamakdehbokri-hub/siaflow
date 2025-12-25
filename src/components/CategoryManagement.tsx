@@ -3,7 +3,7 @@ import { Plus, Edit3, Trash2, X } from 'lucide-react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
-  Smartphone, Plane, Book, Music
+  Smartphone, Plane, Book, Music, MoreHorizontal
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,26 +27,27 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Category } from '@/types/expense';
-import { formatCurrency } from '@/data/mockData';
+import { formatCurrency } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 const iconOptions = [
-  { name: 'UtensilsCrossed', icon: UtensilsCrossed, label: 'غذا' },
+  { name: 'Home', icon: Home, label: 'خانه' },
   { name: 'Car', icon: Car, label: 'حمل و نقل' },
-  { name: 'ShoppingBag', icon: ShoppingBag, label: 'خرید' },
-  { name: 'Receipt', icon: Receipt, label: 'قبوض' },
-  { name: 'Heart', icon: Heart, label: 'سلامت' },
+  { name: 'UtensilsCrossed', icon: UtensilsCrossed, label: 'غذا' },
   { name: 'Gamepad2', icon: Gamepad2, label: 'تفریح' },
+  { name: 'ShoppingBag', icon: ShoppingBag, label: 'خرید' },
+  { name: 'Heart', icon: Heart, label: 'سلامت' },
+  { name: 'Book', icon: Book, label: 'آموزش' },
+  { name: 'Receipt', icon: Receipt, label: 'قبوض' },
   { name: 'Wallet', icon: Wallet, label: 'مالی' },
   { name: 'TrendingUp', icon: TrendingUp, label: 'سرمایه‌گذاری' },
-  { name: 'Home', icon: Home, label: 'خانه' },
   { name: 'Gift', icon: Gift, label: 'هدیه' },
   { name: 'Briefcase', icon: Briefcase, label: 'کار' },
   { name: 'Smartphone', icon: Smartphone, label: 'تکنولوژی' },
   { name: 'Plane', icon: Plane, label: 'سفر' },
-  { name: 'Book', icon: Book, label: 'آموزش' },
   { name: 'Music', icon: Music, label: 'موسیقی' },
+  { name: 'MoreHorizontal', icon: MoreHorizontal, label: 'سایر' },
 ];
 
 const colorOptions = [
@@ -63,7 +64,7 @@ const colorOptions = [
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
-  Smartphone, Plane, Book, Music
+  Smartphone, Plane, Book, Music, MoreHorizontal
 };
 
 interface CategoryManagementProps {

@@ -166,7 +166,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-        نسخه ۱.۰.۰
+        نسخه ۱.۲.۰ - تقویم شمسی و دسته‌بندی جامع
       </p>
     </div>
   );

@@ -10,20 +10,22 @@ import { Category, Transaction } from '@/types/expense';
 import { exportCategoryReport, exportToPDF } from '@/utils/exportUtils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { getPersianWeekdays, formatCurrency } from '@/utils/persianDate';
 
 interface ReportsProps {
   categories: Category[];
   transactions: Transaction[];
 }
 
+const persianWeekdays = getPersianWeekdays();
 const weeklyData = [
-  { name: 'ش', expense: 1200000 },
-  { name: 'ی', expense: 800000 },
-  { name: 'د', expense: 1500000 },
-  { name: 'س', expense: 600000 },
-  { name: 'چ', expense: 2100000 },
-  { name: 'پ', expense: 1800000 },
-  { name: 'ج', expense: 900000 },
+  { name: persianWeekdays[0], expense: 1200000 },
+  { name: persianWeekdays[1], expense: 800000 },
+  { name: persianWeekdays[2], expense: 1500000 },
+  { name: persianWeekdays[3], expense: 600000 },
+  { name: persianWeekdays[4], expense: 2100000 },
+  { name: persianWeekdays[5], expense: 1800000 },
+  { name: persianWeekdays[6], expense: 900000 },
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -31,7 +33,7 @@ const CustomTooltip = ({ active, payload }: any) => {
     return (
       <div className="bg-popover border border-border rounded-lg p-2 shadow-lg">
         <p className="text-sm text-foreground">
-          {new Intl.NumberFormat('fa-IR').format(payload[0].value)} تومان
+          {formatCurrency(payload[0].value)}
         </p>
       </div>
     );

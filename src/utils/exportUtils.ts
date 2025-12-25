@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Transaction } from '@/types/expense';
-import { formatCurrency } from '@/data/mockData';
+import { formatCurrency, formatPersianDateShort } from '@/utils/persianDate';
 
 export const exportToExcel = (transactions: Transaction[], filename: string = 'transactions') => {
   const data = transactions.map((t) => ({
@@ -10,7 +10,7 @@ export const exportToExcel = (transactions: Transaction[], filename: string = 't
     'مبلغ': t.amount,
     'دسته‌بندی': t.category,
     'توضیحات': t.description,
-    'تاریخ': t.date,
+    'تاریخ': formatPersianDateShort(t.date),
     'تکراری': t.isRecurring ? 'بله' : 'خیر',
   }));
 
