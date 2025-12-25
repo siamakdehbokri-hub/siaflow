@@ -134,12 +134,20 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen gradient-mesh pb-28">
       {/* Header */}
-      <header className="sticky top-0 z-40 glass border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground">{getPageTitle()}</h1>
-          <div className="flex items-center gap-1 sm:gap-2">
+      <header className="sticky top-0 z-40 glass-heavy border-b-0">
+        <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow-sm">
+              <span className="text-sm font-bold text-primary-foreground">SF</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
+              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.6</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
             {activeTab === 'dashboard' && (
               <WidgetSettings
                 widgets={widgets}
@@ -153,6 +161,7 @@ const Index = () => {
                 variant="ghost" 
                 size="icon-sm"
                 onClick={() => setShowCategories(true)}
+                className="hover:bg-primary/10"
               >
                 <FolderOpen className="w-5 h-5" />
               </Button>

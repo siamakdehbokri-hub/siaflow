@@ -292,7 +292,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-        SiaFlow نسخه ۱.۶.۰ - برچسب‌ها، جستجوی پیشرفته و بهبودها
+        SiaFlow نسخه ۱.۶.۰ - طراحی جدید، برچسب‌ها و جستجوی پیشرفته
       </p>
     </div>
   );
