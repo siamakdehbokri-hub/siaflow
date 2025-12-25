@@ -75,23 +75,32 @@ export function TrendChart({ transactions = [] }: TrendChartProps) {
     );
   }
 
+  const totalIncome = data.reduce((sum, d) => sum + d.income, 0);
+  const totalExpense = data.reduce((sum, d) => sum + d.expense, 0);
+
   return (
-    <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-      <CardHeader className="px-4 sm:px-5">
-        <CardTitle className="text-base">روند درآمد و هزینه</CardTitle>
+    <Card variant="glass" className="animate-slide-up overflow-hidden" style={{ animationDelay: '0.1s' }}>
+      <CardHeader className="px-4 sm:px-5 pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base">روند مالی</CardTitle>
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-success">+{formatCurrency(totalIncome)}</span>
+            <span className="text-destructive">-{formatCurrency(totalExpense)}</span>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="px-4 sm:px-5">
-        <div className="h-40 sm:h-48">
+        <div className="h-36 sm:h-44">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0.05} />
                 </linearGradient>
                 <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
               <XAxis 
@@ -120,14 +129,15 @@ export function TrendChart({ transactions = [] }: TrendChartProps) {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-center gap-4 sm:gap-6 mt-3 sm:mt-4">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-success" />
-            <span className="text-[10px] sm:text-xs text-muted-foreground">درآمد</span>
+        {/* Legend chips */}
+        <div className="flex items-center justify-center gap-4 mt-3">
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-success/10">
+            <span className="w-2 h-2 rounded-full bg-success" />
+            <span className="text-xs text-success">درآمد</span>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-destructive" />
-            <span className="text-[10px] sm:text-xs text-muted-foreground">هزینه</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-destructive/10">
+            <span className="w-2 h-2 rounded-full bg-destructive" />
+            <span className="text-xs text-destructive">هزینه</span>
           </div>
         </div>
       </CardContent>

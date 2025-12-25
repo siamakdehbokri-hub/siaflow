@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Category } from '@/types/expense';
 import { formatCurrency } from '@/utils/persianDate';
@@ -47,46 +47,66 @@ export function SpendingChart({ categories = [] }: SpendingChartProps) {
     );
   }
 
+  const totalSpending = chartData.reduce((sum, d) => sum + d.value, 0);
+
   return (
-    <Card variant="glass" className="animate-slide-up">
-      <CardHeader className="px-4 sm:px-5">
-        <CardTitle className="text-base">توزیع هزینه‌ها</CardTitle>
+    <Card variant="glass" className="animate-slide-up overflow-hidden">
+      <CardHeader className="px-4 sm:px-5 pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base">توزیع هزینه‌ها</CardTitle>
+          <span className="text-xs text-muted-foreground">
+            {formatCurrency(totalSpending)}
+          </span>
+        </div>
       </CardHeader>
       <CardContent className="px-4 sm:px-5">
-        <div className="h-52 sm:h-64">
+        <div className="h-44 sm:h-56">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
+              <defs>
+                {chartData.map((entry, index) => (
+                  <linearGradient key={`gradient-${index}`} id={`pieGradient-${index}`} x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor={entry.color} stopOpacity={1} />
+                    <stop offset="100%" stopColor={entry.color} stopOpacity={0.6} />
+                  </linearGradient>
+                ))}
+              </defs>
               <Pie
                 data={chartData}
                 cx="50%"
-                cy="45%"
-                innerRadius={45}
-                outerRadius={70}
-                paddingAngle={4}
+                cy="50%"
+                innerRadius={40}
+                outerRadius={65}
+                paddingAngle={3}
                 dataKey="value"
+                strokeWidth={0}
               >
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={COLORS[index]} 
-                    stroke="transparent"
+                    fill={`url(#pieGradient-${index})`}
+                    className="drop-shadow-sm"
                   />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                layout="horizontal"
-                align="center"
-                verticalAlign="bottom"
-                iconType="circle"
-                iconSize={6}
-                formatter={(value: string) => (
-                  <span className="text-[10px] sm:text-xs text-muted-foreground">{value}</span>
-                )}
-                wrapperStyle={{ fontSize: '10px' }}
-              />
             </PieChart>
           </ResponsiveContainer>
+        </div>
+        {/* Legend as chips */}
+        <div className="flex flex-wrap gap-2 justify-center mt-3">
+          {chartData.slice(0, 4).map((item, index) => (
+            <div 
+              key={index}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/50 text-xs"
+            >
+              <span 
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="text-muted-foreground truncate max-w-[60px]">{item.name}</span>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
