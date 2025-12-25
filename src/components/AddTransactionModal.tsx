@@ -220,27 +220,28 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             </Select>
           </div>
 
-          {/* Subcategory - New Enhanced Section */}
+          {/* Subcategory - Responsive Grid */}
           {subcategories.length > 0 && (
             <div className="space-y-2 animate-fade-in">
               <Label className="text-sm font-medium flex items-center gap-2">
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
                 زیردسته
               </Label>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {subcategories.map((sub) => (
                   <button
                     key={sub}
                     type="button"
                     onClick={() => setSubcategory(subcategory === sub ? '' : sub)}
                     className={cn(
-                      "px-3 py-2 text-sm rounded-xl border-2 transition-all duration-200",
+                      "px-2 py-2 text-xs sm:text-sm rounded-xl border-2 transition-all duration-200 truncate min-w-0",
                       subcategory === sub
                         ? type === 'expense'
                           ? "border-destructive bg-destructive/10 text-destructive font-medium"
                           : "border-success bg-success/10 text-success font-medium"
                         : "border-border hover:border-muted-foreground/50 text-muted-foreground hover:text-foreground"
                     )}
+                    title={sub}
                   >
                     {sub}
                   </button>
