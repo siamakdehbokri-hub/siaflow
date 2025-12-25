@@ -86,6 +86,7 @@ export type Database = {
           description: string | null
           id: string
           is_recurring: boolean | null
+          subcategory: string | null
           tags: string[] | null
           type: string
           updated_at: string
@@ -99,6 +100,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean | null
+          subcategory?: string | null
           tags?: string[] | null
           type: string
           updated_at?: string
@@ -112,6 +114,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean | null
+          subcategory?: string | null
           tags?: string[] | null
           type?: string
           updated_at?: string

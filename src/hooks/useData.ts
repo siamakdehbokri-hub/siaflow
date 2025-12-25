@@ -30,9 +30,11 @@ export function useTransactions() {
         amount: Number(t.amount),
         type: t.type as 'income' | 'expense',
         category: t.category,
+        subcategory: t.subcategory || undefined,
         description: t.description || '',
         date: t.date,
         isRecurring: t.is_recurring || false,
+        tags: t.tags || [],
       }));
 
       setTransactions(mappedData);
@@ -59,9 +61,11 @@ export function useTransactions() {
           amount: transaction.amount,
           type: transaction.type,
           category: transaction.category,
+          subcategory: transaction.subcategory || null,
           description: transaction.description,
           date: transaction.date,
           is_recurring: transaction.isRecurring,
+          tags: transaction.tags || [],
         })
         .select()
         .single();
@@ -73,9 +77,11 @@ export function useTransactions() {
         amount: Number(data.amount),
         type: data.type as 'income' | 'expense',
         category: data.category,
+        subcategory: data.subcategory || undefined,
         description: data.description || '',
         date: data.date,
         isRecurring: data.is_recurring || false,
+        tags: data.tags || [],
       };
 
       setTransactions([newTransaction, ...transactions]);
@@ -96,9 +102,11 @@ export function useTransactions() {
           amount: transaction.amount,
           type: transaction.type,
           category: transaction.category,
+          subcategory: transaction.subcategory || null,
           description: transaction.description,
           date: transaction.date,
           is_recurring: transaction.isRecurring,
+          tags: transaction.tags || [],
         })
         .eq('id', transaction.id)
         .eq('user_id', user.id);
