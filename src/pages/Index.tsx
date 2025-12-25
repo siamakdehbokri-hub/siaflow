@@ -176,41 +176,51 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content with Page Transitions */}
       <main className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-5">
         {showCategories ? (
-          <CategoryManagement 
-            categories={categoriesWithSpent}
-            onAddCategory={handleAddCategory}
-            onEditCategory={handleEditCategory}
-            onDeleteCategory={handleDeleteCategory}
-          />
+          <div key="categories" className="animate-slide-up">
+            <CategoryManagement 
+              categories={categoriesWithSpent}
+              onAddCategory={handleAddCategory}
+              onEditCategory={handleEditCategory}
+              onDeleteCategory={handleDeleteCategory}
+            />
+          </div>
         ) : (
           <>
             {activeTab === 'dashboard' && (
-              <Dashboard 
-                transactions={transactions} 
-                categories={categoriesWithSpent}
-                widgets={widgets}
-                onViewAllTransactions={() => handleTabChange('transactions')}
-              />
+              <div key="dashboard" className="animate-fade-in">
+                <Dashboard 
+                  transactions={transactions} 
+                  categories={categoriesWithSpent}
+                  widgets={widgets}
+                  onViewAllTransactions={() => handleTabChange('transactions')}
+                />
+              </div>
             )}
             {activeTab === 'transactions' && (
-              <TransactionsList 
-                transactions={transactions}
-                categories={categoriesWithSpent}
-                onEditTransaction={handleEditTransaction}
-                onDeleteTransaction={handleDeleteTransaction}
-              />
+              <div key="transactions" className="animate-slide-up">
+                <TransactionsList 
+                  transactions={transactions}
+                  categories={categoriesWithSpent}
+                  onEditTransaction={handleEditTransaction}
+                  onDeleteTransaction={handleDeleteTransaction}
+                />
+              </div>
             )}
             {activeTab === 'reports' && (
-              <Reports 
-                categories={categoriesWithSpent}
-                transactions={transactions}
-              />
+              <div key="reports" className="animate-slide-up">
+                <Reports 
+                  categories={categoriesWithSpent}
+                  transactions={transactions}
+                />
+              </div>
             )}
             {activeTab === 'settings' && (
-              <Settings onOpenCategories={() => setShowCategories(true)} />
+              <div key="settings" className="animate-fade-in">
+                <Settings onOpenCategories={() => setShowCategories(true)} />
+              </div>
             )}
           </>
         )}
