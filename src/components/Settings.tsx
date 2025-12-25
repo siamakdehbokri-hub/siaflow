@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   User, Bell, Shield, Palette, Download, 
   HelpCircle, LogOut, ChevronLeft, Moon, Sun, FolderOpen 
@@ -5,10 +6,12 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { ProfileEdit } from './ProfileEdit';
+import { HelpGuide } from './HelpGuide';
 
 const settingsGroups = [
   {
@@ -39,9 +42,12 @@ interface SettingsProps {
   onOpenCategories?: () => void;
 }
 
+type SettingsView = 'main' | 'profile' | 'help';
+
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [isDark, setIsDark] = useState(true);
+  const [currentView, setCurrentView] = useState<SettingsView>('main');
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -58,14 +64,20 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
   const handleAction = (action: string) => {
     switch (action) {
+      case 'profile':
+        setCurrentView('profile');
+        break;
+      case 'help':
+        setCurrentView('help');
+        break;
       case 'backup':
         toast.success('پشتیبان‌گیری انجام شد');
         break;
       case 'categories':
         onOpenCategories?.();
         break;
-      case 'help':
-        toast.info('راهنما به زودی اضافه می‌شود');
+      case 'security':
+        toast.info('تنظیمات امنیتی به زودی اضافه می‌شود');
         break;
       default:
         toast.info('این بخش به زودی فعال می‌شود');
@@ -81,6 +93,15 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       toast.error('خطا در خروج از حساب');
     }
   };
+
+  // Sub-views
+  if (currentView === 'profile') {
+    return <ProfileEdit onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'help') {
+    return <HelpGuide onBack={() => setCurrentView('main')} />;
+  }
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
   const email = user?.email || '';
@@ -166,7 +187,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-        نسخه ۱.۳.۰ - تقویم شمسی، زیردسته‌بندی و نمودار مقایسه
+        نسخه ۱.۴.۰ - تقویم شمسی کامل، پروفایل و راهنما
       </p>
     </div>
   );

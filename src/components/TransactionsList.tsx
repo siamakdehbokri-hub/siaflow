@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Search, Filter, Calendar } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, Filter } from 'lucide-react';
 import { SwipeableTransaction } from './SwipeableTransaction';
 import { ExportButtons } from './ExportButtons';
+import { DateRangeFilter } from './DateRangeFilter';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { formatPersianDateFull } from '@/utils/persianDate';
 import {
   Select,
@@ -30,28 +30,50 @@ export function TransactionsList({
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
 
-  const filteredTransactions = transactions.filter((t) => {
-    const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
-    const matchesType = typeFilter === 'all' || t.type === typeFilter;
-    return matchesSearch && matchesCategory && matchesType;
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((t) => {
+      const matchesSearch = t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.subcategory && t.subcategory.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = categoryFilter === 'all' || t.category === categoryFilter;
+      const matchesType = typeFilter === 'all' || t.type === typeFilter;
+      
+      // Date range filter
+      let matchesDateRange = true;
+      if (startDate) {
+        matchesDateRange = matchesDateRange && t.date >= startDate;
+      }
+      if (endDate) {
+        matchesDateRange = matchesDateRange && t.date <= endDate;
+      }
+      
+      return matchesSearch && matchesCategory && matchesType && matchesDateRange;
+    });
+  }, [transactions, searchQuery, categoryFilter, typeFilter, startDate, endDate]);
 
   // Group by date
-  const groupedTransactions = filteredTransactions.reduce((groups, transaction) => {
-    const date = transaction.date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(transaction);
-    return groups;
-  }, {} as Record<string, Transaction[]>);
+  const groupedTransactions = useMemo(() => {
+    return filteredTransactions.reduce((groups, transaction) => {
+      const date = transaction.date;
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(transaction);
+      return groups;
+    }, {} as Record<string, Transaction[]>);
+  }, [filteredTransactions]);
 
   const sortedDates = Object.keys(groupedTransactions).sort((a, b) => 
     new Date(b).getTime() - new Date(a).getTime()
   );
+
+  const clearDateFilter = () => {
+    setStartDate(null);
+    setEndDate(null);
+  };
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -97,9 +119,13 @@ export function TransactionsList({
           </SelectContent>
         </Select>
 
-        <Button variant="outline" size="icon" className="shrink-0">
-          <Calendar className="w-4 h-4" />
-        </Button>
+        <DateRangeFilter
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+          onClear={clearDateFilter}
+        />
       </div>
 
       {/* Tip */}
