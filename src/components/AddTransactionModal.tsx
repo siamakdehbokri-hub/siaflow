@@ -99,7 +99,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
         <form onSubmit={handleSubmit} className="p-5 space-y-5">
           {/* Type Toggle */}
-          <div className="flex gap-2 p-1 bg-muted rounded-xl">
+          <div className="flex gap-2 p-1 bg-muted rounded-xl overflow-hidden">
             <button
               type="button"
               onClick={() => {
@@ -108,14 +108,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all duration-200",
+                "flex-1 flex items-center justify-center gap-1.5 py-3 px-2 rounded-lg font-medium transition-all duration-200 min-w-0 text-sm",
                 type === 'expense' 
                   ? "bg-destructive text-destructive-foreground shadow-md" 
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Minus className="w-4 h-4" />
-              هزینه
+              <Minus className="w-4 h-4 shrink-0" />
+              <span className="truncate">هزینه</span>
             </button>
             <button
               type="button"
@@ -125,14 +125,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all duration-200",
+                "flex-1 flex items-center justify-center gap-1.5 py-3 px-2 rounded-lg font-medium transition-all duration-200 min-w-0 text-sm",
                 type === 'income' 
                   ? "bg-success text-success-foreground shadow-md" 
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Plus className="w-4 h-4" />
-              درآمد
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="truncate">درآمد</span>
             </button>
           </div>
 
