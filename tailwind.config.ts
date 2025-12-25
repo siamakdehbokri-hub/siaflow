@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        vazir: ["Vazirmatn", "system-ui", "sans-serif"],
+        iransans: ["IRANSansX", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

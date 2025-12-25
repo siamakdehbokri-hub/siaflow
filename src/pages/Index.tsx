@@ -43,10 +43,7 @@ const Index = () => {
 
   const { reminders, dismissReminder, hasReminders } = useReminders(transactions);
 
-  // Set dark mode by default
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+  // Theme is now managed by useTheme hook in Settings
 
   // Calculate spent amounts for each category
   const categoriesWithSpent = useMemo(() => {
