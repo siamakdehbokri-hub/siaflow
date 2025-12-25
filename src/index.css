@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+/* IranSans X Font - already loaded in index.html */
 
 @layer base {
   :root {
@@ -120,7 +120,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-vazir antialiased;
+    @apply bg-background text-foreground font-iransans antialiased;
   }
 }
 

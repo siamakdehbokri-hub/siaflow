@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { 
   User, Bell, Shield, Palette, Download, 
-  HelpCircle, LogOut, ChevronLeft, Moon, Sun, FolderOpen 
+  HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor, FolderOpen 
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { ProfileEdit } from './ProfileEdit';
 import { HelpGuide } from './HelpGuide';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const settingsGroups = [
   {
@@ -25,7 +33,7 @@ const settingsGroups = [
   {
     title: 'تنظیمات',
     items: [
-      { icon: Palette, label: 'حالت شب', action: 'theme', toggle: true },
+      { icon: Palette, label: 'تم برنامه', action: 'theme' },
       { icon: FolderOpen, label: 'دسته‌بندی‌ها', action: 'categories' },
       { icon: Download, label: 'پشتیبان‌گیری', action: 'backup' },
     ],
@@ -46,21 +54,10 @@ type SettingsView = 'main' | 'profile' | 'help';
 
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
-  const [isDark, setIsDark] = useState(true);
   const [currentView, setCurrentView] = useState<SettingsView>('main');
   const { user, signOut } = useAuth();
+  const { theme, setTheme, isDark } = useTheme();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const prefersDark = document.documentElement.classList.contains('dark');
-    setIsDark(prefersDark);
-  }, []);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
-    toast.success(isDark ? 'حالت روز فعال شد' : 'حالت شب فعال شد');
-  };
 
   const handleAction = (action: string) => {
     switch (action) {
@@ -80,7 +77,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         toast.info('تنظیمات امنیتی به زودی اضافه می‌شود');
         break;
       default:
-        toast.info('این بخش به زودی فعال می‌شود');
+        break;
     }
   };
 
@@ -107,6 +104,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const email = user?.email || '';
   const initials = displayName.charAt(0).toUpperCase();
 
+  const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
+
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
       {/* User Profile */}
@@ -120,7 +119,12 @@ export function Settings({ onOpenCategories }: SettingsProps) {
               <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{displayName}</h3>
               <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{email}</p>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0 text-xs sm:text-sm">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="shrink-0 text-xs sm:text-sm"
+              onClick={() => setCurrentView('profile')}
+            >
               ویرایش
             </Button>
           </div>
@@ -140,29 +144,125 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                 const isTheme = item.action === 'theme';
                 const isNotification = item.action === 'notifications';
 
+                if (isTheme) {
+                  return (
+                    <Sheet key={item.action}>
+                      <SheetTrigger asChild>
+                        <button
+                          className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-accent/50 transition-colors"
+                        >
+                          <div className="p-1.5 sm:p-2 rounded-lg bg-muted shrink-0">
+                            <ThemeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
+                          </div>
+                          <span className="flex-1 text-right font-medium text-foreground text-sm sm:text-base">
+                            {item.label}
+                          </span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {theme === 'dark' ? 'تاریک' : theme === 'light' ? 'روشن' : 'سیستم'}
+                          </span>
+                          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                        </button>
+                      </SheetTrigger>
+                      <SheetContent side="bottom" className="h-auto">
+                        <SheetHeader className="text-right">
+                          <SheetTitle>انتخاب تم</SheetTitle>
+                          <SheetDescription>
+                            تم مورد نظر خود را انتخاب کنید
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-6 space-y-2">
+                          <button
+                            onClick={() => {
+                              setTheme('light');
+                              toast.success('حالت روشن فعال شد');
+                            }}
+                            className={`w-full flex items-center gap-4 p-4 rounded-xl transition-colors ${
+                              theme === 'light' ? 'bg-primary/10 border-2 border-primary' : 'bg-muted hover:bg-accent'
+                            }`}
+                          >
+                            <div className="p-3 rounded-full bg-amber-100">
+                              <Sun className="w-6 h-6 text-amber-600" />
+                            </div>
+                            <div className="flex-1 text-right">
+                              <p className="font-semibold text-foreground">حالت روشن</p>
+                              <p className="text-sm text-muted-foreground">پس‌زمینه روشن و متن تیره</p>
+                            </div>
+                            {theme === 'light' && (
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setTheme('dark');
+                              toast.success('حالت تاریک فعال شد');
+                            }}
+                            className={`w-full flex items-center gap-4 p-4 rounded-xl transition-colors ${
+                              theme === 'dark' ? 'bg-primary/10 border-2 border-primary' : 'bg-muted hover:bg-accent'
+                            }`}
+                          >
+                            <div className="p-3 rounded-full bg-slate-800">
+                              <Moon className="w-6 h-6 text-slate-200" />
+                            </div>
+                            <div className="flex-1 text-right">
+                              <p className="font-semibold text-foreground">حالت تاریک</p>
+                              <p className="text-sm text-muted-foreground">پس‌زمینه تیره و متن روشن</p>
+                            </div>
+                            {theme === 'dark' && (
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setTheme('system');
+                              toast.success('تم سیستم فعال شد');
+                            }}
+                            className={`w-full flex items-center gap-4 p-4 rounded-xl transition-colors ${
+                              theme === 'system' ? 'bg-primary/10 border-2 border-primary' : 'bg-muted hover:bg-accent'
+                            }`}
+                          >
+                            <div className="p-3 rounded-full bg-gradient-to-br from-amber-100 to-slate-800">
+                              <Monitor className="w-6 h-6 text-foreground" />
+                            </div>
+                            <div className="flex-1 text-right">
+                              <p className="font-semibold text-foreground">سیستم</p>
+                              <p className="text-sm text-muted-foreground">مطابق با تنظیمات دستگاه</p>
+                            </div>
+                            {theme === 'system' && (
+                              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+                              </div>
+                            )}
+                          </button>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  );
+                }
+
                 return (
                   <button
                     key={item.action}
                     className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-accent/50 transition-colors"
                     onClick={() => {
-                      if (isTheme) toggleTheme();
-                      else if (!item.toggle) handleAction(item.action);
+                      if (!item.toggle) handleAction(item.action);
                     }}
                   >
                     <div className="p-1.5 sm:p-2 rounded-lg bg-muted shrink-0">
-                      {isTheme ? (
-                        isDark ? <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" /> : <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-                      ) : (
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-                      )}
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
                     </div>
                     <span className="flex-1 text-right font-medium text-foreground text-sm sm:text-base">
                       {item.label}
                     </span>
                     {item.toggle ? (
                       <Switch
-                        checked={isTheme ? isDark : notifications}
-                        onCheckedChange={isTheme ? toggleTheme : setNotifications}
+                        checked={notifications}
+                        onCheckedChange={setNotifications}
                       />
                     ) : (
                       <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
@@ -187,7 +287,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-        نسخه ۱.۵.۰ - داشبورد ویجتی و یادآور تراکنش‌ها
+        نسخه ۱.۵.۱ - فونت ایران‌سنس و حالت روشن/تاریک
       </p>
     </div>
   );
