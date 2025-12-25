@@ -18,7 +18,7 @@ const navItems = [
 export function BottomNavigation({ activeTab, onTabChange, onAddClick }: BottomNavigationProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 pb-safe">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+      <div className="flex items-center justify-around h-14 sm:h-16 max-w-lg mx-auto px-1 sm:px-2">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           const Icon = item.icon;
@@ -28,9 +28,9 @@ export function BottomNavigation({ activeTab, onTabChange, onAddClick }: BottomN
               <button
                 key={item.id}
                 onClick={onAddClick}
-                className="flex items-center justify-center w-14 h-14 -mt-6 rounded-full gradient-primary shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 active:scale-95"
+                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 -mt-5 sm:-mt-6 rounded-full gradient-primary shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all duration-300 active:scale-95"
               >
-                <Icon className="w-6 h-6 text-primary-foreground" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
               </button>
             );
           }
@@ -40,16 +40,16 @@ export function BottomNavigation({ activeTab, onTabChange, onAddClick }: BottomN
               key={item.id}
               onClick={() => onTabChange(item.id)}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all duration-200",
+                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl transition-all duration-200 relative",
                 isActive 
                   ? "text-primary" 
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className={cn("w-5 h-5 transition-transform duration-200", isActive && "scale-110")} />
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="text-[10px] sm:text-xs font-medium">{item.label}</span>
               {isActive && (
-                <span className="absolute bottom-1 w-1 h-1 rounded-full bg-primary" />
+                <span className="absolute bottom-0.5 sm:bottom-1 w-1 h-1 rounded-full bg-primary" />
               )}
             </button>
           );
