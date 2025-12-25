@@ -9,6 +9,7 @@ export interface Transaction {
   isRecurring?: boolean;
   reminderDays?: number; // Days before to remind
   nextDueDate?: string; // For recurring transactions
+  tags?: string[]; // Tags for filtering
 }
 
 export interface Category {

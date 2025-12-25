@@ -67,11 +67,12 @@ const Auth = () => {
       <div className="w-full max-w-md">
         {/* Logo/Title */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-            <span className="text-2xl font-bold text-primary-foreground">💰</span>
+          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
+            <span className="text-3xl font-black text-primary-foreground tracking-tight">SF</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">مدیریت هزینه</h1>
-          <p className="text-muted-foreground mt-2">کنترل مالی هوشمند</p>
+          <h1 className="text-2xl font-bold text-foreground">SiaFlow</h1>
+          <p className="text-lg text-primary font-medium">سیا فلو</p>
+          <p className="text-muted-foreground mt-1 text-sm">مدیریت مالی هوشمند</p>
         </div>
 
         <Card variant="glass" className="animate-slide-up">

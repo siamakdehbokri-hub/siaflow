@@ -17,6 +17,7 @@ export type Database = {
       categories: {
         Row: {
           budget: number | null
+          budget_type: string | null
           color: string
           created_at: string
           icon: string
@@ -27,6 +28,7 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          budget_type?: string | null
           color?: string
           created_at?: string
           icon?: string
@@ -37,6 +39,7 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          budget_type?: string | null
           color?: string
           created_at?: string
           icon?: string
@@ -83,6 +86,7 @@ export type Database = {
           description: string | null
           id: string
           is_recurring: boolean | null
+          tags: string[] | null
           type: string
           updated_at: string
           user_id: string
@@ -95,6 +99,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean | null
+          tags?: string[] | null
           type: string
           updated_at?: string
           user_id: string
@@ -107,6 +112,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean | null
+          tags?: string[] | null
           type?: string
           updated_at?: string
           user_id?: string
