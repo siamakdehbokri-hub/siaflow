@@ -5,16 +5,17 @@ import { TrendChart } from './TrendChart';
 import { CategoryBudget } from './CategoryBudget';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Transaction, Category } from '@/types/expense';
+import { Transaction, Category, DashboardWidget } from '@/types/expense';
 import { ChevronLeft } from 'lucide-react';
 
 interface DashboardProps {
   transactions: Transaction[];
   categories: Category[];
+  widgets: DashboardWidget[];
   onViewAllTransactions: () => void;
 }
 
-export function Dashboard({ transactions, categories, onViewAllTransactions }: DashboardProps) {
+export function Dashboard({ transactions, categories, widgets, onViewAllTransactions }: DashboardProps) {
   const totalIncome = transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -27,61 +28,113 @@ export function Dashboard({ transactions, categories, onViewAllTransactions }: D
   const recentTransactions = transactions.slice(0, 4);
   const budgetCategories = categories.filter(c => c.budget);
 
+  const renderWidget = (widget: DashboardWidget, index: number) => {
+    if (!widget.enabled) return null;
+
+    switch (widget.type) {
+      case 'balance':
+        return (
+          <BalanceCard 
+            key={widget.id}
+            balance={balance}
+            income={totalIncome}
+            expense={totalExpense}
+          />
+        );
+
+      case 'spending-chart':
+        return (
+          <div key={widget.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+            <SpendingChart categories={categories} />
+          </div>
+        );
+
+      case 'trend-chart':
+        return (
+          <div key={widget.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+            <TrendChart transactions={transactions} />
+          </div>
+        );
+
+      case 'budget':
+        if (budgetCategories.length === 0) return null;
+        return (
+          <Card key={widget.id} variant="glass" className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+            <CardHeader className="pb-3 px-4 sm:px-5">
+              <CardTitle className="text-base">وضعیت بودجه</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 px-4 sm:px-5">
+              {budgetCategories.slice(0, 3).map((category) => (
+                <CategoryBudget key={category.id} category={category} />
+              ))}
+            </CardContent>
+          </Card>
+        );
+
+      case 'recent-transactions':
+        return (
+          <Card key={widget.id} variant="glass" className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+            <CardHeader className="pb-3 px-4 sm:px-5 flex-row items-center justify-between">
+              <CardTitle className="text-base">تراکنش‌های اخیر</CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onViewAllTransactions}
+                className="text-primary text-sm"
+              >
+                مشاهده همه
+                <ChevronLeft className="w-4 h-4 mr-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-2 px-4 sm:px-5">
+              {recentTransactions.length > 0 ? (
+                recentTransactions.map((transaction) => (
+                  <TransactionItem key={transaction.id} transaction={transaction} />
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-8 text-sm">
+                  هنوز تراکنشی ثبت نشده
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Group charts together for grid layout
+  const chartWidgets = widgets.filter(w => 
+    (w.type === 'spending-chart' || w.type === 'trend-chart') && w.enabled
+  );
+  const otherWidgets = widgets.filter(w => 
+    w.type !== 'spending-chart' && w.type !== 'trend-chart'
+  );
+
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
-      {/* Balance */}
-      <BalanceCard 
-        balance={balance}
-        income={totalIncome}
-        expense={totalExpense}
-      />
-
-      {/* Charts Grid - Responsive */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-        <SpendingChart categories={categories} />
-        <TrendChart transactions={transactions} />
-      </div>
-
-      {/* Budget Overview */}
-      {budgetCategories.length > 0 && (
-        <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <CardHeader className="pb-3 px-4 sm:px-5">
-            <CardTitle className="text-base">وضعیت بودجه</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 px-4 sm:px-5">
-            {budgetCategories.slice(0, 3).map((category) => (
-              <CategoryBudget key={category.id} category={category} />
-            ))}
-          </CardContent>
-        </Card>
+      {/* Render balance first if enabled */}
+      {widgets.find(w => w.type === 'balance' && w.enabled) && (
+        <BalanceCard 
+          balance={balance}
+          income={totalIncome}
+          expense={totalExpense}
+        />
       )}
 
-      {/* Recent Transactions */}
-      <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-        <CardHeader className="pb-3 px-4 sm:px-5 flex-row items-center justify-between">
-          <CardTitle className="text-base">تراکنش‌های اخیر</CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onViewAllTransactions}
-            className="text-primary text-sm"
-          >
-            مشاهده همه
-            <ChevronLeft className="w-4 h-4 mr-1" />
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-2 px-4 sm:px-5">
-          {recentTransactions.length > 0 ? (
-            recentTransactions.map((transaction) => (
-              <TransactionItem key={transaction.id} transaction={transaction} />
-            ))
-          ) : (
-            <p className="text-center text-muted-foreground py-8 text-sm">
-              هنوز تراکنشی ثبت نشده
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Charts Grid - Responsive */}
+      {chartWidgets.length > 0 && (
+        <div className={`grid gap-4 sm:gap-5 ${chartWidgets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+          {chartWidgets.map((widget, index) => renderWidget(widget, index))}
+        </div>
+      )}
+
+      {/* Other widgets */}
+      {otherWidgets
+        .filter(w => w.type !== 'balance')
+        .map((widget, index) => renderWidget(widget, index + chartWidgets.length))}
     </div>
   );
 }

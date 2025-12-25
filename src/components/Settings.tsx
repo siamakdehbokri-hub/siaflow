@@ -187,7 +187,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-        نسخه ۱.۴.۰ - تقویم شمسی کامل، پروفایل و راهنما
+        نسخه ۱.۵.۰ - داشبورد ویجتی و یادآور تراکنش‌ها
       </p>
     </div>
   );
