@@ -7,10 +7,14 @@ import { Settings } from '@/components/Settings';
 import { CategoryManagement } from '@/components/CategoryManagement';
 import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { EditTransactionModal } from '@/components/EditTransactionModal';
+import { WidgetSettings } from '@/components/WidgetSettings';
+import { ReminderNotifications } from '@/components/ReminderNotifications';
 import { useTransactions, useCategories } from '@/hooks/useData';
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
+import { useReminders } from '@/hooks/useReminders';
 import { Transaction, Category } from '@/types/expense';
-import { Bell, FolderOpen, Loader2 } from 'lucide-react';
+import { FolderOpen, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -20,6 +24,7 @@ const Index = () => {
   const [showCategories, setShowCategories] = useState(false);
   
   const { user } = useAuth();
+  const { widgets, toggleWidget, moveWidget, resetWidgets } = useDashboardWidgets();
   const { 
     transactions, 
     loading: transactionsLoading,
@@ -35,6 +40,8 @@ const Index = () => {
     updateCategory,
     deleteCategory 
   } = useCategories();
+
+  const { reminders, dismissReminder, hasReminders } = useReminders(transactions);
 
   // Set dark mode by default
   useEffect(() => {
@@ -136,6 +143,14 @@ const Index = () => {
         <div className="max-w-2xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <h1 className="text-lg sm:text-xl font-bold text-foreground">{getPageTitle()}</h1>
           <div className="flex items-center gap-1 sm:gap-2">
+            {activeTab === 'dashboard' && (
+              <WidgetSettings
+                widgets={widgets}
+                onToggle={toggleWidget}
+                onMove={moveWidget}
+                onReset={resetWidgets}
+              />
+            )}
             {activeTab === 'settings' && !showCategories && (
               <Button 
                 variant="ghost" 
@@ -145,9 +160,10 @@ const Index = () => {
                 <FolderOpen className="w-5 h-5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon-sm">
-              <Bell className="w-5 h-5" />
-            </Button>
+            <ReminderNotifications 
+              reminders={reminders}
+              onDismiss={dismissReminder}
+            />
           </div>
         </div>
       </header>
@@ -167,6 +183,7 @@ const Index = () => {
               <Dashboard 
                 transactions={transactions} 
                 categories={categoriesWithSpent}
+                widgets={widgets}
                 onViewAllTransactions={() => handleTabChange('transactions')}
               />
             )}

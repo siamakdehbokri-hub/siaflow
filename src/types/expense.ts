@@ -7,6 +7,8 @@ export interface Transaction {
   description: string;
   date: string;
   isRecurring?: boolean;
+  reminderDays?: number; // Days before to remind
+  nextDueDate?: string; // For recurring transactions
 }
 
 export interface Category {
@@ -33,6 +35,24 @@ export interface Budget {
   spent: number;
   month: string;
 }
+
+export type WidgetType = 'balance' | 'spending-chart' | 'trend-chart' | 'budget' | 'recent-transactions';
+
+export interface DashboardWidget {
+  id: string;
+  type: WidgetType;
+  title: string;
+  enabled: boolean;
+  order: number;
+}
+
+export const defaultWidgets: DashboardWidget[] = [
+  { id: 'balance', type: 'balance', title: 'موجودی', enabled: true, order: 0 },
+  { id: 'spending-chart', type: 'spending-chart', title: 'نمودار هزینه‌ها', enabled: true, order: 1 },
+  { id: 'trend-chart', type: 'trend-chart', title: 'روند مالی', enabled: true, order: 2 },
+  { id: 'budget', type: 'budget', title: 'وضعیت بودجه', enabled: true, order: 3 },
+  { id: 'recent-transactions', type: 'recent-transactions', title: 'تراکنش‌های اخیر', enabled: true, order: 4 },
+];
 
 // Default categories with subcategories
 export const defaultExpenseCategories = [
