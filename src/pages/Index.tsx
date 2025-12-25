@@ -67,9 +67,11 @@ const Index = () => {
       amount: transaction.amount,
       type: transaction.type,
       category: transaction.category,
+      subcategory: transaction.subcategory,
       description: transaction.description,
       date: transaction.date,
       isRecurring: transaction.isRecurring,
+      tags: transaction.tags,
     });
   };
 
@@ -208,7 +210,7 @@ const Index = () => {
               />
             )}
             {activeTab === 'settings' && (
-              <Settings />
+              <Settings onOpenCategories={() => setShowCategories(true)} />
             )}
           </>
         )}
