@@ -22,8 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { categories } from '@/data/mockData';
-import { Transaction } from '@/types/expense';
+import { Transaction, Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 
 interface EditTransactionModalProps {
@@ -32,6 +31,7 @@ interface EditTransactionModalProps {
   onClose: () => void;
   onSave: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
+  categories: Category[];
 }
 
 export function EditTransactionModal({ 
@@ -39,7 +39,8 @@ export function EditTransactionModal({
   transaction, 
   onClose, 
   onSave, 
-  onDelete 
+  onDelete,
+  categories 
 }: EditTransactionModalProps) {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');

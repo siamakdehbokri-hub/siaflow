@@ -12,16 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { categories } from '@/data/mockData';
+import { Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (transaction: any) => void;
+  categories: Category[];
 }
 
-export function AddTransactionModal({ isOpen, onClose, onAdd }: AddTransactionModalProps) {
+export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddTransactionModalProps) {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Dashboard } from '@/components/Dashboard';
 import { TransactionsList } from '@/components/TransactionsList';
@@ -7,58 +7,96 @@ import { Settings } from '@/components/Settings';
 import { CategoryManagement } from '@/components/CategoryManagement';
 import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { EditTransactionModal } from '@/components/EditTransactionModal';
-import { transactions as mockTransactions, categories as mockCategories } from '@/data/mockData';
+import { useTransactions, useCategories } from '@/hooks/useData';
+import { useAuth } from '@/hooks/useAuth';
 import { Transaction, Category } from '@/types/expense';
-import { Bell, FolderOpen } from 'lucide-react';
+import { Bell, FolderOpen, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-  const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showCategories, setShowCategories] = useState(false);
+  
+  const { user } = useAuth();
+  const { 
+    transactions, 
+    loading: transactionsLoading,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction 
+  } = useTransactions();
+  
+  const { 
+    categories, 
+    loading: categoriesLoading,
+    addCategory,
+    updateCategory,
+    deleteCategory 
+  } = useCategories();
 
   // Set dark mode by default
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
 
-  const handleAddTransaction = (transaction: Transaction) => {
-    setTransactions([transaction, ...transactions]);
-    toast.success('تراکنش با موفقیت ثبت شد');
+  // Calculate spent amounts for each category
+  const categoriesWithSpent = useMemo(() => {
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    
+    return categories.map(category => {
+      const spent = transactions
+        .filter(t => 
+          t.type === 'expense' && 
+          t.category === category.name &&
+          t.date.startsWith(currentMonth)
+        )
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      return { ...category, spent };
+    });
+  }, [categories, transactions]);
+
+  const handleAddTransaction = async (transaction: any) => {
+    await addTransaction({
+      amount: transaction.amount,
+      type: transaction.type,
+      category: transaction.category,
+      description: transaction.description,
+      date: transaction.date,
+      isRecurring: transaction.isRecurring,
+    });
   };
 
   const handleEditTransaction = (transaction: Transaction) => {
     setEditingTransaction(transaction);
   };
 
-  const handleSaveTransaction = (updatedTransaction: Transaction) => {
-    setTransactions(transactions.map(t => 
-      t.id === updatedTransaction.id ? updatedTransaction : t
-    ));
-    toast.success('تراکنش با موفقیت ویرایش شد');
+  const handleSaveTransaction = async (updated: Transaction) => {
+    await updateTransaction(updated);
   };
 
-  const handleDeleteTransaction = (id: string) => {
-    setTransactions(transactions.filter(t => t.id !== id));
-    toast.success('تراکنش با موفقیت حذف شد');
+  const handleDeleteTransaction = async (id: string) => {
+    await deleteTransaction(id);
+    setEditingTransaction(null);
   };
 
-  const handleAddCategory = (category: Category) => {
-    setCategories([...categories, category]);
+  const handleAddCategory = async (category: Category) => {
+    await addCategory({
+      name: category.name,
+      icon: category.icon,
+      color: category.color,
+      budget: category.budget,
+    });
   };
 
-  const handleEditCategory = (updatedCategory: Category) => {
-    setCategories(categories.map(c => 
-      c.id === updatedCategory.id ? updatedCategory : c
-    ));
+  const handleEditCategory = async (category: Category) => {
+    await updateCategory(category);
   };
 
-  const handleDeleteCategory = (id: string) => {
-    setCategories(categories.filter(c => c.id !== id));
+  const handleDeleteCategory = async (id: string) => {
+    await deleteCategory(id);
   };
 
   const getPageTitle = () => {
@@ -76,6 +114,19 @@ const Index = () => {
     setShowCategories(false);
     setActiveTab(tab);
   };
+
+  const isLoading = transactionsLoading || categoriesLoading;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="text-muted-foreground">در حال بارگذاری...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -104,7 +155,7 @@ const Index = () => {
       <main className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-5">
         {showCategories ? (
           <CategoryManagement 
-            categories={categories}
+            categories={categoriesWithSpent}
             onAddCategory={handleAddCategory}
             onEditCategory={handleEditCategory}
             onDeleteCategory={handleDeleteCategory}
@@ -114,21 +165,21 @@ const Index = () => {
             {activeTab === 'dashboard' && (
               <Dashboard 
                 transactions={transactions} 
-                categories={categories}
+                categories={categoriesWithSpent}
                 onViewAllTransactions={() => handleTabChange('transactions')}
               />
             )}
             {activeTab === 'transactions' && (
               <TransactionsList 
                 transactions={transactions}
-                categories={categories}
+                categories={categoriesWithSpent}
                 onEditTransaction={handleEditTransaction}
                 onDeleteTransaction={handleDeleteTransaction}
               />
             )}
             {activeTab === 'reports' && (
               <Reports 
-                categories={categories}
+                categories={categoriesWithSpent}
                 transactions={transactions}
               />
             )}
@@ -151,6 +202,7 @@ const Index = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddTransaction}
+        categories={categoriesWithSpent}
       />
 
       {/* Edit Transaction Modal */}
@@ -160,6 +212,7 @@ const Index = () => {
         onClose={() => setEditingTransaction(null)}
         onSave={handleSaveTransaction}
         onDelete={handleDeleteTransaction}
+        categories={categoriesWithSpent}
       />
     </div>
   );
