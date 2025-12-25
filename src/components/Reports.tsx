@@ -5,6 +5,7 @@ import { SpendingChart } from './SpendingChart';
 import { TrendChart } from './TrendChart';
 import { CategoryBudget } from './CategoryBudget';
 import { MonthlyComparisonChart } from './MonthlyComparisonChart';
+import { SubcategoryChart } from './SubcategoryChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Category, Transaction } from '@/types/expense';
@@ -17,17 +18,6 @@ interface ReportsProps {
   categories: Category[];
   transactions: Transaction[];
 }
-
-const persianWeekdays = getPersianWeekdays();
-const weeklyData = [
-  { name: persianWeekdays[0], expense: 1200000 },
-  { name: persianWeekdays[1], expense: 800000 },
-  { name: persianWeekdays[2], expense: 1500000 },
-  { name: persianWeekdays[3], expense: 600000 },
-  { name: persianWeekdays[4], expense: 2100000 },
-  { name: persianWeekdays[5], expense: 1800000 },
-  { name: persianWeekdays[6], expense: 900000 },
-];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -178,6 +168,9 @@ export function Reports({ categories, transactions }: ReportsProps) {
       {/* Monthly Comparison Chart */}
       <MonthlyComparisonChart transactions={transactions} />
 
+      {/* Subcategory Analysis */}
+      <SubcategoryChart transactions={transactions} />
+
       {/* Charts - Responsive Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SpendingChart categories={categories} />
@@ -190,9 +183,15 @@ export function Reports({ categories, transactions }: ReportsProps) {
           <CardTitle className="text-base">بودجه دسته‌بندی‌ها</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {budgetCategories.map((category) => (
-            <CategoryBudget key={category.id} category={category} />
-          ))}
+          {budgetCategories.length > 0 ? (
+            budgetCategories.map((category) => (
+              <CategoryBudget key={category.id} category={category} />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-4 text-sm">
+              بودجه‌ای تعریف نشده است
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
