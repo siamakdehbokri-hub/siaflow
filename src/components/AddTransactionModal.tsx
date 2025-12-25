@@ -15,6 +15,7 @@ import {
 import { Category, defaultExpenseCategories, defaultIncomeCategories } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
+import { TagInput } from './TagInput';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
 
   // Get subcategories based on selected category
   const subcategories = useMemo(() => {
@@ -52,6 +54,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       description,
       date,
       isRecurring,
+      tags: tags.length > 0 ? tags : undefined,
     });
     onClose();
     // Reset form
@@ -60,6 +63,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     setSubcategory('');
     setDescription('');
     setIsRecurring(false);
+    setTags([]);
   };
 
   const formatAmount = (value: string) => {
@@ -198,6 +202,18 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
           {/* Persian Date Picker */}
           <div className="space-y-2">
             <Label>تاریخ</Label>
+            <PersianDatePicker 
+              value={date} 
+              onChange={setDate}
+              placeholder="انتخاب تاریخ"
+            />
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label>برچسب‌ها (اختیاری)</Label>
+            <TagInput tags={tags} onChange={setTags} maxTags={3} />
+          </div>
             <PersianDatePicker 
               value={date} 
               onChange={setDate}

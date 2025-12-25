@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { ProfileEdit } from './ProfileEdit';
 import { HelpGuide } from './HelpGuide';
+import { SecuritySettings } from './SecuritySettings';
 import {
   Sheet,
   SheetContent,
@@ -27,7 +28,7 @@ const settingsGroups = [
     items: [
       { icon: User, label: 'ویرایش پروفایل', action: 'profile' },
       { icon: Bell, label: 'اعلان‌ها', action: 'notifications', toggle: true },
-      { icon: Shield, label: 'امنیت', action: 'security' },
+      { icon: Shield, label: 'امنیت و رمز عبور', action: 'security' },
     ],
   },
   {
@@ -50,7 +51,7 @@ interface SettingsProps {
   onOpenCategories?: () => void;
 }
 
-type SettingsView = 'main' | 'profile' | 'help';
+type SettingsView = 'main' | 'profile' | 'help' | 'security';
 
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
@@ -67,14 +68,14 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       case 'help':
         setCurrentView('help');
         break;
+      case 'security':
+        setCurrentView('security');
+        break;
       case 'backup':
         toast.success('پشتیبان‌گیری انجام شد');
         break;
       case 'categories':
         onOpenCategories?.();
-        break;
-      case 'security':
-        toast.info('تنظیمات امنیتی به زودی اضافه می‌شود');
         break;
       default:
         break;
@@ -98,6 +99,10 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
   if (currentView === 'help') {
     return <HelpGuide onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'security') {
+    return <SecuritySettings onBack={() => setCurrentView('main')} />;
   }
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
@@ -287,7 +292,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
-        نسخه ۱.۵.۱ - فونت ایران‌سنس و حالت روشن/تاریک
+        SiaFlow نسخه ۱.۶.۰ - برچسب‌ها، جستجوی پیشرفته و بهبودها
       </p>
     </div>
   );
