@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +22,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Transaction, Category } from '@/types/expense';
+import { Transaction, Category, defaultExpenseCategories, defaultIncomeCategories } from '@/types/expense';
 import { cn } from '@/lib/utils';
+import { PersianDatePicker } from './PersianDatePicker';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -45,16 +46,27 @@ export function EditTransactionModal({
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Get subcategories based on selected category
+  const subcategories = useMemo(() => {
+    if (!category) return [];
+    
+    const allCategories = [...defaultExpenseCategories, ...defaultIncomeCategories];
+    const found = allCategories.find(c => c.name === category);
+    return found?.subcategories || [];
+  }, [category]);
 
   useEffect(() => {
     if (transaction) {
       setType(transaction.type);
       setAmount(transaction.amount.toLocaleString());
       setCategory(transaction.category);
+      setSubcategory(transaction.subcategory || '');
       setDescription(transaction.description);
       setDate(transaction.date);
       setIsRecurring(transaction.isRecurring || false);
@@ -70,6 +82,7 @@ export function EditTransactionModal({
       type,
       amount: parseInt(amount.replace(/,/g, '')),
       category,
+      subcategory: subcategory || undefined,
       description,
       date,
       isRecurring,
@@ -83,6 +96,11 @@ export function EditTransactionModal({
       setShowDeleteDialog(false);
       onClose();
     }
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategory(value);
+    setSubcategory('');
   };
 
   const formatAmount = (value: string) => {
@@ -126,7 +144,11 @@ export function EditTransactionModal({
             <div className="flex gap-2 p-1 bg-muted rounded-xl">
               <button
                 type="button"
-                onClick={() => setType('expense')}
+                onClick={() => {
+                  setType('expense');
+                  setCategory('');
+                  setSubcategory('');
+                }}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all duration-200",
                   type === 'expense' 
@@ -139,7 +161,11 @@ export function EditTransactionModal({
               </button>
               <button
                 type="button"
-                onClick={() => setType('income')}
+                onClick={() => {
+                  setType('income');
+                  setCategory('');
+                  setSubcategory('');
+                }}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-medium transition-all duration-200",
                   type === 'income' 
@@ -170,7 +196,7 @@ export function EditTransactionModal({
             {/* Category */}
             <div className="space-y-2">
               <Label>دسته‌بندی</Label>
-              <Select value={category} onValueChange={setCategory} required>
+              <Select value={category} onValueChange={handleCategoryChange} required>
                 <SelectTrigger>
                   <SelectValue placeholder="انتخاب دسته‌بندی" />
                 </SelectTrigger>
@@ -184,6 +210,25 @@ export function EditTransactionModal({
               </Select>
             </div>
 
+            {/* Subcategory */}
+            {subcategories.length > 0 && (
+              <div className="space-y-2">
+                <Label>زیردسته‌بندی (اختیاری)</Label>
+                <Select value={subcategory} onValueChange={setSubcategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="انتخاب زیردسته‌بندی" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcategories.map((sub) => (
+                      <SelectItem key={sub} value={sub}>
+                        {sub}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="edit-description">توضیحات</Label>
@@ -196,15 +241,13 @@ export function EditTransactionModal({
               />
             </div>
 
-            {/* Date */}
+            {/* Persian Date Picker */}
             <div className="space-y-2">
-              <Label htmlFor="edit-date">تاریخ</Label>
-              <Input
-                id="edit-date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
+              <Label>تاریخ</Label>
+              <PersianDatePicker 
+                value={date} 
+                onChange={setDate}
+                placeholder="انتخاب تاریخ"
               />
             </div>
 

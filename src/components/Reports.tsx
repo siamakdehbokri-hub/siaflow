@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { Download } from 'lucide-react';
 import { SpendingChart } from './SpendingChart';
 import { TrendChart } from './TrendChart';
 import { CategoryBudget } from './CategoryBudget';
+import { MonthlyComparisonChart } from './MonthlyComparisonChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Category, Transaction } from '@/types/expense';
@@ -45,7 +46,31 @@ export function Reports({ categories, transactions }: ReportsProps) {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
   const budgetCategories = categories.filter(c => c.budget);
 
-  const maxExpense = Math.max(...weeklyData.map(d => d.expense));
+  // Calculate weekly data from actual transactions
+  const weeklyData = useMemo(() => {
+    const persianWeekdays = getPersianWeekdays();
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    
+    const dailyExpenses: Record<number, number> = {};
+    
+    transactions
+      .filter(t => t.type === 'expense')
+      .forEach(t => {
+        const date = new Date(t.date);
+        const dayOfWeek = date.getDay();
+        const adjustedDay = dayOfWeek === 6 ? 0 : dayOfWeek + 1;
+        dailyExpenses[adjustedDay] = (dailyExpenses[adjustedDay] || 0) + t.amount;
+      });
+    
+    return persianWeekdays.map((name, index) => ({
+      name,
+      expense: dailyExpenses[index] || 0,
+    }));
+  }, [transactions]);
+
+  const maxExpense = Math.max(...weeklyData.map(d => d.expense), 1);
 
   const handleExportCategoryReport = () => {
     try {
@@ -150,10 +175,13 @@ export function Reports({ categories, transactions }: ReportsProps) {
         </CardContent>
       </Card>
 
+      {/* Monthly Comparison Chart */}
+      <MonthlyComparisonChart transactions={transactions} />
+
       {/* Charts - Responsive Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <SpendingChart />
-        <TrendChart />
+        <SpendingChart categories={categories} />
+        <TrendChart transactions={transactions} />
       </div>
 
       {/* All Budgets */}

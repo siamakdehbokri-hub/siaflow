@@ -63,7 +63,12 @@ export function TransactionItem({ transaction, onClick }: TransactionItemProps) 
             <RefreshCw className="w-3 h-3 text-muted-foreground shrink-0" />
           )}
         </div>
-        <p className="text-xs sm:text-sm text-muted-foreground truncate">{transaction.category}</p>
+        <p className="text-xs sm:text-sm text-muted-foreground truncate">
+          {transaction.category}
+          {transaction.subcategory && (
+            <span className="text-muted-foreground/70"> • {transaction.subcategory}</span>
+          )}
+        </p>
       </div>
 
       <div className="text-left shrink-0">
