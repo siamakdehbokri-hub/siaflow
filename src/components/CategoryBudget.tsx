@@ -33,10 +33,10 @@ export function CategoryBudget({ category }: CategoryBudgetProps) {
   if (!category.budget) return null;
 
   return (
-    <div className="p-4 rounded-xl bg-card border border-border/50 animate-fade-in">
-      <div className="flex items-center gap-3 mb-3">
+    <div className="p-3 sm:p-4 rounded-xl bg-card border border-border/50 animate-fade-in">
+      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
         <div 
-          className="p-2 rounded-lg"
+          className="p-1.5 sm:p-2 rounded-lg shrink-0"
           style={{ backgroundColor: `${category.color}20` }}
         >
           <Icon 
@@ -44,15 +44,15 @@ export function CategoryBudget({ category }: CategoryBudgetProps) {
             style={{ color: category.color }}
           />
         </div>
-        <div className="flex-1">
-          <h4 className="font-medium text-foreground">{category.name}</h4>
-          <p className="text-xs text-muted-foreground">
+        <div className="flex-1 min-w-0">
+          <h4 className="font-medium text-foreground text-sm sm:text-base truncate">{category.name}</h4>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             {formatCurrency(category.spent || 0)} از {formatCurrency(category.budget)}
           </p>
         </div>
         {isOverBudget && (
-          <div className="p-1.5 rounded-lg bg-warning/10">
-            <AlertTriangle className="w-4 h-4 text-warning" />
+          <div className="p-1 sm:p-1.5 rounded-lg bg-warning/10 shrink-0">
+            <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-warning" />
           </div>
         )}
       </div>
@@ -60,17 +60,17 @@ export function CategoryBudget({ category }: CategoryBudgetProps) {
       <Progress 
         value={Math.min(progress, 100)} 
         className={cn(
-          "h-2",
+          "h-1.5 sm:h-2",
           isOverBudget && "[&>div]:bg-warning"
         )}
       />
 
-      <div className="flex items-center justify-between mt-2">
-        <span className="text-xs text-muted-foreground">
+      <div className="flex items-center justify-between mt-1.5 sm:mt-2">
+        <span className="text-[10px] sm:text-xs text-muted-foreground">
           {Math.round(progress)}% استفاده شده
         </span>
         <span className={cn(
-          "text-xs font-medium",
+          "text-[10px] sm:text-xs font-medium",
           remaining < 0 ? "text-destructive" : "text-success"
         )}>
           {remaining >= 0 ? `${formatCurrency(remaining)} باقی‌مانده` : `${formatCurrency(Math.abs(remaining))} بیشتر`}

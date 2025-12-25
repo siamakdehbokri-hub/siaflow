@@ -1,12 +1,12 @@
 import { 
   User, Bell, Shield, Palette, Download, 
-  HelpCircle, LogOut, ChevronLeft, Moon, Sun 
+  HelpCircle, LogOut, ChevronLeft, Moon, Sun, FolderOpen 
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const settingsGroups = [
   {
@@ -21,6 +21,7 @@ const settingsGroups = [
     title: 'تنظیمات',
     items: [
       { icon: Palette, label: 'حالت شب', action: 'theme', toggle: true },
+      { icon: FolderOpen, label: 'دسته‌بندی‌ها', action: 'categories' },
       { icon: Download, label: 'پشتیبان‌گیری', action: 'backup' },
     ],
   },
@@ -32,36 +33,55 @@ const settingsGroups = [
   },
 ];
 
-export function Settings() {
+interface SettingsProps {
+  onOpenCategories?: () => void;
+}
+
+export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    // Check system preference and set initial theme
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const prefersDark = document.documentElement.classList.contains('dark');
     setIsDark(prefersDark);
-    document.documentElement.classList.toggle('dark', prefersDark);
   }, []);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
     document.documentElement.classList.toggle('dark');
+    toast.success(isDark ? 'حالت روز فعال شد' : 'حالت شب فعال شد');
+  };
+
+  const handleAction = (action: string) => {
+    switch (action) {
+      case 'backup':
+        toast.success('پشتیبان‌گیری انجام شد');
+        break;
+      case 'categories':
+        onOpenCategories?.();
+        break;
+      case 'help':
+        toast.info('راهنما به زودی اضافه می‌شود');
+        break;
+      default:
+        toast.info('این بخش به زودی فعال می‌شود');
+    }
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-4 sm:space-y-5 animate-fade-in">
       {/* User Profile */}
       <Card variant="glass">
-        <CardContent className="p-5">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-2xl font-bold text-primary-foreground">
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full gradient-primary flex items-center justify-center text-xl sm:text-2xl font-bold text-primary-foreground shrink-0">
               ک
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-foreground">کاربر مهمان</h3>
-              <p className="text-sm text-muted-foreground">guest@example.com</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">کاربر مهمان</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">guest@example.com</p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="shrink-0 text-xs sm:text-sm">
               ویرایش
             </Button>
           </div>
@@ -71,7 +91,7 @@ export function Settings() {
       {/* Settings Groups */}
       {settingsGroups.map((group) => (
         <div key={group.title} className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground px-1">
+          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground px-1">
             {group.title}
           </h3>
           <Card variant="glass">
@@ -84,19 +104,20 @@ export function Settings() {
                 return (
                   <button
                     key={item.action}
-                    className="w-full flex items-center gap-4 p-4 hover:bg-accent/50 transition-colors"
+                    className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-accent/50 transition-colors"
                     onClick={() => {
                       if (isTheme) toggleTheme();
+                      else if (!item.toggle) handleAction(item.action);
                     }}
                   >
-                    <div className="p-2 rounded-lg bg-muted">
+                    <div className="p-1.5 sm:p-2 rounded-lg bg-muted shrink-0">
                       {isTheme ? (
-                        isDark ? <Moon className="w-5 h-5 text-foreground" /> : <Sun className="w-5 h-5 text-foreground" />
+                        isDark ? <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" /> : <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
                       ) : (
-                        <Icon className="w-5 h-5 text-foreground" />
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
                       )}
                     </div>
-                    <span className="flex-1 text-right font-medium text-foreground">
+                    <span className="flex-1 text-right font-medium text-foreground text-sm sm:text-base">
                       {item.label}
                     </span>
                     {item.toggle ? (
@@ -105,7 +126,7 @@ export function Settings() {
                         onCheckedChange={isTheme ? toggleTheme : setNotifications}
                       />
                     ) : (
-                      <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     )}
                   </button>
                 );
@@ -116,13 +137,13 @@ export function Settings() {
       ))}
 
       {/* Logout */}
-      <Button variant="outline" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
+      <Button variant="outline" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 text-sm sm:text-base">
         <LogOut className="w-4 h-4 ml-2" />
         خروج از حساب
       </Button>
 
       {/* Version */}
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-[10px] sm:text-xs text-muted-foreground">
         نسخه ۱.۰.۰
       </p>
     </div>

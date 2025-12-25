@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
+import { Download } from 'lucide-react';
 import { SpendingChart } from './SpendingChart';
 import { TrendChart } from './TrendChart';
 import { CategoryBudget } from './CategoryBudget';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Category } from '@/types/expense';
+import { Category, Transaction } from '@/types/expense';
+import { exportCategoryReport, exportToPDF } from '@/utils/exportUtils';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ReportsProps {
   categories: Category[];
+  transactions: Transaction[];
 }
 
 const weeklyData = [
@@ -35,11 +39,34 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-export function Reports({ categories }: ReportsProps) {
+export function Reports({ categories, transactions }: ReportsProps) {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
   const budgetCategories = categories.filter(c => c.budget);
 
   const maxExpense = Math.max(...weeklyData.map(d => d.expense));
+
+  const handleExportCategoryReport = () => {
+    try {
+      const data = budgetCategories.map(c => ({
+        name: c.name,
+        spent: c.spent || 0,
+        budget: c.budget || 0,
+      }));
+      exportCategoryReport(data);
+      toast.success('گزارش بودجه دانلود شد');
+    } catch {
+      toast.error('خطا در ایجاد گزارش');
+    }
+  };
+
+  const handleExportFullReport = () => {
+    try {
+      exportToPDF(transactions, 'full-report');
+      toast.success('گزارش کامل دانلود شد');
+    } catch {
+      toast.error('خطا در ایجاد گزارش');
+    }
+  };
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -65,20 +92,42 @@ export function Reports({ categories }: ReportsProps) {
         ))}
       </div>
 
+      {/* Export Buttons */}
+      <div className="flex gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleExportFullReport}
+          className="flex-1"
+        >
+          <Download className="w-4 h-4 ml-2" />
+          گزارش کامل
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleExportCategoryReport}
+          className="flex-1"
+        >
+          <Download className="w-4 h-4 ml-2" />
+          گزارش بودجه
+        </Button>
+      </div>
+
       {/* Weekly Bar Chart */}
       <Card variant="glass">
         <CardHeader>
           <CardTitle className="text-base">هزینه‌های هفتگی</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-48">
+          <div className="h-40 sm:h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                 <XAxis 
                   dataKey="name" 
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 />
                 <YAxis hide />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
@@ -99,9 +148,11 @@ export function Reports({ categories }: ReportsProps) {
         </CardContent>
       </Card>
 
-      {/* Charts */}
-      <SpendingChart />
-      <TrendChart />
+      {/* Charts - Responsive Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <SpendingChart />
+        <TrendChart />
+      </div>
 
       {/* All Budgets */}
       <Card variant="glass">

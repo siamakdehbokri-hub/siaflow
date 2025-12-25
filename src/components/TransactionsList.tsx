@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Filter, Calendar } from 'lucide-react';
-import { TransactionItem } from './TransactionItem';
+import { SwipeableTransaction } from './SwipeableTransaction';
+import { ExportButtons } from './ExportButtons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,14 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Transaction } from '@/types/expense';
-import { categories } from '@/data/mockData';
+import { Transaction, Category } from '@/types/expense';
 
 interface TransactionsListProps {
   transactions: Transaction[];
+  categories: Category[];
+  onEditTransaction: (transaction: Transaction) => void;
+  onDeleteTransaction: (id: string) => void;
 }
 
-export function TransactionsList({ transactions }: TransactionsListProps) {
+export function TransactionsList({ 
+  transactions, 
+  categories,
+  onEditTransaction,
+  onDeleteTransaction 
+}: TransactionsListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
@@ -46,21 +54,24 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input
-          placeholder="جستجوی تراکنش..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pr-10"
-        />
+      {/* Header with Export */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
+            placeholder="جستجوی تراکنش..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pr-10"
+          />
+        </div>
+        <ExportButtons transactions={filteredTransactions} />
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
-          <SelectTrigger className="w-28 shrink-0">
+          <SelectTrigger className="w-24 sm:w-28 shrink-0 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -71,8 +82,8 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
         </Select>
 
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-36 shrink-0">
-            <Filter className="w-4 h-4 ml-2" />
+          <SelectTrigger className="w-32 sm:w-36 shrink-0 text-sm">
+            <Filter className="w-4 h-4 ml-1 sm:ml-2" />
             <SelectValue placeholder="دسته‌بندی" />
           </SelectTrigger>
           <SelectContent>
@@ -90,6 +101,11 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
         </Button>
       </div>
 
+      {/* Tip */}
+      <p className="text-xs text-muted-foreground text-center sm:hidden">
+        برای ویرایش یا حذف، تراکنش را به چپ بکشید
+      </p>
+
       {/* Transactions by Date */}
       <div className="space-y-4">
         {sortedDates.map((date) => (
@@ -104,7 +120,12 @@ export function TransactionsList({ transactions }: TransactionsListProps) {
             </h3>
             <div className="space-y-2">
               {groupedTransactions[date].map((transaction) => (
-                <TransactionItem key={transaction.id} transaction={transaction} />
+                <SwipeableTransaction 
+                  key={transaction.id} 
+                  transaction={transaction}
+                  onEdit={onEditTransaction}
+                  onDelete={onDeleteTransaction}
+                />
               ))}
             </div>
           </div>

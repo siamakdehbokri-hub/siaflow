@@ -15,9 +15,9 @@ const COLORS = chartData.map(d => d.color);
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-        <p className="font-medium text-foreground">{payload[0].name}</p>
-        <p className="text-sm text-muted-foreground">
+      <div className="bg-popover border border-border rounded-lg p-2 sm:p-3 shadow-lg">
+        <p className="font-medium text-foreground text-sm">{payload[0].name}</p>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           {new Intl.NumberFormat('fa-IR').format(payload[0].value)} تومان
         </p>
       </div>
@@ -29,19 +29,19 @@ const CustomTooltip = ({ active, payload }: any) => {
 export function SpendingChart() {
   return (
     <Card variant="glass" className="animate-slide-up">
-      <CardHeader>
+      <CardHeader className="px-4 sm:px-5">
         <CardTitle className="text-base">توزیع هزینه‌ها</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-64">
+      <CardContent className="px-4 sm:px-5">
+        <div className="h-52 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
+                cy="45%"
+                innerRadius={45}
+                outerRadius={70}
                 paddingAngle={4}
                 dataKey="value"
               >
@@ -59,10 +59,11 @@ export function SpendingChart() {
                 align="center"
                 verticalAlign="bottom"
                 iconType="circle"
-                iconSize={8}
+                iconSize={6}
                 formatter={(value: string) => (
-                  <span className="text-xs text-muted-foreground">{value}</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground">{value}</span>
                 )}
+                wrapperStyle={{ fontSize: '10px' }}
               />
             </PieChart>
           </ResponsiveContainer>

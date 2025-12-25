@@ -13,10 +13,10 @@ const data = [
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-        <p className="font-medium text-foreground mb-2">{label}</p>
+      <div className="bg-popover border border-border rounded-lg p-2 sm:p-3 shadow-lg">
+        <p className="font-medium text-foreground mb-1 sm:mb-2 text-sm">{label}</p>
         {payload.map((item: any, index: number) => (
-          <p key={index} className="text-sm" style={{ color: item.color }}>
+          <p key={index} className="text-xs sm:text-sm" style={{ color: item.color }}>
             {item.name === 'income' ? 'درآمد' : 'هزینه'}: {new Intl.NumberFormat('fa-IR').format(item.value)} تومان
           </p>
         ))}
@@ -29,11 +29,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function TrendChart() {
   return (
     <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-      <CardHeader>
+      <CardHeader className="px-4 sm:px-5">
         <CardTitle className="text-base">روند درآمد و هزینه</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-48">
+      <CardContent className="px-4 sm:px-5">
+        <div className="h-40 sm:h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
@@ -50,7 +50,8 @@ export function TrendChart() {
                 dataKey="name" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+                interval={0}
               />
               <YAxis hide />
               <Tooltip content={<CustomTooltip />} />
@@ -71,14 +72,14 @@ export function TrendChart() {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-center gap-6 mt-4">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-success" />
-            <span className="text-xs text-muted-foreground">درآمد</span>
+        <div className="flex items-center justify-center gap-4 sm:gap-6 mt-3 sm:mt-4">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-success" />
+            <span className="text-[10px] sm:text-xs text-muted-foreground">درآمد</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-destructive" />
-            <span className="text-xs text-muted-foreground">هزینه</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-destructive" />
+            <span className="text-[10px] sm:text-xs text-muted-foreground">هزینه</span>
           </div>
         </div>
       </CardContent>
