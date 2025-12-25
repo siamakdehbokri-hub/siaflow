@@ -57,19 +57,8 @@ export function Dashboard({ transactions, categories, widgets, onViewAllTransact
         );
 
       case 'budget':
-        if (budgetCategories.length === 0) return null;
-        return (
-          <Card key={widget.id} variant="glass" className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
-            <CardHeader className="pb-3 px-4 sm:px-5">
-              <CardTitle className="text-base">وضعیت بودجه</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 px-4 sm:px-5">
-              {budgetCategories.slice(0, 3).map((category) => (
-                <CategoryBudget key={category.id} category={category} />
-              ))}
-            </CardContent>
-          </Card>
-        );
+        // Budget widget removed per user request - charts are more useful
+        return null;
 
       case 'recent-transactions':
         return (

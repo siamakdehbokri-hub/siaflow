@@ -78,8 +78,13 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     setSubcategory('');
   };
 
-  // Quick amount buttons
-  const quickAmounts = ['50,000', '100,000', '500,000', '1,000,000'];
+  // Quick amount buttons - responsive
+  const quickAmounts = [
+    { value: '50,000', label: '۵۰ هزار' },
+    { value: '100,000', label: '۱۰۰ هزار' },
+    { value: '500,000', label: '۵۰۰ هزار' },
+    { value: '1,000,000', label: '۱ میلیون' },
+  ];
 
   if (!isOpen) return null;
 
@@ -182,16 +187,23 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 required
               />
             </div>
-            {/* Quick Amount Buttons */}
-            <div className="flex gap-2 flex-wrap">
+            {/* Quick Amount Buttons - Responsive Grid */}
+            <div className="grid grid-cols-4 gap-2">
               {quickAmounts.map((qa) => (
                 <button
-                  key={qa}
+                  key={qa.value}
                   type="button"
-                  onClick={() => setAmount(qa)}
-                  className="px-3 py-1.5 text-xs font-medium bg-muted hover:bg-accent rounded-lg transition-colors"
+                  onClick={() => setAmount(qa.value)}
+                  className={cn(
+                    "py-2 px-1 text-[10px] sm:text-xs font-medium rounded-xl border-2 transition-all duration-200",
+                    amount === qa.value
+                      ? type === 'expense'
+                        ? "border-destructive bg-destructive/10 text-destructive"
+                        : "border-success bg-success/10 text-success"
+                      : "border-border bg-muted/50 hover:border-primary/50 text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  {qa}
+                  {qa.label}
                 </button>
               ))}
             </div>
