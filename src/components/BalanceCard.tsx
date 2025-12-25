@@ -1,6 +1,5 @@
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { formatCurrency } from '@/utils/persianDate';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Sparkles, Wallet } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BalanceCardProps {
   balance: number;
@@ -9,46 +8,87 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fa-IR').format(Math.abs(amount));
+  };
+
+  const isPositive = balance >= 0;
+
   return (
-    <Card className="gradient-primary border-0 shadow-glow animate-slide-up overflow-hidden">
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-          <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-primary-foreground/20">
-            <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
-          </div>
-          <span className="text-primary-foreground/80 text-xs sm:text-sm font-medium">موجودی کل</span>
-        </div>
+    <div className="relative overflow-hidden rounded-3xl animate-fade-in">
+      {/* Main Balance Card */}
+      <div className="relative gradient-primary p-6 sm:p-8 shadow-float">
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
         
-        <p className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-4 sm:mb-6">
-          {formatCurrency(balance)}
-        </p>
+        {/* Sparkle Icon */}
+        <div className="absolute top-4 left-4">
+          <Sparkles className="w-5 h-5 text-white/30 animate-pulse" />
+        </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-primary-foreground/10">
-            <div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-success/20">
-              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-success" />
+        {/* Content */}
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-white/70 text-xs">SiaFlow</p>
+                <p className="text-white/90 text-sm font-medium">موجودی کل</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs text-primary-foreground/70">درآمد</p>
-              <p className="text-xs sm:text-sm font-semibold text-primary-foreground truncate">
-                {formatCurrency(income)}
-              </p>
+            <div className={cn(
+              "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium",
+              isPositive ? "bg-white/20 text-white" : "bg-white/10 text-white/80"
+            )}>
+              <TrendingUp className={cn("w-3 h-3", !isPositive && "rotate-180")} />
+              {isPositive ? 'مثبت' : 'منفی'}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-primary-foreground/10">
-            <div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-destructive/20">
-              <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-destructive" />
+          {/* Balance Amount */}
+          <div className="mb-6">
+            <p className={cn(
+              "text-4xl sm:text-5xl font-black text-white tracking-tight",
+              !isPositive && "text-white/90"
+            )}>
+              {formatCurrency(balance)}
+            </p>
+            <p className="text-white/60 text-sm mt-1">تومان</p>
+          </div>
+
+          {/* Income & Expense */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Income */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/10 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-xl bg-emerald-400/20 flex items-center justify-center">
+                <ArrowUpRight className="w-5 h-5 text-emerald-300" />
+              </div>
+              <div>
+                <p className="text-white/60 text-xs">درآمد</p>
+                <p className="text-white font-bold text-sm">{formatCurrency(income)}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs text-primary-foreground/70">هزینه</p>
-              <p className="text-xs sm:text-sm font-semibold text-primary-foreground truncate">
-                {formatCurrency(expense)}
-              </p>
+
+            {/* Expense */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/10 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-xl bg-rose-400/20 flex items-center justify-center">
+                <ArrowDownRight className="w-5 h-5 text-rose-300" />
+              </div>
+              <div>
+                <p className="text-white/60 text-xs">هزینه</p>
+                <p className="text-white font-bold text-sm">{formatCurrency(expense)}</p>
+              </div>
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Bottom Reflection */}
+      <div className="h-4 bg-gradient-to-b from-primary/20 to-transparent rounded-b-3xl" />
+    </div>
   );
 }
