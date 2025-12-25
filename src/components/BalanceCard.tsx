@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatCurrency } from '@/data/mockData';
+import { formatCurrency } from '@/utils/persianDate';
 
 interface BalanceCardProps {
   balance: number;

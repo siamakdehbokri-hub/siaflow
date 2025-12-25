@@ -1,6 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Category } from '@/types/expense';
+import { formatCurrency } from '@/utils/persianDate';
 
 interface SpendingChartProps {
   categories?: Category[];
@@ -12,7 +13,7 @@ const CustomTooltip = ({ active, payload }: any) => {
       <div className="bg-popover border border-border rounded-lg p-2 sm:p-3 shadow-lg">
         <p className="font-medium text-foreground text-sm">{payload[0].name}</p>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          {new Intl.NumberFormat('fa-IR').format(payload[0].value)} تومان
+          {formatCurrency(payload[0].value)}
         </p>
       </div>
     );

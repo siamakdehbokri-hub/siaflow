@@ -173,6 +173,7 @@ export function useCategories() {
         color: c.color,
         budget: c.budget ? Number(c.budget) : undefined,
         spent: 0, // Will be calculated from transactions
+        type: c.budget ? 'expense' : 'income',
       }));
 
       setCategories(mappedData);
@@ -213,6 +214,7 @@ export function useCategories() {
         color: data.color,
         budget: data.budget ? Number(data.budget) : undefined,
         spent: 0,
+        type: data.budget ? 'expense' : 'income',
       };
 
       setCategories([...categories, newCategory]);

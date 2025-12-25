@@ -1,9 +1,10 @@
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
-  Gamepad2, Wallet, TrendingUp, AlertTriangle 
+  Gamepad2, Wallet, TrendingUp, AlertTriangle, Home,
+  Gift, Book, MoreHorizontal
 } from 'lucide-react';
 import { Category } from '@/types/expense';
-import { formatCurrency } from '@/data/mockData';
+import { formatCurrency } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 
@@ -16,6 +17,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Gamepad2,
   Wallet,
   TrendingUp,
+  Home,
+  Gift,
+  Book,
+  MoreHorizontal,
 };
 
 interface CategoryBudgetProps {

@@ -4,6 +4,7 @@ import { SwipeableTransaction } from './SwipeableTransaction';
 import { ExportButtons } from './ExportButtons';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { formatPersianDateFull } from '@/utils/persianDate';
 import {
   Select,
   SelectContent,
@@ -111,12 +112,7 @@ export function TransactionsList({
         {sortedDates.map((date) => (
           <div key={date} className="space-y-2">
             <h3 className="text-sm font-medium text-muted-foreground px-1">
-              {new Intl.DateTimeFormat('fa-IR', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              }).format(new Date(date))}
+              {formatPersianDateFull(date)}
             </h3>
             <div className="space-y-2">
               {groupedTransactions[date].map((transaction) => (

@@ -88,6 +88,7 @@ const Index = () => {
       icon: category.icon,
       color: category.color,
       budget: category.budget,
+      type: category.budget ? 'expense' : 'income',
     });
   };
 

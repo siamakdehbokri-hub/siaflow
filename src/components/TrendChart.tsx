@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Transaction } from '@/types/expense';
+import { formatCurrency, getPersianMonthName } from '@/utils/persianDate';
 
 interface TrendChartProps {
   transactions?: Transaction[];
@@ -14,7 +15,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="font-medium text-foreground mb-1 sm:mb-2 text-sm">{label}</p>
         {payload.map((item: any, index: number) => (
           <p key={index} className="text-xs sm:text-sm" style={{ color: item.color }}>
-            {item.name === 'income' ? 'درآمد' : 'هزینه'}: {new Intl.NumberFormat('fa-IR').format(item.value)} تومان
+            {item.name === 'income' ? 'درآمد' : 'هزینه'}: {formatCurrency(item.value)}
           </p>
         ))}
       </div>

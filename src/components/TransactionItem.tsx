@@ -1,14 +1,27 @@
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
-  Gamepad2, Wallet, TrendingUp, MoreVertical, RefreshCw 
+  Gamepad2, Wallet, TrendingUp, MoreVertical, RefreshCw,
+  Home, Gift, Book, MoreHorizontal
 } from 'lucide-react';
 import { Transaction } from '@/types/expense';
-import { formatCurrency, formatDate } from '@/data/mockData';
+import { formatCurrency, formatPersianDate } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  'غذا و رستوران': UtensilsCrossed,
+  'خانه': Home,
   'حمل و نقل': Car,
+  'خوراک و نوشیدنی': UtensilsCrossed,
+  'سرگرمی و تفریح': Gamepad2,
+  'پوشاک و مد': ShoppingBag,
+  'سلامت و بهداشت': Heart,
+  'آموزش و توسعه فردی': Book,
+  'بدهی و قسط': Receipt,
+  'سایر هزینه‌ها': MoreHorizontal,
+  'حقوق و دستمزد': Wallet,
+  'سرمایه‌گذاری و پس‌انداز': TrendingUp,
+  'سایر درآمدها': Gift,
+  // Legacy support
+  'غذا و رستوران': UtensilsCrossed,
   'خرید': ShoppingBag,
   'قبوض': Receipt,
   'سلامت': Heart,
@@ -60,7 +73,7 @@ export function TransactionItem({ transaction, onClick }: TransactionItemProps) 
         )}>
           {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
         </p>
-        <p className="text-[10px] sm:text-xs text-muted-foreground">{formatDate(transaction.date)}</p>
+        <p className="text-[10px] sm:text-xs text-muted-foreground">{formatPersianDate(transaction.date)}</p>
       </div>
 
       <button className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-accent transition-all duration-200 hidden sm:block">
