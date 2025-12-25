@@ -38,21 +38,23 @@ export function Dashboard({ transactions, categories, onViewAllTransactions }: D
 
       {/* Charts Grid - Responsive */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-        <SpendingChart />
-        <TrendChart />
+        <SpendingChart categories={categories} />
+        <TrendChart transactions={transactions} />
       </div>
 
       {/* Budget Overview */}
-      <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        <CardHeader className="pb-3 px-4 sm:px-5">
-          <CardTitle className="text-base">وضعیت بودجه</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 px-4 sm:px-5">
-          {budgetCategories.slice(0, 3).map((category) => (
-            <CategoryBudget key={category.id} category={category} />
-          ))}
-        </CardContent>
-      </Card>
+      {budgetCategories.length > 0 && (
+        <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <CardHeader className="pb-3 px-4 sm:px-5">
+            <CardTitle className="text-base">وضعیت بودجه</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 px-4 sm:px-5">
+            {budgetCategories.slice(0, 3).map((category) => (
+              <CategoryBudget key={category.id} category={category} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Transactions */}
       <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
@@ -69,9 +71,15 @@ export function Dashboard({ transactions, categories, onViewAllTransactions }: D
           </Button>
         </CardHeader>
         <CardContent className="space-y-2 px-4 sm:px-5">
-          {recentTransactions.map((transaction) => (
-            <TransactionItem key={transaction.id} transaction={transaction} />
-          ))}
+          {recentTransactions.length > 0 ? (
+            recentTransactions.map((transaction) => (
+              <TransactionItem key={transaction.id} transaction={transaction} />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-8 text-sm">
+              هنوز تراکنشی ثبت نشده
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

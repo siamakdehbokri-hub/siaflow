@@ -6,7 +6,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const settingsGroups = [
   {
@@ -40,6 +42,8 @@ interface SettingsProps {
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [isDark, setIsDark] = useState(true);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const prefersDark = document.documentElement.classList.contains('dark');
@@ -68,6 +72,20 @@ export function Settings({ onOpenCategories }: SettingsProps) {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('با موفقیت خارج شدید');
+      navigate('/auth');
+    } catch (error) {
+      toast.error('خطا در خروج از حساب');
+    }
+  };
+
+  const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
+  const email = user?.email || '';
+  const initials = displayName.charAt(0).toUpperCase();
+
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
       {/* User Profile */}
@@ -75,11 +93,11 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         <CardContent className="p-4 sm:p-5">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full gradient-primary flex items-center justify-center text-xl sm:text-2xl font-bold text-primary-foreground shrink-0">
-              ک
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">کاربر مهمان</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground truncate">guest@example.com</p>
+              <h3 className="text-base sm:text-lg font-semibold text-foreground truncate">{displayName}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{email}</p>
             </div>
             <Button variant="outline" size="sm" className="shrink-0 text-xs sm:text-sm">
               ویرایش
@@ -137,7 +155,11 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       ))}
 
       {/* Logout */}
-      <Button variant="outline" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 text-sm sm:text-base">
+      <Button 
+        variant="outline" 
+        className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 text-sm sm:text-base"
+        onClick={handleSignOut}
+      >
         <LogOut className="w-4 h-4 ml-2" />
         خروج از حساب
       </Button>

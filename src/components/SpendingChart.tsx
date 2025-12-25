@@ -1,16 +1,10 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { categories } from '@/data/mockData';
+import { Category } from '@/types/expense';
 
-const chartData = categories
-  .filter(c => c.spent && c.spent > 0)
-  .map(c => ({
-    name: c.name,
-    value: c.spent || 0,
-    color: c.color,
-  }));
-
-const COLORS = chartData.map(d => d.color);
+interface SpendingChartProps {
+  categories?: Category[];
+}
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -26,7 +20,32 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-export function SpendingChart() {
+export function SpendingChart({ categories = [] }: SpendingChartProps) {
+  const chartData = categories
+    .filter(c => c.spent && c.spent > 0)
+    .map(c => ({
+      name: c.name,
+      value: c.spent || 0,
+      color: c.color,
+    }));
+
+  const COLORS = chartData.map(d => d.color);
+
+  if (chartData.length === 0) {
+    return (
+      <Card variant="glass" className="animate-slide-up">
+        <CardHeader className="px-4 sm:px-5">
+          <CardTitle className="text-base">توزیع هزینه‌ها</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 sm:px-5">
+          <div className="h-52 sm:h-64 flex items-center justify-center">
+            <p className="text-muted-foreground text-sm">هنوز هزینه‌ای ثبت نشده</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card variant="glass" className="animate-slide-up">
       <CardHeader className="px-4 sm:px-5">

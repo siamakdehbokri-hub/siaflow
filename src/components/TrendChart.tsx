@@ -1,14 +1,11 @@
+import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Transaction } from '@/types/expense';
 
-const data = [
-  { name: 'فروردین', income: 25000000, expense: 18000000 },
-  { name: 'اردیبهشت', income: 28000000, expense: 20000000 },
-  { name: 'خرداد', income: 26000000, expense: 22000000 },
-  { name: 'تیر', income: 30000000, expense: 19000000 },
-  { name: 'مرداد', income: 27000000, expense: 21000000 },
-  { name: 'شهریور', income: 32000000, expense: 23000000 },
-];
+interface TrendChartProps {
+  transactions?: Transaction[];
+}
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -26,7 +23,57 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export function TrendChart() {
+const persianMonths = [
+  'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 
+  'مرداد', 'شهریور', 'مهر', 'آبان', 
+  'آذر', 'دی', 'بهمن', 'اسفند'
+];
+
+export function TrendChart({ transactions = [] }: TrendChartProps) {
+  const data = useMemo(() => {
+    // Group transactions by month
+    const monthlyData: Record<string, { income: number; expense: number }> = {};
+    
+    transactions.forEach(t => {
+      const month = t.date.slice(0, 7); // YYYY-MM
+      if (!monthlyData[month]) {
+        monthlyData[month] = { income: 0, expense: 0 };
+      }
+      if (t.type === 'income') {
+        monthlyData[month].income += t.amount;
+      } else {
+        monthlyData[month].expense += t.amount;
+      }
+    });
+
+    // Get last 6 months
+    const months = Object.keys(monthlyData).sort().slice(-6);
+    
+    return months.map(month => {
+      const monthIndex = parseInt(month.split('-')[1]) - 1;
+      return {
+        name: persianMonths[monthIndex] || month,
+        income: monthlyData[month].income,
+        expense: monthlyData[month].expense,
+      };
+    });
+  }, [transactions]);
+
+  if (data.length === 0) {
+    return (
+      <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <CardHeader className="px-4 sm:px-5">
+          <CardTitle className="text-base">روند درآمد و هزینه</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 sm:px-5">
+          <div className="h-40 sm:h-48 flex items-center justify-center">
+            <p className="text-muted-foreground text-sm">داده کافی برای نمایش نمودار نیست</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card variant="glass" className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
       <CardHeader className="px-4 sm:px-5">
