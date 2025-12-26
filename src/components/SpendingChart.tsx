@@ -39,7 +39,7 @@ export function SpendingChart({ categories = [] }: SpendingChartProps) {
           <CardTitle className="text-base">توزیع هزینه‌ها</CardTitle>
         </CardHeader>
         <CardContent className="px-4 sm:px-5">
-          <div className="h-52 sm:h-64 flex items-center justify-center">
+          <div className="h-40 sm:h-48 flex items-center justify-center">
             <p className="text-muted-foreground text-sm">هنوز هزینه‌ای ثبت نشده</p>
           </div>
         </CardContent>
@@ -60,7 +60,7 @@ export function SpendingChart({ categories = [] }: SpendingChartProps) {
         </div>
       </CardHeader>
       <CardContent className="px-4 sm:px-5">
-        <div className="h-44 sm:h-56">
+        <div className="h-40 sm:h-48">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <defs>

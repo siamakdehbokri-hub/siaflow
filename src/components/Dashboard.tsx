@@ -3,6 +3,7 @@ import { TransactionItem } from './TransactionItem';
 import { SpendingChart } from './SpendingChart';
 import { TrendChart } from './TrendChart';
 import { CategoryBudget } from './CategoryBudget';
+import { MonthlySummary } from './MonthlySummary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Transaction, Category, DashboardWidget } from '@/types/expense';
@@ -112,6 +113,9 @@ export function Dashboard({ transactions, categories, widgets, onViewAllTransact
           expense={totalExpense}
         />
       )}
+
+      {/* Monthly Summary - Always show */}
+      <MonthlySummary transactions={transactions} categories={categories} />
 
       {/* Charts Grid - Responsive */}
       {chartWidgets.length > 0 && (

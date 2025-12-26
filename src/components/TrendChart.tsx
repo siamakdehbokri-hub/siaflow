@@ -90,7 +90,7 @@ export function TrendChart({ transactions = [] }: TrendChartProps) {
         </div>
       </CardHeader>
       <CardContent className="px-4 sm:px-5">
-        <div className="h-36 sm:h-44">
+        <div className="h-40 sm:h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
               <defs>

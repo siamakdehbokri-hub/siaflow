@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { X, Plus, Minus, Calendar, Tag, RefreshCw, ChevronDown, Sparkles } from 'lucide-react';
+import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +16,6 @@ import {
 import { Category, defaultExpenseCategories, defaultIncomeCategories } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
-import { TagInput } from './TagInput';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -33,7 +32,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isRecurring, setIsRecurring] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
 
   // Get subcategories based on selected category
   const subcategories = useMemo(() => {
@@ -55,7 +53,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       description,
       date,
       isRecurring,
-      tags: tags.length > 0 ? tags : undefined,
+      tags: [],
     });
     onClose();
     // Reset form
@@ -64,7 +62,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     setSubcategory('');
     setDescription('');
     setIsRecurring(false);
-    setTags([]);
   };
 
   const formatAmount = (value: string) => {
@@ -274,29 +271,17 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             />
           </div>
 
-          {/* Date & Tags Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Date */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                تاریخ
-              </Label>
-              <PersianDatePicker 
-                value={date} 
-                onChange={setDate}
-                placeholder="انتخاب تاریخ"
-              />
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Tag className="w-4 h-4 text-muted-foreground" />
-                برچسب‌ها
-              </Label>
-              <TagInput tags={tags} onChange={setTags} maxTags={3} />
-            </div>
+          {/* Date */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+              تاریخ
+            </Label>
+            <PersianDatePicker 
+              value={date} 
+              onChange={setDate}
+              placeholder="انتخاب تاریخ"
+            />
           </div>
 
           {/* Recurring Toggle - Enhanced */}
