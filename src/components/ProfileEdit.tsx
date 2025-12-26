@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ArrowRight, Camera, User, Mail, Save } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Camera, User, Mail, Save, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,9 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -46,6 +48,64 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     }
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files || event.target.files.length === 0) return;
+    
+    const file = event.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/avatar.${fileExt}`;
+    
+    // Validate file type
+    if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt?.toLowerCase() || '')) {
+      toast.error('فقط فایل‌های تصویری مجاز هستند');
+      return;
+    }
+    
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('حداکثر حجم فایل ۲ مگابایت است');
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      // Upload file to storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Add cache-busting query param
+      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+      setAvatarUrl(urlWithCacheBust);
+
+      // Update profile in database
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        });
+
+      if (profileError) throw profileError;
+
+      toast.success('تصویر پروفایل بروزرسانی شد');
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast.error('خطا در آپلود تصویر');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!user) return;
     setLoading(true);
@@ -65,7 +125,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           id: user.id,
           display_name: displayName,
           email: user.email,
-          avatar_url: avatarUrl,
+          avatar_url: avatarUrl?.split('?')[0], // Remove cache-busting param
           updated_at: new Date().toISOString()
         });
 
@@ -97,7 +157,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       <Card variant="glass">
         <CardContent className="p-5 flex flex-col items-center">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground">
+            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground overflow-hidden">
               {avatarUrl ? (
                 <img 
                   src={avatarUrl} 
@@ -107,17 +167,36 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
               ) : (
                 initials
               )}
+              {uploading && (
+                <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-full">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              )}
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
             <button 
               type="button"
-              className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-              onClick={() => toast.info('آپلود تصویر به زودی فعال می‌شود')}
+              className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
             >
-              <Camera className="w-4 h-4" />
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
             </button>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm text-muted-foreground text-center">
             روی آیکون دوربین کلیک کنید تا تصویر پروفایل را تغییر دهید
+            <br />
+            <span className="text-xs">(حداکثر ۲ مگابایت)</span>
           </p>
         </CardContent>
       </Card>
@@ -167,7 +246,11 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         onClick={handleSave}
         disabled={loading}
       >
-        <Save className="w-4 h-4 ml-2" />
+        {loading ? (
+          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+        ) : (
+          <Save className="w-4 h-4 ml-2" />
+        )}
         {loading ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
       </Button>
     </div>
