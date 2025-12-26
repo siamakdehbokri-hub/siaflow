@@ -34,9 +34,9 @@ export const exportToExcel = (transactions: Transaction[], filename: string = 't
 export const exportToPDF = (transactions: Transaction[], filename: string = 'transactions') => {
   const doc = new jsPDF();
   
-  // Add title
+  // Add title in English (jsPDF has limited RTL support)
   doc.setFontSize(18);
-  doc.text('Expense Report', 105, 15, { align: 'center' });
+  doc.text('Financial Report - SiaFlow', 105, 15, { align: 'center' });
   
   // Calculate totals
   const totalIncome = transactions
@@ -47,26 +47,39 @@ export const exportToPDF = (transactions: Transaction[], filename: string = 'tra
     .reduce((sum, t) => sum + t.amount, 0);
   
   doc.setFontSize(12);
-  doc.text(`Total Income: ${totalIncome.toLocaleString()} Toman`, 14, 25);
-  doc.text(`Total Expense: ${totalExpense.toLocaleString()} Toman`, 14, 32);
-  doc.text(`Balance: ${(totalIncome - totalExpense).toLocaleString()} Toman`, 14, 39);
+  doc.text(`Total Income: ${totalIncome.toLocaleString('fa-IR')} Toman`, 14, 25);
+  doc.text(`Total Expense: ${totalExpense.toLocaleString('fa-IR')} Toman`, 14, 32);
+  doc.text(`Balance: ${(totalIncome - totalExpense).toLocaleString('fa-IR')} Toman`, 14, 39);
 
-  // Create table data
+  // Create table data with transliterated headers
   const tableData = transactions.map((t) => [
     t.type === 'income' ? 'Income' : 'Expense',
-    t.amount.toLocaleString(),
+    t.amount.toLocaleString('fa-IR'),
     t.category,
-    t.description,
-    t.date,
+    t.description || '-',
+    formatPersianDateShort(t.date),
   ]);
 
   autoTable(doc, {
     head: [['Type', 'Amount', 'Category', 'Description', 'Date']],
     body: tableData,
     startY: 50,
-    styles: { fontSize: 10 },
-    headStyles: { fillColor: [20, 184, 166] },
+    styles: { 
+      fontSize: 10,
+      halign: 'center',
+    },
+    headStyles: { 
+      fillColor: [20, 184, 166],
+      halign: 'center',
+    },
     alternateRowStyles: { fillColor: [240, 240, 240] },
+    columnStyles: {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 35, halign: 'right' },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 50 },
+      4: { cellWidth: 30 },
+    },
   });
 
   doc.save(`${filename}.pdf`);
@@ -76,13 +89,13 @@ export const exportCategoryReport = (categories: { name: string; spent: number; 
   const doc = new jsPDF();
   
   doc.setFontSize(18);
-  doc.text('Category Budget Report', 105, 15, { align: 'center' });
+  doc.text('Category Budget Report - SiaFlow', 105, 15, { align: 'center' });
   
   const tableData = categories.map((c) => [
     c.name,
-    c.budget.toLocaleString(),
-    c.spent.toLocaleString(),
-    (c.budget - c.spent).toLocaleString(),
+    c.budget.toLocaleString('fa-IR'),
+    c.spent.toLocaleString('fa-IR'),
+    (c.budget - c.spent).toLocaleString('fa-IR'),
     `${Math.round((c.spent / c.budget) * 100)}%`,
   ]);
 
@@ -90,8 +103,14 @@ export const exportCategoryReport = (categories: { name: string; spent: number; 
     head: [['Category', 'Budget', 'Spent', 'Remaining', 'Usage']],
     body: tableData,
     startY: 25,
-    styles: { fontSize: 10 },
-    headStyles: { fillColor: [20, 184, 166] },
+    styles: { 
+      fontSize: 10,
+      halign: 'center',
+    },
+    headStyles: { 
+      fillColor: [20, 184, 166],
+      halign: 'center',
+    },
   });
 
   doc.save('category-report.pdf');
