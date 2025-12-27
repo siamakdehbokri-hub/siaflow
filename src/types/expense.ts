@@ -20,7 +20,7 @@ export interface Category {
   budget?: number;
   spent?: number;
   type?: 'expense' | 'income';
-  subcategories?: Subcategory[];
+  subcategories?: string[] | Subcategory[];
 }
 
 export interface Subcategory {
@@ -55,81 +55,99 @@ export const defaultWidgets: DashboardWidget[] = [
   { id: 'recent-transactions', type: 'recent-transactions', title: 'تراکنش‌های اخیر', enabled: true, order: 4 },
 ];
 
-// Default categories with subcategories
+// Default categories with subcategories - NEW COMPREHENSIVE LIST
 export const defaultExpenseCategories = [
   {
-    name: 'خانه',
+    name: 'خوراک و خرید روزمره',
+    icon: 'ShoppingCart',
+    color: 'hsl(38, 92%, 50%)',
+    subcategories: ['خرید سوپرمارکت', 'رستوران و کافی‌شاپ', 'خوراک بیرون‌بر', 'خوراک مهمانی']
+  },
+  {
+    name: 'خانه و زندگی',
     icon: 'Home',
     color: 'hsl(25, 95%, 53%)',
-    subcategories: ['اجاره / رهن', 'قبوض برق', 'قبوض آب', 'قبوض گاز', 'اینترنت', 'تلفن', 'تعمیرات و نگهداری']
+    subcategories: ['اجاره / شارژ ساختمان', 'قبوض', 'لوازم خانگی', 'تعمیرات منزل']
   },
   {
     name: 'حمل و نقل',
     icon: 'Car',
     color: 'hsl(199, 89%, 48%)',
-    subcategories: ['بنزین / سوخت', 'تاکسی', 'مترو', 'اتوبوس', 'بیمه خودرو', 'تعمیرات خودرو', 'پارکینگ']
+    subcategories: ['بنزین', 'تاکسی / اسنپ', 'سرویس خودرو', 'اقساط خودرو']
   },
   {
-    name: 'خوراک و نوشیدنی',
-    icon: 'UtensilsCrossed',
-    color: 'hsl(38, 92%, 50%)',
-    subcategories: ['خرید مواد غذایی', 'رستوران و کافه', 'نوشیدنی و میان‌وعده']
+    name: 'سلامت و درمان',
+    icon: 'Heart',
+    color: 'hsl(0, 72%, 51%)',
+    subcategories: ['دکتر و ویزیت', 'دارو', 'آزمایش', 'بیمه درمانی']
+  },
+  {
+    name: 'خرید شخصی و پوشاک',
+    icon: 'ShoppingBag',
+    color: 'hsl(330, 80%, 60%)',
+    subcategories: ['لباس', 'کفش', 'لوازم آرایشی', 'اکسسوری']
   },
   {
     name: 'سرگرمی و تفریح',
     icon: 'Gamepad2',
     color: 'hsl(262, 83%, 58%)',
-    subcategories: ['سینما و تئاتر', 'کافه و دورهمی', 'سفر و مسافرت', 'ورزش و باشگاه']
+    subcategories: ['سینما / تئاتر', 'سفر', 'کافی‌شاپ و دورهمی', 'سرگرمی خانگی']
   },
   {
-    name: 'پوشاک و مد',
-    icon: 'ShoppingBag',
-    color: 'hsl(330, 80%, 60%)',
-    subcategories: ['لباس', 'کفش', 'اکسسوری و لوازم جانبی']
+    name: 'اشتراک‌ها و پرداخت ماهانه',
+    icon: 'CreditCard',
+    color: 'hsl(210, 80%, 55%)',
+    subcategories: ['اشتراک آنلاین', 'اینترنت و تلفن', 'عضویت باشگاه']
   },
   {
-    name: 'سلامت و بهداشت',
-    icon: 'Heart',
-    color: 'hsl(0, 72%, 51%)',
-    subcategories: ['دارو و درمان', 'تجهیزات پزشکی', 'آرایش و بهداشت شخصی', 'بیمه سلامت']
+    name: 'مالی و بانک',
+    icon: 'Landmark',
+    color: 'hsl(220, 70%, 45%)',
+    subcategories: ['اقساط و بدهی', 'وام', 'کارمزد انتقال', 'سرمایه‌گذاری']
   },
   {
-    name: 'آموزش و توسعه فردی',
-    icon: 'Book',
+    name: 'خانواده و روابط',
+    icon: 'Users',
+    color: 'hsl(340, 75%, 55%)',
+    subcategories: ['هدیه', 'کمک به خانواده', 'هزینه فرزند']
+  },
+  {
+    name: 'آموزش و رشد فردی',
+    icon: 'GraduationCap',
     color: 'hsl(168, 76%, 42%)',
-    subcategories: ['کتاب و مجله', 'دوره‌های آموزشی آنلاین', 'کلاس‌ها و کارگاه‌ها']
-  },
-  {
-    name: 'بدهی و قسط',
-    icon: 'Receipt',
-    color: 'hsl(0, 60%, 45%)',
-    subcategories: ['وام‌ها', 'قسط‌های خرید', 'سایر بدهی‌ها']
+    subcategories: ['دوره آموزشی', 'کتاب', 'سمینار و وبینار']
   },
   {
     name: 'سایر هزینه‌ها',
     icon: 'MoreHorizontal',
     color: 'hsl(220, 14%, 50%)',
-    subcategories: ['هدیه و کمک به دیگران', 'جریمه و مالیات', 'هزینه‌های اضطراری']
+    subcategories: ['متفرقه']
   }
 ];
 
 export const defaultIncomeCategories = [
   {
-    name: 'حقوق و دستمزد',
+    name: 'حقوق و درآمد شغلی',
     icon: 'Wallet',
     color: 'hsl(142, 71%, 45%)',
-    subcategories: ['حقوق ثابت', 'اضافه‌کار', 'پاداش']
+    subcategories: ['حقوق ماهانه', 'درآمد پروژه', 'پاداش']
   },
   {
-    name: 'سرمایه‌گذاری و پس‌انداز',
+    name: 'کار و پول‌سازی',
+    icon: 'Briefcase',
+    color: 'hsl(160, 70%, 40%)',
+    subcategories: ['درآمد پروژه', 'تجهیزات کاری', 'نرم‌افزار کاری', 'تبلیغات']
+  },
+  {
+    name: 'سرمایه‌گذاری',
     icon: 'TrendingUp',
     color: 'hsl(168, 76%, 42%)',
-    subcategories: ['سود بانکی', 'بورس و سهام', 'طلا و ارز', 'سود سرمایه‌گذاری']
+    subcategories: ['سود سهام', 'سود بانکی', 'کریپتو', 'طلا و ارز']
   },
   {
     name: 'سایر درآمدها',
     icon: 'Gift',
     color: 'hsl(38, 92%, 50%)',
-    subcategories: ['هدیه', 'کار آزاد', 'سایر']
+    subcategories: ['هدیه', 'فروش اجناس', 'متفرقه']
   }
 ];

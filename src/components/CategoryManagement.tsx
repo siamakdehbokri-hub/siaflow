@@ -3,7 +3,8 @@ import { Plus, Edit3, Trash2, ChevronLeft, Sparkles } from 'lucide-react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
-  Smartphone, Plane, Book, Music, MoreHorizontal
+  Smartphone, Plane, Book, Music, MoreHorizontal,
+  ShoppingCart, GraduationCap, CreditCard, Landmark, Users
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,20 +42,23 @@ import { toast } from 'sonner';
 
 const iconOptions = [
   { name: 'Home', icon: Home, label: 'خانه' },
+  { name: 'ShoppingCart', icon: ShoppingCart, label: 'خرید' },
   { name: 'Car', icon: Car, label: 'حمل و نقل' },
   { name: 'UtensilsCrossed', icon: UtensilsCrossed, label: 'غذا' },
-  { name: 'Gamepad2', icon: Gamepad2, label: 'تفریح' },
-  { name: 'ShoppingBag', icon: ShoppingBag, label: 'خرید' },
   { name: 'Heart', icon: Heart, label: 'سلامت' },
-  { name: 'Book', icon: Book, label: 'آموزش' },
-  { name: 'Receipt', icon: Receipt, label: 'قبوض' },
+  { name: 'ShoppingBag', icon: ShoppingBag, label: 'پوشاک' },
+  { name: 'Gamepad2', icon: Gamepad2, label: 'تفریح' },
+  { name: 'CreditCard', icon: CreditCard, label: 'اشتراک' },
+  { name: 'Landmark', icon: Landmark, label: 'بانک' },
+  { name: 'Users', icon: Users, label: 'خانواده' },
+  { name: 'GraduationCap', icon: GraduationCap, label: 'آموزش' },
   { name: 'Wallet', icon: Wallet, label: 'مالی' },
+  { name: 'Briefcase', icon: Briefcase, label: 'کار' },
   { name: 'TrendingUp', icon: TrendingUp, label: 'سرمایه‌گذاری' },
   { name: 'Gift', icon: Gift, label: 'هدیه' },
-  { name: 'Briefcase', icon: Briefcase, label: 'کار' },
-  { name: 'Smartphone', icon: Smartphone, label: 'تکنولوژی' },
+  { name: 'Book', icon: Book, label: 'کتاب' },
   { name: 'Plane', icon: Plane, label: 'سفر' },
-  { name: 'Music', icon: Music, label: 'موسیقی' },
+  { name: 'Receipt', icon: Receipt, label: 'قبوض' },
   { name: 'MoreHorizontal', icon: MoreHorizontal, label: 'سایر' },
 ];
 
@@ -72,7 +76,8 @@ const colorOptions = [
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
-  Smartphone, Plane, Book, Music, MoreHorizontal
+  Smartphone, Plane, Book, Music, MoreHorizontal,
+  ShoppingCart, GraduationCap, CreditCard, Landmark, Users
 };
 
 interface CategoryManagementProps {
