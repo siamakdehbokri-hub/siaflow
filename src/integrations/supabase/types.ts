@@ -23,6 +23,7 @@ export type Database = {
           icon: string
           id: string
           name: string
+          subcategories: string[] | null
           type: string | null
           user_id: string
         }
@@ -34,6 +35,7 @@ export type Database = {
           icon?: string
           id?: string
           name: string
+          subcategories?: string[] | null
           type?: string | null
           user_id: string
         }
@@ -45,6 +47,7 @@ export type Database = {
           icon?: string
           id?: string
           name?: string
+          subcategories?: string[] | null
           type?: string | null
           user_id?: string
         }

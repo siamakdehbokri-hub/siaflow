@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Category, defaultExpenseCategories, defaultIncomeCategories } from '@/types/expense';
+import { Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
 
@@ -33,14 +33,19 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isRecurring, setIsRecurring] = useState(false);
 
-  // Get subcategories based on selected category
-  const subcategories = useMemo(() => {
+  // Get subcategories from actual category data (from database)
+  const subcategories = useMemo((): string[] => {
     if (!category) return [];
     
-    const allCategories = [...defaultExpenseCategories, ...defaultIncomeCategories];
-    const found = allCategories.find(c => c.name === category);
-    return found?.subcategories || [];
-  }, [category]);
+    const found = categories.find(c => c.name === category);
+    if (!found?.subcategories) return [];
+    
+    // Handle both array of strings and array of Subcategory objects
+    return found.subcategories.map(s => {
+      if (typeof s === 'string') return s;
+      return (s as { name: string }).name;
+    });
+  }, [category, categories]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

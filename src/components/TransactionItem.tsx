@@ -1,34 +1,45 @@
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, RefreshCw,
-  Home, Gift, Book, MoreHorizontal, Tag, ArrowUpRight, ArrowDownRight
+  Home, Gift, Book, MoreHorizontal, ArrowUpRight, ArrowDownRight,
+  ShoppingCart, GraduationCap, CreditCard, Landmark, Users, Briefcase
 } from 'lucide-react';
 import { Transaction } from '@/types/expense';
 import { formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  'خانه': Home,
+  // New categories
+  'خوراک و خرید روزمره': ShoppingCart,
+  'خانه و زندگی': Home,
   'حمل و نقل': Car,
-  'خوراک و نوشیدنی': UtensilsCrossed,
+  'سلامت و درمان': Heart,
+  'خرید شخصی و پوشاک': ShoppingBag,
   'سرگرمی و تفریح': Gamepad2,
+  'اشتراک‌ها و پرداخت ماهانه': CreditCard,
+  'مالی و بانک': Landmark,
+  'خانواده و روابط': Users,
+  'آموزش و رشد فردی': GraduationCap,
+  'سایر هزینه‌ها': MoreHorizontal,
+  'حقوق و درآمد شغلی': Wallet,
+  'کار و پول‌سازی': Briefcase,
+  'سرمایه‌گذاری': TrendingUp,
+  'سایر درآمدها': Gift,
+  // Legacy categories
+  'خانه': Home,
+  'خوراک و نوشیدنی': UtensilsCrossed,
   'پوشاک و مد': ShoppingBag,
   'سلامت و بهداشت': Heart,
   'آموزش و توسعه فردی': Book,
   'بدهی و قسط': Receipt,
-  'سایر هزینه‌ها': MoreHorizontal,
   'حقوق و دستمزد': Wallet,
   'سرمایه‌گذاری و پس‌انداز': TrendingUp,
-  'سایر درآمدها': Gift,
-  // Legacy support
   'غذا و رستوران': UtensilsCrossed,
   'خرید': ShoppingBag,
   'قبوض': Receipt,
   'سلامت': Heart,
   'تفریح': Gamepad2,
   'حقوق': Wallet,
-  'سرمایه‌گذاری': TrendingUp,
 };
 
 interface TransactionItemProps {
@@ -126,26 +137,6 @@ export function TransactionItem({ transaction, onClick }: TransactionItemProps) 
           </div>
         </div>
 
-        {/* Tags */}
-        {transaction.tags && transaction.tags.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2.5">
-            {transaction.tags.slice(0, 2).map((tag) => (
-              <Badge 
-                key={tag} 
-                variant="secondary" 
-                className="text-[10px] py-0.5 px-2 gap-1 bg-primary/10 text-primary border-0 rounded-lg"
-              >
-                <Tag className="w-2.5 h-2.5" />
-                {tag}
-              </Badge>
-            ))}
-            {transaction.tags.length > 2 && (
-              <span className="text-[10px] text-muted-foreground font-medium">
-                +{transaction.tags.length - 2}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Hover Indicator Line */}

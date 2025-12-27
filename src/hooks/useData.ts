@@ -182,6 +182,7 @@ export function useCategories() {
         budget: c.budget ? Number(c.budget) : undefined,
         spent: 0, // Will be calculated from transactions
         type: c.budget ? 'expense' : 'income',
+        subcategories: (c as any).subcategories || [],
       }));
 
       setCategories(mappedData);

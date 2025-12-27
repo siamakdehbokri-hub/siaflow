@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, Plus, Minus, Trash2, Calendar, Tag, RefreshCw, ChevronDown, Edit3 } from 'lucide-react';
+import { X, Plus, Minus, Trash2, Calendar, RefreshCw, ChevronDown, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,10 +23,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Transaction, Category, defaultExpenseCategories, defaultIncomeCategories } from '@/types/expense';
+import { Transaction, Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
-import { TagInput } from './TagInput';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -52,17 +51,20 @@ export function EditTransactionModal({
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // Get subcategories based on selected category
-  const subcategories = useMemo(() => {
+  // Get subcategories from actual category data (from database)
+  const subcategories = useMemo((): string[] => {
     if (!category) return [];
     
-    const allCategories = [...defaultExpenseCategories, ...defaultIncomeCategories];
-    const found = allCategories.find(c => c.name === category);
-    return found?.subcategories || [];
-  }, [category]);
+    const found = categories.find(c => c.name === category);
+    if (!found?.subcategories) return [];
+    
+    return found.subcategories.map(s => {
+      if (typeof s === 'string') return s;
+      return (s as { name: string }).name;
+    });
+  }, [category, categories]);
 
   useEffect(() => {
     if (transaction) {
@@ -73,7 +75,7 @@ export function EditTransactionModal({
       setDescription(transaction.description);
       setDate(transaction.date);
       setIsRecurring(transaction.isRecurring || false);
-      setTags(transaction.tags || []);
+      
     }
   }, [transaction]);
 
@@ -90,7 +92,7 @@ export function EditTransactionModal({
       description,
       date,
       isRecurring,
-      tags: tags.length > 0 ? tags : undefined,
+      tags: [],
     });
     onClose();
   };
@@ -307,29 +309,17 @@ export function EditTransactionModal({
               />
             </div>
 
-            {/* Date & Tags Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Date */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  تاریخ
-                </Label>
-                <PersianDatePicker 
-                  value={date} 
-                  onChange={setDate}
-                  placeholder="انتخاب تاریخ"
-                />
-              </div>
-
-              {/* Tags */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-muted-foreground" />
-                  برچسب‌ها
-                </Label>
-                <TagInput tags={tags} onChange={setTags} maxTags={3} />
-              </div>
+            {/* Date */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                تاریخ
+              </Label>
+              <PersianDatePicker 
+                value={date} 
+                onChange={setDate}
+                placeholder="انتخاب تاریخ"
+              />
             </div>
 
             {/* Recurring Toggle */}
