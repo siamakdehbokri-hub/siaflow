@@ -195,6 +195,7 @@ const Index = () => {
                   transactions={transactions} 
                   categories={categoriesWithSpent}
                   widgets={widgets}
+                  userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
                   onViewAllTransactions={() => handleTabChange('transactions')}
                 />
               </div>

@@ -14,10 +14,11 @@ interface DashboardProps {
   transactions: Transaction[];
   categories: Category[];
   widgets: DashboardWidget[];
+  userName: string;
   onViewAllTransactions: () => void;
 }
 
-export function Dashboard({ transactions, categories, widgets, onViewAllTransactions }: DashboardProps) {
+export function Dashboard({ transactions, categories, widgets, userName, onViewAllTransactions }: DashboardProps) {
   const totalIncome = transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -106,16 +107,27 @@ export function Dashboard({ transactions, categories, widgets, onViewAllTransact
 
   const today = new Date().toISOString();
 
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'صبح بخیر';
+    if (hour >= 12 && hour < 17) return 'ظهر بخیر';
+    if (hour >= 17 && hour < 21) return 'عصر بخیر';
+    return 'شب بخیر';
+  };
+
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
-      {/* Today's Date */}
+      {/* Welcome & Today's Date */}
       <div className="flex items-center gap-3 bg-primary/10 rounded-xl p-4 border border-primary/20">
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-          <Calendar className="w-5 h-5 text-primary" />
+        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+          <Calendar className="w-6 h-6 text-primary" />
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">امروز</p>
-          <p className="text-lg font-semibold text-foreground">{formatPersianDateFull(today)}</p>
+        <div className="flex-1">
+          <p className="text-lg font-bold text-foreground">
+            {getGreeting()}، {userName} 👋
+          </p>
+          <p className="text-sm text-muted-foreground">{formatPersianDateFull(today)}</p>
         </div>
       </div>
 
