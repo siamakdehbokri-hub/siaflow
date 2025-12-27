@@ -7,7 +7,8 @@ import { MonthlySummary } from './MonthlySummary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Transaction, Category, DashboardWidget } from '@/types/expense';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Calendar } from 'lucide-react';
+import { formatPersianDateFull } from '@/utils/persianDate';
 
 interface DashboardProps {
   transactions: Transaction[];
@@ -103,8 +104,21 @@ export function Dashboard({ transactions, categories, widgets, onViewAllTransact
     w.type !== 'spending-chart' && w.type !== 'trend-chart'
   );
 
+  const today = new Date().toISOString();
+
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
+      {/* Today's Date */}
+      <div className="flex items-center gap-3 bg-primary/10 rounded-xl p-4 border border-primary/20">
+        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+          <Calendar className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">امروز</p>
+          <p className="text-lg font-semibold text-foreground">{formatPersianDateFull(today)}</p>
+        </div>
+      </div>
+
       {/* Render balance first if enabled */}
       {widgets.find(w => w.type === 'balance' && w.enabled) && (
         <BalanceCard 
