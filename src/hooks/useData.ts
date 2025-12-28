@@ -202,6 +202,10 @@ export function useCategories() {
     if (!user) return;
 
     try {
+      const subcats = category.subcategories 
+        ? category.subcategories.map(s => typeof s === 'string' ? s : s.name)
+        : [];
+
       const { data, error } = await supabase
         .from('categories')
         .insert({
@@ -210,6 +214,8 @@ export function useCategories() {
           icon: category.icon,
           color: category.color,
           budget: category.budget || null,
+          subcategories: subcats,
+          type: category.type || (category.budget ? 'expense' : 'income'),
         })
         .select()
         .single();
@@ -224,6 +230,7 @@ export function useCategories() {
         budget: data.budget ? Number(data.budget) : undefined,
         spent: 0,
         type: data.budget ? 'expense' : 'income',
+        subcategories: (data as any).subcategories || [],
       };
 
       setCategories([...categories, newCategory]);
@@ -238,6 +245,10 @@ export function useCategories() {
     if (!user) return;
 
     try {
+      const subcats = category.subcategories 
+        ? category.subcategories.map(s => typeof s === 'string' ? s : s.name)
+        : [];
+
       const { error } = await supabase
         .from('categories')
         .update({
@@ -245,6 +256,8 @@ export function useCategories() {
           icon: category.icon,
           color: category.color,
           budget: category.budget || null,
+          subcategories: subcats,
+          type: category.type || (category.budget ? 'expense' : 'income'),
         })
         .eq('id', category.id)
         .eq('user_id', user.id);
@@ -252,7 +265,7 @@ export function useCategories() {
       if (error) throw error;
 
       setCategories(categories.map(c => 
-        c.id === category.id ? category : c
+        c.id === category.id ? { ...category, subcategories: subcats } : c
       ));
       toast.success('دسته‌بندی با موفقیت ویرایش شد');
     } catch (error: any) {

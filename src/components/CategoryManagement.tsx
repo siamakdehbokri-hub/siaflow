@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit3, Trash2, ChevronLeft, Sparkles } from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, Sparkles, FolderTree } from 'lucide-react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
@@ -29,12 +29,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { Category } from '@/types/expense';
 import { formatCurrency } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -96,12 +94,24 @@ export function CategoryManagement({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   const [name, setName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('Receipt');
   const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
   const [budget, setBudget] = useState('');
   const [categoryType, setCategoryType] = useState<'expense' | 'income'>('expense');
+  const [subcategoriesInput, setSubcategoriesInput] = useState('');
+
+  const toggleExpanded = (id: string) => {
+    const newSet = new Set(expandedCategories);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setExpandedCategories(newSet);
+  };
 
   const resetForm = () => {
     setName('');
@@ -109,6 +119,7 @@ export function CategoryManagement({
     setSelectedColor(colorOptions[0]);
     setBudget('');
     setCategoryType('expense');
+    setSubcategoriesInput('');
     setEditingCategory(null);
   };
 
@@ -124,6 +135,9 @@ export function CategoryManagement({
     setSelectedColor(category.color);
     setBudget(category.budget?.toString() || '');
     setCategoryType(category.budget ? 'expense' : 'income');
+    const subs = category.subcategories || [];
+    const subNames = subs.map(s => typeof s === 'string' ? s : s.name);
+    setSubcategoriesInput(subNames.join('، '));
     setIsModalOpen(true);
   };
 
@@ -134,6 +148,11 @@ export function CategoryManagement({
       toast.error('نام دسته‌بندی را وارد کنید');
       return;
     }
+
+    const subcategories = subcategoriesInput
+      .split(/[،,]/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
     
     const categoryData: Category = {
       id: editingCategory?.id || Date.now().toString(),
@@ -143,6 +162,7 @@ export function CategoryManagement({
       budget: categoryType === 'expense' && budget ? parseInt(budget.replace(/,/g, '')) : undefined,
       spent: editingCategory?.spent || 0,
       type: categoryType,
+      subcategories,
     };
 
     if (editingCategory) {
@@ -173,13 +193,134 @@ export function CategoryManagement({
   const expenseCategories = categories.filter(c => c.budget || c.type === 'expense');
   const incomeCategories = categories.filter(c => !c.budget && c.type !== 'expense');
 
+  const renderCategoryItem = (category: Category) => {
+    const Icon = iconMap[category.icon] || Receipt;
+    const progress = category.budget && category.spent 
+      ? (category.spent / category.budget) * 100 
+      : 0;
+    const isOverBudget = progress > 100;
+    const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+    const isExpanded = expandedCategories.has(category.id);
+    const subcats = category.subcategories || [];
+    const subcatNames = subcats.map(s => typeof s === 'string' ? s : s.name);
+
+    return (
+      <Collapsible
+        key={category.id}
+        open={isExpanded}
+        onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
+      >
+        <div 
+          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-all group"
+        >
+          {/* Tree Toggle */}
+          <CollapsibleTrigger asChild>
+            <button 
+              className={cn(
+                "p-1 rounded-lg hover:bg-background/50 transition-colors",
+                !hasSubcategories && "invisible"
+              )}
+              disabled={!hasSubcategories}
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
+          </CollapsibleTrigger>
+
+          <div 
+            className="p-2.5 rounded-xl shrink-0 transition-transform group-hover:scale-110"
+            style={{ backgroundColor: `${category.color}20` }}
+          >
+            <Icon 
+              className="w-5 h-5" 
+              style={{ color: category.color }}
+            />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-foreground">{category.name}</span>
+                {hasSubcategories && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {subcatNames.length} زیردسته
+                  </Badge>
+                )}
+              </div>
+              <span className={cn(
+                "text-xs font-medium",
+                isOverBudget ? "text-destructive" : "text-muted-foreground"
+              )}>
+                {category.budget ? formatCurrency(category.budget) : '-'}
+              </span>
+            </div>
+            {category.budget && (
+              <div className="space-y-1">
+                <Progress 
+                  value={Math.min(progress, 100)} 
+                  className={cn("h-1.5", isOverBudget && "[&>div]:bg-destructive")}
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>{formatCurrency(category.spent || 0)} خرج شده</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button 
+              variant="ghost" 
+              size="icon-sm"
+              onClick={() => openEditModal(category)}
+              className="h-8 w-8"
+            >
+              <Edit3 className="w-4 h-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon-sm"
+              onClick={() => setDeleteId(category.id)}
+              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Subcategories Tree */}
+        <CollapsibleContent>
+          {hasSubcategories && (
+            <div className="mr-10 mt-1 space-y-1 border-r-2 border-dashed border-muted pr-4">
+              {subcatNames.map((subcat, idx) => (
+                <div 
+                  key={idx}
+                  className="flex items-center gap-2 p-2 rounded-lg bg-background/50 text-sm"
+                >
+                  <div 
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <span className="text-muted-foreground">{subcat}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
+
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl gradient-primary">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
+            <FolderTree className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-foreground">مدیریت دسته‌بندی‌ها</h2>
@@ -209,73 +350,7 @@ export function CategoryManagement({
               هنوز دسته‌بندی هزینه‌ای ندارید
             </p>
           ) : (
-            expenseCategories.map((category) => {
-              const Icon = iconMap[category.icon] || Receipt;
-              const progress = category.budget && category.spent 
-                ? (category.spent / category.budget) * 100 
-                : 0;
-              const isOverBudget = progress > 100;
-
-              return (
-                <div 
-                  key={category.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-all group"
-                >
-                  <div 
-                    className="p-2.5 rounded-xl shrink-0 transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: `${category.color}20` }}
-                  >
-                    <Icon 
-                      className="w-5 h-5" 
-                      style={{ color: category.color }}
-                    />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-medium text-foreground">{category.name}</span>
-                      <span className={cn(
-                        "text-xs font-medium",
-                        isOverBudget ? "text-destructive" : "text-muted-foreground"
-                      )}>
-                        {category.budget ? formatCurrency(category.budget) : '-'}
-                      </span>
-                    </div>
-                    {category.budget && (
-                      <div className="space-y-1">
-                        <Progress 
-                          value={Math.min(progress, 100)} 
-                          className={cn("h-1.5", isOverBudget && "[&>div]:bg-destructive")}
-                        />
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>{formatCurrency(category.spent || 0)} خرج شده</span>
-                          <span>{Math.round(progress)}%</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
-                      size="icon-sm"
-                      onClick={() => openEditModal(category)}
-                      className="h-8 w-8"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon-sm"
-                      onClick={() => setDeleteId(category.id)}
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
+            expenseCategories.map(renderCategoryItem)
           )}
         </CardContent>
       </Card>
@@ -299,43 +374,96 @@ export function CategoryManagement({
           ) : (
             incomeCategories.map((category) => {
               const Icon = iconMap[category.icon] || Receipt;
+              const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+              const isExpanded = expandedCategories.has(category.id);
+              const subcats = category.subcategories || [];
+              const subcatNames = subcats.map(s => typeof s === 'string' ? s : s.name);
 
               return (
-                <div 
+                <Collapsible
                   key={category.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-all group"
+                  open={isExpanded}
+                  onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
                 >
                   <div 
-                    className="p-2.5 rounded-xl shrink-0 transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: `${category.color}20` }}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-all group"
                   >
-                    <Icon 
-                      className="w-5 h-5" 
-                      style={{ color: category.color }}
-                    />
-                  </div>
-                  
-                  <span className="flex-1 font-medium text-foreground">{category.name}</span>
+                    {/* Tree Toggle */}
+                    <CollapsibleTrigger asChild>
+                      <button 
+                        className={cn(
+                          "p-1 rounded-lg hover:bg-background/50 transition-colors",
+                          !hasSubcategories && "invisible"
+                        )}
+                        disabled={!hasSubcategories}
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </button>
+                    </CollapsibleTrigger>
 
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
-                      size="icon-sm"
-                      onClick={() => openEditModal(category)}
-                      className="h-8 w-8"
+                    <div 
+                      className="p-2.5 rounded-xl shrink-0 transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: `${category.color}20` }}
                     >
-                      <Edit3 className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon-sm"
-                      onClick={() => setDeleteId(category.id)}
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                      <Icon 
+                        className="w-5 h-5" 
+                        style={{ color: category.color }}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="font-medium text-foreground">{category.name}</span>
+                      {hasSubcategories && (
+                        <Badge variant="secondary" className="text-[10px]">
+                          {subcatNames.length} زیردسته
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        variant="ghost" 
+                        size="icon-sm"
+                        onClick={() => openEditModal(category)}
+                        className="h-8 w-8"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon-sm"
+                        onClick={() => setDeleteId(category.id)}
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+
+                  {/* Subcategories Tree */}
+                  <CollapsibleContent>
+                    {hasSubcategories && (
+                      <div className="mr-10 mt-1 space-y-1 border-r-2 border-dashed border-muted pr-4">
+                        {subcatNames.map((subcat, idx) => (
+                          <div 
+                            key={idx}
+                            className="flex items-center gap-2 p-2 rounded-lg bg-background/50 text-sm"
+                          >
+                            <div 
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <span className="text-muted-foreground">{subcat}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
               );
             })
           )}
@@ -405,6 +533,21 @@ export function CategoryManagement({
               />
             </div>
 
+            {/* Subcategories Input */}
+            <div className="space-y-2">
+              <Label htmlFor="cat-subcategories">زیردسته‌ها (با ویرگول جدا کنید)</Label>
+              <Input
+                id="cat-subcategories"
+                value={subcategoriesInput}
+                onChange={(e) => setSubcategoriesInput(e.target.value)}
+                placeholder="مثلا: لباس، کفش، اکسسوری"
+                className="h-12 rounded-xl"
+              />
+              <p className="text-xs text-muted-foreground">
+                زیردسته‌ها را با ویرگول (،) یا کاما (,) جدا کنید
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label>آیکون</Label>
               <div className="grid grid-cols-5 sm:grid-cols-8 gap-2">
@@ -459,26 +602,23 @@ export function CategoryManagement({
                   placeholder="مثلا: 5,000,000 تومان"
                   className="h-12 rounded-xl"
                 />
-                <p className="text-xs text-muted-foreground">
-                  با تعیین بودجه، پیشرفت مصرف را می‌بینید
-                </p>
               </div>
             )}
 
             <div className="flex gap-2 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="flex-1 h-12 rounded-xl" 
-                onClick={() => setIsModalOpen(false)}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  resetForm();
+                }}
+                className="flex-1 rounded-xl"
               >
                 انصراف
               </Button>
-              <Button 
-                type="submit" 
-                className="flex-1 h-12 rounded-xl"
-              >
-                {editingCategory ? 'ذخیره تغییرات' : 'ایجاد دسته'}
+              <Button type="submit" className="flex-1 rounded-xl">
+                {editingCategory ? 'ذخیره تغییرات' : 'افزودن'}
               </Button>
             </div>
           </form>
@@ -491,16 +631,12 @@ export function CategoryManagement({
           <AlertDialogHeader>
             <AlertDialogTitle>حذف دسته‌بندی</AlertDialogTitle>
             <AlertDialogDescription>
-              آیا مطمئن هستید که می‌خواهید این دسته‌بندی را حذف کنید؟
-              تراکنش‌های مرتبط با این دسته حذف نمی‌شوند.
+              آیا مطمئنید؟ این عمل قابل بازگشت نیست.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-xl">انصراف</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
-            >
+          <AlertDialogFooter>
+            <AlertDialogCancel>انصراف</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
               حذف
             </AlertDialogAction>
           </AlertDialogFooter>

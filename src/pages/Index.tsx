@@ -9,12 +9,15 @@ import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { EditTransactionModal } from '@/components/EditTransactionModal';
 import { WidgetSettings } from '@/components/WidgetSettings';
 import { ReminderNotifications } from '@/components/ReminderNotifications';
+import { SavingGoals } from '@/components/SavingGoals';
+import { MonthlyAnalysis } from '@/components/MonthlyAnalysis';
 import { useTransactions, useCategories } from '@/hooks/useData';
+import { useSavingGoals } from '@/hooks/useSavingGoals';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { useReminders } from '@/hooks/useReminders';
 import { Transaction, Category } from '@/types/expense';
-import { FolderOpen, Loader2 } from 'lucide-react';
+import { FolderOpen, Loader2, PiggyBank, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -22,6 +25,8 @@ const Index = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showCategories, setShowCategories] = useState(false);
+  const [showSavingGoals, setShowSavingGoals] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   
   const { user } = useAuth();
   const { widgets, toggleWidget, moveWidget, resetWidgets } = useDashboardWidgets();
@@ -41,13 +46,19 @@ const Index = () => {
     deleteCategory 
   } = useCategories();
 
-  const { reminders, dismissReminder, hasReminders } = useReminders(transactions);
+  const {
+    goals,
+    loading: goalsLoading,
+    addGoal,
+    updateGoalAmount,
+    deleteGoal,
+  } = useSavingGoals();
 
-  // Theme is now managed by useTheme hook in Settings
+  const { reminders, dismissReminder, hasReminders } = useReminders(transactions);
 
   // Calculate spent amounts for each category
   const categoriesWithSpent = useMemo(() => {
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const currentMonth = new Date().toISOString().slice(0, 7);
     
     return categories.map(category => {
       const spent = transactions
@@ -95,6 +106,7 @@ const Index = () => {
       color: category.color,
       budget: category.budget,
       type: category.budget ? 'expense' : 'income',
+      subcategories: category.subcategories,
     });
   };
 
@@ -108,6 +120,8 @@ const Index = () => {
 
   const getPageTitle = () => {
     if (showCategories) return 'دسته‌بندی‌ها';
+    if (showSavingGoals) return 'اهداف پس‌انداز';
+    if (showAnalysis) return 'تحلیل ماهانه';
     switch (activeTab) {
       case 'dashboard': return 'داشبورد';
       case 'transactions': return 'تراکنش‌ها';
@@ -119,10 +133,12 @@ const Index = () => {
 
   const handleTabChange = (tab: string) => {
     setShowCategories(false);
+    setShowSavingGoals(false);
+    setShowAnalysis(false);
     setActiveTab(tab);
   };
 
-  const isLoading = transactionsLoading || categoriesLoading;
+  const isLoading = transactionsLoading || categoriesLoading || goalsLoading;
 
   if (isLoading) {
     return (
@@ -146,17 +162,45 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
-              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.6</p>
+              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.7</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {activeTab === 'dashboard' && (
-              <WidgetSettings
-                widgets={widgets}
-                onToggle={toggleWidget}
-                onMove={moveWidget}
-                onReset={resetWidgets}
-              />
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="icon-sm"
+                  onClick={() => {
+                    setShowSavingGoals(true);
+                    setShowCategories(false);
+                    setShowAnalysis(false);
+                  }}
+                  className="hover:bg-primary/10"
+                  title="اهداف پس‌انداز"
+                >
+                  <PiggyBank className="w-5 h-5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon-sm"
+                  onClick={() => {
+                    setShowAnalysis(true);
+                    setShowCategories(false);
+                    setShowSavingGoals(false);
+                  }}
+                  className="hover:bg-primary/10"
+                  title="تحلیل ماهانه"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                </Button>
+                <WidgetSettings
+                  widgets={widgets}
+                  onToggle={toggleWidget}
+                  onMove={moveWidget}
+                  onReset={resetWidgets}
+                />
+              </>
             )}
             {activeTab === 'settings' && !showCategories && (
               <Button 
@@ -185,6 +229,22 @@ const Index = () => {
               onAddCategory={handleAddCategory}
               onEditCategory={handleEditCategory}
               onDeleteCategory={handleDeleteCategory}
+            />
+          </div>
+        ) : showSavingGoals ? (
+          <div key="saving-goals" className="animate-slide-up">
+            <SavingGoals 
+              goals={goals}
+              onAddGoal={addGoal}
+              onUpdateAmount={updateGoalAmount}
+              onDeleteGoal={deleteGoal}
+            />
+          </div>
+        ) : showAnalysis ? (
+          <div key="analysis" className="animate-slide-up">
+            <MonthlyAnalysis 
+              transactions={transactions}
+              categories={categoriesWithSpent}
             />
           </div>
         ) : (

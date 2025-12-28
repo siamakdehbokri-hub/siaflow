@@ -46,3 +46,8 @@ export const getPersianWeekdays = (): string[] => {
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('fa-IR').format(amount) + ' تومان';
 };
+
+export const toPersianNum = (num: number | string): string => {
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+};
