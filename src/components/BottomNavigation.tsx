@@ -57,7 +57,8 @@ export function BottomNavigation({ activeTab, onTabChange, onAddClick }: BottomN
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
                 className={cn(
-                  "group flex flex-col items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl transition-all duration-400 relative min-w-[60px] sm:min-w-[70px]",
+                  "group flex flex-col items-center justify-center gap-1 px-2 sm:px-4 py-2 rounded-2xl transition-all duration-300 relative",
+                  "min-w-[52px] sm:min-w-[64px] max-w-[72px]",
                   isActive 
                     ? "text-primary" 
                     : "text-muted-foreground hover:text-foreground"
@@ -65,31 +66,31 @@ export function BottomNavigation({ activeTab, onTabChange, onAddClick }: BottomN
               >
                 {/* Active Background with glow */}
                 <div className={cn(
-                  "absolute inset-0 rounded-2xl transition-all duration-400",
+                  "absolute inset-1 rounded-xl transition-all duration-300",
                   isActive 
-                    ? "bg-primary/12 scale-100 shadow-glow-sm" 
+                    ? "bg-primary/12 scale-100" 
                     : "bg-transparent scale-90 group-hover:bg-accent/50 group-hover:scale-100"
                 )} />
                 
                 {/* Icon with Animation */}
                 <div className="relative z-10">
                   <Icon className={cn(
-                    "w-5 h-5 sm:w-6 sm:h-6 transition-all duration-400",
+                    "w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300",
                     isActive && "scale-110"
                   )} />
                   
                   {/* Active indicator dot */}
                   {isActive && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary animate-glow-pulse" />
+                    <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2">
+                      <div className="w-1 h-1 rounded-full bg-primary" />
                     </div>
                   )}
                 </div>
                 
                 {/* Label */}
                 <span className={cn(
-                  "relative z-10 text-[10px] sm:text-xs font-medium transition-all duration-400",
-                  isActive ? "opacity-100 font-semibold" : "opacity-60 group-hover:opacity-100"
+                  "relative z-10 text-[9px] sm:text-[10px] font-medium transition-opacity duration-300 truncate max-w-full",
+                  isActive ? "opacity-100 font-semibold" : "opacity-70 group-hover:opacity-100"
                 )}>
                   {item.label}
                 </span>

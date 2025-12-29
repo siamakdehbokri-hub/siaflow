@@ -2,14 +2,15 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Transaction } from '@/types/expense';
-import { formatCurrency, formatPersianDateShort } from '@/utils/persianDate';
+import { formatPersianDateShort } from '@/utils/persianDate';
 
 export const exportToExcel = (transactions: Transaction[], filename: string = 'transactions') => {
   const data = transactions.map((t) => ({
     'نوع': t.type === 'income' ? 'درآمد' : 'هزینه',
     'مبلغ': t.amount,
     'دسته‌بندی': t.category,
-    'توضیحات': t.description,
+    'زیردسته': t.subcategory || '-',
+    'توضیحات': t.description || '-',
     'تاریخ': formatPersianDateShort(t.date),
     'تکراری': t.isRecurring ? 'بله' : 'خیر',
   }));
@@ -23,12 +24,40 @@ export const exportToExcel = (transactions: Transaction[], filename: string = 't
     { width: 10 },
     { width: 15 },
     { width: 15 },
+    { width: 15 },
     { width: 25 },
     { width: 12 },
     { width: 8 },
   ];
 
   XLSX.writeFile(workbook, `${filename}.xlsx`);
+};
+
+export const exportToCSV = (transactions: Transaction[], filename: string = 'transactions') => {
+  const headers = ['نوع', 'مبلغ', 'دسته‌بندی', 'زیردسته', 'توضیحات', 'تاریخ', 'تکراری'];
+  
+  const rows = transactions.map((t) => [
+    t.type === 'income' ? 'درآمد' : 'هزینه',
+    t.amount.toString(),
+    t.category,
+    t.subcategory || '-',
+    t.description || '-',
+    formatPersianDateShort(t.date),
+    t.isRecurring ? 'بله' : 'خیر',
+  ]);
+
+  // Add BOM for UTF-8 support in Excel
+  const BOM = '\uFEFF';
+  const csvContent = BOM + [headers, ...rows]
+    .map(row => row.map(cell => `"${cell}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${filename}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
 };
 
 export const exportToPDF = (transactions: Transaction[], filename: string = 'transactions') => {
@@ -50,22 +79,24 @@ export const exportToPDF = (transactions: Transaction[], filename: string = 'tra
   doc.text(`Total Income: ${totalIncome.toLocaleString('fa-IR')} Toman`, 14, 25);
   doc.text(`Total Expense: ${totalExpense.toLocaleString('fa-IR')} Toman`, 14, 32);
   doc.text(`Balance: ${(totalIncome - totalExpense).toLocaleString('fa-IR')} Toman`, 14, 39);
+  doc.text(`Transactions: ${transactions.length}`, 14, 46);
 
   // Create table data with transliterated headers
   const tableData = transactions.map((t) => [
     t.type === 'income' ? 'Income' : 'Expense',
     t.amount.toLocaleString('fa-IR'),
     t.category,
+    t.subcategory || '-',
     t.description || '-',
     formatPersianDateShort(t.date),
   ]);
 
   autoTable(doc, {
-    head: [['Type', 'Amount', 'Category', 'Description', 'Date']],
+    head: [['Type', 'Amount', 'Category', 'Subcategory', 'Description', 'Date']],
     body: tableData,
-    startY: 50,
+    startY: 55,
     styles: { 
-      fontSize: 10,
+      fontSize: 9,
       halign: 'center',
     },
     headStyles: { 
@@ -74,11 +105,12 @@ export const exportToPDF = (transactions: Transaction[], filename: string = 'tra
     },
     alternateRowStyles: { fillColor: [240, 240, 240] },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 35, halign: 'right' },
-      2: { cellWidth: 40 },
-      3: { cellWidth: 50 },
-      4: { cellWidth: 30 },
+      0: { cellWidth: 22 },
+      1: { cellWidth: 28, halign: 'right' },
+      2: { cellWidth: 30 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 45 },
+      5: { cellWidth: 25 },
     },
   });
 

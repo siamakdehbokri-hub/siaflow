@@ -1,15 +1,23 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from 'recharts';
-import { Download } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, FileDown } from 'lucide-react';
 import { SpendingChart } from './SpendingChart';
 import { TrendChart } from './TrendChart';
 import { CategoryBudget } from './CategoryBudget';
 import { MonthlyComparisonChart } from './MonthlyComparisonChart';
 import { SubcategoryChart } from './SubcategoryChart';
+import { ReportingFilters } from './ReportingFilters';
+import { ReportStatistics } from './ReportStatistics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Category, Transaction } from '@/types/expense';
-import { exportCategoryReport, exportToPDF } from '@/utils/exportUtils';
+import { exportCategoryReport, exportToPDF, exportToExcel, exportToCSV } from '@/utils/exportUtils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getPersianWeekdays, formatCurrency } from '@/utils/persianDate';
@@ -34,9 +42,15 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export function Reports({ categories, transactions }: ReportsProps) {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions);
   const budgetCategories = categories.filter(c => c.budget);
 
-  // Calculate weekly data from actual transactions
+  // Memoized filter callback to prevent unnecessary re-renders
+  const handleFilterChange = useCallback((filtered: Transaction[]) => {
+    setFilteredTransactions(filtered);
+  }, []);
+
+  // Calculate weekly data from filtered transactions
   const weeklyData = useMemo(() => {
     const persianWeekdays = getPersianWeekdays();
     const now = new Date();
@@ -45,7 +59,7 @@ export function Reports({ categories, transactions }: ReportsProps) {
     
     const dailyExpenses: Record<number, number> = {};
     
-    transactions
+    filteredTransactions
       .filter(t => t.type === 'expense')
       .forEach(t => {
         const date = new Date(t.date);
@@ -58,7 +72,7 @@ export function Reports({ categories, transactions }: ReportsProps) {
       name,
       expense: dailyExpenses[index] || 0,
     }));
-  }, [transactions]);
+  }, [filteredTransactions]);
 
   const maxExpense = Math.max(...weeklyData.map(d => d.expense), 1);
 
@@ -76,59 +90,98 @@ export function Reports({ categories, transactions }: ReportsProps) {
     }
   };
 
-  const handleExportFullReport = () => {
+  const handleExportPDF = () => {
     try {
-      exportToPDF(transactions, 'full-report');
-      toast.success('گزارش کامل دانلود شد');
+      exportToPDF(filteredTransactions, 'full-report');
+      toast.success('گزارش PDF دانلود شد');
     } catch {
       toast.error('خطا در ایجاد گزارش');
     }
   };
 
+  const handleExportExcel = () => {
+    try {
+      exportToExcel(filteredTransactions, 'transactions');
+      toast.success('فایل Excel دانلود شد');
+    } catch {
+      toast.error('خطا در ایجاد فایل');
+    }
+  };
+
+  const handleExportCSV = () => {
+    try {
+      exportToCSV(filteredTransactions, 'transactions');
+      toast.success('فایل CSV دانلود شد');
+    } catch {
+      toast.error('خطا در ایجاد فایل');
+    }
+  };
+
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Period Toggle */}
-      <div className="flex gap-2 p-1 bg-muted rounded-xl">
-        {[
-          { id: 'week', label: 'هفتگی' },
-          { id: 'month', label: 'ماهانه' },
-          { id: 'year', label: 'سالانه' },
-        ].map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setPeriod(item.id as any)}
-            className={cn(
-              "flex-1 py-2 rounded-lg font-medium text-sm transition-all duration-200",
-              period === item.id
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {/* Filters */}
+      <ReportingFilters
+        transactions={transactions}
+        categories={categories}
+        onFilterChange={handleFilterChange}
+      />
 
-      {/* Export Buttons */}
-      <div className="flex gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleExportFullReport}
-          className="flex-1"
-        >
-          <Download className="w-4 h-4 ml-2" />
-          گزارش کامل
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleExportCategoryReport}
-          className="flex-1"
-        >
-          <Download className="w-4 h-4 ml-2" />
-          گزارش بودجه
-        </Button>
+      {/* Statistics Cards */}
+      <ReportStatistics 
+        transactions={filteredTransactions} 
+        categories={categories} 
+      />
+
+      {/* Period Toggle & Export */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex gap-1.5 p-1 bg-muted rounded-xl flex-1">
+          {[
+            { id: 'week', label: 'هفتگی' },
+            { id: 'month', label: 'ماهانه' },
+            { id: 'year', label: 'سالانه' },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setPeriod(item.id as any)}
+              className={cn(
+                "flex-1 py-2 px-3 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200",
+                period === item.id
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Export Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Download className="w-4 h-4" />
+              <span>خروجی</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
+              <FileText className="w-4 h-4" />
+              <span>گزارش کامل (PDF)</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>اکسل (XLSX)</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportCSV} className="gap-2 cursor-pointer">
+              <FileDown className="w-4 h-4" />
+              <span>CSV</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportCategoryReport} className="gap-2 cursor-pointer">
+              <FileText className="w-4 h-4" />
+              <span>گزارش بودجه (PDF)</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Weekly Bar Chart */}
@@ -166,15 +219,15 @@ export function Reports({ categories, transactions }: ReportsProps) {
       </Card>
 
       {/* Monthly Comparison Chart */}
-      <MonthlyComparisonChart transactions={transactions} />
+      <MonthlyComparisonChart transactions={filteredTransactions} />
 
       {/* Subcategory Analysis */}
-      <SubcategoryChart transactions={transactions} />
+      <SubcategoryChart transactions={filteredTransactions} />
 
       {/* Charts - Responsive Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SpendingChart categories={categories} />
-        <TrendChart transactions={transactions} />
+        <TrendChart transactions={filteredTransactions} />
       </div>
 
       {/* All Budgets */}
