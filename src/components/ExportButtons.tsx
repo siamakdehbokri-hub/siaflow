@@ -1,7 +1,13 @@
-import { FileSpreadsheet, FileText } from 'lucide-react';
+import { FileSpreadsheet, FileText, FileDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Transaction } from '@/types/expense';
-import { exportToExcel, exportToPDF } from '@/utils/exportUtils';
+import { exportToExcel, exportToPDF, exportToCSV } from '@/utils/exportUtils';
 import { toast } from 'sonner';
 
 interface ExportButtonsProps {
@@ -28,26 +34,37 @@ export function ExportButtons({ transactions, className }: ExportButtonsProps) {
     }
   };
 
+  const handleExportCSV = () => {
+    try {
+      exportToCSV(transactions);
+      toast.success('فایل CSV با موفقیت دانلود شد');
+    } catch (error) {
+      toast.error('خطا در ایجاد فایل CSV');
+    }
+  };
+
   return (
-    <div className={`flex gap-2 ${className}`}>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleExportExcel}
-        className="flex items-center gap-2"
-      >
-        <FileSpreadsheet className="w-4 h-4" />
-        <span className="hidden sm:inline">Excel</span>
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleExportPDF}
-        className="flex items-center gap-2"
-      >
-        <FileText className="w-4 h-4" />
-        <span className="hidden sm:inline">PDF</span>
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className={`gap-2 ${className}`}>
+          <Download className="w-4 h-4" />
+          <span className="hidden sm:inline">خروجی</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
+          <FileText className="w-4 h-4" />
+          <span>PDF</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+          <FileSpreadsheet className="w-4 h-4" />
+          <span>Excel</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleExportCSV} className="gap-2 cursor-pointer">
+          <FileDown className="w-4 h-4" />
+          <span>CSV</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
