@@ -220,71 +220,73 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Main Content with Page Transitions */}
+      {/* Main Content with Smooth Page Transitions */}
       <main className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-5">
-        {showCategories ? (
-          <div key="categories" className="animate-slide-up">
-            <CategoryManagement 
-              categories={categoriesWithSpent}
-              onAddCategory={handleAddCategory}
-              onEditCategory={handleEditCategory}
-              onDeleteCategory={handleDeleteCategory}
-            />
-          </div>
-        ) : showSavingGoals ? (
-          <div key="saving-goals" className="animate-slide-up">
-            <SavingGoals 
-              goals={goals}
-              onAddGoal={addGoal}
-              onUpdateAmount={updateGoalAmount}
-              onDeleteGoal={deleteGoal}
-            />
-          </div>
-        ) : showAnalysis ? (
-          <div key="analysis" className="animate-slide-up">
-            <MonthlyAnalysis 
-              transactions={transactions}
-              categories={categoriesWithSpent}
-            />
-          </div>
-        ) : (
-          <>
-            {activeTab === 'dashboard' && (
-              <div key="dashboard" className="animate-fade-in">
-                <Dashboard 
-                  transactions={transactions} 
-                  categories={categoriesWithSpent}
-                  widgets={widgets}
-                  userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
-                  onViewAllTransactions={() => handleTabChange('transactions')}
-                />
-              </div>
-            )}
-            {activeTab === 'transactions' && (
-              <div key="transactions" className="animate-slide-up">
-                <TransactionsList 
-                  transactions={transactions}
-                  categories={categoriesWithSpent}
-                  onEditTransaction={handleEditTransaction}
-                  onDeleteTransaction={handleDeleteTransaction}
-                />
-              </div>
-            )}
-            {activeTab === 'reports' && (
-              <div key="reports" className="animate-slide-up">
-                <Reports 
-                  categories={categoriesWithSpent}
-                  transactions={transactions}
-                />
-              </div>
-            )}
-            {activeTab === 'settings' && (
-              <div key="settings" className="animate-fade-in">
-                <Settings onOpenCategories={() => setShowCategories(true)} />
-              </div>
-            )}
-          </>
-        )}
+        <div className="min-h-[60vh]">
+          {showCategories ? (
+            <div key="categories" className="animate-page-enter">
+              <CategoryManagement 
+                categories={categoriesWithSpent}
+                onAddCategory={handleAddCategory}
+                onEditCategory={handleEditCategory}
+                onDeleteCategory={handleDeleteCategory}
+              />
+            </div>
+          ) : showSavingGoals ? (
+            <div key="saving-goals" className="animate-page-enter">
+              <SavingGoals 
+                goals={goals}
+                onAddGoal={addGoal}
+                onUpdateAmount={updateGoalAmount}
+                onDeleteGoal={deleteGoal}
+              />
+            </div>
+          ) : showAnalysis ? (
+            <div key="analysis" className="animate-page-enter">
+              <MonthlyAnalysis 
+                transactions={transactions}
+                categories={categoriesWithSpent}
+              />
+            </div>
+          ) : (
+            <>
+              {activeTab === 'dashboard' && (
+                <div key="dashboard" className="animate-page-enter">
+                  <Dashboard 
+                    transactions={transactions} 
+                    categories={categoriesWithSpent}
+                    widgets={widgets}
+                    userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
+                    onViewAllTransactions={() => handleTabChange('transactions')}
+                  />
+                </div>
+              )}
+              {activeTab === 'transactions' && (
+                <div key="transactions" className="animate-page-enter">
+                  <TransactionsList 
+                    transactions={transactions}
+                    categories={categoriesWithSpent}
+                    onEditTransaction={handleEditTransaction}
+                    onDeleteTransaction={handleDeleteTransaction}
+                  />
+                </div>
+              )}
+              {activeTab === 'reports' && (
+                <div key="reports" className="animate-page-enter">
+                  <Reports 
+                    categories={categoriesWithSpent}
+                    transactions={transactions}
+                  />
+                </div>
+              )}
+              {activeTab === 'settings' && (
+                <div key="settings" className="animate-page-enter">
+                  <Settings onOpenCategories={() => setShowCategories(true)} />
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
 
       {/* Bottom Navigation */}
