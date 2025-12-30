@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Loader2, Sparkles, Shield, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+const features = [
+  { icon: TrendingUp, text: 'مدیریت هوشمند بودجه', color: 'text-emerald-500' },
+  { icon: Shield, text: 'امنیت بالای داده‌ها', color: 'text-blue-500' },
+  { icon: Sparkles, text: 'گزارش‌های دقیق مالی', color: 'text-purple-500' },
+];
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -16,11 +22,30 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('لطفاً یک ایمیل معتبر وارد کنید');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -39,6 +64,12 @@ const Auth = () => {
       } else {
         if (password.length < 6) {
           toast.error('رمز عبور باید حداقل ۶ کاراکتر باشد');
+          setLoading(false);
+          return;
+        }
+
+        if (!displayName.trim()) {
+          toast.error('لطفاً نام خود را وارد کنید');
           setLoading(false);
           return;
         }
@@ -63,35 +94,70 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-bl from-primary/10 via-transparent to-transparent rounded-full blur-3xl" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-primary/5 via-transparent to-transparent rounded-full blur-3xl" />
+      </div>
+
+      <div className={cn(
+        "w-full max-w-md relative z-10 transition-all duration-700",
+        mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      )}>
         {/* Logo/Title */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-            <span className="text-3xl font-black text-primary-foreground tracking-tight">SF</span>
+          <div className="w-24 h-24 mx-auto mb-5 rounded-3xl gradient-primary flex items-center justify-center shadow-glow relative">
+            <span className="text-4xl font-black text-primary-foreground tracking-tight">SF</span>
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-background border-2 border-primary flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary" />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">SiaFlow</h1>
-          <p className="text-lg text-primary font-medium">سیا فلو</p>
-          <p className="text-muted-foreground mt-1 text-sm">مدیریت مالی هوشمند</p>
+          <h1 className="text-3xl font-black text-foreground">SiaFlow</h1>
+          <p className="text-xl text-primary font-bold mt-1">سیا فلو</p>
+          <p className="text-muted-foreground mt-2 text-sm">مدیریت مالی هوشمند شما</p>
         </div>
 
-        <Card variant="glass" className="animate-slide-up">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-xl">
+        {/* Features - only show on signup */}
+        {!isLogin && (
+          <div className={cn(
+            "flex justify-center gap-3 mb-6 transition-all duration-500",
+            mounted ? "opacity-100" : "opacity-0"
+          )}>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-muted/50 backdrop-blur-sm"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <feature.icon className={cn("w-5 h-5", feature.color)} />
+                <span className="text-[10px] text-muted-foreground text-center leading-tight">
+                  {feature.text}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Card variant="glass" className="backdrop-blur-xl border-border/50">
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="text-xl font-bold">
               {isLogin ? 'ورود به حساب' : 'ایجاد حساب جدید'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               {isLogin 
-                ? 'برای ادامه وارد حساب خود شوید' 
-                : 'برای شروع یک حساب ایجاد کنید'}
+                ? 'خوش برگشتید! برای ادامه وارد شوید' 
+                : 'برای شروع مدیریت مالی، ثبت‌نام کنید'}
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">نام نمایشی</Label>
+                <div className="space-y-2 animate-fade-in">
+                  <Label htmlFor="displayName" className="text-sm font-medium">
+                    نام نمایشی
+                  </Label>
                   <div className="relative">
                     <User className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -100,14 +166,17 @@ const Auth = () => {
                       placeholder="نام شما"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="pr-10"
+                      className="pr-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                      required={!isLogin}
                     />
                   </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">ایمیل</Label>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  ایمیل
+                </Label>
                 <div className="relative">
                   <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
@@ -116,7 +185,7 @@ const Auth = () => {
                     placeholder="example@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pr-10"
+                    className="pr-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                     required
                     dir="ltr"
                   />
@@ -124,7 +193,9 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">رمز عبور</Label>
+                <Label htmlFor="password" className="text-sm font-medium">
+                  رمز عبور
+                </Label>
                 <div className="relative">
                   <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
@@ -133,7 +204,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10 pl-10"
+                    className="pr-11 pl-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                     required
                     minLength={6}
                     dir="ltr"
@@ -141,7 +212,7 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -151,38 +222,58 @@ const Auth = () => {
                   </button>
                 </div>
                 {!isLogin && (
-                  <p className="text-xs text-muted-foreground">حداقل ۶ کاراکتر</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Shield className="w-3 h-3" />
+                    حداقل ۶ کاراکتر برای امنیت بیشتر
+                  </p>
                 )}
               </div>
 
               <Button
                 type="submit"
                 size="lg"
-                className="w-full"
+                className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
                 disabled={loading}
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  isLogin ? 'ورود' : 'ثبت‌نام'
+                  <>
+                    {isLogin ? 'ورود به حساب' : 'ایجاد حساب'}
+                    <Sparkles className="w-4 h-4 mr-2" />
+                  </>
                 )}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                {isLogin ? 'حساب ندارید؟' : 'قبلاً ثبت‌نام کردید؟'}
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-primary font-medium mr-1 hover:underline"
-                >
-                  {isLogin ? 'ثبت‌نام کنید' : 'وارد شوید'}
-                </button>
-              </p>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/50" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-card px-4 text-muted-foreground">
+                    {isLogin ? 'حساب ندارید؟' : 'قبلاً ثبت‌نام کردید؟'}
+                  </span>
+                </div>
+              </div>
+              
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsLogin(!isLogin)}
+                className="mt-4 text-primary font-semibold hover:text-primary/80 hover:bg-primary/5"
+              >
+                {isLogin ? 'ایجاد حساب جدید' : 'ورود به حساب موجود'}
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Footer */}
+        <p className="text-center text-[10px] text-muted-foreground/50 mt-6">
+          با ورود یا ثبت‌نام، قوانین و شرایط استفاده را می‌پذیرید
+        </p>
       </div>
     </div>
   );
