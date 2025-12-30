@@ -130,7 +130,7 @@ export function TransactionsList({
 
       {/* Tip */}
       <p className="text-xs text-muted-foreground text-center sm:hidden">
-        برای ویرایش یا حذف، تراکنش را به چپ بکشید
+        برای ویرایش یا حذف، تراکنش را به راست بکشید
       </p>
 
       {/* Transactions by Date */}

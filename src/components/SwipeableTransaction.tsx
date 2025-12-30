@@ -16,6 +16,7 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
   const startX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // In RTL layout, swipe RIGHT (positive direction) to reveal actions on LEFT
   const handleTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
     setIsDragging(true);
@@ -24,13 +25,13 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     const currentX = e.touches[0].clientX;
-    const diff = startX.current - currentX;
+    const diff = currentX - startX.current; // RTL: positive diff = swipe right
     
-    // Only allow left swipe (positive diff)
+    // Allow right swipe (positive diff) to reveal actions
     if (diff > 0) {
       setOffset(Math.min(diff, 140));
     } else {
-      setOffset(Math.max(diff, 0));
+      setOffset(Math.max(0, offset + diff * 0.3)); // Allow slight resistance when swiping back
     }
   };
 
@@ -50,11 +51,11 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    const diff = startX.current - e.clientX;
+    const diff = e.clientX - startX.current; // RTL: positive diff = swipe right
     if (diff > 0) {
       setOffset(Math.min(diff, 140));
     } else {
-      setOffset(Math.max(diff, 0));
+      setOffset(Math.max(0, offset + diff * 0.3));
     }
   };
 
@@ -78,35 +79,51 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
     }
   };
 
+  const resetSwipe = () => {
+    setOffset(0);
+  };
+
   return (
     <div 
       ref={containerRef}
       className="relative overflow-hidden rounded-xl"
       onMouseLeave={handleMouseLeave}
     >
-      {/* Actions behind */}
-      <div className="absolute inset-y-0 left-0 flex items-stretch">
+      {/* Actions on the LEFT side (revealed by swiping RIGHT in RTL) */}
+      <div 
+        className="absolute inset-y-0 left-0 flex items-stretch z-10"
+        style={{ 
+          opacity: offset > 0 ? 1 : 0,
+          transition: isDragging ? 'none' : 'opacity 0.2s ease'
+        }}
+      >
         <button
-          onClick={() => onEdit(transaction)}
+          onClick={() => {
+            onEdit(transaction);
+            resetSwipe();
+          }}
           className="w-[70px] flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           <Edit3 className="w-5 h-5" />
         </button>
         <button
-          onClick={() => onDelete(transaction.id)}
+          onClick={() => {
+            onDelete(transaction.id);
+            resetSwipe();
+          }}
           className="w-[70px] flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
         >
           <Trash2 className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Transaction item */}
+      {/* Transaction item - moves RIGHT to reveal actions */}
       <div
         className={cn(
           "relative bg-card transition-transform",
-          !isDragging && "duration-200"
+          !isDragging && "duration-200 ease-out"
         )}
-        style={{ transform: `translateX(-${offset}px)` }}
+        style={{ transform: `translateX(${offset}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
