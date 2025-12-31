@@ -117,7 +117,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
     setDeleting(true);
     try {
-      // Delete all user data first
+      // Delete all user data first (including debts)
+      await supabase.from('debts').delete().eq('user_id', user.id);
       await supabase.from('saving_goal_transactions').delete().eq('user_id', user.id);
       await supabase.from('saving_goals').delete().eq('user_id', user.id);
       await supabase.from('transactions').delete().eq('user_id', user.id);
@@ -389,7 +390,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۱.۷.۰ - بهبود تنظیمات و حذف حساب
+        SiaFlow نسخه ۱.۸.۰ - سیستم بدهی‌ها و بهبود گزارشات
       </p>
 
       {/* Delete Account Dialog */}
