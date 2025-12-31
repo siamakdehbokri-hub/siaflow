@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, Loader2, Sparkles, Shield, TrendingUp } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Loader2, Sparkles, Shield, TrendingUp, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,19 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
+  // Password validation function - same as PasswordChange component
+  const validatePassword = (password: string): string[] => {
+    const errors: string[] = [];
+    if (password.length < 8) errors.push('حداقل ۸ کاراکتر');
+    if (!/[A-Z]/.test(password)) errors.push('یک حرف بزرگ انگلیسی');
+    if (!/[a-z]/.test(password)) errors.push('یک حرف کوچک انگلیسی');
+    if (!/[0-9]/.test(password)) errors.push('یک عدد');
+    return errors;
+  };
+
+  const passwordErrors = !isLogin ? validatePassword(password) : [];
+  const isPasswordValid = passwordErrors.length === 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -62,8 +75,9 @@ const Auth = () => {
           navigate('/');
         }
       } else {
-        if (password.length < 6) {
-          toast.error('رمز عبور باید حداقل ۶ کاراکتر باشد');
+        // Strong password validation for sign-up
+        if (!isPasswordValid) {
+          toast.error('رمز عبور باید شامل ' + passwordErrors.join('، ') + ' باشد');
           setLoading(false);
           return;
         }
@@ -206,7 +220,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pr-11 pl-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
                     required
-                    minLength={6}
+                    minLength={isLogin ? 6 : 8}
                     dir="ltr"
                   />
                   <button
@@ -222,10 +236,27 @@ const Auth = () => {
                   </button>
                 </div>
                 {!isLogin && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    حداقل ۶ کاراکتر برای امنیت بیشتر
-                  </p>
+                  <div className="space-y-1 text-xs">
+                    {['حداقل ۸ کاراکتر', 'یک حرف بزرگ انگلیسی', 'یک حرف کوچک انگلیسی', 'یک عدد'].map((req, i) => {
+                      const checks = [
+                        password.length >= 8,
+                        /[A-Z]/.test(password),
+                        /[a-z]/.test(password),
+                        /[0-9]/.test(password),
+                      ];
+                      return (
+                        <div
+                          key={req}
+                          className={`flex items-center gap-1.5 ${
+                            checks[i] ? 'text-emerald-500' : 'text-muted-foreground'
+                          }`}
+                        >
+                          <CheckCircle className={`w-3 h-3 ${checks[i] ? 'opacity-100' : 'opacity-30'}`} />
+                          {req}
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
 
