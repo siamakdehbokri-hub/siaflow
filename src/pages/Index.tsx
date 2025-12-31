@@ -10,14 +10,16 @@ import { EditTransactionModal } from '@/components/EditTransactionModal';
 import { WidgetSettings } from '@/components/WidgetSettings';
 import { ReminderNotifications } from '@/components/ReminderNotifications';
 import { SavingGoals } from '@/components/SavingGoals';
+import { DebtManagement } from '@/components/DebtManagement';
 import { MonthlyAnalysis } from '@/components/MonthlyAnalysis';
 import { useTransactions, useCategories } from '@/hooks/useData';
 import { useSavingGoals } from '@/hooks/useSavingGoals';
+import { useDebts } from '@/hooks/useDebts';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { useReminders } from '@/hooks/useReminders';
 import { Transaction, Category } from '@/types/expense';
-import { FolderOpen, Loader2, PiggyBank, BarChart3 } from 'lucide-react';
+import { FolderOpen, Loader2, PiggyBank, BarChart3, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -26,6 +28,7 @@ const Index = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [showCategories, setShowCategories] = useState(false);
   const [showSavingGoals, setShowSavingGoals] = useState(false);
+  const [showDebts, setShowDebts] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   
   const { user } = useAuth();
@@ -53,6 +56,16 @@ const Index = () => {
     updateGoalAmount,
     deleteGoal,
   } = useSavingGoals();
+
+  const {
+    debts,
+    loading: debtsLoading,
+    addDebt,
+    updateDebt,
+    deleteDebt,
+    addPayment,
+    stats: debtStats,
+  } = useDebts();
 
   const { reminders, dismissReminder, hasReminders } = useReminders(transactions);
 
@@ -121,6 +134,7 @@ const Index = () => {
   const getPageTitle = () => {
     if (showCategories) return 'دسته‌بندی‌ها';
     if (showSavingGoals) return 'اهداف پس‌انداز';
+    if (showDebts) return 'مدیریت بدهی‌ها';
     if (showAnalysis) return 'تحلیل ماهانه';
     switch (activeTab) {
       case 'dashboard': return 'داشبورد';
@@ -134,11 +148,12 @@ const Index = () => {
   const handleTabChange = (tab: string) => {
     setShowCategories(false);
     setShowSavingGoals(false);
+    setShowDebts(false);
     setShowAnalysis(false);
     setActiveTab(tab);
   };
 
-  const isLoading = transactionsLoading || categoriesLoading || goalsLoading;
+  const isLoading = transactionsLoading || categoriesLoading || goalsLoading || debtsLoading;
 
   if (isLoading) {
     return (
@@ -162,10 +177,10 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
-              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.7</p>
+              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.8</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {activeTab === 'dashboard' && (
               <>
                 <Button 
@@ -174,6 +189,7 @@ const Index = () => {
                   onClick={() => {
                     setShowSavingGoals(true);
                     setShowCategories(false);
+                    setShowDebts(false);
                     setShowAnalysis(false);
                   }}
                   className="hover:bg-primary/10"
@@ -185,9 +201,24 @@ const Index = () => {
                   variant="ghost" 
                   size="icon-sm"
                   onClick={() => {
+                    setShowDebts(true);
+                    setShowSavingGoals(false);
+                    setShowCategories(false);
+                    setShowAnalysis(false);
+                  }}
+                  className="hover:bg-primary/10"
+                  title="بدهی‌ها"
+                >
+                  <CreditCard className="w-5 h-5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon-sm"
+                  onClick={() => {
                     setShowAnalysis(true);
                     setShowCategories(false);
                     setShowSavingGoals(false);
+                    setShowDebts(false);
                   }}
                   className="hover:bg-primary/10"
                   title="تحلیل ماهانه"
@@ -239,6 +270,17 @@ const Index = () => {
                 onAddGoal={addGoal}
                 onUpdateAmount={updateGoalAmount}
                 onDeleteGoal={deleteGoal}
+              />
+            </div>
+          ) : showDebts ? (
+            <div key="debts" className="animate-page-enter">
+              <DebtManagement 
+                debts={debts}
+                stats={debtStats}
+                onAddDebt={addDebt}
+                onUpdateDebt={updateDebt}
+                onDeleteDebt={deleteDebt}
+                onAddPayment={addPayment}
               />
             </div>
           ) : showAnalysis ? (
