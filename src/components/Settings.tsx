@@ -117,14 +117,6 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
     setDeleting(true);
     try {
-      // Delete all user data first (including debts)
-      await supabase.from('debts').delete().eq('user_id', user.id);
-      await supabase.from('saving_goal_transactions').delete().eq('user_id', user.id);
-      await supabase.from('saving_goals').delete().eq('user_id', user.id);
-      await supabase.from('transactions').delete().eq('user_id', user.id);
-      await supabase.from('categories').delete().eq('user_id', user.id);
-      await supabase.from('profiles').delete().eq('id', user.id);
-      
       // Delete user avatar if exists
       const { data: avatarList } = await supabase.storage
         .from('avatars')
@@ -135,10 +127,19 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         await supabase.storage.from('avatars').remove(filesToDelete);
       }
 
-      // Sign out user
-      await signOut();
+      // Call edge function to delete user completely from server
+      const { data: sessionData } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke('delete-user-account', {
+        headers: {
+          Authorization: `Bearer ${sessionData.session?.access_token}`
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'خطا در حذف حساب');
+      }
       
-      toast.success('حساب شما با موفقیت حذف شد');
+      toast.success('حساب شما با موفقیت و به طور کامل از سرور حذف شد');
       navigate('/auth');
     } catch (error: any) {
       console.error('Error deleting account:', error);
