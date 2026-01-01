@@ -174,20 +174,24 @@ export function Settings({ onOpenCategories }: SettingsProps) {
     <div className="space-y-5 animate-fade-in pb-6">
       {/* User Profile Card - Enhanced */}
       <Card variant="glass" className="overflow-hidden">
-        <div className="h-16 sm:h-20 gradient-primary opacity-80" />
-        <CardContent className="p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4">
-            <div className="-mt-10 sm:-mt-12 w-14 h-14 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-xl sm:text-3xl font-bold text-primary-foreground shrink-0 border-4 border-background shadow-lg self-center sm:self-auto">
+        <div className="relative">
+          <div className="h-20 sm:h-24 gradient-primary opacity-80" />
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 sm:left-auto sm:translate-x-0 sm:right-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-2xl sm:text-3xl font-bold text-primary-foreground shrink-0 border-4 border-background shadow-lg">
               {initials}
             </div>
-            <div className="flex-1 min-w-0 text-center sm:text-right sm:pb-1">
-              <h3 className="text-base sm:text-xl font-bold text-foreground truncate">{displayName}</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{email}</p>
-            </div>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
+        </div>
+
+        <CardContent className="p-4 sm:p-5 pt-12 sm:pt-14 sm:pr-28">
+          <div className="min-w-0 text-center sm:text-right">
+            <h3 className="text-base sm:text-xl font-bold text-foreground truncate">{displayName}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{email}</p>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
             className="w-full mt-4 text-sm"
             onClick={() => setCurrentView('profile')}
           >
