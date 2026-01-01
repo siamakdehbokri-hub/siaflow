@@ -174,14 +174,14 @@ export function Settings({ onOpenCategories }: SettingsProps) {
     <div className="space-y-5 animate-fade-in pb-6">
       {/* User Profile Card - Enhanced */}
       <Card variant="glass" className="overflow-hidden">
-        <div className="h-16 gradient-primary opacity-80" />
-        <CardContent className="p-4 sm:p-5 -mt-10">
-          <div className="flex items-end gap-3 sm:gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-2xl sm:text-3xl font-bold text-primary-foreground shrink-0 border-4 border-background shadow-lg">
+        <div className="h-12 sm:h-16 gradient-primary opacity-80" />
+        <CardContent className="p-3 sm:p-5 -mt-8 sm:-mt-10">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-xl sm:text-3xl font-bold text-primary-foreground shrink-0 border-3 sm:border-4 border-background shadow-lg self-start">
               {initials}
             </div>
-            <div className="flex-1 min-w-0 pb-1">
-              <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">{displayName}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-xl font-bold text-foreground truncate">{displayName}</h3>
               <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{email}</p>
             </div>
           </div>
