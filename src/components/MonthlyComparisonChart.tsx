@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Transaction } from '@/types/expense';
-import { formatCurrency, getPersianMonthName } from '@/utils/persianDate';
+import { formatCurrency, getJalaliMonthName } from '@/utils/persianDate';
 import { format } from 'date-fns-jalali';
 
 interface MonthlyComparisonChartProps {
@@ -33,23 +33,21 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function MonthlyComparisonChart({ transactions }: MonthlyComparisonChartProps) {
   const data = useMemo(() => {
     // Group transactions by Persian month
-    const monthlyData: Record<string, { income: number; expense: number; month: number; year: number }> = {};
+    const monthlyData: Record<string, { income: number; expense: number; firstDate: string }> = {};
     
     transactions.forEach(t => {
       const date = new Date(t.date);
-      // Get Persian month using date-fns-jalali
-      const persianMonth = format(date, 'yyyy-MM');
-      const monthNum = parseInt(format(date, 'M'));
-      const yearNum = parseInt(format(date, 'yyyy'));
+      // Get Persian month key using date-fns-jalali
+      const persianMonthKey = format(date, 'yyyy-MM');
       
-      if (!monthlyData[persianMonth]) {
-        monthlyData[persianMonth] = { income: 0, expense: 0, month: monthNum, year: yearNum };
+      if (!monthlyData[persianMonthKey]) {
+        monthlyData[persianMonthKey] = { income: 0, expense: 0, firstDate: t.date };
       }
       
       if (t.type === 'income') {
-        monthlyData[persianMonth].income += t.amount;
+        monthlyData[persianMonthKey].income += t.amount;
       } else {
-        monthlyData[persianMonth].expense += t.amount;
+        monthlyData[persianMonthKey].expense += t.amount;
       }
     });
 
@@ -58,8 +56,9 @@ export function MonthlyComparisonChart({ transactions }: MonthlyComparisonChartP
     
     return sortedKeys.map(key => {
       const data = monthlyData[key];
+      // Use the actual date to get correct Jalali month name
       return {
-        name: getPersianMonthName(data.month - 1),
+        name: getJalaliMonthName(data.firstDate),
         expense: data.expense,
         income: data.income,
         difference: data.income - data.expense,
