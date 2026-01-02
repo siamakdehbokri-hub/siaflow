@@ -117,33 +117,17 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
     setDeleting(true);
     try {
-      // Delete user avatar if exists
-      const { data: avatarList } = await supabase.storage
-        .from('avatars')
-        .list(user.id);
-      
-      if (avatarList && avatarList.length > 0) {
-        const filesToDelete = avatarList.map(file => `${user.id}/${file.name}`);
-        await supabase.storage.from('avatars').remove(filesToDelete);
-      }
+      const { data, error } = await supabase.functions.invoke('delete-user-account');
+      if (error) throw error;
 
-      // Call edge function to delete user completely from server
-      const { data: sessionData } = await supabase.auth.getSession();
-      const response = await supabase.functions.invoke('delete-user-account', {
-        headers: {
-          Authorization: `Bearer ${sessionData.session?.access_token}`
-        }
-      });
+      // Ensure local session is cleared immediately
+      await supabase.auth.signOut();
 
-      if (response.error) {
-        throw new Error(response.error.message || 'خطا در حذف حساب');
-      }
-      
-      toast.success('حساب شما با موفقیت و به طور کامل از سرور حذف شد');
-      navigate('/auth');
+      toast.success('حساب شما کاملاً حذف شد. برای استفاده دوباره باید ثبت‌نام کنید.');
+      navigate('/auth', { replace: true });
     } catch (error: any) {
       console.error('Error deleting account:', error);
-      toast.error('خطا در حذف حساب. لطفاً دوباره تلاش کنید.');
+      toast.error(error?.message || 'خطا در حذف حساب. لطفاً دوباره تلاش کنید.');
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
