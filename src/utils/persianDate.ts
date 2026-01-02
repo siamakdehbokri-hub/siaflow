@@ -1,4 +1,4 @@
-import { format, formatDistance } from 'date-fns-jalali';
+import { format, formatDistance, getMonth } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
 
 export const formatPersianDate = (dateString: string): string => {
@@ -21,6 +21,11 @@ export const formatPersianMonth = (dateString: string): string => {
   return format(date, 'MMMM yyyy', { locale: faIR });
 };
 
+export const formatPersianMonthOnly = (dateString: string): string => {
+  const date = new Date(dateString);
+  return format(date, 'MMMM', { locale: faIR });
+};
+
 export const formatPersianWeekday = (dateString: string): string => {
   const date = new Date(dateString);
   return format(date, 'EEEE', { locale: faIR });
@@ -37,6 +42,17 @@ export const getPersianMonthName = (monthIndex: number): string => {
     'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
   ];
   return months[monthIndex] || '';
+};
+
+// Get Jalali month index from a date string (0-11)
+export const getJalaliMonth = (dateString: string): number => {
+  const date = new Date(dateString);
+  return getMonth(date);
+};
+
+// Get Jalali month name from a date string
+export const getJalaliMonthName = (dateString: string): string => {
+  return formatPersianMonthOnly(dateString);
 };
 
 export const getPersianWeekdays = (): string[] => {

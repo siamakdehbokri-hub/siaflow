@@ -34,12 +34,20 @@ export function ReminderNotifications({ reminders, onDismiss }: ReminderNotifica
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon-sm" className="relative">
-          <Bell className="w-5 h-5" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300 group"
+        >
+          <Bell className="w-[18px] h-[18px] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
           {reminders.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center font-bold animate-pulse">
+            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center font-bold animate-bounce shadow-lg">
               {reminders.length}
             </span>
+          )}
+          {/* Glow ring when has reminders */}
+          {reminders.length > 0 && (
+            <span className="absolute inset-0 rounded-xl border-2 border-destructive/30 animate-ping opacity-50" />
           )}
         </Button>
       </SheetTrigger>

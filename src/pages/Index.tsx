@@ -168,62 +168,73 @@ const Index = () => {
 
   return (
     <div className="min-h-screen gradient-mesh pb-28">
-      {/* Header */}
-      <header className="sticky top-0 z-40 glass-heavy border-b-0">
-        <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+      {/* Header with safe area support */}
+      <header className="sticky top-0 z-40">
+        {/* Glass background layer */}
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl border-b border-border/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+        
+        <div className="relative max-w-2xl mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
+          {/* Logo & Title */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow-sm">
-              <span className="text-sm font-bold text-primary-foreground">SF</span>
+            <div className="relative group">
+              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105">
+                <span className="text-sm font-black text-primary-foreground">SF</span>
+              </div>
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-xl bg-primary/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
               <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.8</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
+
+          {/* Action Icons - Redesigned for better touch and visibility */}
+          <div className="flex items-center gap-1">
             {activeTab === 'dashboard' && (
               <>
                 <Button 
                   variant="ghost" 
-                  size="icon-sm"
+                  size="icon"
                   onClick={() => {
                     setShowSavingGoals(true);
                     setShowCategories(false);
                     setShowDebts(false);
                     setShowAnalysis(false);
                   }}
-                  className="hover:bg-primary/10"
+                  className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
                   title="اهداف پس‌انداز"
                 >
-                  <PiggyBank className="w-5 h-5" />
+                  <PiggyBank className="w-[18px] h-[18px]" />
                 </Button>
                 <Button 
                   variant="ghost" 
-                  size="icon-sm"
+                  size="icon"
                   onClick={() => {
                     setShowDebts(true);
                     setShowSavingGoals(false);
                     setShowCategories(false);
                     setShowAnalysis(false);
                   }}
-                  className="hover:bg-primary/10"
+                  className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
                   title="بدهی‌ها"
                 >
-                  <CreditCard className="w-5 h-5" />
+                  <CreditCard className="w-[18px] h-[18px]" />
                 </Button>
                 <Button 
                   variant="ghost" 
-                  size="icon-sm"
+                  size="icon"
                   onClick={() => {
                     setShowAnalysis(true);
                     setShowCategories(false);
                     setShowSavingGoals(false);
                     setShowDebts(false);
                   }}
-                  className="hover:bg-primary/10"
+                  className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
                   title="تحلیل ماهانه"
                 >
-                  <BarChart3 className="w-5 h-5" />
+                  <BarChart3 className="w-[18px] h-[18px]" />
                 </Button>
                 <WidgetSettings
                   widgets={widgets}
@@ -236,11 +247,11 @@ const Index = () => {
             {activeTab === 'settings' && !showCategories && (
               <Button 
                 variant="ghost" 
-                size="icon-sm"
+                size="icon"
                 onClick={() => setShowCategories(true)}
-                className="hover:bg-primary/10"
+                className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
               >
-                <FolderOpen className="w-5 h-5" />
+                <FolderOpen className="w-[18px] h-[18px]" />
               </Button>
             )}
             <ReminderNotifications 
