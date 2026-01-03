@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { 
   Plus, CreditCard, Trash2, Edit3, DollarSign, 
-  Calendar, User, FileText, TrendingDown, CheckCircle2,
-  AlertCircle, Loader2
+  User, FileText, TrendingDown, CheckCircle2,
+  AlertCircle, Loader2, Calendar
 } from 'lucide-react';
+import { PersianDatePicker } from './PersianDatePicker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,7 +29,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Debt } from '@/hooks/useDebts';
-import { formatCurrency } from '@/utils/persianDate';
+import { formatCurrency, formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
 interface DebtManagementProps {
@@ -244,8 +245,8 @@ export function DebtManagement({
                         {debt.dueDate && (
                           <>
                             <span className="text-border">•</span>
-                            <Calendar className="w-3 h-3" />
-                            <span>{new Date(debt.dueDate).toLocaleDateString('fa-IR')}</span>
+                        <Calendar className="w-3 h-3" />
+                            <span>{formatPersianDateShort(debt.dueDate)}</span>
                           </>
                         )}
                       </div>
@@ -388,11 +389,10 @@ export function DebtManagement({
 
             <div className="space-y-2">
               <Label>تاریخ سررسید (اختیاری)</Label>
-              <Input
-                type="date"
+              <PersianDatePicker
                 value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="h-11 rounded-xl"
+                onChange={setDueDate}
+                placeholder="انتخاب تاریخ سررسید"
               />
             </div>
 

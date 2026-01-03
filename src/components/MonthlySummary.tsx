@@ -3,7 +3,7 @@ import { Calendar, TrendingUp, TrendingDown, AlertTriangle, Sparkles } from 'luc
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Transaction, Category } from '@/types/expense';
-import { formatCurrency, getPersianMonthName } from '@/utils/persianDate';
+import { formatCurrency, getJalaliMonthName } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
 interface MonthlySummaryProps {
@@ -71,7 +71,7 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" />
-          خلاصه این ماه
+          خلاصه {getJalaliMonthName(new Date().toISOString())}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
