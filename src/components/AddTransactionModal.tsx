@@ -66,6 +66,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     setCategory('');
     setSubcategory('');
     setDescription('');
+    setDate(new Date().toISOString().split('T')[0]);
     setIsRecurring(false);
   };
 
