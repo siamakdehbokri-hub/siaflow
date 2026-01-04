@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { 
   User, Bell, Shield, Palette, Download, 
   HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor, FolderOpen,
-  Trash2, AlertTriangle, Loader2
+  Trash2, AlertTriangle, Loader2, ShieldCheck
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdmin } from '@/hooks/useAdmin';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -72,6 +73,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const { theme, setTheme, isDark } = useTheme();
   const navigate = useNavigate();
 
@@ -182,6 +184,19 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             <User className="w-4 h-4 ml-2" />
             ویرایش پروفایل
           </Button>
+
+          {/* Admin Panel Link - Only visible for admins */}
+          {isAdmin && (
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full mt-2 text-sm bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white"
+              onClick={() => navigate('/admin')}
+            >
+              <ShieldCheck className="w-4 h-4 ml-2" />
+              پنل مدیریت
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -379,7 +394,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۱.۸.۰ - سیستم بدهی‌ها و بهبود گزارشات
+        SiaFlow نسخه ۱.۹.۰ - پنل مدیریت و سیستم نقش‌ها
       </p>
 
       {/* Delete Account Dialog */}
