@@ -8,6 +8,7 @@ import { MonthlyComparisonChart } from './MonthlyComparisonChart';
 import { SubcategoryChart } from './SubcategoryChart';
 import { ReportingFilters } from './ReportingFilters';
 import { ReportStatistics } from './ReportStatistics';
+import { AIReport } from './AIReport';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -119,6 +120,12 @@ export function Reports({ categories, transactions }: ReportsProps) {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      {/* AI Report - New Feature */}
+      <AIReport 
+        transactions={filteredTransactions} 
+        categories={categories} 
+      />
+
       {/* Filters */}
       <ReportingFilters
         transactions={transactions}

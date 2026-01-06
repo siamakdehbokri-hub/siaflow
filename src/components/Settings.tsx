@@ -151,7 +151,10 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   }
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
-  const email = user?.email || '';
+  // Extract phone from email format (09xxxxxxxxx@siaflow.app) or use email
+  const emailPart = user?.email?.replace('@siaflow.app', '') || '';
+  const phone = /^09\d{9}$/.test(emailPart) ? emailPart : '';
+  const displayPhone = phone ? `${phone.slice(0, 4)} ${phone.slice(4, 7)} ${phone.slice(7)}` : user?.email || '';
   const initials = displayName.charAt(0).toUpperCase();
 
   const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
@@ -172,7 +175,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         <CardContent className="p-4 sm:p-5 pt-12 sm:pt-14 sm:pr-28">
           <div className="min-w-0 text-center sm:text-right">
             <h3 className="text-base sm:text-xl font-bold text-foreground truncate">{displayName}</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{email}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{displayPhone}</p>
           </div>
 
           <Button
