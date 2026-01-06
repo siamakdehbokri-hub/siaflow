@@ -1,1 +1,10 @@
 project_id = "qlytnmelseururejffbf"
+
+[functions.admin-operations]
+verify_jwt = true
+
+[functions.delete-user-account]
+verify_jwt = true
+
+[functions.ai-report]
+verify_jwt = true

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff, Loader2, Sparkles, Shield, TrendingUp, CheckCircle } from 'lucide-react';
+import { Phone, Lock, User, Eye, EyeOff, Loader2, Sparkles, Shield, TrendingUp, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,12 +12,12 @@ import { cn } from '@/lib/utils';
 const features = [
   { icon: TrendingUp, text: 'مدیریت هوشمند بودجه', color: 'text-emerald-500' },
   { icon: Shield, text: 'امنیت بالای داده‌ها', color: 'text-blue-500' },
-  { icon: Sparkles, text: 'گزارش‌های دقیق مالی', color: 'text-purple-500' },
+  { icon: Sparkles, text: 'گزارش هوشمند AI', color: 'text-purple-500' },
 ];
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -36,7 +36,22 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
-  // Password validation function - same as PasswordChange component
+  // Format phone number for display (Persian style)
+  const formatPhoneDisplay = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 11)}`;
+  };
+
+  // Validate Iranian phone number
+  const validatePhone = (phone: string): boolean => {
+    const digits = phone.replace(/\D/g, '');
+    // Iranian mobile: 09xxxxxxxxx (11 digits)
+    return /^09\d{9}$/.test(digits);
+  };
+
+  // Password validation function
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
     if (password.length < 8) errors.push('حداقل ۸ کاراکتر');
@@ -48,25 +63,35 @@ const Auth = () => {
 
   const passwordErrors = !isLogin ? validatePassword(password) : [];
   const isPasswordValid = passwordErrors.length === 0;
+  const phoneDigits = phone.replace(/\D/g, '');
+  const isPhoneValid = validatePhone(phoneDigits);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+      setPhone(value);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error('لطفاً یک ایمیل معتبر وارد کنید');
+    if (!isPhoneValid) {
+      toast.error('لطفاً شماره موبایل معتبر وارد کنید (مثال: ۰۹۱۲۳۴۵۶۷۸۹)');
       return;
     }
 
     setLoading(true);
+    
+    // Create email from phone for Supabase auth (phone@siaflow.app)
+    const email = `${phoneDigits}@siaflow.app`;
 
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('ایمیل یا رمز عبور اشتباه است');
+            toast.error('شماره موبایل یا رمز عبور اشتباه است');
           } else {
             toast.error('خطا در ورود: ' + error.message);
           }
@@ -75,7 +100,6 @@ const Auth = () => {
           navigate('/');
         }
       } else {
-        // Strong password validation for sign-up
         if (!isPasswordValid) {
           toast.error('رمز عبور باید شامل ' + passwordErrors.join('، ') + ' باشد');
           setLoading(false);
@@ -88,10 +112,10 @@ const Auth = () => {
           return;
         }
         
-        const { error } = await signUp(email, password, displayName);
+        const { error } = await signUp(email, password, displayName, phoneDigits);
         if (error) {
           if (error.message.includes('already registered')) {
-            toast.error('این ایمیل قبلاً ثبت شده است');
+            toast.error('این شماره موبایل قبلاً ثبت شده است');
           } else {
             toast.error('خطا در ثبت‌نام: ' + error.message);
           }
@@ -113,23 +137,27 @@ const Auth = () => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-bl from-primary/10 via-transparent to-transparent rounded-full blur-3xl" />
         <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-primary/5 via-transparent to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl" />
       </div>
 
       <div className={cn(
         "w-full max-w-md relative z-10 transition-all duration-700",
         mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       )}>
-        {/* Logo/Title */}
+        {/* Logo/Title - Enhanced */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 mx-auto mb-5 rounded-3xl gradient-primary flex items-center justify-center shadow-glow relative">
-            <span className="text-4xl font-black text-primary-foreground tracking-tight">SF</span>
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-background border-2 border-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary" />
+          <div className="relative inline-block">
+            <div className="w-28 h-28 mx-auto mb-5 rounded-3xl gradient-primary flex items-center justify-center shadow-glow-lg relative overflow-hidden">
+              <span className="text-5xl font-black text-primary-foreground tracking-tight relative z-10">SF</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+              <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-background border-2 border-primary flex items-center justify-center shadow-lg">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
             </div>
           </div>
-          <h1 className="text-3xl font-black text-foreground">SiaFlow</h1>
-          <p className="text-xl text-primary font-bold mt-1">سیا فلو</p>
-          <p className="text-muted-foreground mt-2 text-sm">مدیریت مالی هوشمند شما</p>
+          <h1 className="text-4xl font-black text-foreground bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">SiaFlow</h1>
+          <p className="text-2xl text-primary font-bold mt-1">سیا فلو</p>
+          <p className="text-muted-foreground mt-3 text-sm">مدیریت مالی هوشمند با قدرت AI</p>
         </div>
 
         {/* Features - only show on signup */}
@@ -141,7 +169,7 @@ const Auth = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-muted/50 backdrop-blur-sm"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-muted/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all duration-300"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <feature.icon className={cn("w-5 h-5", feature.color)} />
@@ -153,20 +181,20 @@ const Auth = () => {
           </div>
         )}
 
-        <Card variant="glass" className="backdrop-blur-xl border-border/50">
+        <Card variant="glass" className="backdrop-blur-xl border-border/50 shadow-2xl">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl font-bold">
+            <CardTitle className="text-2xl font-bold">
               {isLogin ? 'ورود به حساب' : 'ایجاد حساب جدید'}
             </CardTitle>
             <CardDescription className="text-sm">
               {isLogin 
-                ? 'خوش برگشتید! برای ادامه وارد شوید' 
+                ? 'خوش برگشتید! با شماره موبایل وارد شوید' 
                 : 'برای شروع مدیریت مالی، ثبت‌نام کنید'}
             </CardDescription>
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {!isLogin && (
                 <div className="space-y-2 animate-fade-in">
                   <Label htmlFor="displayName" className="text-sm font-medium">
@@ -180,7 +208,7 @@ const Auth = () => {
                       placeholder="نام شما"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="pr-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                      className="pr-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background focus:border-primary transition-all"
                       required={!isLogin}
                     />
                   </div>
@@ -188,22 +216,35 @@ const Auth = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  ایمیل
+                <Label htmlFor="phone" className="text-sm font-medium">
+                  شماره موبایل
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="example@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pr-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                    id="phone"
+                    type="tel"
+                    placeholder="۰۹۱۲ ۳۴۵ ۶۷۸۹"
+                    value={formatPhoneDisplay(phone)}
+                    onChange={handlePhoneChange}
+                    className="pr-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background focus:border-primary transition-all tracking-wide"
                     required
                     dir="ltr"
                   />
+                  {phone.length > 0 && (
+                    <div className={cn(
+                      "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center transition-all",
+                      isPhoneValid ? "bg-emerald-500" : "bg-muted"
+                    )}>
+                      {isPhoneValid && <CheckCircle className="w-3 h-3 text-white" />}
+                    </div>
+                  )}
                 </div>
+                {!isLogin && (
+                  <p className="text-[11px] text-muted-foreground">
+                    شماره موبایل ایرانی وارد کنید (مثال: ۰۹۱۲۳۴۵۶۷۸۹)
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -218,7 +259,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-11 pl-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background transition-colors"
+                    className="pr-11 pl-11 h-12 text-base rounded-xl bg-muted/50 border-border/50 focus:bg-background focus:border-primary transition-all"
                     required
                     minLength={isLogin ? 6 : 8}
                     dir="ltr"
@@ -236,7 +277,7 @@ const Auth = () => {
                   </button>
                 </div>
                 {!isLogin && (
-                  <div className="space-y-1 text-xs">
+                  <div className="space-y-1.5 text-xs bg-muted/30 rounded-xl p-3 mt-2">
                     {['حداقل ۸ کاراکتر', 'یک حرف بزرگ انگلیسی', 'یک حرف کوچک انگلیسی', 'یک عدد'].map((req, i) => {
                       const checks = [
                         password.length >= 8,
@@ -247,11 +288,16 @@ const Auth = () => {
                       return (
                         <div
                           key={req}
-                          className={`flex items-center gap-1.5 ${
+                          className={`flex items-center gap-2 ${
                             checks[i] ? 'text-emerald-500' : 'text-muted-foreground'
                           }`}
                         >
-                          <CheckCircle className={`w-3 h-3 ${checks[i] ? 'opacity-100' : 'opacity-30'}`} />
+                          <div className={cn(
+                            "w-4 h-4 rounded-full flex items-center justify-center transition-all",
+                            checks[i] ? "bg-emerald-500" : "bg-muted-foreground/20"
+                          )}>
+                            {checks[i] && <CheckCircle className="w-3 h-3 text-white" />}
+                          </div>
                           {req}
                         </div>
                       );
@@ -263,7 +309,7 @@ const Auth = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
+                className="w-full h-14 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 group"
                 disabled={loading}
               >
                 {loading ? (
@@ -271,7 +317,7 @@ const Auth = () => {
                 ) : (
                   <>
                     {isLogin ? 'ورود به حساب' : 'ایجاد حساب'}
-                    <Sparkles className="w-4 h-4 mr-2" />
+                    <ArrowRight className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
                   </>
                 )}
               </Button>

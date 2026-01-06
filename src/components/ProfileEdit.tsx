@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Camera, User, Mail, Save, Loader2 } from 'lucide-react';
+import { ArrowRight, Camera, User, Phone, Save, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ interface ProfileEditProps {
 export function ProfileEdit({ onBack }: ProfileEditProps) {
   const { user } = useAuth();
   const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -24,7 +24,11 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   useEffect(() => {
     if (user) {
       setDisplayName(user.user_metadata?.display_name || user.email?.split('@')[0] || '');
-      setEmail(user.email || '');
+      // Extract phone from email (09xxxxxxxxx@siaflow.app)
+      const emailPhone = user.email?.replace('@siaflow.app', '') || '';
+      if (/^09\d{9}$/.test(emailPhone)) {
+        setPhone(emailPhone);
+      }
       loadProfile();
     }
   }, [user]);
@@ -35,17 +39,25 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('display_name, avatar_url')
+        .select('display_name, avatar_url, phone')
         .eq('id', user.id)
         .single();
 
       if (data && !error) {
         if (data.display_name) setDisplayName(data.display_name);
         if (data.avatar_url) setAvatarUrl(data.avatar_url);
+        if (data.phone) setPhone(data.phone);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
     }
+  };
+
+  const formatPhoneDisplay = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 4)} ${digits.slice(4)}`;
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 11)}`;
   };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,6 +137,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           id: user.id,
           display_name: displayName,
           email: user.email,
+          phone: phone,
           avatar_url: avatarUrl?.split('?')[0], // Remove cache-busting param
           updated_at: new Date().toISOString()
         });
@@ -221,19 +234,20 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              ایمیل
+            <Label htmlFor="phone" className="flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              شماره موبایل
             </Label>
             <Input
-              id="email"
-              type="email"
-              value={email}
+              id="phone"
+              type="tel"
+              value={formatPhoneDisplay(phone)}
               disabled
-              className="bg-muted"
+              className="bg-muted tracking-wide"
+              dir="ltr"
             />
             <p className="text-xs text-muted-foreground">
-              ایمیل قابل تغییر نیست
+              شماره موبایل قابل تغییر نیست
             </p>
           </div>
         </CardContent>
