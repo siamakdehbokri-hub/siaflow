@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Calendar, TrendingUp, TrendingDown, AlertTriangle, Sparkles } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Wallet, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Transaction, Category } from '@/types/expense';
@@ -15,7 +15,6 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
   const monthlyData = useMemo(() => {
     const currentDate = new Date();
     const currentMonth = currentDate.toISOString().slice(0, 7);
-    const jalaliMonth = currentDate.getMonth(); // This is a simplification
     
     // Current month transactions
     const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
@@ -42,13 +41,21 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
     const daysRemaining = daysInMonth - currentDate.getDate();
     
-    // Monthly budget
-    const totalBudget = categories.filter(c => c.budget).reduce((sum, c) => sum + (c.budget || 0), 0);
+    // Monthly budget from expense categories
+    const totalBudget = categories.filter(c => c.budget && c.budget > 0).reduce((sum, c) => sum + (c.budget || 0), 0);
     const budgetUsed = totalBudget > 0 ? (expense / totalBudget) * 100 : 0;
     
-    // Daily average needed to stay in budget
-    const remaining = totalBudget - expense;
-    const dailyBudgetRemaining = daysRemaining > 0 ? remaining / daysRemaining : 0;
+    // Calculate daily spending allowance:
+    // (درآمد ماهانه − هزینه‌ها) ÷ روزهای باقی‌مانده
+    // Only show if there's actual income
+    const remaining = income - expense;
+    const dailyAllowance = daysRemaining > 0 && income > 0 ? Math.max(0, remaining / daysRemaining) : 0;
+    
+    // Has meaningful data
+    const hasData = transactions.length > 0;
+    const hasIncome = income > 0;
+    const hasExpenses = expense > 0;
+    const hasBudget = totalBudget > 0;
     
     return {
       income,
@@ -59,12 +66,43 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
       totalBudget,
       budgetUsed,
       remaining,
-      dailyBudgetRemaining,
+      dailyAllowance,
       transactionCount: monthTransactions.length,
+      hasData,
+      hasIncome,
+      hasExpenses,
+      hasBudget,
     };
   }, [transactions, categories]);
 
   const budgetStatus = monthlyData.budgetUsed > 100 ? 'danger' : monthlyData.budgetUsed > 80 ? 'warning' : 'safe';
+
+  // If no data at all, show empty state
+  if (!monthlyData.hasData) {
+    return (
+      <Card variant="glass" className="animate-fade-in">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            خلاصه {getJalaliMonthName(new Date().toISOString())}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-6">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-muted/50 flex items-center justify-center">
+              <Wallet className="w-7 h-7 text-muted-foreground/50" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              هنوز تراکنشی ثبت نشده
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              با ثبت اولین تراکنش، خلاصه مالی ماه را ببینید
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card variant="glass" className="animate-fade-in">
@@ -80,12 +118,16 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
           <div className="p-2.5 rounded-xl bg-success/10 border border-success/20">
             <TrendingUp className="w-4 h-4 text-success mx-auto mb-1" />
             <p className="text-xs text-muted-foreground">درآمد</p>
-            <p className="text-sm font-bold text-success">{formatCurrency(monthlyData.income).replace(' تومان', '')}</p>
+            <p className="text-sm font-bold text-success">
+              {monthlyData.hasIncome ? formatCurrency(monthlyData.income).replace(' تومان', '') : '—'}
+            </p>
           </div>
           <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
             <TrendingDown className="w-4 h-4 text-destructive mx-auto mb-1" />
             <p className="text-xs text-muted-foreground">هزینه</p>
-            <p className="text-sm font-bold text-destructive">{formatCurrency(monthlyData.expense).replace(' تومان', '')}</p>
+            <p className="text-sm font-bold text-destructive">
+              {monthlyData.hasExpenses ? formatCurrency(monthlyData.expense).replace(' تومان', '') : '—'}
+            </p>
           </div>
           <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
             <Calendar className="w-4 h-4 text-primary mx-auto mb-1" />
@@ -94,8 +136,8 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
           </div>
         </div>
 
-        {/* Budget Progress */}
-        {monthlyData.totalBudget > 0 && (
+        {/* Budget Progress - Only show if budget is set */}
+        {monthlyData.hasBudget && (
           <div className="p-3 rounded-xl bg-muted/50">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-foreground">وضعیت بودجه</span>
@@ -118,7 +160,7 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
             />
             <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
               <span>{formatCurrency(monthlyData.expense)} خرج شده</span>
-              <span>{formatCurrency(monthlyData.remaining)} باقیمانده</span>
+              <span>{formatCurrency(Math.max(0, monthlyData.totalBudget - monthlyData.expense))} باقیمانده</span>
             </div>
           </div>
         )}
@@ -127,7 +169,7 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
         {monthlyData.topCategories.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">بیشترین هزینه‌ها</p>
-            {monthlyData.topCategories.map((cat, idx) => (
+            {monthlyData.topCategories.map((cat) => (
               <div key={cat.name} className="flex items-center gap-2">
                 <div 
                   className="w-3 h-3 rounded-full shrink-0"
@@ -142,18 +184,18 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
           </div>
         )}
 
-        {/* Daily Budget Alert */}
-        {monthlyData.daysRemaining > 0 && monthlyData.totalBudget > 0 && (
+        {/* Daily Allowance - Only show if has income */}
+        {monthlyData.daysRemaining > 0 && monthlyData.hasIncome && (
           <div className={cn(
             "flex items-center gap-2 p-2.5 rounded-xl text-xs",
-            monthlyData.dailyBudgetRemaining < 0 
+            monthlyData.dailyAllowance <= 0 
               ? "bg-destructive/10 text-destructive" 
               : "bg-primary/10 text-primary"
           )}>
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <Wallet className="w-4 h-4 shrink-0" />
             <span>
-              {monthlyData.dailyBudgetRemaining > 0 
-                ? `روزانه ${formatCurrency(Math.round(monthlyData.dailyBudgetRemaining)).replace(' تومان', '')} تومان قابل خرج`
+              {monthlyData.dailyAllowance > 0 
+                ? `روزانه ${formatCurrency(Math.round(monthlyData.dailyAllowance)).replace(' تومان', '')} تومان قابل خرج`
                 : 'بودجه ماهانه تمام شده!'
               }
               {' '}({monthlyData.daysRemaining} روز مانده)

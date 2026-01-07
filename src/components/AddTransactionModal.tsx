@@ -32,6 +32,18 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isRecurring, setIsRecurring] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filter categories by type - income categories don't have budget
+  const expenseCategories = useMemo(() => 
+    categories.filter(c => c.budget !== undefined && c.budget !== null && c.budget > 0), 
+    [categories]
+  );
+  
+  const incomeCategories = useMemo(() => 
+    categories.filter(c => c.budget === undefined || c.budget === null || c.budget === 0), 
+    [categories]
+  );
 
   // Get subcategories from actual category data (from database)
   const subcategories = useMemo((): string[] => {
@@ -47,27 +59,39 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     });
   }, [category, categories]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({
-      id: Date.now().toString(),
-      type,
-      amount: parseInt(amount.replace(/,/g, '')),
-      category,
-      subcategory: subcategory || undefined,
-      description,
-      date,
-      isRecurring,
-      tags: [],
-    });
-    onClose();
-    // Reset form
-    setAmount('');
-    setCategory('');
-    setSubcategory('');
-    setDescription('');
-    setDate(new Date().toISOString().split('T')[0]);
-    setIsRecurring(false);
+    
+    if (isSubmitting || !amount || !category) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      await onAdd({
+        id: Date.now().toString(),
+        type,
+        amount: parseInt(amount.replace(/,/g, '')),
+        category,
+        subcategory: subcategory || undefined,
+        description,
+        date,
+        isRecurring,
+        tags: [],
+      });
+      
+      // Reset form and close
+      setAmount('');
+      setCategory('');
+      setSubcategory('');
+      setDescription('');
+      setDate(new Date().toISOString().split('T')[0]);
+      setIsRecurring(false);
+      onClose();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatAmount = (value: string) => {
@@ -91,8 +115,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
   if (!isOpen) return null;
 
-  const expenseCategories = categories.filter(c => c.budget);
-  const incomeCategories = categories.filter(c => !c.budget);
+  const currentCategories = type === 'expense' ? expenseCategories : incomeCategories;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -220,17 +243,23 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 <SelectValue placeholder="انتخاب دسته‌بندی" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
-                {(type === 'expense' ? expenseCategories : incomeCategories).map((cat) => (
-                  <SelectItem key={cat.id} value={cat.name} className="py-3">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: cat.color }}
-                      />
-                      {cat.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                {currentCategories.length > 0 ? (
+                  currentCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.name} className="py-3">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: cat.color }}
+                        />
+                        {cat.name}
+                      </div>
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="py-4 text-center text-sm text-muted-foreground">
+                    دسته‌بندی {type === 'income' ? 'درآمد' : 'هزینه'} یافت نشد
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -323,9 +352,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               "w-full rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all",
               type === 'income' ? 'gradient-income' : 'gradient-expense'
             )}
-            disabled={!amount || !category}
+            disabled={!amount || !category || isSubmitting}
           >
-            {type === 'income' ? (
+            {isSubmitting ? (
+              <>
+                <RefreshCw className="w-5 h-5 animate-spin" />
+                در حال ثبت...
+              </>
+            ) : type === 'income' ? (
               <>
                 <Plus className="w-5 h-5" />
                 ثبت درآمد
