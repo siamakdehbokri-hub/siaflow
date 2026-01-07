@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, TrendingUp, PiggyBank, Wallet, Loader2, RefreshCw, Bot } from 'lucide-react';
+import { Sparkles, TrendingUp, PiggyBank, Wallet, Loader2, RefreshCw, Bot, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,40 +24,122 @@ export function AIReport({ transactions, categories }: AIReportProps) {
   const [activeType, setActiveType] = useState<ReportType>('summary');
   const [report, setReport] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if there's enough data
+  const hasTransactions = transactions.length > 0;
+  const hasIncome = transactions.some(t => t.type === 'income');
+  const hasExpenses = transactions.some(t => t.type === 'expense');
 
   const generateReport = async (type: ReportType) => {
     setActiveType(type);
     setLoading(true);
     setReport(null);
+    setError(null);
+
+    // Check data availability
+    if (!hasTransactions) {
+      setError('برای دریافت گزارش هوشمند، ابتدا تراکنش‌هایی ثبت کنید.');
+      setLoading(false);
+      return;
+    }
+
+    if (type === 'summary' && !hasIncome && !hasExpenses) {
+      setError('حداقل یک تراکنش درآمد یا هزینه نیاز است.');
+      setLoading(false);
+      return;
+    }
+
+    if (type === 'savings' && !hasExpenses) {
+      setError('برای پیشنهاد صرفه‌جویی، حداقل یک هزینه ثبت کنید.');
+      setLoading(false);
+      return;
+    }
+
+    if (type === 'budget') {
+      const hasBudgetCategories = categories.some(c => c.budget && c.budget > 0);
+      if (!hasBudgetCategories) {
+        setError('ابتدا بودجه‌ای برای دسته‌بندی‌ها تعیین کنید.');
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-report', {
+      const { data, error: invokeError } = await supabase.functions.invoke('ai-report', {
         body: { 
           transactions: transactions.slice(0, 100), // Limit for API
-          categories,
+          categories: categories.filter(c => c.budget && c.budget > 0),
           type 
         }
       });
 
-      if (error) throw error;
+      if (invokeError) {
+        console.error('AI report invoke error:', invokeError);
+        throw new Error(invokeError.message || 'خطا در ارتباط با سرور');
+      }
       
       if (data?.error) {
-        if (data.error.includes('محدودیت')) {
-          toast.error('محدودیت درخواست. لطفاً کمی صبر کنید.');
+        if (data.error.includes('محدودیت') || data.error.includes('429')) {
+          setError('محدودیت درخواست. لطفاً چند دقیقه صبر کنید.');
+          toast.error('محدودیت درخواست');
+        } else if (data.error.includes('402') || data.error.includes('اعتبار')) {
+          setError('اعتبار AI تمام شده است.');
+          toast.error('اعتبار AI تمام شده');
         } else {
+          setError(data.error);
           toast.error(data.error);
         }
         return;
       }
 
+      if (!data?.report) {
+        setError('پاسخی از AI دریافت نشد. لطفاً دوباره تلاش کنید.');
+        return;
+      }
+
       setReport(data.report);
-    } catch (error: any) {
-      console.error('AI report error:', error);
-      toast.error('خطا در دریافت گزارش هوشمند');
+    } catch (err: any) {
+      console.error('AI report error:', err);
+      setError('خطا در دریافت گزارش. لطفاً دوباره تلاش کنید.');
     } finally {
       setLoading(false);
     }
   };
+
+  // Empty state when no transactions
+  if (!hasTransactions) {
+    return (
+      <Card variant="glass" className="overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20">
+              <Bot className="w-5 h-5 text-primary" />
+            </div>
+            گزارش هوشمند AI
+            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+              جدید
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground mb-1">
+                هنوز داده‌ای برای تحلیل نیست
+              </p>
+              <p className="text-xs text-muted-foreground">
+                با ثبت تراکنش‌ها، گزارش هوشمند دریافت کنید
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card variant="glass" className="overflow-hidden">
@@ -109,6 +191,24 @@ export function AIReport({ transactions, categories }: AIReportProps) {
                 <Loader2 className="absolute -right-1 -bottom-1 w-5 h-5 text-primary animate-spin" />
               </div>
               <p className="text-sm text-muted-foreground">در حال تحلیل...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-8">
+              <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
+                <AlertCircle className="w-7 h-7 text-destructive" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-3">{error}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => generateReport(activeType)}
+                  className="gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  تلاش مجدد
+                </Button>
+              </div>
             </div>
           ) : report ? (
             <div className="space-y-3">

@@ -6,7 +6,7 @@ import { MonthlySummary } from './MonthlySummary';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Transaction, Category, DashboardWidget } from '@/types/expense';
-import { ChevronLeft, Calendar, Sparkles, ArrowUpRight, ArrowDownRight, Zap } from 'lucide-react';
+import { ChevronLeft, Calendar, Sparkles, Zap } from 'lucide-react';
 import { formatPersianDateFull } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +45,8 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
         );
 
       case 'spending-chart':
+        // Only show if there are expenses
+        if (totalExpense === 0) return null;
         return (
           <div key={widget.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
             <SpendingChart categories={categories} />
@@ -52,6 +54,8 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
         );
 
       case 'trend-chart':
+        // Only show if there are transactions
+        if (transactions.length === 0) return null;
         return (
           <div key={widget.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
             <TrendChart transactions={transactions} />
@@ -69,15 +73,17 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
                 <Zap className="w-4 h-4 text-primary" />
                 تراکنش‌های اخیر
               </CardTitle>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onViewAllTransactions}
-                className="text-primary text-sm group"
-              >
-                مشاهده همه
-                <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
-              </Button>
+              {recentTransactions.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={onViewAllTransactions}
+                  className="text-primary text-sm group"
+                >
+                  مشاهده همه
+                  <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+                </Button>
+              )}
             </CardHeader>
             <CardContent className="space-y-2 px-4 sm:px-5">
               {recentTransactions.length > 0 ? (
@@ -134,64 +140,33 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
     return '🌙';
   };
 
-  // Quick stats
-  const todayTransactions = transactions.filter(t => t.date === today.slice(0, 10));
-  const todayExpense = todayTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
-  const todayIncome = todayTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  // Filter chart widgets that should actually show
+  const visibleChartWidgets = chartWidgets.filter(w => {
+    if (w.type === 'spending-chart' && totalExpense === 0) return false;
+    if (w.type === 'trend-chart' && transactions.length === 0) return false;
+    return true;
+  });
 
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
-      {/* Welcome Card - Enhanced */}
+      {/* Welcome Card - Simplified */}
       <div className="relative overflow-hidden rounded-2xl">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-purple-500/10" />
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
         
         <div className="relative p-4 sm:p-5 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25">
-            <Calendar className="w-7 h-7 text-primary-foreground" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/25">
+            <Calendar className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <p className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
               {getGreeting()}، {userName} 
-              <span className="text-xl">{getGreetingEmoji()}</span>
+              <span className="text-lg sm:text-xl">{getGreetingEmoji()}</span>
             </p>
-            <p className="text-sm text-muted-foreground">{formatPersianDateFull(today)}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">{formatPersianDateFull(today)}</p>
           </div>
         </div>
       </div>
-
-      {/* Today's Quick Stats - New */}
-      {(todayExpense > 0 || todayIncome > 0) && (
-        <div className="grid grid-cols-2 gap-3 animate-fade-in-up">
-          {todayIncome > 0 && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <ArrowUpRight className="w-5 h-5 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">درآمد امروز</p>
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                  {new Intl.NumberFormat('fa-IR').format(todayIncome)} <span className="text-[10px] font-normal">ت</span>
-                </p>
-              </div>
-            </div>
-          )}
-          {todayExpense > 0 && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center">
-                <ArrowDownRight className="w-5 h-5 text-rose-500" />
-              </div>
-              <div>
-                <p className="text-[10px] text-rose-600 dark:text-rose-400 font-medium">هزینه امروز</p>
-                <p className="text-sm font-bold text-rose-600 dark:text-rose-400">
-                  {new Intl.NumberFormat('fa-IR').format(todayExpense)} <span className="text-[10px] font-normal">ت</span>
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Render balance first if enabled */}
       {widgets.find(w => w.type === 'balance' && w.enabled) && (
@@ -205,13 +180,13 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
       {/* Monthly Summary - Always show */}
       <MonthlySummary transactions={transactions} categories={categories} />
 
-      {/* Charts Grid - Responsive */}
-      {chartWidgets.length > 0 && (
+      {/* Charts Grid - Responsive - Only show if there's data */}
+      {visibleChartWidgets.length > 0 && (
         <div className={cn(
           "grid gap-4 sm:gap-5",
-          chartWidgets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'
+          visibleChartWidgets.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'
         )}>
-          {chartWidgets.map((widget, index) => renderWidget(widget, index))}
+          {visibleChartWidgets.map((widget, index) => renderWidget(widget, index))}
         </div>
       )}
 
