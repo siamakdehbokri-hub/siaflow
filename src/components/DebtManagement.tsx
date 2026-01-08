@@ -131,44 +131,61 @@ export function DebtManagement({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg">
-            <CreditCard className="w-5 h-5 text-white" />
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-rose-500/30">
+            <CreditCard className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">مدیریت بدهی‌ها</h2>
+            <h2 className="text-xl font-bold text-foreground">مدیریت بدهی‌ها</h2>
             <p className="text-xs text-muted-foreground">{debts.length} بدهی فعال</p>
           </div>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="rounded-xl">
+        <Button 
+          onClick={() => setIsAddModalOpen(true)} 
+          size="sm" 
+          className="rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 shadow-lg shadow-rose-500/20"
+        >
           <Plus className="w-4 h-4 ml-2" />
           بدهی جدید
         </Button>
       </div>
 
-      {/* Summary Card */}
+      {/* Summary Card - Enhanced */}
       {debts.length > 0 && (
-        <Card variant="glass" className="border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-pink-500/5">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">کل بدهی</p>
-                <p className="text-lg font-bold text-rose-500">{formatCurrency(stats.totalDebt)}</p>
+        <Card variant="glass" className="border-rose-500/20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 via-transparent to-pink-500/5 pointer-events-none" />
+          <CardContent className="p-5 relative">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="p-3 rounded-2xl bg-rose-500/10">
+                <TrendingDown className="w-6 h-6 text-rose-500" />
               </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">پرداخت شده</p>
-                <p className="text-lg font-bold text-emerald-500">{formatCurrency(stats.totalPaid)}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground mb-1">باقی‌مانده</p>
-                <p className="text-lg font-bold text-foreground">{formatCurrency(stats.totalRemaining)}</p>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground mb-1">مجموع بدهی باقی‌مانده</p>
+                <p className="text-3xl font-black text-rose-500">{formatCurrency(stats.totalRemaining)}</p>
               </div>
             </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground">پیشرفت پرداخت</span>
-                <span className="font-medium text-emerald-500">{Math.round(stats.progress)}%</span>
+            
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              <div className="p-3 rounded-xl bg-rose-500/5 border border-rose-500/10 text-center">
+                <p className="text-[10px] text-muted-foreground mb-1">کل بدهی</p>
+                <p className="text-base font-bold text-rose-500">{formatCurrency(stats.totalDebt)}</p>
               </div>
-              <Progress value={stats.progress} className="h-2.5" />
+              <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
+                <p className="text-[10px] text-muted-foreground mb-1">پرداخت شده</p>
+                <p className="text-base font-bold text-emerald-500">{formatCurrency(stats.totalPaid)}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 text-center">
+                <p className="text-[10px] text-muted-foreground mb-1">پیشرفت</p>
+                <p className="text-base font-bold text-primary">{Math.round(stats.progress)}%</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Progress value={stats.progress} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-green-400" />
+              <p className="text-xs text-muted-foreground text-center">
+                {stats.progress >= 100 
+                  ? '🎉 تبریک! تمام بدهی‌ها تسویه شده‌اند' 
+                  : `${formatCurrency(stats.totalRemaining)} تا تسویه کامل`}
+              </p>
             </div>
           </CardContent>
         </Card>
