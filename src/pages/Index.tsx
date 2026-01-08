@@ -186,7 +186,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
-              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.8</p>
+              <p className="text-[10px] text-muted-foreground -mt-0.5">SiaFlow v1.9</p>
             </div>
           </div>
 

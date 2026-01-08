@@ -129,43 +129,61 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
   const totalSaved = goals.reduce((sum, g) => sum + g.currentAmount, 0);
   const totalTarget = goals.reduce((sum, g) => sum + g.targetAmount, 0);
 
+  const progressPercent = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0;
+
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl gradient-primary shadow-glow-sm">
-            <PiggyBank className="w-5 h-5 text-primary-foreground" />
+          <div className="p-3 rounded-2xl gradient-primary shadow-glow-sm">
+            <PiggyBank className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">اهداف پس‌انداز</h2>
+            <h2 className="text-xl font-bold text-foreground">اهداف پس‌انداز</h2>
             <p className="text-xs text-muted-foreground">{goals.length} هدف فعال</p>
           </div>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="rounded-xl">
+        <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="rounded-xl shadow-lg shadow-primary/20">
           <Plus className="w-4 h-4 ml-2" />
           هدف جدید
         </Button>
       </div>
 
-      {/* Summary Card */}
+      {/* Summary Card - Enhanced */}
       {goals.length > 0 && (
-        <Card variant="glass" className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">مجموع پس‌انداز</p>
-                <p className="text-2xl font-bold text-primary">{formatCurrency(totalSaved)}</p>
+        <Card variant="glass-glow" className="overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 rounded-2xl bg-primary/10">
+                <Sparkles className="w-6 h-6 text-primary" />
               </div>
-              <div className="text-left">
-                <p className="text-sm text-muted-foreground">از مجموع هدف</p>
-                <p className="text-lg font-semibold text-foreground">{formatCurrency(totalTarget)}</p>
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground mb-1">مجموع پس‌انداز شما</p>
+                <p className="text-3xl font-black text-primary">{formatCurrency(totalSaved)}</p>
               </div>
             </div>
-            <Progress 
-              value={totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0} 
-              className="h-2 mt-3"
-            />
+            
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 rounded-xl bg-muted/50 text-center">
+                <p className="text-xs text-muted-foreground mb-1">هدف کل</p>
+                <p className="text-lg font-bold text-foreground">{formatCurrency(totalTarget)}</p>
+              </div>
+              <div className="p-3 rounded-xl bg-muted/50 text-center">
+                <p className="text-xs text-muted-foreground mb-1">پیشرفت</p>
+                <p className="text-lg font-bold text-primary">{Math.round(progressPercent)}%</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Progress 
+                value={progressPercent} 
+                className="h-3"
+              />
+              <p className="text-xs text-muted-foreground text-center">
+                {formatCurrency(totalTarget - totalSaved)} تا رسیدن به تمام اهداف
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
