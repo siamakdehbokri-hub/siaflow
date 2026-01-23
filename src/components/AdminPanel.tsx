@@ -4,7 +4,8 @@ import {
   RefreshCw, Crown, Activity, Database, CreditCard, Target,
   AlertTriangle, Loader2, Search, Download, Filter, Eye,
   Mail, Phone, Calendar, TrendingUp, Clock, ChevronDown,
-  Settings, FileText, UserPlus
+  Settings, FileText, UserPlus, Bell, MessageSquare, 
+  Server, HardDrive, Wallet, ArrowRightLeft, PieChart
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -47,7 +51,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAdmin, AdminUser } from '@/hooks/useAdmin';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow, format, subDays } from 'date-fns';
 import { faIR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';

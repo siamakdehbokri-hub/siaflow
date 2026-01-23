@@ -236,6 +236,8 @@ serve(async (req) => {
 
         // Delete all user data from all tables
         const tablesToDelete = [
+          'transfers',
+          'accounts',
           'saving_goal_transactions',
           'saving_goals',
           'transactions',
