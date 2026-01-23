@@ -9,17 +9,20 @@ import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { EditTransactionModal } from '@/components/EditTransactionModal';
 import { WidgetSettings } from '@/components/WidgetSettings';
 import { ReminderNotifications } from '@/components/ReminderNotifications';
+import { DebtReminderNotifications } from '@/components/DebtReminderNotifications';
 import { SavingGoals } from '@/components/SavingGoals';
 import { DebtManagement } from '@/components/DebtManagement';
 import { MonthlyAnalysis } from '@/components/MonthlyAnalysis';
+import { TransferManagement } from '@/components/TransferManagement';
 import { useTransactions, useCategories } from '@/hooks/useData';
 import { useSavingGoals } from '@/hooks/useSavingGoals';
 import { useDebts } from '@/hooks/useDebts';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { useReminders } from '@/hooks/useReminders';
+import { useDebtReminders } from '@/hooks/useDebtReminders';
 import { Transaction, Category } from '@/types/expense';
-import { FolderOpen, Loader2, PiggyBank, BarChart3, CreditCard } from 'lucide-react';
+import { FolderOpen, Loader2, PiggyBank, BarChart3, CreditCard, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -30,6 +33,7 @@ const Index = () => {
   const [showSavingGoals, setShowSavingGoals] = useState(false);
   const [showDebts, setShowDebts] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showTransfers, setShowTransfers] = useState(false);
   
   const { user } = useAuth();
   const { widgets, toggleWidget, moveWidget, resetWidgets } = useDashboardWidgets();
@@ -68,6 +72,11 @@ const Index = () => {
   } = useDebts();
 
   const { reminders, dismissReminder, hasReminders } = useReminders(transactions);
+  const { 
+    reminders: debtReminders, 
+    dismissReminder: dismissDebtReminder, 
+    requestNotificationPermission 
+  } = useDebtReminders(debts);
 
   // Calculate spent amounts for each category
   const categoriesWithSpent = useMemo(() => {
@@ -136,6 +145,7 @@ const Index = () => {
     if (showSavingGoals) return 'اهداف پس‌انداز';
     if (showDebts) return 'مدیریت بدهی‌ها';
     if (showAnalysis) return 'تحلیل ماهانه';
+    if (showTransfers) return 'انتقال پول';
     switch (activeTab) {
       case 'dashboard': return 'داشبورد';
       case 'transactions': return 'تراکنش‌ها';
@@ -150,7 +160,12 @@ const Index = () => {
     setShowSavingGoals(false);
     setShowDebts(false);
     setShowAnalysis(false);
+    setShowTransfers(false);
     setActiveTab(tab);
+  };
+
+  const handleTransferToGoal = async (goalId: string, amount: number) => {
+    await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب');
   };
 
   const isLoading = transactionsLoading || categoriesLoading || goalsLoading || debtsLoading;
@@ -202,6 +217,7 @@ const Index = () => {
                     setShowCategories(false);
                     setShowDebts(false);
                     setShowAnalysis(false);
+                    setShowTransfers(false);
                   }}
                   className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
                   title="اهداف پس‌انداز"
@@ -216,6 +232,7 @@ const Index = () => {
                     setShowSavingGoals(false);
                     setShowCategories(false);
                     setShowAnalysis(false);
+                    setShowTransfers(false);
                   }}
                   className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
                   title="بدهی‌ها"
@@ -226,10 +243,26 @@ const Index = () => {
                   variant="ghost" 
                   size="icon"
                   onClick={() => {
+                    setShowTransfers(true);
+                    setShowCategories(false);
+                    setShowSavingGoals(false);
+                    setShowDebts(false);
+                    setShowAnalysis(false);
+                  }}
+                  className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
+                  title="انتقال پول"
+                >
+                  <ArrowRightLeft className="w-[18px] h-[18px]" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => {
                     setShowAnalysis(true);
                     setShowCategories(false);
                     setShowSavingGoals(false);
                     setShowDebts(false);
+                    setShowTransfers(false);
                   }}
                   className="w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300"
                   title="تحلیل ماهانه"
@@ -254,6 +287,11 @@ const Index = () => {
                 <FolderOpen className="w-[18px] h-[18px]" />
               </Button>
             )}
+            <DebtReminderNotifications 
+              reminders={debtReminders}
+              onDismiss={dismissDebtReminder}
+              onEnableNotifications={requestNotificationPermission}
+            />
             <ReminderNotifications 
               reminders={reminders}
               onDismiss={dismissReminder}
@@ -299,6 +337,13 @@ const Index = () => {
               <MonthlyAnalysis 
                 transactions={transactions}
                 categories={categoriesWithSpent}
+              />
+            </div>
+          ) : showTransfers ? (
+            <div key="transfers" className="animate-page-enter">
+              <TransferManagement 
+                goals={goals}
+                onTransferToGoal={handleTransferToGoal}
               />
             </div>
           ) : (
