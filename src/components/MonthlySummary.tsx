@@ -3,7 +3,8 @@ import { Calendar, TrendingUp, TrendingDown, Wallet, Sparkles } from 'lucide-rea
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Transaction, Category } from '@/types/expense';
-import { formatCurrency, getJalaliMonthName } from '@/utils/persianDate';
+import { formatCurrency, getJalaliMonthName, getCurrentJalaliMonthBounds } from '@/utils/persianDate';
+import { endOfMonth } from 'date-fns-jalali';
 import { cn } from '@/lib/utils';
 
 interface MonthlySummaryProps {
@@ -14,10 +15,11 @@ interface MonthlySummaryProps {
 export function MonthlySummary({ transactions, categories }: MonthlySummaryProps) {
   const monthlyData = useMemo(() => {
     const currentDate = new Date();
-    const currentMonth = currentDate.toISOString().slice(0, 7);
+    // Use Jalali month bounds for filtering
+    const { start: monthStart, end: monthEnd } = getCurrentJalaliMonthBounds();
     
-    // Current month transactions
-    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
+    // Current month transactions - using Jalali calendar
+    const monthTransactions = transactions.filter(t => t.date >= monthStart && t.date <= monthEnd);
     const income = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const expense = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     
@@ -37,9 +39,9 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
         return { name, amount, color: cat?.color || 'hsl(220, 14%, 50%)' };
       });
     
-    // Days remaining in month
-    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-    const daysRemaining = daysInMonth - currentDate.getDate();
+    // Days remaining in Jalali month
+    const jalaliMonthEnd = endOfMonth(currentDate);
+    const daysRemaining = Math.max(0, Math.ceil((jalaliMonthEnd.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)));
     
     // Monthly budget from expense categories
     const totalBudget = categories.filter(c => c.budget && c.budget > 0).reduce((sum, c) => sum + (c.budget || 0), 0);

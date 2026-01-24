@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Dashboard } from '@/components/Dashboard';
 import { TransactionsList } from '@/components/TransactionsList';
@@ -22,6 +22,7 @@ import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { useReminders } from '@/hooks/useReminders';
 import { useDebtReminders } from '@/hooks/useDebtReminders';
 import { Transaction, Category } from '@/types/expense';
+import { isInCurrentJalaliMonth } from '@/utils/persianDate';
 import { FolderOpen, Loader2, PiggyBank, BarChart3, CreditCard, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -78,16 +79,14 @@ const Index = () => {
     requestNotificationPermission 
   } = useDebtReminders(debts);
 
-  // Calculate spent amounts for each category
+  // Calculate spent amounts for each category using Jalali month
   const categoriesWithSpent = useMemo(() => {
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    
     return categories.map(category => {
       const spent = transactions
         .filter(t => 
           t.type === 'expense' && 
           t.category === category.name &&
-          t.date.startsWith(currentMonth)
+          isInCurrentJalaliMonth(t.date)
         )
         .reduce((sum, t) => sum + t.amount, 0);
       

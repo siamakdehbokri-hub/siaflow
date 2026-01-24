@@ -4,7 +4,6 @@ import {
   Calendar, Filter, AlertTriangle, Award, BarChart3
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -14,11 +13,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Transaction, Category } from '@/types/expense';
-import { formatCurrency, toPersianNum, formatPersianDate } from '@/utils/persianDate';
+import { 
+  formatCurrency, 
+  toPersianNum, 
+  getCurrentJalaliMonthBounds, 
+  getPreviousJalaliMonthBounds,
+  getJalaliMonthName 
+} from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  Cell, Legend, CartesianGrid
+  CartesianGrid
 } from 'recharts';
 
 interface MonthlyAnalysisProps {
@@ -30,10 +35,9 @@ export function MonthlyAnalysis({ transactions, categories }: MonthlyAnalysisPro
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const { currentMonth, lastMonth, comparison, dangerousCategories, topExpenseCategory, topSavingCategory } = useMemo(() => {
-    const now = new Date();
-    const currentMonthStr = now.toISOString().slice(0, 7);
-    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthStr = lastMonthDate.toISOString().slice(0, 7);
+    // Use Jalali month bounds for filtering
+    const { start: currentStart, end: currentEnd } = getCurrentJalaliMonthBounds();
+    const { start: lastStart, end: lastEnd } = getPreviousJalaliMonthBounds();
 
     // Filter by category if selected
     const filterByCategory = (tx: Transaction[]) => {
@@ -41,13 +45,17 @@ export function MonthlyAnalysis({ transactions, categories }: MonthlyAnalysisPro
       return tx.filter(t => t.category === selectedCategory);
     };
 
-    // Current month data
-    const currentMonthTx = filterByCategory(transactions.filter(t => t.date.startsWith(currentMonthStr)));
+    // Current month data using Jalali calendar
+    const currentMonthTx = filterByCategory(
+      transactions.filter(t => t.date >= currentStart && t.date <= currentEnd)
+    );
     const currentIncome = currentMonthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const currentExpense = currentMonthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
-    // Last month data
-    const lastMonthTx = filterByCategory(transactions.filter(t => t.date.startsWith(lastMonthStr)));
+    // Last month data using Jalali calendar
+    const lastMonthTx = filterByCategory(
+      transactions.filter(t => t.date >= lastStart && t.date <= lastEnd)
+    );
     const lastIncome = lastMonthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const lastExpense = lastMonthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 

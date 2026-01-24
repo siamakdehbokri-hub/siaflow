@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Wallet, Target, AlertTriangle, Award, Calculator, Percent, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, AlertTriangle, Award, Calculator, Percent, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Transaction, Category } from '@/types/expense';
-import { formatCurrency, toPersianNum } from '@/utils/persianDate';
+import { formatCurrency, toPersianNum, isInCurrentJalaliMonth, isInPreviousJalaliMonth } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
 interface ReportStatisticsProps {
@@ -85,25 +85,13 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
       return spent > c.budget;
     });
 
-    // Calculate month-over-month growth rate
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    
+    // Calculate month-over-month growth rate using Jalali months
     const currentMonthExpense = expenseTransactions
-      .filter(t => {
-        const date = new Date(t.date);
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-      })
+      .filter(t => isInCurrentJalaliMonth(t.date))
       .reduce((sum, t) => sum + t.amount, 0);
-
-    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
     
     const lastMonthExpense = expenseTransactions
-      .filter(t => {
-        const date = new Date(t.date);
-        return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
-      })
+      .filter(t => isInPreviousJalaliMonth(t.date))
       .reduce((sum, t) => sum + t.amount, 0);
 
     // Growth rate formula: ((Current - Previous) / Previous) * 100
