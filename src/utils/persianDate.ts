@@ -1,4 +1,4 @@
-import { format, formatDistance, getMonth } from 'date-fns-jalali';
+import { format, formatDistance, getMonth, getYear, startOfMonth, endOfMonth, subMonths } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
 
 export const formatPersianDate = (dateString: string): string => {
@@ -50,9 +50,56 @@ export const getJalaliMonth = (dateString: string): number => {
   return getMonth(date);
 };
 
+// Get Jalali year from a date string
+export const getJalaliYear = (dateString: string): number => {
+  const date = new Date(dateString);
+  return getYear(date);
+};
+
 // Get Jalali month name from a date string
 export const getJalaliMonthName = (dateString: string): string => {
   return formatPersianMonthOnly(dateString);
+};
+
+// Get current Jalali month boundaries (start and end dates in ISO format)
+export const getCurrentJalaliMonthBounds = (): { start: string; end: string } => {
+  const now = new Date();
+  const startDate = startOfMonth(now);
+  const endDate = endOfMonth(now);
+  return {
+    start: startDate.toISOString().split('T')[0],
+    end: endDate.toISOString().split('T')[0],
+  };
+};
+
+// Get previous Jalali month boundaries
+export const getPreviousJalaliMonthBounds = (): { start: string; end: string } => {
+  const now = new Date();
+  const prevMonth = subMonths(now, 1);
+  const startDate = startOfMonth(prevMonth);
+  const endDate = endOfMonth(prevMonth);
+  return {
+    start: startDate.toISOString().split('T')[0],
+    end: endDate.toISOString().split('T')[0],
+  };
+};
+
+// Check if a date string falls within the current Jalali month
+export const isInCurrentJalaliMonth = (dateString: string): boolean => {
+  const { start, end } = getCurrentJalaliMonthBounds();
+  return dateString >= start && dateString <= end;
+};
+
+// Check if a date string falls within the previous Jalali month
+export const isInPreviousJalaliMonth = (dateString: string): boolean => {
+  const { start, end } = getPreviousJalaliMonthBounds();
+  return dateString >= start && dateString <= end;
+};
+
+// Get Jalali month key for grouping (e.g., "1403-11")
+export const getJalaliMonthKey = (dateString: string): string => {
+  const date = new Date(dateString);
+  return format(date, 'yyyy-MM', { locale: faIR });
 };
 
 export const getPersianWeekdays = (): string[] => {
