@@ -103,7 +103,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
     try {
       await signOut();
       toast.success('با موفقیت خارج شدید');
-      navigate('/auth');
+      // Force navigation to auth page and clear state
+      window.location.href = '/auth';
     } catch (error) {
       toast.error('خطا در خروج از حساب');
     }
