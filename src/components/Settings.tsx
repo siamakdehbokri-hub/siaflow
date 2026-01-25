@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   User, Bell, Shield, Palette, Download, 
   HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor, FolderOpen,
@@ -370,6 +370,24 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const displayPhone = phone ? `${phone.slice(0, 4)} ${phone.slice(4, 7)} ${phone.slice(7)}` : user?.email || '';
   const initials = displayName.charAt(0).toUpperCase();
 
+  // Fetch avatar URL from profile
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+      if (data?.avatar_url) {
+        setAvatarUrl(`${data.avatar_url}?t=${Date.now()}`);
+      }
+    };
+    fetchAvatar();
+  }, [user, currentView]);
+
   const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 
   return (
@@ -385,8 +403,12 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             </div>
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-10">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-xl sm:text-2xl font-bold text-primary-foreground border-4 border-background shadow-xl transform hover:scale-105 transition-transform duration-300">
-              {initials}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-xl sm:text-2xl font-bold text-primary-foreground border-4 border-background shadow-xl transform hover:scale-105 transition-transform duration-300 overflow-hidden">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                initials
+              )}
             </div>
           </div>
         </div>

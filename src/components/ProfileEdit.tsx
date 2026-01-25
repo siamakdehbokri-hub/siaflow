@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Camera, User, Phone, Save, Loader2 } from 'lucide-react';
+import { ArrowRight, Camera, User, Phone, Save, Loader2, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,17 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ImageCropper } from './ImageCropper';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ProfileEditProps {
   onBack: () => void;
@@ -19,6 +30,9 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -60,32 +74,57 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
     return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 11)}`;
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !event.target.files || event.target.files.length === 0) return;
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) return;
     
     const file = event.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/avatar.${fileExt}`;
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
     
     // Validate file type
-    if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt?.toLowerCase() || '')) {
+    if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt || '')) {
       toast.error('فقط فایل‌های تصویری مجاز هستند');
       return;
     }
     
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('حداکثر حجم فایل ۲ مگابایت است');
+    // Validate file size (max 5MB for cropping)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('حداکثر حجم فایل ۵ مگابایت است');
       return;
     }
 
+    // Create object URL for cropping
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedImage(imageUrl);
+    setCropperOpen(true);
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!user) return;
+    
+    setCropperOpen(false);
     setUploading(true);
     
+    // Clean up selected image URL
+    if (selectedImage) {
+      URL.revokeObjectURL(selectedImage);
+      setSelectedImage(null);
+    }
+
+    const fileName = `${user.id}/avatar.png`;
+    
     try {
-      // Upload file to storage
+      // Upload cropped file to storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, croppedBlob, { 
+          upsert: true,
+          contentType: 'image/png'
+        });
 
       if (uploadError) throw uploadError;
 
@@ -109,10 +148,47 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
       if (profileError) throw profileError;
 
-      toast.success('تصویر پروفایل بروزرسانی شد');
+      toast.success('تصویر پروفایل با موفقیت بروزرسانی شد');
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
       toast.error('خطا در آپلود تصویر');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!user) return;
+    
+    setDeleteDialogOpen(false);
+    setUploading(true);
+
+    try {
+      // Delete from storage
+      const { error: deleteError } = await supabase.storage
+        .from('avatars')
+        .remove([`${user.id}/avatar.png`]);
+
+      if (deleteError) {
+        console.warn('Error deleting avatar file:', deleteError);
+      }
+
+      // Update profile in database
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          avatar_url: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      setAvatarUrl(null);
+      toast.success('تصویر پروفایل حذف شد');
+    } catch (error: any) {
+      console.error('Error deleting avatar:', error);
+      toast.error('خطا در حذف تصویر');
     } finally {
       setUploading(false);
     }
@@ -138,7 +214,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           display_name: displayName,
           email: user.email,
           phone: phone,
-          avatar_url: avatarUrl?.split('?')[0], // Remove cache-busting param
+          avatar_url: avatarUrl?.split('?')[0] || null, // Remove cache-busting param
           updated_at: new Date().toISOString()
         });
 
@@ -170,12 +246,12 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       <Card variant="glass">
         <CardContent className="p-5 flex flex-col items-center">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground overflow-hidden">
+            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground overflow-hidden border-4 border-background shadow-xl">
               {avatarUrl ? (
                 <img 
                   src={avatarUrl} 
                   alt="Avatar" 
-                  className="w-full h-full rounded-full object-cover"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 initials
@@ -189,13 +265,13 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleFileSelect}
               className="hidden"
             />
             <button 
               type="button"
-              className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="absolute bottom-0 right-0 p-2.5 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
             >
@@ -206,11 +282,24 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
               )}
             </button>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground text-center">
-            روی آیکون دوربین کلیک کنید تا تصویر پروفایل را تغییر دهید
-            <br />
-            <span className="text-xs">(حداکثر ۲ مگابایت)</span>
-          </p>
+          
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <p className="text-sm text-muted-foreground text-center">
+              روی آیکون دوربین کلیک کنید
+            </p>
+            {avatarUrl && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => setDeleteDialogOpen(true)}
+                disabled={uploading}
+              >
+                <Trash2 className="w-4 h-4 ml-1" />
+                حذف تصویر
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -267,6 +356,45 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         )}
         {loading ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
       </Button>
+
+      {/* Image Cropper Modal */}
+      {selectedImage && (
+        <ImageCropper
+          open={cropperOpen}
+          onClose={() => {
+            setCropperOpen(false);
+            if (selectedImage) {
+              URL.revokeObjectURL(selectedImage);
+              setSelectedImage(null);
+            }
+          }}
+          imageSrc={selectedImage}
+          onCropComplete={handleCropComplete}
+          aspectRatio={1}
+          circularCrop={true}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف تصویر پروفایل</AlertDialogTitle>
+            <AlertDialogDescription>
+              آیا مطمئن هستید که می‌خواهید تصویر پروفایل خود را حذف کنید؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>انصراف</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAvatar}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
