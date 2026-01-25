@@ -58,6 +58,21 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+// Validate CSS color values to prevent CSS injection attacks
+const isValidCSSColor = (color: string): boolean => {
+  // Allow hex colors, rgb/rgba, hsl/hsla, CSS variables, and named colors
+  const validColorPattern = /^(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)|hsla?\([^)]+\)|var\(--[\w-]+\)|[a-zA-Z]+)$/;
+  // Reject any values containing dangerous characters
+  const dangerousPattern = /[{}<>;"'\\]/;
+  return validColorPattern.test(color.trim()) && !dangerousPattern.test(color);
+};
+
+// Sanitize key names to prevent CSS injection
+const sanitizeKey = (key: string): string => {
+  // Only allow alphanumeric characters, hyphens, and underscores
+  return key.replace(/[^a-zA-Z0-9_-]/g, '');
+};
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -75,8 +90,14 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    // Validate color before including in CSS
+    if (color && isValidCSSColor(color)) {
+      const sanitizedKey = sanitizeKey(key);
+      return `  --color-${sanitizedKey}: ${color};`;
+    }
+    return null;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `,
