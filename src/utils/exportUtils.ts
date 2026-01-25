@@ -1,36 +1,12 @@
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Transaction } from '@/types/expense';
 import { formatPersianDateShort } from '@/utils/persianDate';
 
 export const exportToExcel = (transactions: Transaction[], filename: string = 'transactions') => {
-  const data = transactions.map((t) => ({
-    'نوع': t.type === 'income' ? 'درآمد' : 'هزینه',
-    'مبلغ': t.amount,
-    'دسته‌بندی': t.category,
-    'زیردسته': t.subcategory || '-',
-    'توضیحات': t.description || '-',
-    'تاریخ': formatPersianDateShort(t.date),
-    'تکراری': t.isRecurring ? 'بله' : 'خیر',
-  }));
-
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
-  
-  // Set RTL for the worksheet
-  worksheet['!cols'] = [
-    { width: 10 },
-    { width: 15 },
-    { width: 15 },
-    { width: 15 },
-    { width: 25 },
-    { width: 12 },
-    { width: 8 },
-  ];
-
-  XLSX.writeFile(workbook, `${filename}.xlsx`);
+  // Use CSV export as a secure alternative (xlsx package has known vulnerabilities)
+  // CSV files can be opened in Excel and other spreadsheet applications
+  exportToCSV(transactions, filename);
 };
 
 export const exportToCSV = (transactions: Transaction[], filename: string = 'transactions') => {
