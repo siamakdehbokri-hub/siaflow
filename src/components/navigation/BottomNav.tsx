@@ -19,13 +19,13 @@ const navItems: { id: NavTab; icon: typeof Home; label: string }[] = [
 
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 overflow-visible">
       {/* Gradient Fade */}
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none h-28" />
       
       {/* Navigation Container */}
-      <div className="relative mx-3 mb-2 pb-safe">
-        <div className="glass-heavy rounded-2xl border border-border/20 shadow-float">
+      <div className="relative mx-3 mb-2 pb-safe overflow-visible">
+        <div className="glass-heavy relative overflow-visible rounded-2xl border border-border/20 shadow-float">
           {/* Subtle top highlight */}
           <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           
@@ -38,7 +38,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
               // Center FAB for Plan
               if (isCenter) {
                 return (
-                  <div key={item.id} className="relative flex flex-col items-center">
+                  <div key={item.id} className="relative flex flex-col items-center overflow-visible min-w-[80px]">
                     {/* Quick Add FAB - responsive sizing */}
                     <button
                       onClick={onAddClick}
