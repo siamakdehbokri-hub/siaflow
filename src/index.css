@@ -737,8 +737,71 @@
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
   .duration-400 {
     transition-duration: 400ms;
+  }
+
+  /* ========== MOBILE-FIRST TYPOGRAPHY ========== */
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Optimal touch targets for mobile - minimum 44x44px (iOS HIG) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .touch-target-lg {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Mobile-optimized font sizes */
+  .text-mobile-xs {
+    font-size: 0.6875rem; /* 11px */
+    line-height: 1.4;
+  }
+
+  .text-mobile-sm {
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.5;
+  }
+
+  .text-mobile-base {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.6;
+  }
+
+  .text-mobile-lg {
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.5;
+  }
+
+  /* Prevent text overflow on mobile */
+  .mobile-truncate {
+    @apply truncate max-w-full;
+  }
+
+  /* Better scrolling on mobile */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Card spacing optimized for mobile readability */
+  .mobile-card-padding {
+    @apply p-4 sm:p-5;
+  }
+
+  /* Consistent gap for mobile layouts */
+  .mobile-gap {
+    @apply gap-3 sm:gap-4;
   }
 
   /* ========== DARK MODE GLASS ADJUSTMENTS ========== */

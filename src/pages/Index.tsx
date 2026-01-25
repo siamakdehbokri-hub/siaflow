@@ -98,31 +98,31 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      {/* Header */}
-      <header className="sticky top-0 z-40">
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-b border-border/20" />
-        <div className="relative max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-background pb-32 mobile-scroll">
+      {/* Header - Enhanced for mobile */}
+      <header className="sticky top-0 z-40 pt-safe">
+        <div className="absolute inset-0 bg-background/85 backdrop-blur-xl border-b border-border/20" />
+        <div className="relative max-w-2xl mx-auto px-4 sm:px-5 h-14 sm:h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {subView !== 'main' && (
-              <Button variant="ghost" size="icon" onClick={() => setSubView('main')} className="rounded-xl">
+              <Button variant="ghost" size="icon" onClick={() => setSubView('main')} className="rounded-xl touch-target shrink-0">
                 <ChevronRight className="w-5 h-5" />
               </Button>
             )}
-            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center">
-              <span className="text-xs font-bold text-primary-foreground">SF</span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shrink-0">
+              <span className="text-xs sm:text-sm font-bold text-primary-foreground">SF</span>
             </div>
-            <h1 className="text-lg font-bold text-foreground">{getPageTitle()}</h1>
+            <h1 className="text-base sm:text-lg font-bold text-foreground truncate">{getPageTitle()}</h1>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
             <DebtReminderNotifications reminders={debtReminders} onDismiss={dismissDebtReminder} onEnableNotifications={requestNotificationPermission} />
             <ReminderNotifications reminders={reminders} onDismiss={dismissReminder} />
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 py-5">
+      {/* Main Content - Better mobile spacing */}
+      <main className="max-w-2xl mx-auto px-4 sm:px-5 py-4 sm:py-5">
         {subView === 'categories' ? (
           <CategoryManagement categories={categoriesWithSpent} onAddCategory={addCategory} onEditCategory={updateCategory} onDeleteCategory={deleteCategory} />
         ) : subView === 'goals' ? (
