@@ -1,42 +1,23 @@
 import { useMemo } from 'react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isInCurrentJalaliMonth } from '@/utils/persianDate';
-import { BalanceHero } from './BalanceHero';
-import { QuickActions } from './QuickActions';
-import { AIInsightCard } from './AIInsightCard';
-import { RecentActivity } from './RecentActivity';
-import { GoalsPreview } from './GoalsPreview';
-import { SavingGoal } from '@/hooks/useSavingGoals';
-import { Debt } from '@/hooks/useDebts';
+import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull } from '@/utils/persianDate';
+import { cn } from '@/lib/utils';
 
 interface HomeScreenProps {
   transactions: Transaction[];
   categories: Category[];
-  goals: SavingGoal[];
-  debts: Debt[];
   userName?: string;
   onAddTransaction: (type?: string) => void;
   onViewAllTransactions: () => void;
-  onViewInsights: () => void;
-  onOpenTransfers: () => void;
-  onOpenGoals: () => void;
-  onOpenDebts: () => void;
-  onOpenBudget: () => void;
 }
 
 export function HomeScreen({
   transactions,
   categories,
-  goals,
-  debts,
   userName = 'کاربر',
   onAddTransaction,
   onViewAllTransactions,
-  onViewInsights,
-  onOpenTransfers,
-  onOpenGoals,
-  onOpenDebts,
-  onOpenBudget,
 }: HomeScreenProps) {
   // Calculate financial data for current Jalali month
   const financialData = useMemo(() => {
@@ -51,77 +32,14 @@ export function HomeScreen({
       .reduce((sum, t) => sum + t.amount, 0);
     
     const balance = income - expense;
-    const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
-    
-    // Get top spending category
-    const categorySpending = categories
-      .map(cat => ({
-        name: cat.name,
-        spent: monthlyTransactions
-          .filter(t => t.type === 'expense' && t.category === cat.name)
-          .reduce((sum, t) => sum + t.amount, 0)
-      }))
-      .filter(c => c.spent > 0)
-      .sort((a, b) => b.spent - a.spent);
-    
-    const topCategory = categorySpending[0];
     
     return {
       income,
       expense,
       balance,
-      savingsRate: Math.max(0, savingsRate),
-      topCategory,
-      recentTransactions: transactions.slice(0, 4),
+      recentTransactions: transactions.slice(0, 3),
     };
-  }, [transactions, categories]);
-
-  // Generate contextual AI insight
-  const getInsight = () => {
-    const { savingsRate, topCategory, expense, income } = financialData;
-    
-    if (income === 0 && expense === 0) {
-      return {
-        type: 'tip' as const,
-        title: 'شروع کنید!',
-        message: 'اولین تراکنش خود را ثبت کنید تا بینش‌های مالی شخصی دریافت کنید.',
-      };
-    }
-    
-    if (savingsRate >= 30) {
-      return {
-        type: 'achievement' as const,
-        title: 'عالی! نرخ پس‌انداز بالا',
-        message: `این ماه ${Math.round(savingsRate)}% از درآمدتان را پس‌انداز کرده‌اید. ادامه دهید!`,
-      };
-    }
-    
-    if (savingsRate < 10 && income > 0) {
-      return {
-        type: 'warning' as const,
-        title: 'هشدار پس‌انداز',
-        message: topCategory 
-          ? `بیشترین هزینه شما در "${topCategory.name}" است. آیا می‌توان کاهش داد؟`
-          : 'پیشنهاد می‌کنیم حداقل ۱۰٪ درآمد را پس‌انداز کنید.',
-      };
-    }
-    
-    return {
-      type: 'tip' as const,
-      title: 'وضعیت مالی متعادل',
-      message: 'هزینه‌ها و درآمدتان در تعادل است. برای رشد بیشتر، اهداف پس‌انداز تعیین کنید.',
-    };
-  };
-
-  const insight = getInsight();
-
-  const handleQuickAction = (actionId: string) => {
-    if (actionId === 'transfer') {
-      onOpenTransfers();
-    } else {
-      onAddTransaction(actionId);
-    }
-  };
+  }, [transactions]);
 
   // Get current time of day for greeting
   const getGreeting = () => {
@@ -134,50 +52,135 @@ export function HomeScreen({
 
   return (
     <div className="space-y-6">
-      {/* Greeting */}
-      <div className="px-1 animate-fade-in">
-        <h2 className="text-xl font-bold text-foreground">
+      {/* Zone 1: Balance Hero */}
+      <div className="text-center py-6 animate-fade-in">
+        <p className="text-sm text-muted-foreground mb-1">
           {getGreeting()}، {userName}
-        </h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          خلاصه مالی این ماه شما
         </p>
+        <h1 className="text-4xl font-bold text-foreground mb-2">
+          {formatCurrency(financialData.balance)}
+        </h1>
+        <p className="text-sm text-muted-foreground">موجودی این ماه</p>
+        
+        {/* Income/Expense Summary */}
+        <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
+              <ArrowUpRight className="w-4 h-4 text-success" />
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">درآمد</p>
+              <p className="text-sm font-semibold text-success">{formatCurrency(financialData.income)}</p>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-border/50" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center">
+              <ArrowDownRight className="w-4 h-4 text-destructive" />
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">هزینه</p>
+              <p className="text-sm font-semibold text-destructive">{formatCurrency(financialData.expense)}</p>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      {/* Balance Hero Card */}
-      <BalanceHero
-        balance={financialData.balance}
-        income={financialData.income}
-        expense={financialData.expense}
-        savingsRate={financialData.savingsRate}
-      />
-      
-      {/* Quick Actions */}
-      <QuickActions onAction={handleQuickAction} />
-      
-      {/* AI Insight Highlight */}
-      <AIInsightCard
-        type={insight.type}
-        title={insight.title}
-        message={insight.message}
-        onClick={onViewInsights}
-      />
-      
-      {/* Goals & Planning Preview */}
-      <GoalsPreview
-        goals={goals}
-        debts={debts}
-        categories={categories}
-        onViewGoals={onOpenGoals}
-        onViewDebts={onOpenDebts}
-        onViewBudget={onOpenBudget}
-      />
-      
-      {/* Recent Activity */}
-      <RecentActivity
-        transactions={financialData.recentTransactions}
-        onViewAll={onViewAllTransactions}
-      />
+
+      {/* Zone 2: Two Big Action Buttons */}
+      <div className="grid grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <button
+          onClick={() => onAddTransaction('expense')}
+          className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-card border border-border/30 hover:border-destructive/30 hover:bg-destructive/5 transition-all duration-300 active:scale-[0.98]"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <ArrowDownRight className="w-7 h-7 text-destructive" />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold text-foreground">ثبت هزینه</p>
+            <p className="text-xs text-muted-foreground mt-0.5">خرید، قبض، ...</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onAddTransaction('income')}
+          className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-card border border-border/30 hover:border-success/30 hover:bg-success/5 transition-all duration-300 active:scale-[0.98]"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <ArrowUpRight className="w-7 h-7 text-success" />
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold text-foreground">ثبت درآمد</p>
+            <p className="text-xs text-muted-foreground mt-0.5">حقوق، هدیه، ...</p>
+          </div>
+        </button>
+      </div>
+
+      {/* Zone 3: Recent Transactions (3 items only) */}
+      <div className="space-y-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-sm font-medium text-muted-foreground">فعالیت اخیر</h3>
+          <button 
+            onClick={onViewAllTransactions}
+            className="flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            همه
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        
+        {financialData.recentTransactions.length === 0 ? (
+          <div className="p-6 rounded-2xl bg-card border border-border/30 text-center">
+            <Clock className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">با دکمه‌های بالا اولین تراکنش را ثبت کنید</p>
+          </div>
+        ) : (
+          <div className="bg-card rounded-2xl border border-border/30 divide-y divide-border/30">
+            {financialData.recentTransactions.map((transaction) => {
+              const isIncome = transaction.type === 'income';
+              
+              return (
+                <div 
+                  key={transaction.id} 
+                  className="flex items-center gap-3 p-4"
+                >
+                  <div className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                    isIncome ? "bg-success/10" : "bg-destructive/10"
+                  )}>
+                    {isIncome ? (
+                      <ArrowUpRight className="w-5 h-5 text-success" />
+                    ) : (
+                      <ArrowDownRight className="w-5 h-5 text-destructive" />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {transaction.category}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {transaction.description || '—'}
+                    </p>
+                  </div>
+                  
+                  <div className="text-left shrink-0">
+                    <p className={cn(
+                      "text-sm font-semibold",
+                      isIncome ? "text-success" : "text-destructive"
+                    )}>
+                      {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {formatPersianDateFull(transaction.date).split(' ')[0]}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

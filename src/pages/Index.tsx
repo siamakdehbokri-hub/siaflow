@@ -1,9 +1,7 @@
 import { useState, useMemo } from 'react';
 import { BottomNav, NavTab } from '@/components/navigation/BottomNav';
 import { HomeScreen } from '@/components/home/HomeScreen';
-import { ActivityScreen } from '@/components/activity/ActivityScreen';
-import { PlanHub } from '@/components/plan/PlanHub';
-import { InsightsHub } from '@/components/insights/InsightsHub';
+import { ReportsHub } from '@/components/reports/ReportsHub';
 import { Settings } from '@/components/Settings';
 import { CategoryManagement } from '@/components/CategoryManagement';
 import { AddTransactionModal } from '@/components/AddTransactionModal';
@@ -63,10 +61,6 @@ const Index = () => {
     });
   };
 
-  const handleTransferToGoal = async (goalId: string, amount: number) => {
-    await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب');
-  };
-
   const openAddModal = (type?: string) => {
     setAddTransactionType(type);
     setIsAddModalOpen(true);
@@ -84,9 +78,7 @@ const Index = () => {
     if (subView === 'transfers') return 'انتقال پول';
     switch (activeTab) {
       case 'home': return 'خانه';
-      case 'activity': return 'فعالیت‌ها';
-      case 'plan': return 'برنامه‌ریزی';
-      case 'insights': return 'بینش‌ها';
+      case 'reports': return 'گزارش‌ها';
       case 'settings': return 'تنظیمات';
       default: return 'SiaFlow';
     }
@@ -138,46 +130,30 @@ const Index = () => {
         ) : subView === 'debts' ? (
           <DebtManagement debts={debts} stats={debtStats} onAddDebt={addDebt} onUpdateDebt={updateDebt} onDeleteDebt={deleteDebt} onAddPayment={addPayment} />
         ) : subView === 'transfers' ? (
-          <TransferManagement goals={goals} onTransferToGoal={handleTransferToGoal} />
+          <TransferManagement goals={goals} onTransferToGoal={async (goalId, amount) => await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب')} />
         ) : (
           <>
             {activeTab === 'home' && (
               <HomeScreen
                 transactions={transactions}
                 categories={categoriesWithSpent}
-                goals={goals}
-                debts={debts}
                 userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
                 onAddTransaction={openAddModal}
-                onViewAllTransactions={() => setActiveTab('activity')}
-                onViewInsights={() => setActiveTab('insights')}
-                onOpenTransfers={() => setSubView('transfers')}
-                onOpenGoals={() => setSubView('goals')}
-                onOpenDebts={() => setSubView('debts')}
-                onOpenBudget={() => setSubView('categories')}
+                onViewAllTransactions={() => setActiveTab('reports')}
               />
             )}
-            {activeTab === 'activity' && (
-              <ActivityScreen
+            {activeTab === 'reports' && (
+              <ReportsHub
                 transactions={transactions}
                 categories={categoriesWithSpent}
-                onEditTransaction={setEditingTransaction}
-                onDeleteTransaction={deleteTransaction}
-              />
-            )}
-            {activeTab === 'plan' && (
-              <PlanHub
-                categories={categoriesWithSpent}
-                transactions={transactions}
                 goals={goals}
                 debts={debts}
-                onOpenBudget={() => setSubView('categories')}
+                onEditTransaction={setEditingTransaction}
+                onDeleteTransaction={deleteTransaction}
                 onOpenGoals={() => setSubView('goals')}
                 onOpenDebts={() => setSubView('debts')}
+                onOpenBudget={() => setSubView('categories')}
               />
-            )}
-            {activeTab === 'insights' && (
-              <InsightsHub transactions={transactions} categories={categoriesWithSpent} />
             )}
             {activeTab === 'settings' && (
               <Settings onOpenCategories={() => setSubView('categories')} />
