@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { 
   User, Bell, Shield, Palette, Download, 
   HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor, FolderOpen,
-  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Heart, Sparkles
+  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Heart, Sparkles,
+  MessageCircleQuestion, ChevronDown, ExternalLink
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -32,6 +33,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -39,26 +46,58 @@ const settingsGroups = [
   {
     title: 'حساب کاربری',
     items: [
-      { icon: User, label: 'ویرایش پروفایل', action: 'profile', color: 'text-blue-500' },
-      { icon: Bell, label: 'اعلان‌ها', action: 'notifications', toggle: true, color: 'text-amber-500' },
-      { icon: Shield, label: 'امنیت و رمز عبور', action: 'security', color: 'text-emerald-500' },
+      { icon: User, label: 'ویرایش پروفایل', action: 'profile', color: 'text-blue-500', description: 'نام، تصویر و اطلاعات شخصی' },
+      { icon: Bell, label: 'اعلان‌ها', action: 'notifications', toggle: true, color: 'text-amber-500', description: 'یادآوری‌ها و هشدارها' },
+      { icon: Shield, label: 'امنیت و رمز عبور', action: 'security', color: 'text-emerald-500', description: 'تغییر رمز عبور' },
     ],
   },
   {
     title: 'تنظیمات',
     items: [
-      { icon: Palette, label: 'تم برنامه', action: 'theme', color: 'text-purple-500' },
-      { icon: FolderOpen, label: 'دسته‌بندی‌ها', action: 'categories', color: 'text-cyan-500' },
-      { icon: Download, label: 'پشتیبان‌گیری', action: 'backup', color: 'text-teal-500' },
+      { icon: Palette, label: 'تم برنامه', action: 'theme', color: 'text-purple-500', description: 'حالت روشن یا تاریک' },
+      { icon: FolderOpen, label: 'دسته‌بندی‌ها', action: 'categories', color: 'text-cyan-500', description: 'مدیریت دسته‌بندی‌ها' },
+      { icon: Download, label: 'پشتیبان‌گیری', action: 'backup', color: 'text-teal-500', description: 'دانلود داده‌ها' },
     ],
   },
   {
     title: 'پشتیبانی',
     items: [
-      { icon: HelpCircle, label: 'راهنما', action: 'help', color: 'text-indigo-500' },
-      { icon: Info, label: 'درباره ما', action: 'about', color: 'text-pink-500' },
-      { icon: Mail, label: 'تماس با ما', action: 'contact', color: 'text-orange-500' },
+      { icon: HelpCircle, label: 'راهنما', action: 'help', color: 'text-indigo-500', description: 'آموزش استفاده' },
+      { icon: MessageCircleQuestion, label: 'سوالات متداول', action: 'faq', color: 'text-violet-500', description: 'پاسخ سوالات رایج' },
+      { icon: Info, label: 'درباره ما', action: 'about', color: 'text-pink-500', description: 'معرفی SiaFlow' },
+      { icon: Mail, label: 'تماس با ما', action: 'contact', color: 'text-orange-500', description: 'ارسال پیام' },
     ],
+  },
+];
+
+const faqItems = [
+  {
+    question: 'چگونه تراکنش جدید اضافه کنم؟',
+    answer: 'از دکمه + در پایین صفحه استفاده کنید. نوع تراکنش (درآمد یا هزینه)، مبلغ، دسته‌بندی و توضیحات را وارد کنید.'
+  },
+  {
+    question: 'بودجه ماهانه چگونه کار می‌کند؟',
+    answer: 'در بخش «برنامه‌ریزی» می‌توانید برای هر دسته‌بندی یک سقف بودجه تعیین کنید. برنامه به صورت خودکار هزینه‌های شما را پیگیری و در صورت نزدیک شدن به سقف هشدار می‌دهد.'
+  },
+  {
+    question: 'چطور هدف پس‌انداز بسازم؟',
+    answer: 'در بخش «برنامه‌ریزی» > «اهداف پس‌انداز»، روی دکمه افزودن هدف کلیک کنید. نام، مبلغ هدف و تاریخ موردنظر را وارد کنید.'
+  },
+  {
+    question: 'گزارش هوش مصنوعی چیست؟',
+    answer: 'هوش مصنوعی SiaFlow الگوهای خرج کردن شما را تحلیل می‌کند و پیشنهادات شخصی برای بهبود وضعیت مالی ارائه می‌دهد.'
+  },
+  {
+    question: 'اطلاعات من امن هستند؟',
+    answer: 'بله! تمام داده‌های شما با رمزنگاری پیشرفته محافظت می‌شوند و فقط شما به آن‌ها دسترسی دارید.'
+  },
+  {
+    question: 'چگونه تم برنامه را تغییر دهم؟',
+    answer: 'در تنظیمات > تم برنامه، می‌توانید بین حالت روشن، تاریک یا خودکار (مطابق سیستم) انتخاب کنید.'
+  },
+  {
+    question: 'مدیریت بدهی چه امکاناتی دارد؟',
+    answer: 'می‌توانید بدهی‌های خود را ثبت کنید، تاریخ سررسید تعیین کنید و پرداخت‌های جزئی را پیگیری کنید. برنامه یادآوری‌ها را مدیریت می‌کند.'
   },
 ];
 
@@ -66,7 +105,7 @@ interface SettingsProps {
   onOpenCategories?: () => void;
 }
 
-type SettingsView = 'main' | 'profile' | 'help' | 'security' | 'about' | 'contact';
+type SettingsView = 'main' | 'profile' | 'help' | 'security' | 'about' | 'contact' | 'faq';
 
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
@@ -96,6 +135,9 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       case 'contact':
         setCurrentView('contact');
         break;
+      case 'faq':
+        setCurrentView('faq');
+        break;
       case 'backup':
         toast.success('پشتیبان‌گیری انجام شد');
         break;
@@ -111,7 +153,6 @@ export function Settings({ onOpenCategories }: SettingsProps) {
     try {
       await signOut();
       toast.success('با موفقیت خارج شدید');
-      // Force navigation to auth page and clear state
       window.location.href = '/auth';
     } catch (error) {
       toast.error('خطا در خروج از حساب');
@@ -131,7 +172,6 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       const { data, error } = await supabase.functions.invoke('delete-user-account');
       if (error) throw error;
 
-      // Ensure local session is cleared immediately
       await supabase.auth.signOut();
 
       toast.success('حساب شما کاملاً حذف شد. برای استفاده دوباره باید ثبت‌نام کنید.');
@@ -162,49 +202,61 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   if (currentView === 'about') {
     return (
       <div className="space-y-5 animate-fade-in pb-6">
-        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2">
+        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2 hover-scale">
           <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
           بازگشت
         </Button>
         
-        <Card variant="glass" className="overflow-hidden">
-          <div className="h-32 gradient-primary opacity-90 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3">
-                <Sparkles className="w-8 h-8 text-white" />
+        <Card variant="glass" className="overflow-hidden animate-scale-in">
+          <div className="h-36 gradient-primary opacity-90 flex items-center justify-center relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-white/30 blur-2xl animate-pulse" />
+              <div className="absolute bottom-4 right-4 w-16 h-16 rounded-full bg-white/20 blur-xl" style={{ animationDelay: '0.5s' }} />
+            </div>
+            
+            <div className="text-center relative z-10">
+              <div className="w-18 h-18 mx-auto rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <Sparkles className="w-9 h-9 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-white">SiaFlow</h2>
+              <h2 className="text-2xl font-bold text-white tracking-wide">SiaFlow</h2>
+              <p className="text-white/70 text-xs mt-1">دستیار هوشمند مالی</p>
             </div>
           </div>
           
-          <CardContent className="p-5 space-y-4">
-            <div className="text-center space-y-3">
+          <CardContent className="p-5 space-y-5">
+            <div className="text-center space-y-4">
               <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <Heart className="w-4 h-4 text-pink-500" />
-                <span className="text-sm">ساخته شده با عشق</span>
+                <Heart className="w-4 h-4 text-pink-500 animate-pulse" />
+                <span className="text-sm">ساخته شده با عشق و هوش مصنوعی</span>
               </div>
               
-              <div className="bg-muted/50 rounded-2xl p-4 space-y-3">
+              <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-2xl p-5 space-y-4 border border-border/30">
                 <p className="text-foreground leading-relaxed text-sm">
-                  این برنامه توسط <span className="font-bold text-primary">سیامک.د</span> توسعه داده شده است.
+                  این برنامه توسط <span className="font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">سیامک.د</span> توسعه داده شده است.
                 </p>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  SiaFlow یک دستیار هوشمند مدیریت مالی شخصی است که با استفاده از هوش مصنوعی به شما کمک می‌کند تا درک بهتری از وضعیت مالی خود داشته باشید و تصمیمات هوشمندانه‌تری بگیرید.
+                  SiaFlow یک دستیار هوشمند مدیریت مالی شخصی است که با بهره‌گیری از هوش مصنوعی پیشرفته، به شما کمک می‌کند درک عمیق‌تری از وضعیت مالی خود داشته باشید و تصمیمات هوشمندانه‌تری بگیرید.
                 </p>
               </div>
               
               <div className="flex flex-wrap justify-center gap-2 pt-2">
-                <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">هوش مصنوعی</span>
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs rounded-full">مدیریت بودجه</span>
-                <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs rounded-full">گزارش‌گیری</span>
-                <span className="px-3 py-1 bg-purple-500/10 text-purple-500 text-xs rounded-full">اهداف پس‌انداز</span>
+                {['هوش مصنوعی', 'مدیریت بودجه', 'گزارش‌گیری', 'اهداف پس‌انداز'].map((tag, i) => (
+                  <span 
+                    key={tag}
+                    className="px-3 py-1.5 bg-primary/10 text-primary text-xs rounded-full border border-primary/20 hover-scale cursor-default"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <p className="text-center text-xs text-muted-foreground/60">
-          نسخه ۱.۹.۰
+        <p className="text-center text-xs text-muted-foreground/60 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          نسخه ۲.۰.۰
         </p>
       </div>
     );
@@ -213,40 +265,40 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   if (currentView === 'contact') {
     return (
       <div className="space-y-5 animate-fade-in pb-6">
-        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2">
+        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2 hover-scale">
           <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
           بازگشت
         </Button>
         
-        <Card variant="glass">
-          <CardHeader className="text-center pb-2">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-orange-500/10 flex items-center justify-center mb-3">
-              <Mail className="w-8 h-8 text-orange-500" />
+        <Card variant="glass" className="animate-scale-in">
+          <CardHeader className="text-center pb-3">
+            <div className="w-18 h-18 mx-auto rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center mb-4 shadow-lg">
+              <Mail className="w-9 h-9 text-orange-500" />
             </div>
             <CardTitle className="text-xl">تماس با ما</CardTitle>
-            <CardDescription>
-              سوال، پیشنهاد یا انتقادی دارید؟ با ما در ارتباط باشید
+            <CardDescription className="text-sm">
+              سوال، پیشنهاد یا انتقادی دارید؟ خوشحال می‌شویم از شما بشنویم
             </CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-4">
             <a 
               href="mailto:siamakflow@gmail.com"
-              className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50 hover:bg-accent transition-colors"
+              className="group flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/30 hover:from-primary/10 hover:to-primary/5 border border-border/30 hover:border-primary/30 transition-all duration-300"
             >
-              <div className="p-3 rounded-xl bg-primary/10">
+              <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                 <Mail className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">ایمیل</p>
                 <p className="text-sm text-muted-foreground truncate" dir="ltr">siamakflow@gmail.com</p>
               </div>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+              <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </a>
             
-            <div className="bg-muted/30 rounded-2xl p-4 text-center">
+            <div className="bg-gradient-to-br from-muted/30 to-transparent rounded-2xl p-4 text-center border border-border/20">
               <p className="text-sm text-muted-foreground">
-                پاسخگوی شما هستیم. معمولاً ظرف ۲۴ ساعت پاسخ می‌دهیم.
+                ✨ پاسخگوی شما هستیم. معمولاً ظرف ۲۴ ساعت پاسخ می‌دهیم.
               </p>
             </div>
           </CardContent>
@@ -255,8 +307,64 @@ export function Settings({ onOpenCategories }: SettingsProps) {
     );
   }
 
+  if (currentView === 'faq') {
+    return (
+      <div className="space-y-5 animate-fade-in pb-6">
+        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2 hover-scale">
+          <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
+          بازگشت
+        </Button>
+        
+        <Card variant="glass" className="animate-scale-in">
+          <CardHeader className="text-center pb-3">
+            <div className="w-18 h-18 mx-auto rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mb-4 shadow-lg">
+              <MessageCircleQuestion className="w-9 h-9 text-violet-500" />
+            </div>
+            <CardTitle className="text-xl">سوالات متداول</CardTitle>
+            <CardDescription className="text-sm">
+              پاسخ سوالات رایج کاربران
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="px-3">
+            <Accordion type="single" collapsible className="space-y-2">
+              {faqItems.map((item, index) => (
+                <AccordionItem 
+                  key={index} 
+                  value={`item-${index}`}
+                  className="bg-muted/30 rounded-xl border border-border/30 overflow-hidden px-0 data-[state=open]:bg-muted/50 transition-colors"
+                >
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50 transition-colors text-right text-sm font-medium [&[data-state=open]>svg]:text-primary">
+                    <span className="flex-1 text-right leading-relaxed">{item.question}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4 pt-0 text-sm text-muted-foreground leading-relaxed">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
+        
+        <Card variant="glass" className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <HelpCircle className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-foreground font-medium">سوال دیگری دارید؟</p>
+              <p className="text-xs text-muted-foreground">با ما تماس بگیرید</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => setCurrentView('contact')} className="hover-scale">
+              تماس
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
-  // Extract phone from email format (09xxxxxxxxx@siaflow.app) or use email
   const emailPart = user?.email?.replace('@siaflow.app', '') || '';
   const phone = /^09\d{9}$/.test(emailPart) ? emailPart : '';
   const displayPhone = phone ? `${phone.slice(0, 4)} ${phone.slice(4, 7)} ${phone.slice(7)}` : user?.email || '';
@@ -266,163 +374,132 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
   return (
     <div className="space-y-5 animate-fade-in pb-6">
-      {/* User Profile Card - Enhanced */}
-      <Card variant="glass" className="overflow-hidden">
+      {/* User Profile Card - Enhanced with animations */}
+      <Card variant="glass" className="overflow-hidden animate-scale-in">
         <div className="relative">
-          <div className="h-20 sm:h-24 gradient-primary opacity-80" />
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 sm:left-auto sm:translate-x-0 sm:right-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-2xl sm:text-3xl font-bold text-primary-foreground shrink-0 border-4 border-background shadow-lg">
+          <div className="h-24 gradient-primary opacity-90 relative overflow-hidden">
+            {/* Decorative animated elements */}
+            <div className="absolute inset-0">
+              <div className="absolute top-2 left-6 w-12 h-12 rounded-full bg-white/10 blur-xl animate-pulse" />
+              <div className="absolute bottom-2 right-10 w-8 h-8 rounded-full bg-white/15 blur-lg" style={{ animationDelay: '0.3s' }} />
+            </div>
+          </div>
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2">
+            <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center text-2xl font-bold text-primary-foreground shrink-0 border-4 border-background shadow-xl transform hover:scale-105 transition-transform duration-300">
               {initials}
             </div>
           </div>
         </div>
 
-        <CardContent className="p-4 sm:p-5 pt-12 sm:pt-14 sm:pr-28">
-          <div className="min-w-0 text-center sm:text-right">
-            <h3 className="text-base sm:text-xl font-bold text-foreground truncate">{displayName}</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground truncate" dir="ltr">{displayPhone}</p>
-          </div>
+        <CardContent className="p-5 pt-14 text-center">
+          <h3 className="text-lg font-bold text-foreground">{displayName}</h3>
+          <p className="text-sm text-muted-foreground mt-1" dir="ltr">{displayPhone}</p>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full mt-4 text-sm"
-            onClick={() => setCurrentView('profile')}
-          >
-            <User className="w-4 h-4 ml-2" />
-            ویرایش پروفایل
-          </Button>
-
-          {/* Admin Panel Link - Only visible for admins */}
-          {isAdmin && (
+          <div className="flex gap-2 mt-4">
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="w-full mt-2 text-sm bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white"
-              onClick={() => navigate('/admin')}
+              className="flex-1 text-sm hover-scale"
+              onClick={() => setCurrentView('profile')}
             >
-              <ShieldCheck className="w-4 h-4 ml-2" />
-              پنل مدیریت
+              <User className="w-4 h-4 ml-2" />
+              ویرایش
             </Button>
-          )}
+            
+            {isAdmin && (
+              <Button
+                variant="default"
+                size="sm"
+                className="flex-1 text-sm bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white hover-scale"
+                onClick={() => navigate('/admin')}
+              >
+                <ShieldCheck className="w-4 h-4 ml-2" />
+                مدیریت
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Settings Groups - Enhanced */}
-      {settingsGroups.map((group) => (
-        <div key={group.title} className="space-y-2">
-          <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground px-1 flex items-center gap-2">
-            <span className="w-1 h-4 rounded-full bg-primary" />
+      {/* Settings Groups - Enhanced with staggered animations */}
+      {settingsGroups.map((group, groupIndex) => (
+        <div 
+          key={group.title} 
+          className="space-y-2 animate-fade-in"
+          style={{ animationDelay: `${groupIndex * 0.1}s` }}
+        >
+          <h3 className="text-xs font-semibold text-muted-foreground px-1 flex items-center gap-2">
+            <span className="w-1 h-4 rounded-full bg-gradient-to-b from-primary to-primary/50" />
             {group.title}
           </h3>
-          <Card variant="glass">
-            <CardContent className="p-0 divide-y divide-border/50">
-              {group.items.map((item) => {
+          <Card variant="glass" className="overflow-hidden">
+            <CardContent className="p-0 divide-y divide-border/30">
+              {group.items.map((item, itemIndex) => {
                 const Icon = item.icon;
                 const isTheme = item.action === 'theme';
-                const isNotification = item.action === 'notifications';
 
                 if (isTheme) {
                   return (
                     <Sheet key={item.action}>
                       <SheetTrigger asChild>
                         <button
-                          className="w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 hover:bg-accent/50 transition-all duration-200"
+                          className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 active:bg-accent/70 transition-all duration-200 group"
                         >
-                          <div className={`p-2.5 rounded-xl bg-purple-500/10 shrink-0`}>
+                          <div className="p-2.5 rounded-xl bg-purple-500/10 shrink-0 group-hover:scale-110 transition-transform">
                             <ThemeIcon className={`w-5 h-5 ${item.color}`} />
                           </div>
-                          <span className="flex-1 text-right font-medium text-foreground text-sm sm:text-base">
-                            {item.label}
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-2 bg-muted px-2 py-1 rounded-full">
+                          <div className="flex-1 text-right min-w-0">
+                            <span className="font-medium text-foreground text-sm block">{item.label}</span>
+                            <span className="text-xs text-muted-foreground">{item.description}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
                             {theme === 'dark' ? 'تاریک' : theme === 'light' ? 'روشن' : 'سیستم'}
                           </span>
-                          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                          <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </button>
                       </SheetTrigger>
                       <SheetContent side="bottom" className="h-auto rounded-t-3xl">
                         <SheetHeader className="text-right pb-2">
-                          <SheetTitle className="text-xl">انتخاب تم</SheetTitle>
+                          <SheetTitle className="text-xl flex items-center gap-2">
+                            <Palette className="w-5 h-5 text-purple-500" />
+                            انتخاب تم
+                          </SheetTitle>
                           <SheetDescription>
                             تم مورد نظر خود را انتخاب کنید
                           </SheetDescription>
                         </SheetHeader>
-                        <div className="mt-4 space-y-3">
-                          <button
-                            onClick={() => {
-                              setTheme('light');
-                              toast.success('حالت روشن فعال شد');
-                            }}
-                            className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 ${
-                              theme === 'light' 
-                                ? 'bg-primary/10 border-2 border-primary shadow-sm' 
-                                : 'bg-muted/50 hover:bg-accent border-2 border-transparent'
-                            }`}
-                          >
-                            <div className="p-3 rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                              <Sun className="w-6 h-6 text-amber-600" />
-                            </div>
-                            <div className="flex-1 text-right">
-                              <p className="font-semibold text-foreground">حالت روشن</p>
-                              <p className="text-sm text-muted-foreground">پس‌زمینه روشن و متن تیره</p>
-                            </div>
-                            {theme === 'light' && (
-                              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                        <div className="mt-4 space-y-3 pb-6">
+                          {[
+                            { value: 'light', label: 'حالت روشن', desc: 'پس‌زمینه روشن و متن تیره', icon: Sun, bg: 'bg-amber-100 dark:bg-amber-900/30', iconColor: 'text-amber-600' },
+                            { value: 'dark', label: 'حالت تاریک', desc: 'پس‌زمینه تیره و متن روشن', icon: Moon, bg: 'bg-slate-800 dark:bg-slate-700', iconColor: 'text-slate-200' },
+                            { value: 'system', label: 'سیستم', desc: 'مطابق با تنظیمات دستگاه', icon: Monitor, bg: 'bg-gradient-to-br from-amber-100 to-slate-800', iconColor: 'text-foreground' },
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              onClick={() => {
+                                setTheme(option.value as any);
+                                toast.success(`${option.label} فعال شد`);
+                              }}
+                              className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 hover-scale ${
+                                theme === option.value 
+                                  ? 'bg-primary/10 border-2 border-primary shadow-lg shadow-primary/10' 
+                                  : 'bg-muted/50 hover:bg-accent border-2 border-transparent'
+                              }`}
+                            >
+                              <div className={`p-3 rounded-xl ${option.bg}`}>
+                                <option.icon className={`w-6 h-6 ${option.iconColor}`} />
                               </div>
-                            )}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setTheme('dark');
-                              toast.success('حالت تاریک فعال شد');
-                            }}
-                            className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 ${
-                              theme === 'dark' 
-                                ? 'bg-primary/10 border-2 border-primary shadow-sm' 
-                                : 'bg-muted/50 hover:bg-accent border-2 border-transparent'
-                            }`}
-                          >
-                            <div className="p-3 rounded-xl bg-slate-800 dark:bg-slate-700">
-                              <Moon className="w-6 h-6 text-slate-200" />
-                            </div>
-                            <div className="flex-1 text-right">
-                              <p className="font-semibold text-foreground">حالت تاریک</p>
-                              <p className="text-sm text-muted-foreground">پس‌زمینه تیره و متن روشن</p>
-                            </div>
-                            {theme === 'dark' && (
-                              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                              <div className="flex-1 text-right">
+                                <p className="font-semibold text-foreground">{option.label}</p>
+                                <p className="text-sm text-muted-foreground">{option.desc}</p>
                               </div>
-                            )}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setTheme('system');
-                              toast.success('تم سیستم فعال شد');
-                            }}
-                            className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 ${
-                              theme === 'system' 
-                                ? 'bg-primary/10 border-2 border-primary shadow-sm' 
-                                : 'bg-muted/50 hover:bg-accent border-2 border-transparent'
-                            }`}
-                          >
-                            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-100 to-slate-800">
-                              <Monitor className="w-6 h-6 text-foreground" />
-                            </div>
-                            <div className="flex-1 text-right">
-                              <p className="font-semibold text-foreground">سیستم</p>
-                              <p className="text-sm text-muted-foreground">مطابق با تنظیمات دستگاه</p>
-                            </div>
-                            {theme === 'system' && (
-                              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                                <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
-                              </div>
-                            )}
-                          </button>
+                              {theme === option.value && (
+                                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center animate-scale-in">
+                                  <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                                </div>
+                              )}
+                            </button>
+                          ))}
                         </div>
                       </SheetContent>
                     </Sheet>
@@ -434,24 +511,25 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                 return (
                   <button
                     key={item.action}
-                    className="w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 hover:bg-accent/50 transition-all duration-200"
+                    className="w-full flex items-center gap-3 p-4 hover:bg-accent/50 active:bg-accent/70 transition-all duration-200 group"
                     onClick={() => {
                       if (!item.toggle) handleAction(item.action);
                     }}
                   >
-                    <div className={`p-2.5 rounded-xl ${bgColorClass} shrink-0`}>
+                    <div className={`p-2.5 rounded-xl ${bgColorClass} shrink-0 group-hover:scale-110 transition-transform`}>
                       <Icon className={`w-5 h-5 ${item.color || 'text-foreground'}`} />
                     </div>
-                    <span className="flex-1 text-right font-medium text-foreground text-sm sm:text-base">
-                      {item.label}
-                    </span>
+                    <div className="flex-1 text-right min-w-0">
+                      <span className="font-medium text-foreground text-sm block">{item.label}</span>
+                      <span className="text-xs text-muted-foreground">{item.description}</span>
+                    </div>
                     {item.toggle ? (
                       <Switch
                         checked={notifications}
                         onCheckedChange={setNotifications}
                       />
                     ) : (
-                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                      <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     )}
                   </button>
                 );
@@ -461,55 +539,60 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         </div>
       ))}
 
-      {/* Danger Zone */}
-      <div className="space-y-2">
-        <h3 className="text-xs sm:text-sm font-semibold text-destructive/80 px-1 flex items-center gap-2">
-          <span className="w-1 h-4 rounded-full bg-destructive" />
+      {/* Danger Zone - Enhanced */}
+      <div className="space-y-2 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <h3 className="text-xs font-semibold text-destructive/80 px-1 flex items-center gap-2">
+          <span className="w-1 h-4 rounded-full bg-gradient-to-b from-destructive to-destructive/50" />
           منطقه خطر
         </h3>
-        <Card variant="glass" className="border-destructive/20">
+        <Card variant="glass" className="border-destructive/20 overflow-hidden">
           <CardContent className="p-0">
             <button
-              className="w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 hover:bg-destructive/5 transition-all duration-200"
+              className="w-full flex items-center gap-3 p-4 hover:bg-destructive/5 active:bg-destructive/10 transition-all duration-200 group"
               onClick={() => setShowDeleteDialog(true)}
             >
-              <div className="p-2.5 rounded-xl bg-destructive/10 shrink-0">
+              <div className="p-2.5 rounded-xl bg-destructive/10 shrink-0 group-hover:scale-110 transition-transform">
                 <Trash2 className="w-5 h-5 text-destructive" />
               </div>
               <div className="flex-1 text-right">
-                <span className="font-medium text-destructive text-sm sm:text-base block">
+                <span className="font-medium text-destructive text-sm block">
                   حذف حساب کاربری
                 </span>
                 <span className="text-xs text-muted-foreground">
                   تمام داده‌های شما برای همیشه پاک می‌شود
                 </span>
               </div>
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-destructive/50" />
+              <ChevronLeft className="w-4 h-4 text-destructive/50 group-hover:text-destructive transition-colors" />
             </button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Logout */}
+      {/* Logout - Enhanced */}
       <Button 
         variant="outline" 
-        className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 hover:border-destructive/30 text-sm sm:text-base transition-all duration-200"
+        className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 hover:border-destructive/30 transition-all duration-200 hover-scale"
         onClick={handleSignOut}
       >
         <LogOut className="w-4 h-4 ml-2" />
         خروج از حساب
       </Button>
 
-      {/* Version */}
-      <p className="text-center text-[10px] sm:text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۲.۰.۰
-      </p>
+      {/* Version - Enhanced */}
+      <div className="text-center space-y-1 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <p className="text-xs text-muted-foreground/60">
+          SiaFlow نسخه ۲.۰.۰
+        </p>
+        <p className="text-[10px] text-muted-foreground/40">
+          ساخته شده با ❤️ در ایران
+        </p>
+      </div>
 
-      {/* Delete Account Dialog */}
+      {/* Delete Account Dialog - Enhanced */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-sm mx-auto">
           <DialogHeader className="text-center">
-            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4 animate-scale-in">
               <AlertTriangle className="w-8 h-8 text-destructive" />
             </div>
             <DialogTitle className="text-xl text-destructive">حذف حساب کاربری</DialogTitle>
@@ -519,22 +602,12 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           </DialogHeader>
           
           <div className="bg-destructive/5 rounded-xl p-4 space-y-2 text-sm">
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
-              تمام تراکنش‌ها
-            </p>
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
-              دسته‌بندی‌ها و بودجه‌ها
-            </p>
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
-              اهداف پس‌انداز
-            </p>
-            <p className="flex items-center gap-2 text-muted-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
-              اطلاعات پروفایل
-            </p>
+            {['تمام تراکنش‌ها', 'دسته‌بندی‌ها و بودجه‌ها', 'اهداف پس‌انداز', 'اطلاعات پروفایل'].map((item) => (
+              <p key={item} className="flex items-center gap-2 text-muted-foreground">
+                <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
+                {item}
+              </p>
+            ))}
           </div>
 
           <div className="space-y-2">
@@ -553,7 +626,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <DialogFooter className="flex-col gap-2 sm:flex-col">
             <Button
               variant="destructive"
-              className="w-full"
+              className="w-full hover-scale"
               onClick={handleDeleteAccount}
               disabled={deleting || deleteConfirmation !== 'حذف حساب'}
             >
