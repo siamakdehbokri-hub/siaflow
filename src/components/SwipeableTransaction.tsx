@@ -102,18 +102,18 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
             onEdit(transaction);
             resetSwipe();
           }}
-          className="w-[70px] flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="w-[60px] sm:w-[70px] flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 transition-colors touch-target"
         >
-          <Edit3 className="w-5 h-5" />
+          <Edit3 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
         </button>
         <button
           onClick={() => {
             onDelete(transaction.id);
             resetSwipe();
           }}
-          className="w-[70px] flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+          className="w-[60px] sm:w-[70px] flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 transition-colors touch-target"
         >
-          <Trash2 className="w-5 h-5" />
+          <Trash2 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
         </button>
       </div>
 
