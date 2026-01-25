@@ -72,11 +72,14 @@ Deno.serve(async (req) => {
 
     // 2) Delete all user data from tables (order matters due to foreign keys)
     const deletes = [
+      { table: 'transfers', col: 'user_id' },
+      { table: 'accounts', col: 'user_id' },
       { table: 'saving_goal_transactions', col: 'user_id' },
       { table: 'saving_goals', col: 'user_id' },
       { table: 'transactions', col: 'user_id' },
       { table: 'categories', col: 'user_id' },
       { table: 'debts', col: 'user_id' },
+      { table: 'user_roles', col: 'user_id' },
       { table: 'profiles', col: 'id' },
     ] as const
 
