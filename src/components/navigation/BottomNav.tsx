@@ -31,13 +31,13 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
           {/* Subtle top highlight */}
           <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           
-          <div className="relative flex items-center justify-center h-16 px-4">
-            {/* Left Tab - Home */}
+          <div className="relative flex items-center h-16 px-2 sm:px-3 max-w-lg mx-auto">
+            {/* Left Side */}
             <div className="flex-1 flex justify-center">
               <button
                 onClick={() => onTabChange('home')}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 px-4 py-2 rounded-xl transition-all duration-300",
+                  "relative flex flex-col items-center justify-center gap-0.5 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300",
                   activeTab === 'home'
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -51,7 +51,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                   activeTab === 'home' && "scale-110"
                 )} />
                 <span className={cn(
-                  "relative z-10 text-[10px] font-medium",
+                  "relative z-10 text-[10px] font-medium whitespace-nowrap",
                   activeTab === 'home' && "font-semibold"
                 )}>
                   خانه
@@ -62,25 +62,21 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
               </button>
             </div>
 
-            {/* Center FAB - Add Button */}
-            <div className="relative flex items-center justify-center w-16">
-              <button
-                onClick={onAddClick}
-                className="absolute -top-8 left-1/2 -translate-x-1/2 group flex items-center justify-center w-14 h-14 rounded-2xl gradient-primary shadow-float hover:shadow-glow transition-all duration-400 active:scale-95 hover:scale-105"
-              >
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-2xl bg-primary/30 blur-xl opacity-60 group-hover:opacity-100 transition-opacity" />
-                <Plus className="relative w-7 h-7 text-primary-foreground transition-transform duration-300 group-hover:rotate-90" />
-              </button>
-            </div>
+            {/* Center FAB (anchored to the full bar width) */}
+            <button
+              onClick={onAddClick}
+              className="absolute -top-8 left-1/2 -translate-x-1/2 group flex items-center justify-center w-14 h-14 rounded-2xl gradient-primary shadow-float hover:shadow-glow transition-all duration-400 active:scale-95 hover:scale-105"
+            >
+              <div className="absolute inset-0 rounded-2xl bg-primary/30 blur-xl opacity-60 group-hover:opacity-100 transition-opacity" />
+              <Plus className="relative w-7 h-7 text-primary-foreground transition-transform duration-300 group-hover:rotate-90" />
+            </button>
 
-            {/* Right Side - Reports & Settings */}
-            <div className="flex-1 flex justify-center gap-2">
-              {/* Reports Tab */}
+            {/* Right Side */}
+            <div className="flex-1 flex justify-center gap-1 sm:gap-2">
               <button
                 onClick={() => onTabChange('reports')}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 px-4 py-2 rounded-xl transition-all duration-300",
+                  "relative flex flex-col items-center justify-center gap-0.5 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300",
                   activeTab === 'reports'
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -94,7 +90,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                   activeTab === 'reports' && "scale-110"
                 )} />
                 <span className={cn(
-                  "relative z-10 text-[10px] font-medium",
+                  "relative z-10 text-[10px] font-medium whitespace-nowrap",
                   activeTab === 'reports' && "font-semibold"
                 )}>
                   گزارش‌ها
@@ -104,11 +100,10 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                 )}
               </button>
 
-              {/* Settings Tab */}
               <button
                 onClick={() => onTabChange('settings')}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 px-4 py-2 rounded-xl transition-all duration-300",
+                  "relative flex flex-col items-center justify-center gap-0.5 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300",
                   activeTab === 'settings'
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
@@ -122,7 +117,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                   activeTab === 'settings' && "scale-110"
                 )} />
                 <span className={cn(
-                  "relative z-10 text-[10px] font-medium",
+                  "relative z-10 text-[10px] font-medium whitespace-nowrap",
                   activeTab === 'settings' && "font-semibold"
                 )}>
                   تنظیمات
