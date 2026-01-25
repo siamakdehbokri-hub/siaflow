@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { 
   User, Bell, Shield, Palette, Download, 
   HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor, FolderOpen,
-  Trash2, AlertTriangle, Loader2, ShieldCheck
+  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Heart, Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -56,6 +56,8 @@ const settingsGroups = [
     title: 'پشتیبانی',
     items: [
       { icon: HelpCircle, label: 'راهنما', action: 'help', color: 'text-indigo-500' },
+      { icon: Info, label: 'درباره ما', action: 'about', color: 'text-pink-500' },
+      { icon: Mail, label: 'تماس با ما', action: 'contact', color: 'text-orange-500' },
     ],
   },
 ];
@@ -64,7 +66,7 @@ interface SettingsProps {
   onOpenCategories?: () => void;
 }
 
-type SettingsView = 'main' | 'profile' | 'help' | 'security';
+type SettingsView = 'main' | 'profile' | 'help' | 'security' | 'about' | 'contact';
 
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
@@ -87,6 +89,12 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         break;
       case 'security':
         setCurrentView('security');
+        break;
+      case 'about':
+        setCurrentView('about');
+        break;
+      case 'contact':
+        setCurrentView('contact');
         break;
       case 'backup':
         toast.success('پشتیبان‌گیری انجام شد');
@@ -149,6 +157,102 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
   if (currentView === 'security') {
     return <SecuritySettings onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'about') {
+    return (
+      <div className="space-y-5 animate-fade-in pb-6">
+        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2">
+          <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
+          بازگشت
+        </Button>
+        
+        <Card variant="glass" className="overflow-hidden">
+          <div className="h-32 gradient-primary opacity-90 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">SiaFlow</h2>
+            </div>
+          </div>
+          
+          <CardContent className="p-5 space-y-4">
+            <div className="text-center space-y-3">
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Heart className="w-4 h-4 text-pink-500" />
+                <span className="text-sm">ساخته شده با عشق</span>
+              </div>
+              
+              <div className="bg-muted/50 rounded-2xl p-4 space-y-3">
+                <p className="text-foreground leading-relaxed text-sm">
+                  این برنامه توسط <span className="font-bold text-primary">سیامک.د</span> توسعه داده شده است.
+                </p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  SiaFlow یک دستیار هوشمند مدیریت مالی شخصی است که با استفاده از هوش مصنوعی به شما کمک می‌کند تا درک بهتری از وضعیت مالی خود داشته باشید و تصمیمات هوشمندانه‌تری بگیرید.
+                </p>
+              </div>
+              
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">هوش مصنوعی</span>
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs rounded-full">مدیریت بودجه</span>
+                <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs rounded-full">گزارش‌گیری</span>
+                <span className="px-3 py-1 bg-purple-500/10 text-purple-500 text-xs rounded-full">اهداف پس‌انداز</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <p className="text-center text-xs text-muted-foreground/60">
+          نسخه ۱.۹.۰
+        </p>
+      </div>
+    );
+  }
+
+  if (currentView === 'contact') {
+    return (
+      <div className="space-y-5 animate-fade-in pb-6">
+        <Button variant="ghost" size="sm" onClick={() => setCurrentView('main')} className="mb-2">
+          <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
+          بازگشت
+        </Button>
+        
+        <Card variant="glass">
+          <CardHeader className="text-center pb-2">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-orange-500/10 flex items-center justify-center mb-3">
+              <Mail className="w-8 h-8 text-orange-500" />
+            </div>
+            <CardTitle className="text-xl">تماس با ما</CardTitle>
+            <CardDescription>
+              سوال، پیشنهاد یا انتقادی دارید؟ با ما در ارتباط باشید
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <a 
+              href="mailto:siamakflow@gmail.com"
+              className="flex items-center gap-4 p-4 rounded-2xl bg-muted/50 hover:bg-accent transition-colors"
+            >
+              <div className="p-3 rounded-xl bg-primary/10">
+                <Mail className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">ایمیل</p>
+                <p className="text-sm text-muted-foreground truncate" dir="ltr">siamakflow@gmail.com</p>
+              </div>
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+            </a>
+            
+            <div className="bg-muted/30 rounded-2xl p-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                پاسخگوی شما هستیم. معمولاً ظرف ۲۴ ساعت پاسخ می‌دهیم.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
@@ -398,7 +502,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-[10px] sm:text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۱.۹.۰ - پنل مدیریت و سیستم نقش‌ها
+        SiaFlow نسخه ۲.۰.۰
       </p>
 
       {/* Delete Account Dialog */}
