@@ -5,25 +5,38 @@ import { BalanceHero } from './BalanceHero';
 import { QuickActions } from './QuickActions';
 import { AIInsightCard } from './AIInsightCard';
 import { RecentActivity } from './RecentActivity';
+import { GoalsPreview } from './GoalsPreview';
+import { SavingGoal } from '@/hooks/useSavingGoals';
+import { Debt } from '@/hooks/useDebts';
 
 interface HomeScreenProps {
   transactions: Transaction[];
   categories: Category[];
+  goals: SavingGoal[];
+  debts: Debt[];
   userName?: string;
   onAddTransaction: (type?: string) => void;
   onViewAllTransactions: () => void;
   onViewInsights: () => void;
   onOpenTransfers: () => void;
+  onOpenGoals: () => void;
+  onOpenDebts: () => void;
+  onOpenBudget: () => void;
 }
 
 export function HomeScreen({
   transactions,
   categories,
+  goals,
+  debts,
   userName = 'کاربر',
   onAddTransaction,
   onViewAllTransactions,
   onViewInsights,
   onOpenTransfers,
+  onOpenGoals,
+  onOpenDebts,
+  onOpenBudget,
 }: HomeScreenProps) {
   // Calculate financial data for current Jalali month
   const financialData = useMemo(() => {
@@ -148,6 +161,16 @@ export function HomeScreen({
         title={insight.title}
         message={insight.message}
         onClick={onViewInsights}
+      />
+      
+      {/* Goals & Planning Preview */}
+      <GoalsPreview
+        goals={goals}
+        debts={debts}
+        categories={categories}
+        onViewGoals={onOpenGoals}
+        onViewDebts={onOpenDebts}
+        onViewBudget={onOpenBudget}
       />
       
       {/* Recent Activity */}

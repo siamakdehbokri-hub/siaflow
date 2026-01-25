@@ -145,11 +145,16 @@ const Index = () => {
               <HomeScreen
                 transactions={transactions}
                 categories={categoriesWithSpent}
+                goals={goals}
+                debts={debts}
                 userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
                 onAddTransaction={openAddModal}
                 onViewAllTransactions={() => setActiveTab('activity')}
                 onViewInsights={() => setActiveTab('insights')}
                 onOpenTransfers={() => setSubView('transfers')}
+                onOpenGoals={() => setSubView('goals')}
+                onOpenDebts={() => setSubView('debts')}
+                onOpenBudget={() => setSubView('categories')}
               />
             )}
             {activeTab === 'activity' && (
