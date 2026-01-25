@@ -5,7 +5,8 @@ import {
   AlertTriangle, Loader2, Search, Download, Filter, Eye,
   Mail, Phone, Calendar, TrendingUp, Clock, ChevronDown,
   Settings, FileText, UserPlus, Bell, MessageSquare, 
-  Server, HardDrive, Wallet, ArrowRightLeft, PieChart
+  Server, HardDrive, Wallet, ArrowRightLeft, PieChart,
+  Banknote, TrendingDown, DollarSign, Receipt, Tag, Landmark
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAdmin, AdminUser } from '@/hooks/useAdmin';
+import { useAdmin, AdminUser, AdminTransaction, AdminCategory, AdminDebt, AdminGoal, AdminAccount } from '@/hooks/useAdmin';
 import { formatDistanceToNow, format, subDays } from 'date-fns';
 import { faIR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -70,7 +71,31 @@ export function AdminPanel() {
     fetchStats,
     toggleUserStatus,
     deleteUser,
-    setUserAdmin
+    setUserAdmin,
+    // Extended data
+    transactions,
+    transactionsLoading,
+    fetchAllTransactions,
+    categories,
+    categoriesLoading,
+    fetchAllCategories,
+    debts,
+    debtsLoading,
+    fetchAllDebts,
+    goals,
+    goalsLoading,
+    fetchAllGoals,
+    accounts,
+    accountsLoading,
+    fetchAllAccounts,
+    financialSummary,
+    financialSummaryLoading,
+    fetchFinancialSummary,
+    // Delete actions
+    deleteTransaction,
+    deleteCategory,
+    deleteDebt,
+    deleteGoal
   } = useAdmin();
 
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<AdminUser | null>(null);
@@ -79,29 +104,62 @@ export function AdminPanel() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [activeTab, setActiveTab] = useState('users');
+  
+  // Filter states for transactions
+  const [txSearchQuery, setTxSearchQuery] = useState('');
+  const [txTypeFilter, setTxTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [txUserFilter, setTxUserFilter] = useState<string>('all');
+
+  // Delete confirm states
+  const [deleteConfirmTx, setDeleteConfirmTx] = useState<AdminTransaction | null>(null);
+  const [deleteConfirmCat, setDeleteConfirmCat] = useState<AdminCategory | null>(null);
+  const [deleteConfirmDebt, setDeleteConfirmDebt] = useState<AdminDebt | null>(null);
+  const [deleteConfirmGoal, setDeleteConfirmGoal] = useState<AdminGoal | null>(null);
 
   useEffect(() => {
     if (isAdmin) {
       fetchUsers();
       fetchStats();
+      fetchFinancialSummary();
     }
-  }, [isAdmin, fetchUsers, fetchStats]);
+  }, [isAdmin, fetchUsers, fetchStats, fetchFinancialSummary]);
+
+  // Load data when tab changes
+  useEffect(() => {
+    if (!isAdmin) return;
+    
+    switch (activeTab) {
+      case 'transactions':
+        if (transactions.length === 0) fetchAllTransactions();
+        break;
+      case 'categories':
+        if (categories.length === 0) fetchAllCategories();
+        break;
+      case 'debts':
+        if (debts.length === 0) fetchAllDebts();
+        break;
+      case 'goals':
+        if (goals.length === 0) fetchAllGoals();
+        break;
+      case 'accounts':
+        if (accounts.length === 0) fetchAllAccounts();
+        break;
+    }
+  }, [activeTab, isAdmin]);
 
   // Filtered users
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      // Search filter
       const matchesSearch = 
         u.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Status filter
       const matchesStatus = 
         statusFilter === 'all' ||
         (statusFilter === 'active' && u.isActive) ||
         (statusFilter === 'inactive' && !u.isActive);
       
-      // Role filter
       const matchesRole = 
         roleFilter === 'all' ||
         (roleFilter === 'admin' && u.roles.includes('admin')) ||
@@ -110,6 +168,21 @@ export function AdminPanel() {
       return matchesSearch && matchesStatus && matchesRole;
     });
   }, [users, searchQuery, statusFilter, roleFilter]);
+
+  // Filtered transactions
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(t => {
+      const matchesSearch = 
+        t.category?.toLowerCase().includes(txSearchQuery.toLowerCase()) ||
+        t.description?.toLowerCase().includes(txSearchQuery.toLowerCase()) ||
+        t.userName?.toLowerCase().includes(txSearchQuery.toLowerCase());
+      
+      const matchesType = txTypeFilter === 'all' || t.type === txTypeFilter;
+      const matchesUser = txUserFilter === 'all' || t.user_id === txUserFilter;
+      
+      return matchesSearch && matchesType && matchesUser;
+    });
+  }, [transactions, txSearchQuery, txTypeFilter, txUserFilter]);
 
   // Export users to CSV
   const exportToCSV = () => {
@@ -133,6 +206,31 @@ export function AdminPanel() {
     const link = document.createElement('a');
     link.href = url;
     link.download = `users-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export transactions to CSV
+  const exportTransactionsToCSV = () => {
+    const headers = ['تاریخ', 'کاربر', 'نوع', 'دسته‌بندی', 'مبلغ', 'توضیحات'];
+    const rows = filteredTransactions.map(t => [
+      t.date,
+      t.userName,
+      t.type === 'income' ? 'درآمد' : 'هزینه',
+      t.category,
+      t.amount.toString(),
+      t.description || '-'
+    ]);
+    
+    const csvContent = [headers, ...rows]
+      .map(row => row.join(','))
+      .join('\n');
+    
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `transactions-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -195,6 +293,50 @@ export function AdminPanel() {
     }
   };
 
+  const handleDeleteTransaction = async () => {
+    if (!deleteConfirmTx) return;
+    setActionLoading(deleteConfirmTx.id);
+    try {
+      await deleteTransaction(deleteConfirmTx.id);
+    } finally {
+      setActionLoading(null);
+      setDeleteConfirmTx(null);
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!deleteConfirmCat) return;
+    setActionLoading(deleteConfirmCat.id);
+    try {
+      await deleteCategory(deleteConfirmCat.id);
+    } finally {
+      setActionLoading(null);
+      setDeleteConfirmCat(null);
+    }
+  };
+
+  const handleDeleteDebt = async () => {
+    if (!deleteConfirmDebt) return;
+    setActionLoading(deleteConfirmDebt.id);
+    try {
+      await deleteDebt(deleteConfirmDebt.id);
+    } finally {
+      setActionLoading(null);
+      setDeleteConfirmDebt(null);
+    }
+  };
+
+  const handleDeleteGoal = async () => {
+    if (!deleteConfirmGoal) return;
+    setActionLoading(deleteConfirmGoal.id);
+    try {
+      await deleteGoal(deleteConfirmGoal.id);
+    } finally {
+      setActionLoading(null);
+      setDeleteConfirmGoal(null);
+    }
+  };
+
   const formatLastLogin = (date: string | null) => {
     if (!date) return 'هرگز';
     try {
@@ -213,6 +355,17 @@ export function AdminPanel() {
     }
   };
 
+  const refreshAll = () => {
+    fetchUsers();
+    fetchStats();
+    fetchFinancialSummary();
+    if (transactions.length > 0) fetchAllTransactions();
+    if (categories.length > 0) fetchAllCategories();
+    if (debts.length > 0) fetchAllDebts();
+    if (goals.length > 0) fetchAllGoals();
+    if (accounts.length > 0) fetchAllAccounts();
+  };
+
   return (
     <div className="space-y-6" dir="rtl">
       {/* Header */}
@@ -223,15 +376,12 @@ export function AdminPanel() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">پنل مدیریت</h1>
-            <p className="text-sm text-muted-foreground">مدیریت کاربران و سیستم • نسخه 1.9</p>
+            <p className="text-sm text-muted-foreground">مدیریت کامل سیستم • نسخه 2.0</p>
           </div>
         </div>
         <Button
           variant="outline"
-          onClick={() => {
-            fetchUsers();
-            fetchStats();
-          }}
+          onClick={refreshAll}
           disabled={usersLoading || statsLoading}
           className="rounded-xl"
         >
@@ -240,8 +390,69 @@ export function AdminPanel() {
         </Button>
       </div>
 
+      {/* Financial Summary Cards */}
+      {financialSummary && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Card className="glass hover-lift border-green-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-green-500/10">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-green-500">{formatCurrency(financialSummary.totalIncome)}</p>
+                  <p className="text-xs text-muted-foreground">کل درآمد</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass hover-lift border-red-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-500/10">
+                  <TrendingDown className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-red-500">{formatCurrency(financialSummary.totalExpense)}</p>
+                  <p className="text-xs text-muted-foreground">کل هزینه</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass hover-lift border-blue-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-500/10">
+                  <Wallet className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-blue-500">{formatCurrency(financialSummary.totalAccountBalance)}</p>
+                  <p className="text-xs text-muted-foreground">موجودی حساب‌ها</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass hover-lift border-purple-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-500/10">
+                  <Target className="w-5 h-5 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-purple-500">{financialSummary.totalGoalProgress}%</p>
+                  <p className="text-xs text-muted-foreground">پیشرفت اهداف</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         <Card className="glass hover-lift">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -250,7 +461,7 @@ export function AdminPanel() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.totalUsers ?? '-'}</p>
-                <p className="text-xs text-muted-foreground">کل کاربران</p>
+                <p className="text-xs text-muted-foreground">کاربران</p>
               </div>
             </div>
           </CardContent>
@@ -264,7 +475,7 @@ export function AdminPanel() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.activeUsers ?? '-'}</p>
-                <p className="text-xs text-muted-foreground">کاربر فعال</p>
+                <p className="text-xs text-muted-foreground">فعال</p>
               </div>
             </div>
           </CardContent>
@@ -288,7 +499,7 @@ export function AdminPanel() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-orange-500/10">
-                <Database className="w-5 h-5 text-orange-500" />
+                <Tag className="w-5 h-5 text-orange-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.totalCategories ?? '-'}</p>
@@ -302,7 +513,7 @@ export function AdminPanel() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-red-500/10">
-                <BarChart3 className="w-5 h-5 text-red-500" />
+                <Banknote className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.totalDebts ?? '-'}</p>
@@ -320,7 +531,35 @@ export function AdminPanel() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats?.totalGoals ?? '-'}</p>
-                <p className="text-xs text-muted-foreground">هدف پس‌انداز</p>
+                <p className="text-xs text-muted-foreground">هدف</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass hover-lift">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-indigo-500/10">
+                <Landmark className="w-5 h-5 text-indigo-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats?.totalAccounts ?? '-'}</p>
+                <p className="text-xs text-muted-foreground">حساب</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass hover-lift">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-pink-500/10">
+                <ArrowRightLeft className="w-5 h-5 text-pink-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats?.totalTransfers ?? '-'}</p>
+                <p className="text-xs text-muted-foreground">انتقال</p>
               </div>
             </div>
           </CardContent>
@@ -328,25 +567,40 @@ export function AdminPanel() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 max-w-md glass">
-          <TabsTrigger value="users" className="gap-2 rounded-xl">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 gap-1 glass h-auto p-1">
+          <TabsTrigger value="users" className="gap-1.5 rounded-lg text-xs py-2">
             <Users className="w-4 h-4" />
-            کاربران
+            <span className="hidden sm:inline">کاربران</span>
           </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-2 rounded-xl">
-            <BarChart3 className="w-4 h-4" />
-            گزارش‌ها
+          <TabsTrigger value="transactions" className="gap-1.5 rounded-lg text-xs py-2">
+            <CreditCard className="w-4 h-4" />
+            <span className="hidden sm:inline">تراکنش‌ها</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-2 rounded-xl">
+          <TabsTrigger value="categories" className="gap-1.5 rounded-lg text-xs py-2">
+            <Tag className="w-4 h-4" />
+            <span className="hidden sm:inline">دسته‌ها</span>
+          </TabsTrigger>
+          <TabsTrigger value="debts" className="gap-1.5 rounded-lg text-xs py-2">
+            <Banknote className="w-4 h-4" />
+            <span className="hidden sm:inline">بدهی‌ها</span>
+          </TabsTrigger>
+          <TabsTrigger value="goals" className="gap-1.5 rounded-lg text-xs py-2">
+            <Target className="w-4 h-4" />
+            <span className="hidden sm:inline">اهداف</span>
+          </TabsTrigger>
+          <TabsTrigger value="accounts" className="gap-1.5 rounded-lg text-xs py-2">
+            <Wallet className="w-4 h-4" />
+            <span className="hidden sm:inline">حساب‌ها</span>
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5 rounded-lg text-xs py-2">
             <Settings className="w-4 h-4" />
-            تنظیمات
+            <span className="hidden sm:inline">تنظیمات</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Users Tab */}
         <TabsContent value="users" className="mt-4 space-y-4">
-          {/* Search and Filters */}
           <Card className="glass">
             <CardContent className="p-4">
               <div className="flex flex-col sm:flex-row gap-3">
@@ -396,7 +650,6 @@ export function AdminPanel() {
             </CardContent>
           </Card>
 
-          {/* Users Table */}
           <Card className="glass">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center justify-between">
@@ -417,23 +670,19 @@ export function AdminPanel() {
               ) : filteredUsers.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground">
-                    {searchQuery || statusFilter !== 'all' || roleFilter !== 'all' 
-                      ? 'کاربری با این فیلترها یافت نشد' 
-                      : 'هیچ کاربری یافت نشد'}
-                  </p>
+                  <p className="text-muted-foreground">کاربری یافت نشد</p>
                 </div>
               ) : (
-                <ScrollArea className="h-[500px]">
+                <ScrollArea className="h-[400px]">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right sticky top-0 bg-background">کاربر</TableHead>
-                        <TableHead className="text-right sticky top-0 bg-background">وضعیت</TableHead>
-                        <TableHead className="text-right sticky top-0 bg-background">نقش</TableHead>
-                        <TableHead className="text-right sticky top-0 bg-background">تراکنش‌ها</TableHead>
-                        <TableHead className="text-right sticky top-0 bg-background">آخرین ورود</TableHead>
-                        <TableHead className="text-right sticky top-0 bg-background">عملیات</TableHead>
+                        <TableHead className="text-right">کاربر</TableHead>
+                        <TableHead className="text-right">وضعیت</TableHead>
+                        <TableHead className="text-right">نقش</TableHead>
+                        <TableHead className="text-right">تراکنش‌ها</TableHead>
+                        <TableHead className="text-right">آخرین ورود</TableHead>
+                        <TableHead className="text-right">عملیات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -467,16 +716,14 @@ export function AdminPanel() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-1">
-                              {adminUser.roles.includes('admin') ? (
-                                <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30 rounded-lg">
-                                  <Crown className="w-3 h-3 ml-1" />
-                                  ادمین
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="rounded-lg">کاربر</Badge>
-                              )}
-                            </div>
+                            {adminUser.roles.includes('admin') ? (
+                              <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30 rounded-lg">
+                                <Crown className="w-3 h-3 ml-1" />
+                                ادمین
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="rounded-lg">کاربر</Badge>
+                            )}
                           </TableCell>
                           <TableCell>
                             <span className="font-mono text-sm bg-muted px-2 py-1 rounded-lg">
@@ -489,55 +736,53 @@ export function AdminPanel() {
                             </span>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-1">
-                              {adminUser.id !== user?.id ? (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="rounded-xl">
-                                      <ChevronDown className="w-4 h-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuLabel>عملیات</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => setSelectedUser(adminUser)}>
-                                      <Eye className="w-4 h-4 ml-2" />
-                                      مشاهده جزئیات
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleToggleStatus(adminUser.id)}>
-                                      {adminUser.isActive ? (
-                                        <>
-                                          <UserX className="w-4 h-4 ml-2 text-orange-500" />
-                                          غیرفعال‌سازی
-                                        </>
-                                      ) : (
-                                        <>
-                                          <UserCheck className="w-4 h-4 ml-2 text-green-500" />
-                                          فعال‌سازی
-                                        </>
-                                      )}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleToggleAdmin(adminUser)}>
-                                      <Crown className={cn(
-                                        "w-4 h-4 ml-2",
-                                        adminUser.roles.includes('admin') ? "text-amber-500" : "text-muted-foreground"
-                                      )} />
-                                      {adminUser.roles.includes('admin') ? 'حذف نقش ادمین' : 'افزودن نقش ادمین'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                      onClick={() => setDeleteConfirmUser(adminUser)}
-                                      className="text-destructive focus:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4 ml-2" />
-                                      حذف کاربر
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              ) : (
-                                <Badge variant="outline" className="text-xs rounded-lg">شما</Badge>
-                              )}
-                            </div>
+                            {adminUser.id !== user?.id ? (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="rounded-xl">
+                                    <ChevronDown className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuLabel>عملیات</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => setSelectedUser(adminUser)}>
+                                    <Eye className="w-4 h-4 ml-2" />
+                                    مشاهده جزئیات
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleToggleStatus(adminUser.id)}>
+                                    {adminUser.isActive ? (
+                                      <>
+                                        <UserX className="w-4 h-4 ml-2 text-orange-500" />
+                                        غیرفعال‌سازی
+                                      </>
+                                    ) : (
+                                      <>
+                                        <UserCheck className="w-4 h-4 ml-2 text-green-500" />
+                                        فعال‌سازی
+                                      </>
+                                    )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleToggleAdmin(adminUser)}>
+                                    <Crown className={cn(
+                                      "w-4 h-4 ml-2",
+                                      adminUser.roles.includes('admin') ? "text-amber-500" : "text-muted-foreground"
+                                    )} />
+                                    {adminUser.roles.includes('admin') ? 'حذف نقش ادمین' : 'افزودن نقش ادمین'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    onClick={() => setDeleteConfirmUser(adminUser)}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4 ml-2" />
+                                    حذف کاربر
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            ) : (
+                              <Badge variant="outline" className="text-xs rounded-lg">شما</Badge>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -549,43 +794,490 @@ export function AdminPanel() {
           </Card>
         </TabsContent>
 
-        {/* Reports Tab */}
-        <TabsContent value="reports" className="mt-4">
+        {/* Transactions Tab */}
+        <TabsContent value="transactions" className="mt-4 space-y-4">
+          <Card className="glass">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="جستجوی تراکنش..."
+                    value={txSearchQuery}
+                    onChange={(e) => setTxSearchQuery(e.target.value)}
+                    className="pr-10 rounded-xl"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select value={txTypeFilter} onValueChange={(v: any) => setTxTypeFilter(v)}>
+                    <SelectTrigger className="w-[120px] rounded-xl">
+                      <SelectValue placeholder="نوع" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">همه</SelectItem>
+                      <SelectItem value="income">درآمد</SelectItem>
+                      <SelectItem value="expense">هزینه</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={txUserFilter} onValueChange={setTxUserFilter}>
+                    <SelectTrigger className="w-[150px] rounded-xl">
+                      <SelectValue placeholder="کاربر" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">همه کاربران</SelectItem>
+                      {users.map(u => (
+                        <SelectItem key={u.id} value={u.id}>{u.displayName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={exportTransactionsToCSV}
+                    className="rounded-xl"
+                    title="خروجی CSV"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  تمام تراکنش‌ها
+                </div>
+                <Badge variant="outline" className="font-mono">
+                  {filteredTransactions.length} / {transactions.length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {transactionsLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : filteredTransactions.length === 0 ? (
+                <div className="text-center py-12">
+                  <CreditCard className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">تراکنشی یافت نشد</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-right">تاریخ</TableHead>
+                        <TableHead className="text-right">کاربر</TableHead>
+                        <TableHead className="text-right">نوع</TableHead>
+                        <TableHead className="text-right">دسته‌بندی</TableHead>
+                        <TableHead className="text-right">مبلغ</TableHead>
+                        <TableHead className="text-right">عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredTransactions.map((tx) => (
+                        <TableRow key={tx.id} className="hover:bg-muted/50">
+                          <TableCell className="text-sm">{tx.date}</TableCell>
+                          <TableCell className="text-sm">{tx.userName}</TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "rounded-lg",
+                                tx.type === 'income' 
+                                  ? "bg-green-500/10 text-green-600" 
+                                  : "bg-red-500/10 text-red-600"
+                              )}
+                            >
+                              {tx.type === 'income' ? 'درآمد' : 'هزینه'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">{tx.category}</TableCell>
+                          <TableCell className={cn(
+                            "font-mono font-medium",
+                            tx.type === 'income' ? 'text-green-600' : 'text-red-600'
+                          )}>
+                            {formatCurrency(tx.amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteConfirmTx(tx)}
+                              className="text-destructive hover:text-destructive rounded-xl"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Categories Tab */}
+        <TabsContent value="categories" className="mt-4">
+          <Card className="glass">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-5 h-5" />
+                  تمام دسته‌بندی‌ها
+                </div>
+                <Badge variant="outline" className="font-mono">{categories.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {categoriesLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="text-center py-12">
+                  <Tag className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">دسته‌بندی‌ای یافت نشد</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-right">نام</TableHead>
+                        <TableHead className="text-right">کاربر</TableHead>
+                        <TableHead className="text-right">نوع</TableHead>
+                        <TableHead className="text-right">بودجه</TableHead>
+                        <TableHead className="text-right">عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {categories.map((cat) => (
+                        <TableRow key={cat.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: cat.color + '20' }}
+                              >
+                                <span style={{ color: cat.color }}>●</span>
+                              </div>
+                              <span className="font-medium">{cat.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm">{cat.userName}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="rounded-lg">
+                              {cat.type === 'income' ? 'درآمد' : 'هزینه'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {cat.budget ? formatCurrency(cat.budget) : '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteConfirmCat(cat)}
+                              className="text-destructive hover:text-destructive rounded-xl"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Debts Tab */}
+        <TabsContent value="debts" className="mt-4">
+          <Card className="glass">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Banknote className="w-5 h-5" />
+                  تمام بدهی‌ها
+                </div>
+                <Badge variant="outline" className="font-mono">{debts.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {debtsLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : debts.length === 0 ? (
+                <div className="text-center py-12">
+                  <Banknote className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">بدهی‌ای یافت نشد</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-right">نام</TableHead>
+                        <TableHead className="text-right">کاربر</TableHead>
+                        <TableHead className="text-right">طلبکار</TableHead>
+                        <TableHead className="text-right">کل مبلغ</TableHead>
+                        <TableHead className="text-right">پرداخت شده</TableHead>
+                        <TableHead className="text-right">سررسید</TableHead>
+                        <TableHead className="text-right">عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {debts.map((debt) => (
+                        <TableRow key={debt.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{debt.name}</TableCell>
+                          <TableCell className="text-sm">{debt.userName}</TableCell>
+                          <TableCell className="text-sm">{debt.creditor}</TableCell>
+                          <TableCell className="font-mono text-sm">{formatCurrency(debt.total_amount)}</TableCell>
+                          <TableCell className="font-mono text-sm text-green-600">{formatCurrency(debt.paid_amount)}</TableCell>
+                          <TableCell className="text-sm">{debt.due_date || '-'}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteConfirmDebt(debt)}
+                              className="text-destructive hover:text-destructive rounded-xl"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Goals Tab */}
+        <TabsContent value="goals" className="mt-4">
+          <Card className="glass">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  تمام اهداف پس‌انداز
+                </div>
+                <Badge variant="outline" className="font-mono">{goals.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {goalsLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : goals.length === 0 ? (
+                <div className="text-center py-12">
+                  <Target className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">هدفی یافت نشد</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-right">نام</TableHead>
+                        <TableHead className="text-right">کاربر</TableHead>
+                        <TableHead className="text-right">هدف</TableHead>
+                        <TableHead className="text-right">پس‌انداز</TableHead>
+                        <TableHead className="text-right">پیشرفت</TableHead>
+                        <TableHead className="text-right">عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {goals.map((goal) => {
+                        const progress = goal.target_amount > 0 
+                          ? Math.round((goal.current_amount / goal.target_amount) * 100) 
+                          : 0;
+                        return (
+                          <TableRow key={goal.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                  style={{ backgroundColor: goal.color + '20' }}
+                                >
+                                  <span style={{ color: goal.color }}>●</span>
+                                </div>
+                                <span className="font-medium">{goal.name}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm">{goal.userName}</TableCell>
+                            <TableCell className="font-mono text-sm">{formatCurrency(goal.target_amount)}</TableCell>
+                            <TableCell className="font-mono text-sm text-green-600">{formatCurrency(goal.current_amount)}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Progress value={progress} className="w-16 h-2" />
+                                <span className="text-xs font-mono">{progress}%</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteConfirmGoal(goal)}
+                                className="text-destructive hover:text-destructive rounded-xl"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Accounts Tab */}
+        <TabsContent value="accounts" className="mt-4">
+          <Card className="glass">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5" />
+                  تمام حساب‌ها
+                </div>
+                <Badge variant="outline" className="font-mono">{accounts.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {accountsLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : accounts.length === 0 ? (
+                <div className="text-center py-12">
+                  <Wallet className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <p className="text-muted-foreground">حسابی یافت نشد</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-right">نام</TableHead>
+                        <TableHead className="text-right">کاربر</TableHead>
+                        <TableHead className="text-right">نوع</TableHead>
+                        <TableHead className="text-right">موجودی</TableHead>
+                        <TableHead className="text-right">پیش‌فرض</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {accounts.map((acc) => (
+                        <TableRow key={acc.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: acc.color + '20' }}
+                              >
+                                <span style={{ color: acc.color }}>●</span>
+                              </div>
+                              <span className="font-medium">{acc.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-sm">{acc.userName}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="rounded-lg">{acc.type}</Badge>
+                          </TableCell>
+                          <TableCell className={cn(
+                            "font-mono text-sm",
+                            acc.balance >= 0 ? 'text-green-600' : 'text-red-600'
+                          )}>
+                            {formatCurrency(acc.balance)}
+                          </TableCell>
+                          <TableCell>
+                            {acc.is_default && (
+                              <Badge className="bg-primary/10 text-primary rounded-lg">پیش‌فرض</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Settings Tab */}
+        <TabsContent value="settings" className="mt-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="glass">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                  آمار کلی سیستم
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  تنظیمات سیستم
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
-                  <span className="text-muted-foreground">نرخ فعالیت کاربران</span>
-                  <span className="font-bold text-primary">
-                    {stats?.totalUsers ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0}%
-                  </span>
+                <div className="p-4 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Shield className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">احراز هویت</p>
+                      <p className="text-xs text-muted-foreground">تأیید ایمیل خودکار فعال است</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
-                  <span className="text-muted-foreground">میانگین تراکنش به ازای کاربر</span>
-                  <span className="font-bold">
-                    {stats?.totalUsers ? Math.round(stats.totalTransactions / stats.totalUsers) : 0}
-                  </span>
+
+                <div className="p-4 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-green-500/10">
+                      <Database className="w-4 h-4 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">پایگاه داده</p>
+                      <p className="text-xs text-muted-foreground">متصل و فعال</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
-                  <span className="text-muted-foreground">میانگین دسته‌بندی به ازای کاربر</span>
-                  <span className="font-bold">
-                    {stats?.totalUsers ? Math.round(stats.totalCategories / stats.totalUsers) : 0}
-                  </span>
+
+                <div className="p-4 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-lg bg-blue-500/10">
+                      <Activity className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">نسخه سیستم</p>
+                      <p className="text-xs text-muted-foreground">SiaFlow v2.0</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="glass">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <FileText className="w-5 h-5 text-primary" />
-                  خروجی گزارش
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  خروجی گزارشات
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -597,64 +1289,17 @@ export function AdminPanel() {
                   <Download className="w-4 h-4 ml-2" />
                   خروجی لیست کاربران (CSV)
                 </Button>
-                <p className="text-xs text-muted-foreground">
-                  می‌توانید لیست کاربران را به فرمت CSV دانلود کنید.
-                </p>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start rounded-xl"
+                  onClick={exportTransactionsToCSV}
+                >
+                  <Download className="w-4 h-4 ml-2" />
+                  خروجی تراکنش‌ها (CSV)
+                </Button>
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
-
-        {/* Settings Tab */}
-        <TabsContent value="settings" className="mt-4">
-          <Card className="glass">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                تنظیمات سیستم
-              </CardTitle>
-              <CardDescription>
-                مدیریت تنظیمات کلی سیستم
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 rounded-xl border border-border bg-muted/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Shield className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">احراز هویت</p>
-                    <p className="text-xs text-muted-foreground">تأیید ایمیل خودکار فعال است</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-border bg-muted/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-green-500/10">
-                    <Database className="w-4 h-4 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="font-medium">پایگاه داده</p>
-                    <p className="text-xs text-muted-foreground">متصل و فعال</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-border bg-muted/30">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-blue-500/10">
-                    <Activity className="w-4 h-4 text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="font-medium">نسخه سیستم</p>
-                    <p className="text-xs text-muted-foreground">SiaFlow v1.9</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
 
@@ -724,7 +1369,7 @@ export function AdminPanel() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete User Dialog */}
       <AlertDialog open={!!deleteConfirmUser} onOpenChange={() => setDeleteConfirmUser(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -736,7 +1381,7 @@ export function AdminPanel() {
               آیا مطمئن هستید که می‌خواهید کاربر <strong className="text-foreground">{deleteConfirmUser?.displayName}</strong> را حذف کنید؟
               <br /><br />
               <span className="text-destructive">
-                ⚠️ این عمل تمام داده‌های کاربر شامل تراکنش‌ها، دسته‌بندی‌ها، بدهی‌ها و اهداف پس‌انداز را به‌صورت دائمی حذف می‌کند و قابل بازگشت نیست.
+                ⚠️ این عمل تمام داده‌های کاربر را به‌صورت دائمی حذف می‌کند.
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -752,7 +1397,107 @@ export function AdminPanel() {
               ) : (
                 <Trash2 className="w-4 h-4 ml-2" />
               )}
-              حذف کاربر
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Transaction Dialog */}
+      <AlertDialog open={!!deleteConfirmTx} onOpenChange={() => setDeleteConfirmTx(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              حذف تراکنش
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              آیا مطمئن هستید که می‌خواهید این تراکنش را حذف کنید؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">انصراف</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTransaction}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            >
+              <Trash2 className="w-4 h-4 ml-2" />
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Category Dialog */}
+      <AlertDialog open={!!deleteConfirmCat} onOpenChange={() => setDeleteConfirmCat(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              حذف دسته‌بندی
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              آیا مطمئن هستید که می‌خواهید دسته‌بندی <strong className="text-foreground">{deleteConfirmCat?.name}</strong> را حذف کنید؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">انصراف</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCategory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            >
+              <Trash2 className="w-4 h-4 ml-2" />
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Debt Dialog */}
+      <AlertDialog open={!!deleteConfirmDebt} onOpenChange={() => setDeleteConfirmDebt(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              حذف بدهی
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              آیا مطمئن هستید که می‌خواهید بدهی <strong className="text-foreground">{deleteConfirmDebt?.name}</strong> را حذف کنید؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">انصراف</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteDebt}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            >
+              <Trash2 className="w-4 h-4 ml-2" />
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Goal Dialog */}
+      <AlertDialog open={!!deleteConfirmGoal} onOpenChange={() => setDeleteConfirmGoal(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              حذف هدف
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              آیا مطمئن هستید که می‌خواهید هدف <strong className="text-foreground">{deleteConfirmGoal?.name}</strong> را حذف کنید؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">انصراف</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteGoal}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            >
+              <Trash2 className="w-4 h-4 ml-2" />
+              حذف
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

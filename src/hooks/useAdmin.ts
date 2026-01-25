@@ -22,6 +22,89 @@ export interface SystemStats {
   totalCategories: number;
   totalDebts: number;
   totalGoals: number;
+  totalAccounts: number;
+  totalTransfers: number;
+}
+
+export interface AdminTransaction {
+  id: string;
+  user_id: string;
+  userName: string;
+  amount: number;
+  type: 'income' | 'expense';
+  category: string;
+  subcategory?: string;
+  description?: string;
+  date: string;
+  created_at: string;
+  is_recurring?: boolean;
+  tags?: string[];
+}
+
+export interface AdminCategory {
+  id: string;
+  user_id: string;
+  userName: string;
+  name: string;
+  icon: string;
+  color: string;
+  type: 'income' | 'expense';
+  budget?: number;
+  budget_type?: string;
+  subcategories?: string[];
+  created_at: string;
+}
+
+export interface AdminDebt {
+  id: string;
+  user_id: string;
+  userName: string;
+  name: string;
+  total_amount: number;
+  paid_amount: number;
+  creditor: string;
+  reason?: string;
+  due_date?: string;
+  created_at: string;
+}
+
+export interface AdminGoal {
+  id: string;
+  user_id: string;
+  userName: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  color: string;
+  icon: string;
+  deadline?: string;
+  created_at: string;
+}
+
+export interface AdminAccount {
+  id: string;
+  user_id: string;
+  userName: string;
+  name: string;
+  type: string;
+  balance: number;
+  color: string;
+  icon: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface FinancialSummary {
+  totalIncome: number;
+  totalExpense: number;
+  netBalance: number;
+  totalDebtAmount: number;
+  totalDebtPaid: number;
+  totalDebtRemaining: number;
+  totalGoalTarget: number;
+  totalGoalCurrent: number;
+  totalGoalProgress: number;
+  totalAccountBalance: number;
 }
 
 export function useAdmin() {
@@ -32,6 +115,20 @@ export function useAdmin() {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [usersLoading, setUsersLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
+  
+  // Extended data states
+  const [transactions, setTransactions] = useState<AdminTransaction[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [categories, setCategories] = useState<AdminCategory[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [debts, setDebts] = useState<AdminDebt[]>([]);
+  const [debtsLoading, setDebtsLoading] = useState(false);
+  const [goals, setGoals] = useState<AdminGoal[]>([]);
+  const [goalsLoading, setGoalsLoading] = useState(false);
+  const [accounts, setAccounts] = useState<AdminAccount[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(false);
+  const [financialSummary, setFinancialSummary] = useState<FinancialSummary | null>(null);
+  const [financialSummaryLoading, setFinancialSummaryLoading] = useState(false);
 
   // Check if current user is admin
   useEffect(() => {
@@ -114,6 +211,100 @@ export function useAdmin() {
     }
   }, [isAdmin]);
 
+  const fetchAllTransactions = useCallback(async (filterUserId?: string) => {
+    if (!isAdmin) return;
+    
+    setTransactionsLoading(true);
+    try {
+      const result = await callAdminFunction('get-all-transactions', undefined, { 
+        limit: 500, 
+        offset: 0,
+        userId: filterUserId
+      });
+      setTransactions(result.transactions || []);
+    } catch (err: any) {
+      console.error('Error fetching transactions:', err);
+      toast.error('خطا در دریافت تراکنش‌ها');
+    } finally {
+      setTransactionsLoading(false);
+    }
+  }, [isAdmin]);
+
+  const fetchAllCategories = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    setCategoriesLoading(true);
+    try {
+      const result = await callAdminFunction('get-all-categories');
+      setCategories(result.categories || []);
+    } catch (err: any) {
+      console.error('Error fetching categories:', err);
+      toast.error('خطا در دریافت دسته‌بندی‌ها');
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }, [isAdmin]);
+
+  const fetchAllDebts = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    setDebtsLoading(true);
+    try {
+      const result = await callAdminFunction('get-all-debts');
+      setDebts(result.debts || []);
+    } catch (err: any) {
+      console.error('Error fetching debts:', err);
+      toast.error('خطا در دریافت بدهی‌ها');
+    } finally {
+      setDebtsLoading(false);
+    }
+  }, [isAdmin]);
+
+  const fetchAllGoals = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    setGoalsLoading(true);
+    try {
+      const result = await callAdminFunction('get-all-goals');
+      setGoals(result.goals || []);
+    } catch (err: any) {
+      console.error('Error fetching goals:', err);
+      toast.error('خطا در دریافت اهداف');
+    } finally {
+      setGoalsLoading(false);
+    }
+  }, [isAdmin]);
+
+  const fetchAllAccounts = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    setAccountsLoading(true);
+    try {
+      const result = await callAdminFunction('get-all-accounts');
+      setAccounts(result.accounts || []);
+    } catch (err: any) {
+      console.error('Error fetching accounts:', err);
+      toast.error('خطا در دریافت حساب‌ها');
+    } finally {
+      setAccountsLoading(false);
+    }
+  }, [isAdmin]);
+
+  const fetchFinancialSummary = useCallback(async () => {
+    if (!isAdmin) return;
+    
+    setFinancialSummaryLoading(true);
+    try {
+      const result = await callAdminFunction('get-financial-summary');
+      setFinancialSummary(result.summary || null);
+    } catch (err: any) {
+      console.error('Error fetching financial summary:', err);
+      toast.error('خطا در دریافت خلاصه مالی');
+    } finally {
+      setFinancialSummaryLoading(false);
+    }
+  }, [isAdmin]);
+
   const toggleUserStatus = async (userId: string) => {
     try {
       const result = await callAdminFunction('toggle-user-status', userId);
@@ -152,6 +343,58 @@ export function useAdmin() {
     }
   };
 
+  const deleteTransaction = async (transactionId: string) => {
+    try {
+      await callAdminFunction('delete-transaction', undefined, { transactionId });
+      toast.success('تراکنش حذف شد');
+      await fetchAllTransactions();
+      await fetchStats();
+    } catch (err: any) {
+      console.error('Error deleting transaction:', err);
+      toast.error('خطا در حذف تراکنش');
+      throw err;
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    try {
+      await callAdminFunction('delete-category', undefined, { categoryId });
+      toast.success('دسته‌بندی حذف شد');
+      await fetchAllCategories();
+      await fetchStats();
+    } catch (err: any) {
+      console.error('Error deleting category:', err);
+      toast.error('خطا در حذف دسته‌بندی');
+      throw err;
+    }
+  };
+
+  const deleteDebt = async (debtId: string) => {
+    try {
+      await callAdminFunction('delete-debt', undefined, { debtId });
+      toast.success('بدهی حذف شد');
+      await fetchAllDebts();
+      await fetchStats();
+    } catch (err: any) {
+      console.error('Error deleting debt:', err);
+      toast.error('خطا در حذف بدهی');
+      throw err;
+    }
+  };
+
+  const deleteGoal = async (goalId: string) => {
+    try {
+      await callAdminFunction('delete-goal', undefined, { goalId });
+      toast.success('هدف حذف شد');
+      await fetchAllGoals();
+      await fetchStats();
+    } catch (err: any) {
+      console.error('Error deleting goal:', err);
+      toast.error('خطا در حذف هدف');
+      throw err;
+    }
+  };
+
   return {
     isAdmin,
     loading,
@@ -163,6 +406,30 @@ export function useAdmin() {
     fetchStats,
     toggleUserStatus,
     deleteUser,
-    setUserAdmin
+    setUserAdmin,
+    // Extended data
+    transactions,
+    transactionsLoading,
+    fetchAllTransactions,
+    categories,
+    categoriesLoading,
+    fetchAllCategories,
+    debts,
+    debtsLoading,
+    fetchAllDebts,
+    goals,
+    goalsLoading,
+    fetchAllGoals,
+    accounts,
+    accountsLoading,
+    fetchAllAccounts,
+    financialSummary,
+    financialSummaryLoading,
+    fetchFinancialSummary,
+    // Delete actions
+    deleteTransaction,
+    deleteCategory,
+    deleteDebt,
+    deleteGoal
   };
 }
