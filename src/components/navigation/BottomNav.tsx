@@ -39,13 +39,13 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
               if (isCenter) {
                 return (
                   <div key={item.id} className="relative flex flex-col items-center">
-                    {/* Quick Add FAB */}
+                    {/* Quick Add FAB - responsive sizing */}
                     <button
                       onClick={onAddClick}
-                      className="absolute -top-10 w-14 h-14 rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-300 active:scale-95 hover:scale-105"
+                      className="absolute -top-8 sm:-top-10 w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl gradient-primary shadow-glow flex items-center justify-center transition-all duration-300 active:scale-95 hover:scale-105"
                       aria-label="افزودن تراکنش"
                     >
-                      <Plus className="w-6 h-6 text-primary-foreground" />
+                      <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
                     </button>
                     
                     {/* Plan Tab */}
