@@ -384,14 +384,14 @@ export function Settings({ onOpenCategories }: SettingsProps) {
               <div className="absolute bottom-2 right-10 w-8 h-8 rounded-full bg-white/15 blur-lg" style={{ animationDelay: '0.3s' }} />
             </div>
           </div>
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2">
-            <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center text-2xl font-bold text-primary-foreground shrink-0 border-4 border-background shadow-xl transform hover:scale-105 transition-transform duration-300">
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-10">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl gradient-primary flex items-center justify-center text-xl sm:text-2xl font-bold text-primary-foreground border-4 border-background shadow-xl transform hover:scale-105 transition-transform duration-300">
               {initials}
             </div>
           </div>
         </div>
 
-        <CardContent className="p-5 pt-14 text-center">
+        <CardContent className="p-5 pt-12 sm:pt-14 text-center">
           <h3 className="text-lg font-bold text-foreground">{displayName}</h3>
           <p className="text-sm text-muted-foreground mt-1" dir="ltr">{displayPhone}</p>
 
