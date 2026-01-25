@@ -5,13 +5,57 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Simple validation functions (no external deps needed in Deno edge functions)
+function isValidTransaction(t: unknown): t is { amount: number; type: string; category: string; description?: string } {
+  if (typeof t !== 'object' || t === null) return false;
+  const obj = t as Record<string, unknown>;
+  
+  // amount must be a number
+  if (typeof obj.amount !== 'number' || isNaN(obj.amount)) return false;
+  
+  // type must be 'income' or 'expense'
+  if (obj.type !== 'income' && obj.type !== 'expense') return false;
+  
+  // category must be a non-empty string with max length
+  if (typeof obj.category !== 'string' || obj.category.length === 0 || obj.category.length > 100) return false;
+  
+  // description is optional but if present must be string with max length
+  if (obj.description !== undefined && obj.description !== null) {
+    if (typeof obj.description !== 'string' || obj.description.length > 500) return false;
+  }
+  
+  return true;
+}
+
+function isValidCategory(c: unknown): c is { name: string; budget?: number } {
+  if (typeof c !== 'object' || c === null) return false;
+  const obj = c as Record<string, unknown>;
+  
+  if (typeof obj.name !== 'string' || obj.name.length === 0 || obj.name.length > 100) return false;
+  if (obj.budget !== undefined && obj.budget !== null && typeof obj.budget !== 'number') return false;
+  
+  return true;
+}
+
+// Sanitize text to prevent prompt injection
+function sanitizeText(text: string): string {
+  // Remove potential prompt injection patterns
+  return text
+    .replace(/[<>]/g, '') // Remove HTML-like brackets
+    .replace(/\{[^}]*\}/g, '') // Remove curly brace patterns
+    .replace(/\[\[|\]\]/g, '') // Remove double brackets
+    .slice(0, 500); // Enforce length limit
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { transactions, categories, type } = await req.json();
+    const body = await req.json();
+    const { transactions: rawTransactions, categories: rawCategories, type } = body;
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -22,24 +66,50 @@ serve(async (req) => {
       );
     }
 
-    // Validate input data
-    if (!transactions || !Array.isArray(transactions)) {
+    // Validate type parameter
+    const validTypes = ['summary', 'savings', 'budget', 'general'];
+    const reportType = validTypes.includes(type) ? type : 'general';
+
+    // Validate transactions array
+    if (!Array.isArray(rawTransactions)) {
       return new Response(
         JSON.stringify({ error: "داده تراکنش‌ها معتبر نیست" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Generating AI report for type:", type, "transactions count:", transactions.length);
+    // Limit and validate each transaction
+    const transactions = rawTransactions
+      .slice(0, 100) // Limit to 100 items
+      .filter(isValidTransaction)
+      .map(t => ({
+        amount: Math.abs(t.amount), // Ensure positive
+        type: t.type,
+        category: sanitizeText(t.category),
+        description: t.description ? sanitizeText(t.description) : undefined
+      }));
+
+    // Validate categories array
+    const categories = Array.isArray(rawCategories) 
+      ? rawCategories
+          .slice(0, 50) // Limit categories
+          .filter(isValidCategory)
+          .map(c => ({
+            name: sanitizeText(c.name),
+            budget: c.budget && c.budget > 0 ? c.budget : 0
+          }))
+      : [];
+
+    console.log("Generating AI report for type:", reportType, "valid transactions:", transactions.length);
 
     // Calculate summary stats
     const totalIncome = transactions
-      .filter((t: any) => t.type === 'income')
-      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+      .filter((t) => t.type === 'income')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
     
     const totalExpense = transactions
-      .filter((t: any) => t.type === 'expense')
-      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+      .filter((t) => t.type === 'expense')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     // Check if there's enough data
     if (transactions.length === 0) {
@@ -52,8 +122,8 @@ serve(async (req) => {
     // Group expenses by category
     const categoryExpenses: Record<string, number> = {};
     transactions
-      .filter((t: any) => t.type === 'expense')
-      .forEach((t: any) => {
+      .filter((t) => t.type === 'expense')
+      .forEach((t) => {
         categoryExpenses[t.category] = (categoryExpenses[t.category] || 0) + (t.amount || 0);
       });
 
@@ -75,7 +145,7 @@ serve(async (req) => {
 
     let userPrompt = "";
 
-    if (type === "summary") {
+    if (reportType === "summary") {
       if (totalIncome === 0 && totalExpense === 0) {
         return new Response(
           JSON.stringify({ report: "📊 هنوز درآمد یا هزینه‌ای ثبت نشده.\n\nبا ثبت تراکنش‌ها، تحلیل مالی دریافت کنید." }),
@@ -94,7 +164,7 @@ ${topCategories.map((c, i) => `${i + 1}. ${c.name}: ${c.amount.toLocaleString('f
 
 لطفاً یک تحلیل کوتاه از وضعیت مالی ارائه بده و ۳ پیشنهاد برای بهبود ارائه کن.`;
 
-    } else if (type === "savings") {
+    } else if (reportType === "savings") {
       if (totalExpense === 0) {
         return new Response(
           JSON.stringify({ report: "💰 هنوز هزینه‌ای ثبت نشده.\n\nبرای پیشنهاد صرفه‌جویی، ابتدا هزینه‌ها را ثبت کنید." }),
@@ -112,8 +182,8 @@ ${topCategories.map((c, i) => `${i + 1}. ${c.name}: ${c.amount.toLocaleString('f
 
 لطفاً پیشنهادهای عملی برای صرفه‌جویی ارائه بده و بگو کاربر در کدام دسته‌ها می‌تواند کمتر خرج کند.`;
 
-    } else if (type === "budget") {
-      const budgetCategories = (categories || []).filter((c: any) => c.budget && c.budget > 0);
+    } else if (reportType === "budget") {
+      const budgetCategories = categories.filter((c) => c.budget && c.budget > 0);
       
       if (budgetCategories.length === 0) {
         return new Response(
@@ -124,7 +194,7 @@ ${topCategories.map((c, i) => `${i + 1}. ${c.name}: ${c.amount.toLocaleString('f
 
       userPrompt = `بودجه‌های تعیین شده و میزان مصرف:
 ${budgetCategories
-  .map((c: any) => {
+  .map((c) => {
     const spent = categoryExpenses[c.name] || 0;
     const percentage = c.budget > 0 ? Math.round((spent / c.budget) * 100) : 0;
     return `- ${c.name}: ${spent.toLocaleString('fa-IR')} از ${c.budget.toLocaleString('fa-IR')} تومان (${percentage}%)`;
