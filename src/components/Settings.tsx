@@ -113,10 +113,27 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const { theme, setTheme, isDark } = useTheme();
   const navigate = useNavigate();
+
+  // Fetch avatar URL from profile - MUST be at top level before any returns
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+      if (data?.avatar_url) {
+        setAvatarUrl(`${data.avatar_url}?t=${Date.now()}`);
+      }
+    };
+    fetchAvatar();
+  }, [user, currentView]);
 
   const handleAction = (action: string) => {
     switch (action) {
@@ -369,24 +386,6 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const phone = /^09\d{9}$/.test(emailPart) ? emailPart : '';
   const displayPhone = phone ? `${phone.slice(0, 4)} ${phone.slice(4, 7)} ${phone.slice(7)}` : user?.email || '';
   const initials = displayName.charAt(0).toUpperCase();
-
-  // Fetch avatar URL from profile
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      if (!user) return;
-      const { data } = await supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id', user.id)
-        .single();
-      if (data?.avatar_url) {
-        setAvatarUrl(`${data.avatar_url}?t=${Date.now()}`);
-      }
-    };
-    fetchAvatar();
-  }, [user, currentView]);
 
   const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 
