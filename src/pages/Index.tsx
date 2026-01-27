@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { BottomNav, NavTab } from '@/components/navigation/BottomNav';
+import { AppHeader } from '@/components/layout/AppHeader';
 import { HomeScreen } from '@/components/home/HomeScreen';
 import { ReportsHub } from '@/components/reports/ReportsHub';
 import { Settings } from '@/components/Settings';
@@ -17,7 +18,7 @@ import { useDebts } from '@/hooks/useDebts';
 import { useAuth } from '@/hooks/useAuth';
 import { useReminders } from '@/hooks/useReminders';
 import { useDebtReminders } from '@/hooks/useDebtReminders';
-import { Transaction, Category } from '@/types/expense';
+import { Transaction } from '@/types/expense';
 import { isInCurrentJalaliMonth } from '@/utils/persianDate';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ const Index = () => {
     if (subView === 'debts') return 'مدیریت بدهی';
     if (subView === 'transfers') return 'انتقال پول';
     switch (activeTab) {
-      case 'home': return 'خانه';
+      case 'home': return 'داشبورد';
       case 'reports': return 'گزارش‌ها';
       case 'settings': return 'تنظیمات';
       default: return 'SiaFlow';
@@ -98,76 +99,123 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32 mobile-scroll">
-      {/* Header - Enhanced for mobile */}
-      <header className="sticky top-0 z-40 pt-safe">
-        <div className="absolute inset-0 bg-background/85 backdrop-blur-xl border-b border-border/20" />
-        <div className="relative max-w-2xl mx-auto px-4 sm:px-5 h-14 sm:h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {subView !== 'main' && (
-              <Button variant="ghost" size="icon" onClick={() => setSubView('main')} className="rounded-xl touch-target shrink-0">
-                <ChevronRight className="w-5 h-5" />
-              </Button>
-            )}
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-              <span className="text-xs sm:text-sm font-bold text-primary-foreground">SF</span>
-            </div>
-            <h1 className="text-base sm:text-lg font-bold text-foreground truncate">{getPageTitle()}</h1>
-          </div>
-          <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
-            <DebtReminderNotifications reminders={debtReminders} onDismiss={dismissDebtReminder} onEnableNotifications={requestNotificationPermission} />
-            <ReminderNotifications reminders={reminders} onDismiss={dismissReminder} />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <AppHeader 
+        title={getPageTitle()} 
+        showDate={activeTab === 'home' && subView === 'main'} 
+      />
 
-      {/* Main Content - Better mobile spacing */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-5 py-4 sm:py-5">
-        {subView === 'categories' ? (
-          <CategoryManagement categories={categoriesWithSpent} onAddCategory={addCategory} onEditCategory={updateCategory} onDeleteCategory={deleteCategory} />
-        ) : subView === 'goals' ? (
-          <SavingGoals goals={goals} onAddGoal={addGoal} onUpdateAmount={updateGoalAmount} onDeleteGoal={deleteGoal} />
-        ) : subView === 'debts' ? (
-          <DebtManagement debts={debts} stats={debtStats} onAddDebt={addDebt} onUpdateDebt={updateDebt} onDeleteDebt={deleteDebt} onAddPayment={addPayment} />
-        ) : subView === 'transfers' ? (
-          <TransferManagement goals={goals} onTransferToGoal={async (goalId, amount) => await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب')} />
-        ) : (
-          <>
-            {activeTab === 'home' && (
-              <HomeScreen
-                transactions={transactions}
-                categories={categoriesWithSpent}
-                userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
-                onAddTransaction={openAddModal}
-                onViewAllTransactions={() => setActiveTab('reports')}
-              />
-            )}
-            {activeTab === 'reports' && (
-              <ReportsHub
-                transactions={transactions}
-                categories={categoriesWithSpent}
-                goals={goals}
-                debts={debts}
-                onEditTransaction={setEditingTransaction}
-                onDeleteTransaction={deleteTransaction}
-                onOpenGoals={() => setSubView('goals')}
-                onOpenDebts={() => setSubView('debts')}
-                onOpenBudget={() => setSubView('categories')}
-              />
-            )}
-            {activeTab === 'settings' && (
-              <Settings onOpenCategories={() => setSubView('categories')} />
-            )}
-          </>
-        )}
+      {/* Sub-view back button */}
+      {subView !== 'main' && (
+        <div className="bg-card border-b border-border px-4 py-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setSubView('main')} 
+            className="gap-1"
+          >
+            <ChevronRight className="w-4 h-4" />
+            بازگشت
+          </Button>
+        </div>
+      )}
+
+      {/* Notification badges */}
+      <div className="fixed top-16 left-4 z-40 flex gap-1">
+        <DebtReminderNotifications 
+          reminders={debtReminders} 
+          onDismiss={dismissDebtReminder} 
+          onEnableNotifications={requestNotificationPermission} 
+        />
+        <ReminderNotifications reminders={reminders} onDismiss={dismissReminder} />
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto pb-24">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          {subView === 'categories' ? (
+            <CategoryManagement 
+              categories={categoriesWithSpent} 
+              onAddCategory={addCategory} 
+              onEditCategory={updateCategory} 
+              onDeleteCategory={deleteCategory} 
+            />
+          ) : subView === 'goals' ? (
+            <SavingGoals 
+              goals={goals} 
+              onAddGoal={addGoal} 
+              onUpdateAmount={updateGoalAmount} 
+              onDeleteGoal={deleteGoal} 
+            />
+          ) : subView === 'debts' ? (
+            <DebtManagement 
+              debts={debts} 
+              stats={debtStats} 
+              onAddDebt={addDebt} 
+              onUpdateDebt={updateDebt} 
+              onDeleteDebt={deleteDebt} 
+              onAddPayment={addPayment} 
+            />
+          ) : subView === 'transfers' ? (
+            <TransferManagement 
+              goals={goals} 
+              onTransferToGoal={async (goalId, amount) => await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب')} 
+            />
+          ) : (
+            <>
+              {activeTab === 'home' && (
+                <HomeScreen
+                  transactions={transactions}
+                  categories={categoriesWithSpent}
+                  userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
+                  onAddTransaction={openAddModal}
+                  onViewAllTransactions={() => setActiveTab('reports')}
+                />
+              )}
+              {activeTab === 'reports' && (
+                <ReportsHub
+                  transactions={transactions}
+                  categories={categoriesWithSpent}
+                  goals={goals}
+                  debts={debts}
+                  onEditTransaction={setEditingTransaction}
+                  onDeleteTransaction={deleteTransaction}
+                  onOpenGoals={() => setSubView('goals')}
+                  onOpenDebts={() => setSubView('debts')}
+                  onOpenBudget={() => setSubView('categories')}
+                />
+              )}
+              {activeTab === 'settings' && (
+                <Settings onOpenCategories={() => setSubView('categories')} />
+              )}
+            </>
+          )}
+        </div>
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} onAddClick={() => openAddModal()} />
+      <BottomNav 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+        onAddClick={() => openAddModal()} 
+      />
 
       {/* Modals */}
-      <AddTransactionModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddTransaction} categories={categoriesWithSpent} />
-      <EditTransactionModal isOpen={!!editingTransaction} transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onSave={updateTransaction} onDelete={deleteTransaction} categories={categoriesWithSpent} />
+      <AddTransactionModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onAdd={handleAddTransaction} 
+        categories={categoriesWithSpent} 
+      />
+      <EditTransactionModal 
+        isOpen={!!editingTransaction} 
+        transaction={editingTransaction} 
+        onClose={() => setEditingTransaction(null)} 
+        onSave={updateTransaction} 
+        onDelete={deleteTransaction} 
+        categories={categoriesWithSpent} 
+      />
     </div>
   );
 };

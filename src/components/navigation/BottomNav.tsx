@@ -9,111 +9,66 @@ interface BottomNavProps {
   onAddClick: () => void;
 }
 
+const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
+  { id: 'home', icon: Home, label: 'داشبورد' },
+  { id: 'reports', icon: BarChart3, label: 'گزارش‌ها' },
+  { id: 'settings', icon: Settings, label: 'تنظیمات' },
+];
+
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
-      {/* Gradient Fade Background */}
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none h-24" />
-      
-      {/* Navigation Container */}
-      <div className="relative mx-3 mb-0 pb-safe">
-        <div className="glass-heavy rounded-t-2xl border-t border-x border-border/30 overflow-visible">
-          {/* Subtle top highlight */}
-          <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+    <>
+      {/* Floating Add Button - Left side like reference */}
+      <button
+        onClick={onAddClick}
+        className="fixed bottom-24 left-4 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 transition-transform"
+        aria-label="افزودن تراکنش"
+      >
+        <Plus className="w-7 h-7" strokeWidth={2.5} />
+      </button>
 
-          {/* Navigation Items - Even 4-column grid */}
-          <div className="grid grid-cols-4 items-center h-16">
-            
-            {/* Home */}
-            <NavItem
-              icon={Home}
-              label="خانه"
-              isActive={activeTab === 'home'}
-              onClick={() => onTabChange('home')}
-            />
-
-            {/* Reports */}
-            <NavItem
-              icon={BarChart3}
-              label="گزارش‌ها"
-              isActive={activeTab === 'reports'}
-              onClick={() => onTabChange('reports')}
-            />
-
-            {/* FAB - Centered between columns 2 & 3 */}
-            <div className="relative flex justify-center">
-              <button
-                onClick={onAddClick}
-                className="absolute -top-6 left-1/2 -translate-x-1/2 group flex items-center justify-center w-12 h-12 rounded-2xl gradient-primary shadow-float active:scale-95 transition-all duration-200"
-                aria-label="افزودن"
-              >
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-2xl bg-primary/30 blur-lg opacity-50 group-active:opacity-80 transition-opacity" />
-                <Plus className="relative w-6 h-6 text-primary-foreground" strokeWidth={2.5} />
-              </button>
-            </div>
-
-            {/* Settings */}
-            <NavItem
-              icon={Settings}
-              label="تنظیمات"
-              isActive={activeTab === 'settings'}
-              onClick={() => onTabChange('settings')}
-            />
-
+      {/* Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
+        <div className="pb-safe">
+          <div className="flex items-stretch h-16">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onTabChange(item.id)}
+                  className={cn(
+                    "flex-1 flex flex-col items-center justify-center gap-1 relative transition-colors",
+                    isActive 
+                      ? "text-primary" 
+                      : "text-muted-foreground active:text-foreground"
+                  )}
+                >
+                  <Icon 
+                    className="w-6 h-6" 
+                    strokeWidth={isActive ? 2 : 1.5} 
+                  />
+                  <span 
+                    className={cn(
+                      "text-[11px]",
+                      isActive ? "font-semibold" : "font-normal"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                  
+                  {/* Active indicator line */}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
-    </nav>
-  );
-}
-
-interface NavItemProps {
-  icon: LucideIcon;
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
-
-function NavItem({ icon: Icon, label, isActive, onClick }: NavItemProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "relative flex flex-col items-center justify-center gap-1 h-full px-2 transition-all duration-200",
-        isActive 
-          ? "text-primary" 
-          : "text-muted-foreground active:text-foreground"
-      )}
-    >
-      {/* Active background */}
-      {isActive && (
-        <div className="absolute inset-2 rounded-xl bg-primary/10" />
-      )}
-      
-      {/* Icon */}
-      <Icon 
-        className={cn(
-          "relative z-10 w-5 h-5 transition-transform duration-200",
-          isActive && "scale-110"
-        )}
-        strokeWidth={isActive ? 2.25 : 1.75} 
-      />
-      
-      {/* Label */}
-      <span 
-        className={cn(
-          "relative z-10 text-[10px] leading-none whitespace-nowrap",
-          isActive ? "font-semibold" : "font-medium opacity-80"
-        )}
-      >
-        {label}
-      </span>
-
-      {/* Active indicator dot */}
-      {isActive && (
-        <div className="absolute bottom-1.5 w-1 h-1 rounded-full bg-primary" />
-      )}
-    </button>
+      </nav>
+    </>
   );
 }
