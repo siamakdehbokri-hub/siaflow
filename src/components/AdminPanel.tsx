@@ -370,251 +370,126 @@ export function AdminPanel() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       {/* Header */}
-      <div className="flex flex-col gap-3">
-        {/* Back button - mobile friendly */}
+      <div className="flex items-center justify-between gap-3">
         <Button
-          variant="ghost"
+          variant="outline"
           onClick={() => navigate('/')}
-          className="w-fit rounded-xl gap-2 text-muted-foreground hover:text-foreground -mr-2"
+          className="rounded-xl gap-2 border-2"
         >
           <Home className="w-4 h-4" />
-          <span className="text-sm">بازگشت به خانه</span>
-          <ArrowRight className="w-4 h-4" />
+          <span className="text-sm">خانه</span>
         </Button>
         
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl glass-glow">
-              <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">پنل مدیریت</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">مدیریت کامل سیستم</p>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refreshAll}
-            disabled={usersLoading || statsLoading}
-            className="rounded-xl w-full sm:w-auto"
-          >
-            <RefreshCw className={cn("w-4 h-4 ml-2", (usersLoading || statsLoading) && "animate-spin")} />
-            بروزرسانی
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={refreshAll}
+          disabled={usersLoading || statsLoading}
+          className="rounded-xl border-2"
+        >
+          <RefreshCw className={cn("w-4 h-4 ml-2", (usersLoading || statsLoading) && "animate-spin")} />
+          بروزرسانی
+        </Button>
       </div>
 
-      {/* Financial Summary Cards - Mobile optimized */}
+      {/* Financial Summary Cards */}
       {financialSummary && (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <Card className="glass hover-lift border-green-500/20">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-green-500/10 shrink-0">
-                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm sm:text-lg font-bold text-green-500 truncate">{formatCurrency(financialSummary.totalIncome)}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">کل درآمد</p>
-                </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-card rounded-xl border-2 border-border p-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                <TrendingUp className="w-4 h-4 text-success" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">کل درآمد</p>
+                <p className="text-sm font-bold text-success truncate">{formatCurrency(financialSummary.totalIncome)}</p>
+              </div>
+            </div>
+          </div>
 
-          <Card className="glass hover-lift border-red-500/20">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-red-500/10 shrink-0">
-                  <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm sm:text-lg font-bold text-red-500 truncate">{formatCurrency(financialSummary.totalExpense)}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">کل هزینه</p>
-                </div>
+          <div className="bg-card rounded-xl border-2 border-border p-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+                <TrendingDown className="w-4 h-4 text-destructive" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">کل هزینه</p>
+                <p className="text-sm font-bold text-destructive truncate">{formatCurrency(financialSummary.totalExpense)}</p>
+              </div>
+            </div>
+          </div>
 
-          <Card className="glass hover-lift border-blue-500/20">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-500/10 shrink-0">
-                  <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm sm:text-lg font-bold text-blue-500 truncate">{formatCurrency(financialSummary.totalAccountBalance)}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">موجودی</p>
-                </div>
+          <div className="bg-card rounded-xl border-2 border-border p-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Wallet className="w-4 h-4 text-primary" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">موجودی</p>
+                <p className="text-sm font-bold text-primary truncate">{formatCurrency(financialSummary.totalAccountBalance)}</p>
+              </div>
+            </div>
+          </div>
 
-          <Card className="glass hover-lift border-purple-500/20">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-purple-500/10 shrink-0">
-                  <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm sm:text-lg font-bold text-purple-500">{financialSummary.totalGoalProgress}%</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">پیشرفت</p>
-                </div>
+          <div className="bg-card rounded-xl border-2 border-border p-3">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                <Target className="w-4 h-4 text-purple-500" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">پیشرفت اهداف</p>
+                <p className="text-sm font-bold text-purple-500">{financialSummary.totalGoalProgress}%</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Stats Cards - Mobile optimized with horizontal scroll */}
-      <div className="overflow-x-auto -mx-4 px-4 pb-2">
-        <div className="flex gap-2 sm:grid sm:grid-cols-4 lg:grid-cols-8 sm:gap-3 min-w-max sm:min-w-0">
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-500/10">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalUsers ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">کاربران</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-green-500/10">
-                  <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.activeUsers ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">فعال</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-purple-500/10">
-                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalTransactions ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">تراکنش</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-orange-500/10">
-                  <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalCategories ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">دسته‌بندی</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-red-500/10">
-                  <Banknote className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalDebts ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">بدهی</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-teal-500/10">
-                  <Target className="w-4 h-4 sm:w-5 sm:h-5 text-teal-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalGoals ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">هدف</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-indigo-500/10">
-                  <Landmark className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalAccounts ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">حساب</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass hover-lift w-28 sm:w-auto shrink-0">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-center sm:text-right">
-                <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-pink-500/10">
-                  <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500" />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold">{stats?.totalTransfers ?? '-'}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">انتقال</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-4 gap-2">
+        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
+          <p className="text-lg font-bold text-primary">{stats?.totalUsers ?? '-'}</p>
+          <p className="text-[10px] text-muted-foreground">کاربران</p>
+        </div>
+        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
+          <p className="text-lg font-bold text-success">{stats?.activeUsers ?? '-'}</p>
+          <p className="text-[10px] text-muted-foreground">فعال</p>
+        </div>
+        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
+          <p className="text-lg font-bold text-foreground">{stats?.totalTransactions ?? '-'}</p>
+          <p className="text-[10px] text-muted-foreground">تراکنش</p>
+        </div>
+        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
+          <p className="text-lg font-bold text-foreground">{stats?.totalCategories ?? '-'}</p>
+          <p className="text-[10px] text-muted-foreground">دسته‌بندی</p>
         </div>
       </div>
 
-      {/* Tabs - Mobile optimized with horizontal scroll */}
+      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="overflow-x-auto -mx-4 px-4">
-          <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-7 gap-1 glass h-auto p-1">
-            <TabsTrigger value="users" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <div className="flex gap-1 p-1 rounded-xl bg-muted/50 border-2 border-border overflow-x-auto">
+          <TabsList className="inline-flex w-full bg-transparent p-0 h-auto gap-1">
+            <TabsTrigger value="users" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               کاربران
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <CreditCard className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="transactions" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               تراکنش‌ها
             </TabsTrigger>
-            <TabsTrigger value="categories" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="categories" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               دسته‌ها
             </TabsTrigger>
-            <TabsTrigger value="debts" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <Banknote className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="debts" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               بدهی‌ها
             </TabsTrigger>
-            <TabsTrigger value="goals" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="goals" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               اهداف
             </TabsTrigger>
-            <TabsTrigger value="accounts" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="accounts" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               حساب‌ها
             </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-1 sm:gap-1.5 rounded-lg text-[10px] sm:text-xs py-2 px-2 sm:px-3 whitespace-nowrap">
-              <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="settings" className="flex-1 rounded-lg py-2.5 px-2 text-xs font-medium data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
               تنظیمات
             </TabsTrigger>
           </TabsList>
@@ -622,9 +497,8 @@ export function AdminPanel() {
 
         {/* Users Tab */}
         <TabsContent value="users" className="mt-4 space-y-4">
-          <Card className="glass">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row gap-3">
+          <div className="bg-card rounded-xl border-2 border-border p-4">
+            <div className="flex flex-col gap-3">
                 <div className="relative flex-1">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -668,10 +542,10 @@ export function AdminPanel() {
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="glass">
+          <div className="bg-card rounded-xl border-2 border-border">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -811,8 +685,8 @@ export function AdminPanel() {
                   </Table>
                 </ScrollArea>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
 
         {/* Transactions Tab */}

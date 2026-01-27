@@ -35,10 +35,21 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="container max-w-6xl mx-auto px-4 py-6">
-        <AdminPanel />
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-primary text-primary-foreground">
+        <div className="pt-safe" />
+        <div className="h-14 px-4 flex items-center justify-center">
+          <h1 className="text-lg font-bold">پنل مدیریت</h1>
+        </div>
+      </header>
+      
+      {/* Content */}
+      <main className="pb-8">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <AdminPanel />
+        </div>
+      </main>
     </div>
   );
 }
