@@ -476,10 +476,10 @@ export function AdminPanel() {
       </div>
 
       {/* Tabs - Horizontal Scroll for Mobile */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <ScrollArea className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
+        <ScrollArea className="w-full" dir="rtl">
           <div className="p-1 rounded-xl bg-muted/50 border-2 border-border">
-            <TabsList className="inline-flex w-max min-w-full bg-transparent p-0 h-auto gap-1">
+            <TabsList className="inline-flex w-max min-w-full bg-transparent p-0 h-auto gap-1 flex-row-reverse">
               <TabsTrigger value="users" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
                 <Users className="w-4 h-4 ml-1.5" />
                 کاربران
