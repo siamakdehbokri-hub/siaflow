@@ -543,7 +543,6 @@ export function AdminPanel() {
                 </div>
               </div>
             </div>
-          </div>
 
           <div className="bg-card rounded-xl border-2 border-border">
             <CardHeader className="pb-3">
@@ -685,7 +684,7 @@ export function AdminPanel() {
                   </Table>
                 </ScrollArea>
               )}
-            </div>
+            </CardContent>
           </div>
         </TabsContent>
 
