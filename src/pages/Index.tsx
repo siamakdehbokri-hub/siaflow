@@ -103,7 +103,12 @@ const Index = () => {
       {/* Header */}
       <AppHeader 
         title={getPageTitle()} 
-        showDate={activeTab === 'home' && subView === 'main'} 
+        showDate={activeTab === 'home' && subView === 'main'}
+        debtReminders={debtReminders}
+        reminders={reminders}
+        onDismissDebtReminder={dismissDebtReminder}
+        onDismissReminder={dismissReminder}
+        onEnableNotifications={requestNotificationPermission}
       />
 
       {/* Sub-view back button */}
@@ -121,15 +126,7 @@ const Index = () => {
         </div>
       )}
 
-      {/* Notification badges */}
-      <div className="fixed top-16 left-4 z-40 flex gap-1">
-        <DebtReminderNotifications 
-          reminders={debtReminders} 
-          onDismiss={dismissDebtReminder} 
-          onEnableNotifications={requestNotificationPermission} 
-        />
-        <ReminderNotifications reminders={reminders} onDismiss={dismissReminder} />
-      </div>
+      {/* Notification badges - moved to header */}
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-24">
