@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react';
-import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, Sparkles } from 'lucide-react';
+import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -34,7 +33,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [isRecurring, setIsRecurring] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter categories by type - income categories don't have budget
   const expenseCategories = useMemo(() => 
     categories.filter(c => c.budget !== undefined && c.budget !== null && c.budget > 0), 
     [categories]
@@ -45,14 +43,10 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     [categories]
   );
 
-  // Get subcategories from actual category data (from database)
   const subcategories = useMemo((): string[] => {
     if (!category) return [];
-    
     const found = categories.find(c => c.name === category);
     if (!found?.subcategories) return [];
-    
-    // Handle both array of strings and array of Subcategory objects
     return found.subcategories.map(s => {
       if (typeof s === 'string') return s;
       return (s as { name: string }).name;
@@ -61,7 +55,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (isSubmitting || !amount || !category) return;
     
     setIsSubmitting(true);
@@ -79,7 +72,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
         tags: [],
       });
       
-      // Reset form and close
       setAmount('');
       setCategory('');
       setSubcategory('');
@@ -99,13 +91,11 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  // Reset subcategory when category changes
   const handleCategoryChange = (value: string) => {
     setCategory(value);
     setSubcategory('');
   };
 
-  // Quick amount buttons - responsive
   const quickAmounts = [
     { value: '50,000', label: '۵۰ هزار' },
     { value: '100,000', label: '۱۰۰ هزار' },
@@ -118,43 +108,32 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const currentCategories = type === 'expense' ? expenseCategories : incomeCategories;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-background/80 backdrop-blur-md"
+        className="absolute inset-0 bg-black/50"
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-lg bg-card border border-border rounded-t-3xl sm:rounded-2xl shadow-2xl animate-slide-up max-h-[92vh] overflow-y-auto">
-        {/* Header with gradient */}
-        <div className="sticky top-0 z-10 overflow-hidden">
-          <div className={cn(
-            "absolute inset-0",
-            type === 'expense' ? "gradient-expense" : "gradient-income"
-          )} />
-          <div className="relative p-5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-background/20 backdrop-blur-sm">
-                <Sparkles className="w-5 h-5 text-background" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-background">تراکنش جدید</h2>
-                <p className="text-xs text-background/80">ثبت هزینه یا درآمد</p>
-              </div>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon-sm" 
-              onClick={onClose}
-              className="text-background hover:bg-background/20"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
+      {/* Modal */}
+      <div className="relative w-full max-w-lg bg-card rounded-t-2xl shadow-xl animate-slide-up max-h-[90vh] overflow-hidden flex flex-col">
+        
+        {/* Header - Clean Blue */}
+        <div className="bg-primary text-primary-foreground px-5 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold">ثبت تراکنش جدید</h2>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-5">
-          {/* Type Toggle - Improved */}
-          <div className="flex gap-2 p-1.5 bg-muted rounded-2xl overflow-hidden">
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
+          
+          {/* Type Toggle */}
+          <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => {
@@ -163,14 +142,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3.5 px-3 rounded-xl font-semibold transition-all duration-300 min-w-0",
+                "flex items-center justify-center gap-2 py-4 rounded-xl font-semibold transition-all border-2",
                 type === 'expense' 
-                  ? "gradient-expense text-destructive-foreground shadow-lg scale-[1.02]" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  ? "bg-destructive text-white border-destructive" 
+                  : "bg-card text-muted-foreground border-border hover:border-destructive/50"
               )}
             >
-              <Minus className="w-5 h-5 shrink-0" />
-              <span className="truncate">هزینه</span>
+              <Minus className="w-5 h-5" />
+              هزینه
             </button>
             <button
               type="button"
@@ -180,40 +159,31 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-3.5 px-3 rounded-xl font-semibold transition-all duration-300 min-w-0",
+                "flex items-center justify-center gap-2 py-4 rounded-xl font-semibold transition-all border-2",
                 type === 'income' 
-                  ? "gradient-income text-success-foreground shadow-lg scale-[1.02]" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  ? "bg-success text-white border-success" 
+                  : "bg-card text-muted-foreground border-border hover:border-success/50"
               )}
             >
-              <Plus className="w-5 h-5 shrink-0" />
-              <span className="truncate">درآمد</span>
+              <Plus className="w-5 h-5" />
+              درآمد
             </button>
           </div>
 
-          {/* Amount - Enhanced */}
+          {/* Amount */}
           <div className="space-y-3">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <span>مبلغ</span>
-              <Badge variant="secondary" className="text-xs font-normal">تومان</Badge>
-            </Label>
-            <div className="relative">
-              <Input
-                type="text"
-                inputMode="numeric"
-                placeholder="0"
-                value={amount}
-                onChange={(e) => setAmount(formatAmount(e.target.value))}
-                className={cn(
-                  "text-3xl font-bold text-center h-16 rounded-2xl border-2 transition-all",
-                  type === 'expense' 
-                    ? "focus:border-destructive/50" 
-                    : "focus:border-success/50"
-                )}
-                required
-              />
-            </div>
-            {/* Quick Amount Buttons - Responsive Grid */}
+            <Label className="text-sm font-medium text-foreground">مبلغ (تومان)</Label>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="۰"
+              value={amount}
+              onChange={(e) => setAmount(formatAmount(e.target.value))}
+              className="text-2xl font-bold text-center h-14 rounded-xl border-2 border-border focus:border-primary"
+              required
+            />
+            
+            {/* Quick Amounts */}
             <div className="grid grid-cols-4 gap-2">
               {quickAmounts.map((qa) => (
                 <button
@@ -221,12 +191,10 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                   type="button"
                   onClick={() => setAmount(qa.value)}
                   className={cn(
-                    "py-2 px-1 text-[10px] sm:text-xs font-medium rounded-xl border-2 transition-all duration-200",
+                    "py-2.5 text-xs font-medium rounded-lg border transition-all",
                     amount === qa.value
-                      ? type === 'expense'
-                        ? "border-destructive bg-destructive/10 text-destructive"
-                        : "border-success bg-success/10 text-success"
-                      : "border-border bg-muted/50 hover:border-primary/50 text-muted-foreground hover:text-foreground"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-muted/30 text-muted-foreground hover:border-primary/50"
                   )}
                 >
                   {qa.label}
@@ -235,57 +203,54 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             </div>
           </div>
 
-          {/* Category - Enhanced */}
+          {/* Category */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">دسته‌بندی</Label>
+            <Label className="text-sm font-medium text-foreground">دسته‌بندی</Label>
             <Select value={category} onValueChange={handleCategoryChange} required>
-              <SelectTrigger className="h-12 rounded-xl text-base">
+              <SelectTrigger className="h-12 rounded-xl border-2 border-border">
                 <SelectValue placeholder="انتخاب دسته‌بندی" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
                 {currentCategories.length > 0 ? (
                   currentCategories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.name} className="py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <div 
-                          className="w-3 h-3 rounded-full"
+                          className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: cat.color }}
                         />
-                        {cat.name}
+                        <span>{cat.name}</span>
                       </div>
                     </SelectItem>
                   ))
                 ) : (
                   <div className="py-4 text-center text-sm text-muted-foreground">
-                    دسته‌بندی {type === 'income' ? 'درآمد' : 'هزینه'} یافت نشد
+                    دسته‌بندی یافت نشد
                   </div>
                 )}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Subcategory - Responsive Grid */}
+          {/* Subcategory */}
           {subcategories.length > 0 && (
             <div className="space-y-2 animate-fade-in">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+                <ChevronDown className="w-4 h-4" />
                 زیردسته
               </Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="flex flex-wrap gap-2">
                 {subcategories.map((sub) => (
                   <button
                     key={sub}
                     type="button"
                     onClick={() => setSubcategory(subcategory === sub ? '' : sub)}
                     className={cn(
-                      "px-2 py-2 text-xs sm:text-sm rounded-xl border-2 transition-all duration-200 truncate min-w-0",
+                      "px-4 py-2 text-sm rounded-full border transition-all",
                       subcategory === sub
-                        ? type === 'expense'
-                          ? "border-destructive bg-destructive/10 text-destructive font-medium"
-                          : "border-success bg-success/10 text-success font-medium"
-                        : "border-border hover:border-muted-foreground/50 text-muted-foreground hover:text-foreground"
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-muted/30 text-foreground hover:border-primary/50"
                     )}
-                    title={sub}
                   >
                     {sub}
                   </button>
@@ -296,20 +261,20 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
           {/* Description */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">توضیحات (اختیاری)</Label>
+            <Label className="text-sm font-medium text-foreground">توضیحات (اختیاری)</Label>
             <Textarea
               placeholder="مثلا: خرید از فروشگاه..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="rounded-xl resize-none"
+              className="rounded-xl border-2 border-border resize-none"
             />
           </div>
 
           {/* Date */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
+            <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
               تاریخ
             </Label>
             <PersianDatePicker 
@@ -319,19 +284,19 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             />
           </div>
 
-          {/* Recurring Toggle - Enhanced */}
+          {/* Recurring Toggle */}
           <div className={cn(
-            "flex items-center justify-between p-4 rounded-2xl border-2 transition-all",
+            "flex items-center justify-between p-4 rounded-xl border-2 transition-all",
             isRecurring 
-              ? "border-primary/30 bg-primary/5" 
-              : "border-border bg-muted/30"
+              ? "border-primary bg-primary/5" 
+              : "border-border bg-muted/20"
           )}>
             <div className="flex items-center gap-3">
               <div className={cn(
-                "p-2 rounded-xl transition-colors",
+                "w-10 h-10 rounded-lg flex items-center justify-center",
                 isRecurring ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
               )}>
-                <RefreshCw className={cn("w-5 h-5", isRecurring && "animate-spin")} style={{ animationDuration: '3s' }} />
+                <RefreshCw className="w-5 h-5" />
               </div>
               <div>
                 <p className="font-medium text-foreground">تراکنش تکراری</p>
@@ -343,35 +308,39 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               onCheckedChange={setIsRecurring}
             />
           </div>
+        </form>
 
-          {/* Submit Button - Enhanced */}
+        {/* Footer - Submit Button */}
+        <div className="p-5 border-t border-border bg-card">
           <Button 
-            type="submit" 
-            size="xl" 
+            type="submit"
+            onClick={handleSubmit}
             className={cn(
-              "w-full rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all",
-              type === 'income' ? 'gradient-income' : 'gradient-expense'
+              "w-full h-14 rounded-xl font-bold text-base",
+              type === 'income' 
+                ? 'bg-success hover:bg-success/90' 
+                : 'bg-destructive hover:bg-destructive/90'
             )}
             disabled={!amount || !category || isSubmitting}
           >
             {isSubmitting ? (
               <>
-                <RefreshCw className="w-5 h-5 animate-spin" />
+                <RefreshCw className="w-5 h-5 animate-spin ml-2" />
                 در حال ثبت...
               </>
             ) : type === 'income' ? (
               <>
-                <Plus className="w-5 h-5" />
+                <Plus className="w-5 h-5 ml-2" />
                 ثبت درآمد
               </>
             ) : (
               <>
-                <Minus className="w-5 h-5" />
+                <Minus className="w-5 h-5 ml-2" />
                 ثبت هزینه
               </>
             )}
           </Button>
-        </form>
+        </div>
       </div>
     </div>
   );
