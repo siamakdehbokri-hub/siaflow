@@ -1,14 +1,32 @@
 import { Bell, Menu } from 'lucide-react';
 import { formatPersianDateFull } from '@/utils/persianDate';
 import { Button } from '@/components/ui/button';
+import { DebtReminderNotifications } from '@/components/DebtReminderNotifications';
+import { ReminderNotifications } from '@/components/ReminderNotifications';
+import { DebtReminder } from '@/hooks/useDebtReminders';
+import { Reminder } from '@/hooks/useReminders';
 
 interface AppHeaderProps {
   title: string;
   showDate?: boolean;
   onMenuClick?: () => void;
+  debtReminders?: DebtReminder[];
+  reminders?: Reminder[];
+  onDismissDebtReminder?: (id: string) => void;
+  onDismissReminder?: (id: string) => void;
+  onEnableNotifications?: () => void;
 }
 
-export function AppHeader({ title, showDate = true, onMenuClick }: AppHeaderProps) {
+export function AppHeader({ 
+  title, 
+  showDate = true, 
+  onMenuClick,
+  debtReminders = [],
+  reminders = [],
+  onDismissDebtReminder,
+  onDismissReminder,
+  onEnableNotifications,
+}: AppHeaderProps) {
   const today = new Date();
   const persianDate = formatPersianDateFull(today.toISOString());
   
@@ -19,14 +37,18 @@ export function AppHeader({ title, showDate = true, onMenuClick }: AppHeaderProp
       
       {/* Header content */}
       <div className="flex items-center justify-between h-14 px-4">
-        {/* Bell icon - Left side (RTL) */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-primary-foreground hover:bg-white/10 rounded-full"
-        >
-          <Bell className="w-5 h-5" />
-        </Button>
+        {/* Notifications - Left side (RTL) */}
+        <div className="flex items-center gap-1">
+          <DebtReminderNotifications 
+            reminders={debtReminders} 
+            onDismiss={onDismissDebtReminder || (() => {})} 
+            onEnableNotifications={onEnableNotifications} 
+          />
+          <ReminderNotifications 
+            reminders={reminders} 
+            onDismiss={onDismissReminder || (() => {})} 
+          />
+        </div>
         
         {/* Title - Center */}
         <h1 className="text-lg font-bold">{title}</h1>

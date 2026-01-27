@@ -56,9 +56,10 @@ export const getJalaliYear = (dateString: string): number => {
   return getYear(date);
 };
 
-// Get Jalali month name from a date string
-export const getJalaliMonthName = (dateString: string): string => {
-  return formatPersianMonthOnly(dateString);
+// Get Jalali month name from a date string or Date object
+export const getJalaliMonthName = (date: string | Date): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return format(dateObj, 'MMMM yyyy', { locale: faIR });
 };
 
 // Get current Jalali month boundaries (start and end dates in ISO format)
