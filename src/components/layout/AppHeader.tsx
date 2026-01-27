@@ -1,5 +1,4 @@
-import { Bell, Menu } from 'lucide-react';
-import { formatPersianDateFull } from '@/utils/persianDate';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DebtReminderNotifications } from '@/components/DebtReminderNotifications';
 import { ReminderNotifications } from '@/components/ReminderNotifications';
@@ -8,7 +7,6 @@ import { Reminder } from '@/hooks/useReminders';
 
 interface AppHeaderProps {
   title: string;
-  showDate?: boolean;
   onMenuClick?: () => void;
   debtReminders?: DebtReminder[];
   reminders?: Reminder[];
@@ -19,7 +17,6 @@ interface AppHeaderProps {
 
 export function AppHeader({ 
   title, 
-  showDate = true, 
   onMenuClick,
   debtReminders = [],
   reminders = [],
@@ -27,15 +24,12 @@ export function AppHeader({
   onDismissReminder,
   onEnableNotifications,
 }: AppHeaderProps) {
-  const today = new Date();
-  const persianDate = formatPersianDateFull(today.toISOString());
-  
   return (
     <header className="bg-primary text-primary-foreground">
       {/* Safe area padding */}
       <div className="pt-safe" />
       
-      {/* Header content */}
+      {/* Header content - fixed height */}
       <div className="flex items-center justify-between h-14 px-4">
         {/* Notifications - Left side (RTL) */}
         <div className="flex items-center gap-1">
@@ -63,13 +57,6 @@ export function AppHeader({
           <Menu className="w-5 h-5" />
         </Button>
       </div>
-      
-      {/* Date strip */}
-      {showDate && (
-        <div className="text-center pb-3 text-sm opacity-90">
-          ◂ {persianDate}
-        </div>
-      )}
     </header>
   );
 }
