@@ -103,7 +103,6 @@ const Index = () => {
       {/* Header */}
       <AppHeader 
         title={getPageTitle()} 
-        showDate={activeTab === 'home' && subView === 'main'}
         debtReminders={debtReminders}
         reminders={reminders}
         onDismissDebtReminder={dismissDebtReminder}
