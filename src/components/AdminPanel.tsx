@@ -477,40 +477,40 @@ export function AdminPanel() {
 
       {/* Tabs - Horizontal Scroll for Mobile */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <ScrollArea className="w-full" dir="rtl">
-          <div className="p-1 rounded-xl bg-muted/50 border-2 border-border">
-            <TabsList className="inline-flex w-max min-w-full bg-transparent p-0 h-auto gap-1 flex-row-reverse">
-              <TabsTrigger value="users" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Users className="w-4 h-4 ml-1.5" />
-                کاربران
-              </TabsTrigger>
-              <TabsTrigger value="transactions" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <CreditCard className="w-4 h-4 ml-1.5" />
-                تراکنش‌ها
-              </TabsTrigger>
-              <TabsTrigger value="categories" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Tag className="w-4 h-4 ml-1.5" />
-                دسته‌ها
-              </TabsTrigger>
-              <TabsTrigger value="debts" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Banknote className="w-4 h-4 ml-1.5" />
-                بدهی‌ها
-              </TabsTrigger>
-              <TabsTrigger value="goals" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Target className="w-4 h-4 ml-1.5" />
-                اهداف
+        <div className="overflow-x-auto w-full" dir="rtl">
+          <div className="p-1 rounded-xl bg-muted/50 border-2 border-border min-w-max">
+            <TabsList className="flex w-full bg-transparent p-0 h-auto gap-1 justify-end">
+              <TabsTrigger value="settings" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
+                <Settings className="w-4 h-4 ml-1.5" />
+                تنظیمات
               </TabsTrigger>
               <TabsTrigger value="accounts" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
                 <Wallet className="w-4 h-4 ml-1.5" />
                 حساب‌ها
               </TabsTrigger>
-              <TabsTrigger value="settings" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Settings className="w-4 h-4 ml-1.5" />
-                تنظیمات
+              <TabsTrigger value="goals" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
+                <Target className="w-4 h-4 ml-1.5" />
+                اهداف
+              </TabsTrigger>
+              <TabsTrigger value="debts" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
+                <Banknote className="w-4 h-4 ml-1.5" />
+                بدهی‌ها
+              </TabsTrigger>
+              <TabsTrigger value="categories" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
+                <Tag className="w-4 h-4 ml-1.5" />
+                دسته‌ها
+              </TabsTrigger>
+              <TabsTrigger value="transactions" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
+                <CreditCard className="w-4 h-4 ml-1.5" />
+                تراکنش‌ها
+              </TabsTrigger>
+              <TabsTrigger value="users" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
+                <Users className="w-4 h-4 ml-1.5" />
+                کاربران
               </TabsTrigger>
             </TabsList>
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Users Tab */}
         <TabsContent value="users" className="mt-4 space-y-3">
