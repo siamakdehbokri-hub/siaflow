@@ -40,8 +40,26 @@ export function HomeScreen({
     };
   }, [transactions]);
 
+  const today = new Date();
+  const persianDate = formatPersianDateFull(today.toISOString());
+
   return (
     <div className="space-y-4">
+      {/* Welcome & Date Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-foreground">
+            سلام، {userName} 👋
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            خوش آمدی!
+          </p>
+        </div>
+        <div className="text-left">
+          <p className="text-sm font-medium text-foreground">{persianDate}</p>
+        </div>
+      </div>
+
       {/* Hero Card - Today's spending */}
       <div className="bg-card rounded-2xl p-5 border border-border">
         <div className="flex items-start justify-between">
