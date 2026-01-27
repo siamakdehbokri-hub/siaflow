@@ -140,10 +140,19 @@
   body {
     @apply bg-background text-foreground font-iransans antialiased;
     font-feature-settings: "ss01", "ss02";
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: hidden;
     /* Ensure body respects safe areas */
     padding-top: env(safe-area-inset-top);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
   /* Elegant Scrollbar */

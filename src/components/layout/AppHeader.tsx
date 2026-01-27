@@ -30,9 +30,9 @@ export function AppHeader({
       <div className="pt-safe" />
       
       {/* Header content - fixed height */}
-      <div className="flex items-center justify-between h-14 px-4">
-        {/* Notifications - Left side (RTL) */}
-        <div className="flex items-center gap-1">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-4">
+        {/* Notifications (right side in RTL) */}
+        <div className="flex items-center gap-1 justify-self-start min-w-0">
           <DebtReminderNotifications 
             reminders={debtReminders} 
             onDismiss={onDismissDebtReminder || (() => {})} 
@@ -44,18 +44,22 @@ export function AppHeader({
           />
         </div>
         
-        {/* Title - Center */}
-        <h1 className="text-lg font-bold">{title}</h1>
+        {/* Title - truly centered regardless of side widths */}
+        <h1 className="text-lg font-bold justify-self-center text-center truncate max-w-[70vw]">
+          {title}
+        </h1>
         
-        {/* Menu icon - Right side (RTL) */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onMenuClick}
-          className="text-primary-foreground hover:bg-white/10 rounded-full"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
+        {/* Menu icon (left side in RTL) */}
+        <div className="justify-self-end">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onMenuClick}
+            className="text-primary-foreground hover:bg-white/10 rounded-full"
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
     </header>
   );
