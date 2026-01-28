@@ -13,9 +13,9 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
   
   if (recentItems.length === 0) {
     return (
-      <div className="p-6 rounded-2xl bg-card border border-border/30 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
-        <Clock className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
+      <div className="p-6 rounded-2xl bg-card border-2 border-border/40 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <Clock className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" strokeWidth={1.5} />
+        <p className="text-sm font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
         <p className="text-xs text-muted-foreground/70 mt-1">با دکمه + اولین تراکنش خود را ثبت کنید</p>
       </div>
     );
@@ -24,43 +24,43 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
   return (
     <div className="space-y-3 animate-fade-in" style={{ animationDelay: '300ms' }}>
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-medium text-muted-foreground">فعالیت اخیر</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground">فعالیت اخیر</h3>
         <button 
           onClick={onViewAll}
-          className="flex items-center gap-1 text-xs text-primary hover:underline"
+          className="flex items-center gap-1 text-xs font-medium text-primary hover:underline py-2 px-1 -mr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
           همه
-          <ChevronLeft className="w-3.5 h-3.5" />
+          <ChevronLeft className="w-4 h-4" strokeWidth={2} />
         </button>
       </div>
       
-      <div className="bg-card rounded-2xl border border-border/30 divide-y divide-border/30">
+      <div className="bg-card rounded-2xl border-2 border-border/40 divide-y divide-border/40 overflow-hidden">
         {recentItems.map((transaction, index) => {
           const isIncome = transaction.type === 'income';
           
           return (
             <div 
               key={transaction.id} 
-              className="flex items-center gap-3 p-4 first:rounded-t-2xl last:rounded-b-2xl"
+              className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors"
             >
-              {/* Icon */}
+              {/* Icon - 44px container */}
               <div className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
                 isIncome ? "bg-success/10" : "bg-destructive/10"
               )}>
                 {isIncome ? (
-                  <ArrowUpRight className="w-5 h-5 text-success" />
+                  <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2} />
                 ) : (
-                  <ArrowDownRight className="w-5 h-5 text-destructive" />
+                  <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2} />
                 )}
               </div>
               
               {/* Details */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-sm font-semibold text-foreground truncate">
                   {transaction.category}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate mt-0.5">
                   {transaction.description || transaction.subcategory || '—'}
                 </p>
               </div>
@@ -68,12 +68,12 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
               {/* Amount */}
               <div className="text-left shrink-0">
                 <p className={cn(
-                  "text-sm font-semibold",
+                  "text-sm font-bold",
                   isIncome ? "text-success" : "text-destructive"
                 )}>
                   {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
                 </p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                   {formatPersianDateFull(transaction.date).split(' ')[0]}
                 </p>
               </div>

@@ -18,13 +18,17 @@ const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
   return (
     <>
-      {/* Floating Add Button - Left side like reference */}
+      {/* Floating Add Button - Left side with safe area consideration */}
       <button
         onClick={onAddClick}
-        className="fixed bottom-24 left-4 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg active:scale-95 transition-transform"
+        className="fixed z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        style={{ 
+          bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))',
+          left: 'max(16px, env(safe-area-inset-left, 16px))'
+        }}
         aria-label="افزودن تراکنش"
       >
-        <Plus className="w-7 h-7" strokeWidth={2.5} />
+        <Plus className="w-6 h-6" strokeWidth={2.5} />
       </button>
 
       {/* Bottom Navigation Bar */}

@@ -44,7 +44,7 @@ interface QuickActionsProps {
 export function QuickActions({ onAction }: QuickActionsProps) {
   return (
     <div className="space-y-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
-      <h3 className="text-sm font-medium text-muted-foreground px-1">عملیات سریع</h3>
+      <h3 className="text-sm font-semibold text-muted-foreground px-1">عملیات سریع</h3>
       
       <div className="grid grid-cols-3 gap-3">
         {actions.map((action) => {
@@ -53,15 +53,22 @@ export function QuickActions({ onAction }: QuickActionsProps) {
             <button
               key={action.id}
               onClick={() => onAction(action.id)}
-              className="group relative flex flex-col items-center gap-2 p-4 rounded-2xl bg-card border border-border/30 hover:border-border/50 transition-all duration-300 hover:shadow-lg active:scale-95"
+              className={cn(
+                // Minimum 80px height for comfortable touch target
+                "group relative flex flex-col items-center justify-center gap-2.5 min-h-[88px] p-4",
+                "rounded-2xl bg-card border-2 border-border/40",
+                "hover:border-border transition-all duration-200",
+                "hover:shadow-lg active:scale-[0.97]",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              )}
             >
               <div className={cn(
-                "w-11 h-11 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110",
+                "w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105",
                 action.bgColor
               )}>
-                <Icon className={cn("w-5 h-5", action.color)} />
+                <Icon className={cn("w-6 h-6", action.color)} strokeWidth={2} />
               </div>
-              <span className="text-xs font-medium text-foreground">{action.label}</span>
+              <span className="text-sm font-medium text-foreground">{action.label}</span>
             </button>
           );
         })}
