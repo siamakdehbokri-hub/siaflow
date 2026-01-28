@@ -56,13 +56,13 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         .from('profiles')
         .select('avatar_url')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       if (data?.avatar_url) {
         setAvatarUrl(`${data.avatar_url}?t=${Date.now()}`);
       }
     };
     fetchAvatar();
-  }, [user, currentView]);
+  }, [user?.id, currentView]);
 
   const handleSignOut = async () => {
     try {
@@ -303,7 +303,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۲.۰.۰
+        SiaFlow نسخه ۲.۰.۱
       </p>
 
       {/* Delete Account Dialog */}

@@ -1,18 +1,27 @@
-import { useState, useMemo } from 'react';
-import { Search, X, ArrowUpRight, ArrowDownRight, Brain, PiggyBank, CreditCard, ChartPie, Sparkles, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { useState, useMemo, lazy, Suspense, useCallback } from 'react';
+import { Search, X, ArrowUpRight, ArrowDownRight, Brain, PiggyBank, CreditCard, ChartPie, Sparkles, ChevronLeft, ChevronRight, Calendar, Loader2 } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { Debt } from '@/hooks/useDebts';
 import { SwipeableTransaction } from '@/components/SwipeableTransaction';
-import { AIReport } from '@/components/AIReport';
-import { SpendingChart } from '@/components/SpendingChart';
-import { TrendChart } from '@/components/TrendChart';
-import { MonthlyComparisonChart } from '@/components/MonthlyComparisonChart';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { formatCurrency, formatPersianMonth, getJalaliMonthName } from '@/utils/persianDate';
 import { startOfMonth, endOfMonth, subMonths, addMonths, isWithinInterval, parseISO } from 'date-fns-jalali';
 import { cn } from '@/lib/utils';
+
+// Lazy load heavy chart components
+const AIReport = lazy(() => import('@/components/AIReport').then(m => ({ default: m.AIReport })));
+const SpendingChart = lazy(() => import('@/components/SpendingChart').then(m => ({ default: m.SpendingChart })));
+const TrendChart = lazy(() => import('@/components/TrendChart').then(m => ({ default: m.TrendChart })));
+const MonthlyComparisonChart = lazy(() => import('@/components/MonthlyComparisonChart').then(m => ({ default: m.MonthlyComparisonChart })));
+
+// Loading fallback component
+const ChartLoader = () => (
+  <div className="flex items-center justify-center py-12">
+    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+  </div>
+);
 
 type ReportsTab = 'transactions' | 'planning' | 'insights';
 
@@ -137,7 +146,9 @@ export function ReportsHub({
           <ChevronLeft className="w-4 h-4 rotate-180" />
           بازگشت
         </button>
-        <AIReport transactions={transactions} categories={categories} />
+        <Suspense fallback={<ChartLoader />}>
+          <AIReport transactions={transactions} categories={categories} />
+        </Suspense>
       </div>
     );
   }
@@ -402,17 +413,23 @@ export function ReportsHub({
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-card border-2 border-border">
               <h4 className="text-sm font-medium text-muted-foreground mb-4">تفکیک هزینه‌ها</h4>
-              <SpendingChart categories={categories} />
+              <Suspense fallback={<ChartLoader />}>
+                <SpendingChart categories={categories} />
+              </Suspense>
             </div>
 
             <div className="p-4 rounded-2xl bg-card border-2 border-border">
               <h4 className="text-sm font-medium text-muted-foreground mb-4">روند هزینه‌ها</h4>
-              <TrendChart transactions={transactions} />
+              <Suspense fallback={<ChartLoader />}>
+                <TrendChart transactions={transactions} />
+              </Suspense>
             </div>
 
             <div className="p-4 rounded-2xl bg-card border-2 border-border">
               <h4 className="text-sm font-medium text-muted-foreground mb-4">مقایسه ماهانه</h4>
-              <MonthlyComparisonChart transactions={transactions} />
+              <Suspense fallback={<ChartLoader />}>
+                <MonthlyComparisonChart transactions={transactions} />
+              </Suspense>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, RefreshCw,
@@ -47,7 +48,7 @@ interface TransactionItemProps {
   onClick?: () => void;
 }
 
-export function TransactionItem({ transaction, onClick }: TransactionItemProps) {
+function TransactionItemComponent({ transaction, onClick }: TransactionItemProps) {
   const CategoryIcon = iconMap[transaction.category] || Receipt;
   const isIncome = transaction.type === 'income';
   const DirectionIcon = isIncome ? ArrowUpRight : ArrowDownRight;
@@ -144,3 +145,5 @@ export function TransactionItem({ transaction, onClick }: TransactionItemProps) 
     </div>
   );
 }
+
+export const TransactionItem = memo(TransactionItemComponent);

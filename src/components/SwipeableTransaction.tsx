@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback } from 'react';
 import { Trash2, Edit3 } from 'lucide-react';
 import { Transaction } from '@/types/expense';
 import { TransactionItem } from './TransactionItem';
@@ -10,7 +10,7 @@ interface SwipeableTransactionProps {
   onDelete: (id: string) => void;
 }
 
-export function SwipeableTransaction({ transaction, onEdit, onDelete }: SwipeableTransactionProps) {
+function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: SwipeableTransactionProps) {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const startX = useRef(0);
@@ -79,9 +79,9 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
     }
   };
 
-  const resetSwipe = () => {
+  const resetSwipe = useCallback(() => {
     setOffset(0);
-  };
+  }, []);
 
   return (
     <div 
@@ -139,3 +139,5 @@ export function SwipeableTransaction({ transaction, onEdit, onDelete }: Swipeabl
     </div>
   );
 }
+
+export const SwipeableTransaction = memo(SwipeableTransactionComponent);
