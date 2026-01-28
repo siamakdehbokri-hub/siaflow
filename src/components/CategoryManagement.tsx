@@ -209,101 +209,122 @@ export function CategoryManagement({
         open={isExpanded}
         onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
       >
-        <div 
-          className="flex items-center gap-3 p-4 bg-card border border-border rounded-2xl hover:border-primary/30 transition-all group"
-        >
-          {/* Tree Toggle */}
-          <CollapsibleTrigger asChild>
-            <button 
-              className={cn(
-                "p-1.5 rounded-xl hover:bg-accent transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center",
-                !hasSubcategories && "invisible"
-              )}
-              disabled={!hasSubcategories}
-            >
-              {isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              )}
-            </button>
-          </CollapsibleTrigger>
+        <div className="bg-card border-2 border-border rounded-2xl overflow-hidden active:bg-accent/50 transition-colors">
+          {/* Main Row */}
+          <div className="flex items-center gap-2 p-3">
+            {/* Tree Toggle - Mobile Optimized */}
+            <CollapsibleTrigger asChild>
+              <button 
+                className={cn(
+                  "min-w-[36px] min-h-[36px] rounded-xl flex items-center justify-center active:bg-accent",
+                  !hasSubcategories && "opacity-0 pointer-events-none"
+                )}
+                disabled={!hasSubcategories}
+              >
+                {isExpanded ? (
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                )}
+              </button>
+            </CollapsibleTrigger>
 
-          <div 
-            className="p-3 rounded-xl shrink-0"
-            style={{ backgroundColor: `${category.color}15` }}
-          >
-            <Icon 
-              className="w-5 h-5" 
-              style={{ color: category.color }}
-            />
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-foreground text-sm">{category.name}</span>
+            {/* Icon */}
+            <div 
+              className="w-11 h-11 rounded-xl shrink-0 flex items-center justify-center"
+              style={{ backgroundColor: `${category.color}15` }}
+            >
+              <Icon 
+                className="w-5 h-5" 
+                style={{ color: category.color }}
+              />
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-foreground text-sm truncate">{category.name}</span>
                 {hasSubcategories && (
-                  <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground border-0">
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 bg-accent text-accent-foreground border-0 shrink-0">
                     {subcatNames.length} زیردسته
                   </Badge>
                 )}
               </div>
-              <span className={cn(
-                "text-xs font-medium",
-                isOverBudget ? "text-destructive" : "text-muted-foreground"
-              )}>
-                {category.budget ? formatCurrency(category.budget) : '-'}
-              </span>
+              {category.budget && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  بودجه: {formatCurrency(category.budget)}
+                </p>
+              )}
             </div>
-            {category.budget && (
-              <div className="space-y-1.5">
+
+            {/* Actions - Always Visible on Mobile */}
+            <div className="flex items-center gap-1 shrink-0">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditModal(category);
+                }}
+                className="h-10 w-10 rounded-xl active:bg-accent"
+              >
+                <Edit3 className="w-4 h-4 text-primary" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteId(category.id);
+                }}
+                className="h-10 w-10 rounded-xl text-destructive active:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Budget Progress - Mobile Optimized */}
+          {category.budget && (
+            <div className="px-3 pb-3 pt-0">
+              <div className="bg-accent/50 rounded-xl p-2.5">
                 <Progress 
                   value={Math.min(progress, 100)} 
-                  className={cn("h-2", isOverBudget && "[&>div]:bg-destructive")}
+                  className={cn("h-2 mb-2", isOverBudget && "[&>div]:bg-destructive")}
                 />
-                <div className="flex justify-between text-[11px] text-muted-foreground">
-                  <span>{formatCurrency(category.spent || 0)} خرج شده</span>
-                  <span>{Math.round(progress)}%</span>
+                <div className="flex justify-between text-xs">
+                  <span className={cn(
+                    "font-medium",
+                    isOverBudget ? "text-destructive" : "text-muted-foreground"
+                  )}>
+                    {formatCurrency(category.spent || 0)} خرج شده
+                  </span>
+                  <span className={cn(
+                    "font-bold",
+                    isOverBudget ? "text-destructive" : "text-primary"
+                  )}>
+                    {Math.round(progress)}%
+                  </span>
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => openEditModal(category)}
-              className="h-10 w-10 rounded-xl hover:bg-accent"
-            >
-              <Edit3 className="w-4 h-4 text-muted-foreground" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setDeleteId(category.id)}
-              className="h-10 w-10 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Subcategories Tree */}
+        {/* Subcategories Tree - Mobile Optimized */}
         <CollapsibleContent>
           {hasSubcategories && (
-            <div className="mr-12 mt-2 space-y-1.5 border-r-2 border-primary/20 pr-4">
+            <div className="mr-6 mt-2 space-y-1.5 border-r-2 border-primary/30 pr-3">
               {subcatNames.map((subcat, idx) => (
                 <div 
                   key={idx}
-                  className="flex items-center gap-2.5 p-3 rounded-xl bg-accent/50 text-sm"
+                  className="flex items-center gap-2 p-2.5 rounded-xl bg-accent/50"
                 >
                   <div 
-                    className="w-2.5 h-2.5 rounded-full"
+                    className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: category.color }}
                   />
-                  <span className="text-foreground font-medium">{subcat}</span>
+                  <span className="text-sm text-foreground">{subcat}</span>
                 </div>
               ))}
             </div>
@@ -314,45 +335,45 @@ export function CategoryManagement({
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
-      {/* Header - Clean Blue Style */}
-      <div className="bg-primary rounded-2xl p-5 text-primary-foreground">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-white/20">
+    <div className="space-y-4 animate-fade-in">
+      {/* Header - Mobile Optimized */}
+      <div className="bg-primary rounded-2xl p-4 text-primary-foreground">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
               <FolderTree className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold">مدیریت دسته‌بندی‌ها</h2>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold truncate">مدیریت دسته‌بندی‌ها</h2>
               <p className="text-xs text-primary-foreground/70">{categories.length} دسته‌بندی</p>
             </div>
           </div>
           <Button 
             onClick={openAddModal} 
             size="sm" 
-            className="rounded-xl bg-white text-primary hover:bg-white/90 font-semibold"
+            className="rounded-xl bg-white text-primary hover:bg-white/90 font-bold h-10 px-4 shrink-0"
           >
-            <Plus className="w-4 h-4 ml-1.5" />
+            <Plus className="w-4 h-4 ml-1" />
             جدید
           </Button>
         </div>
       </div>
 
-      {/* Expense Categories Card */}
+      {/* Expense Categories Card - Mobile Optimized */}
       <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-3 h-3 rounded-full bg-destructive" />
-            <h3 className="font-bold text-foreground">دسته‌بندی هزینه‌ها</h3>
+        <div className="p-3 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-destructive" />
+            <h3 className="font-bold text-foreground text-sm">دسته‌بندی هزینه‌ها</h3>
           </div>
-          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground">
+          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground text-xs">
             {expenseCategories.length}
           </Badge>
         </div>
-        <div className="p-4 space-y-3">
+        <div className="p-3 space-y-2">
           {expenseCategories.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-3 flex items-center justify-center">
+            <div className="text-center py-6">
+              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-2 flex items-center justify-center">
                 <Receipt className="w-6 h-6 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground text-sm">هنوز دسته‌بندی هزینه‌ای ندارید</p>
@@ -363,129 +384,36 @@ export function CategoryManagement({
         </div>
       </div>
 
-      {/* Income Categories Card */}
+      {/* Income Categories Card - Mobile Optimized */}
       <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-3 h-3 rounded-full bg-success" />
-            <h3 className="font-bold text-foreground">دسته‌بندی درآمدها</h3>
+        <div className="p-3 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-success" />
+            <h3 className="font-bold text-foreground text-sm">دسته‌بندی درآمدها</h3>
           </div>
-          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground">
+          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground text-xs">
             {incomeCategories.length}
           </Badge>
         </div>
-        <div className="p-4 space-y-3">
+        <div className="p-3 space-y-2">
           {incomeCategories.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-3 flex items-center justify-center">
+            <div className="text-center py-6">
+              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-2 flex items-center justify-center">
                 <Wallet className="w-6 h-6 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground text-sm">هنوز دسته‌بندی درآمدی ندارید</p>
             </div>
           ) : (
-            incomeCategories.map((category) => {
-              const Icon = iconMap[category.icon] || Receipt;
-              const hasSubcategories = category.subcategories && category.subcategories.length > 0;
-              const isExpanded = expandedCategories.has(category.id);
-              const subcats = category.subcategories || [];
-              const subcatNames = subcats.map(s => typeof s === 'string' ? s : s.name);
-
-              return (
-                <Collapsible
-                  key={category.id}
-                  open={isExpanded}
-                  onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
-                >
-                  <div 
-                    className="flex items-center gap-3 p-4 bg-card border border-border rounded-2xl hover:border-primary/30 transition-all group"
-                  >
-                    {/* Tree Toggle */}
-                    <CollapsibleTrigger asChild>
-                      <button 
-                        className={cn(
-                          "p-1.5 rounded-xl hover:bg-accent transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center",
-                          !hasSubcategories && "invisible"
-                        )}
-                        disabled={!hasSubcategories}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </button>
-                    </CollapsibleTrigger>
-
-                    <div 
-                      className="p-3 rounded-xl shrink-0"
-                      style={{ backgroundColor: `${category.color}15` }}
-                    >
-                      <Icon 
-                        className="w-5 h-5" 
-                        style={{ color: category.color }}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center gap-2 flex-1">
-                      <span className="font-semibold text-foreground text-sm">{category.name}</span>
-                      {hasSubcategories && (
-                        <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground border-0">
-                          {subcatNames.length} زیردسته
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => openEditModal(category)}
-                        className="h-10 w-10 rounded-xl hover:bg-accent"
-                      >
-                        <Edit3 className="w-4 h-4 text-muted-foreground" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => setDeleteId(category.id)}
-                        className="h-10 w-10 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Subcategories Tree */}
-                  <CollapsibleContent>
-                    {hasSubcategories && (
-                      <div className="mr-12 mt-2 space-y-1.5 border-r-2 border-primary/20 pr-4">
-                        {subcatNames.map((subcat, idx) => (
-                          <div 
-                            key={idx}
-                            className="flex items-center gap-2.5 p-3 rounded-xl bg-accent/50 text-sm"
-                          >
-                            <div 
-                              className="w-2.5 h-2.5 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            <span className="text-foreground font-medium">{subcat}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
-              );
-            })
+            incomeCategories.map(renderCategoryItem)
           )}
         </div>
       </div>
 
-      {/* Add/Edit Modal - Clean Blue Header */}
+      {/* Add/Edit Modal - Full Mobile Sheet Style */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-hidden p-0">
-          <DialogHeader className="bg-primary text-primary-foreground p-5 rounded-t-2xl">
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+        <DialogContent className="max-w-[100vw] w-full sm:max-w-md max-h-[95vh] overflow-hidden p-0 rounded-t-3xl sm:rounded-2xl">
+          <DialogHeader className="bg-primary text-primary-foreground p-4">
+            <DialogTitle className="flex items-center gap-2 text-base font-bold">
               {editingCategory ? (
                 <>
                   <Edit3 className="w-5 h-5" />
@@ -500,19 +428,19 @@ export function CategoryManagement({
             </DialogTitle>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="p-5 space-y-5 overflow-y-auto max-h-[calc(90vh-100px)]">
-            {/* Type Selection */}
-            <div className="space-y-2.5">
-              <Label className="font-semibold">نوع دسته‌بندی</Label>
-              <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto max-h-[calc(95vh-80px)]">
+            {/* Type Selection - Mobile Optimized */}
+            <div className="space-y-2">
+              <Label className="font-bold text-sm">نوع دسته‌بندی</Label>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setCategoryType('expense')}
                   className={cn(
-                    "p-4 rounded-xl border-2 transition-all text-center font-semibold",
+                    "h-12 rounded-xl border-2 transition-all text-center font-bold text-sm",
                     categoryType === 'expense'
                       ? "border-destructive bg-destructive/10 text-destructive"
-                      : "border-border hover:border-primary/30"
+                      : "border-border active:border-primary/50"
                   )}
                 >
                   هزینه
@@ -521,10 +449,10 @@ export function CategoryManagement({
                   type="button"
                   onClick={() => setCategoryType('income')}
                   className={cn(
-                    "p-4 rounded-xl border-2 transition-all text-center font-semibold",
+                    "h-12 rounded-xl border-2 transition-all text-center font-bold text-sm",
                     categoryType === 'income'
                       ? "border-success bg-success/10 text-success"
-                      : "border-border hover:border-primary/30"
+                      : "border-border active:border-primary/50"
                   )}
                 >
                   درآمد
@@ -532,36 +460,37 @@ export function CategoryManagement({
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              <Label htmlFor="cat-name" className="font-semibold">نام دسته‌بندی</Label>
+            <div className="space-y-2">
+              <Label htmlFor="cat-name" className="font-bold text-sm">نام دسته‌بندی</Label>
               <Input
                 id="cat-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="مثلا: خرید لباس"
-                className="h-12 rounded-xl border-2"
+                className="h-12 rounded-xl border-2 text-base"
                 required
               />
             </div>
 
             {/* Subcategories Input */}
-            <div className="space-y-2.5">
-              <Label htmlFor="cat-subcategories" className="font-semibold">زیردسته‌ها (با ویرگول جدا کنید)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="cat-subcategories" className="font-bold text-sm">زیردسته‌ها</Label>
               <Input
                 id="cat-subcategories"
                 value={subcategoriesInput}
                 onChange={(e) => setSubcategoriesInput(e.target.value)}
-                placeholder="مثلا: لباس، کفش، اکسسوری"
-                className="h-12 rounded-xl border-2"
+                placeholder="لباس، کفش، اکسسوری"
+                className="h-12 rounded-xl border-2 text-base"
               />
-              <p className="text-xs text-muted-foreground">
-                زیردسته‌ها را با ویرگول (،) یا کاما (,) جدا کنید
+              <p className="text-[11px] text-muted-foreground">
+                با ویرگول جدا کنید
               </p>
             </div>
 
-            <div className="space-y-2.5">
-              <Label className="font-semibold">آیکون</Label>
-              <div className="grid grid-cols-6 gap-2">
+            {/* Icons - Mobile Grid 5 columns */}
+            <div className="space-y-2">
+              <Label className="font-bold text-sm">آیکون</Label>
+              <div className="grid grid-cols-5 gap-2">
                 {iconOptions.map((opt) => {
                   const Icon = opt.icon;
                   return (
@@ -570,10 +499,10 @@ export function CategoryManagement({
                       type="button"
                       onClick={() => setSelectedIcon(opt.name)}
                       className={cn(
-                        "p-3 rounded-xl transition-all aspect-square flex items-center justify-center border-2",
+                        "aspect-square rounded-xl transition-all flex items-center justify-center border-2 min-h-[44px]",
                         selectedIcon === opt.name
                           ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border hover:border-primary/30 bg-card"
+                          : "border-border active:border-primary/50 bg-card"
                       )}
                     >
                       <Icon className="w-5 h-5" />
@@ -583,9 +512,10 @@ export function CategoryManagement({
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              <Label className="font-semibold">رنگ</Label>
-              <div className="flex gap-2.5 flex-wrap">
+            {/* Colors - Mobile Optimized */}
+            <div className="space-y-2">
+              <Label className="font-bold text-sm">رنگ</Label>
+              <div className="flex gap-2 flex-wrap">
                 {colorOptions.map((color) => (
                   <button
                     key={color}
@@ -594,8 +524,8 @@ export function CategoryManagement({
                     className={cn(
                       "w-11 h-11 rounded-xl transition-all border-2",
                       selectedColor === color 
-                        ? "border-foreground scale-110 shadow-lg" 
-                        : "border-transparent hover:scale-105"
+                        ? "border-foreground ring-2 ring-primary ring-offset-2" 
+                        : "border-transparent active:scale-95"
                     )}
                     style={{ backgroundColor: color }}
                   />
@@ -604,21 +534,22 @@ export function CategoryManagement({
             </div>
 
             {categoryType === 'expense' && (
-              <div className="space-y-2.5 animate-fade-in">
-                <Label htmlFor="cat-budget" className="font-semibold">بودجه ماهانه (اختیاری)</Label>
+              <div className="space-y-2 animate-fade-in">
+                <Label htmlFor="cat-budget" className="font-bold text-sm">بودجه ماهانه (اختیاری)</Label>
                 <Input
                   id="cat-budget"
                   type="text"
                   inputMode="numeric"
                   value={budget}
                   onChange={(e) => setBudget(formatAmount(e.target.value))}
-                  placeholder="مثلا: 5,000,000 تومان"
-                  className="h-12 rounded-xl border-2"
+                  placeholder="5,000,000 تومان"
+                  className="h-12 rounded-xl border-2 text-base"
                 />
               </div>
             )}
 
-            <div className="flex gap-3 pt-3">
+            {/* Action Buttons - Mobile Safe Area */}
+            <div className="flex gap-2 pt-2 pb-safe">
               <Button
                 type="button"
                 variant="outline"
@@ -626,30 +557,33 @@ export function CategoryManagement({
                   setIsModalOpen(false);
                   resetForm();
                 }}
-                className="flex-1 rounded-xl h-12 border-2 font-semibold"
+                className="flex-1 rounded-xl h-12 border-2 font-bold"
               >
                 انصراف
               </Button>
-              <Button type="submit" className="flex-1 rounded-xl h-12 font-semibold">
-                {editingCategory ? 'ذخیره تغییرات' : 'افزودن'}
+              <Button type="submit" className="flex-1 rounded-xl h-12 font-bold">
+                {editingCategory ? 'ذخیره' : 'افزودن'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation - Mobile Optimized */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="rounded-2xl">
+        <AlertDialogContent className="rounded-2xl max-w-[90vw]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold">حذف دسته‌بندی</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-bold text-base">حذف دسته‌بندی</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               آیا مطمئنید؟ این عمل قابل بازگشت نیست.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="rounded-xl border-2">انصراف</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 rounded-xl">
+          <AlertDialogFooter className="gap-2 flex-row">
+            <AlertDialogCancel className="rounded-xl border-2 flex-1 h-11">انصراف</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              className="bg-destructive hover:bg-destructive/90 rounded-xl flex-1 h-11"
+            >
               حذف
             </AlertDialogAction>
           </AlertDialogFooter>
