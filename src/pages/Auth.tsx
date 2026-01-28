@@ -218,7 +218,10 @@ const Auth = () => {
                     placeholder="۰۹۱۲ ۳۴۵ ۶۷۸۹"
                     value={formatPhoneDisplay(phone)}
                     onChange={handlePhoneChange}
-                    className="pr-11 h-12 rounded-xl border-2 border-border focus:border-primary tracking-wide"
+                    className={cn(
+                      "pr-11 h-12 rounded-xl border-2 border-border focus:border-primary tracking-wide",
+                      phone.length > 0 && isPhoneValid && "pl-11"
+                    )}
                     required={authMethod === 'phone'}
                     dir="ltr"
                   />
@@ -240,7 +243,10 @@ const Auth = () => {
                     placeholder="example@mail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pr-11 h-12 rounded-xl border-2 border-border focus:border-primary"
+                    className={cn(
+                      "pr-11 h-12 rounded-xl border-2 border-border focus:border-primary",
+                      email.length > 0 && isEmailValid && "pl-11"
+                    )}
                     required={authMethod === 'email'}
                     dir="ltr"
                   />
