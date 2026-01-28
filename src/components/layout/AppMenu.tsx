@@ -14,11 +14,14 @@ import {
   FileText,
   TrendingUp,
   PiggyBank,
+  Home,
+  BarChart3,
+  Settings,
   type LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
+import { NavTab } from '@/components/navigation/BottomNav';
 
 type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers';
 
@@ -26,7 +29,9 @@ interface AppMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (view: SubView) => void;
+  onTabChange: (tab: NavTab) => void;
   onOpenAdmin?: () => void;
+  onOpenHelp?: () => void;
 }
 
 interface MenuItemProps {
@@ -75,8 +80,14 @@ function MenuItem({ icon: Icon, label, description, onClick, variant = 'default'
   );
 }
 
-export function AppMenu({ isOpen, onClose, onNavigate, onOpenAdmin }: AppMenuProps) {
-  const { user } = useAuth();
+export function AppMenu({ 
+  isOpen, 
+  onClose, 
+  onNavigate, 
+  onTabChange,
+  onOpenAdmin,
+  onOpenHelp 
+}: AppMenuProps) {
   const { isAdmin, loading: adminLoading } = useAdmin();
 
   const handleNavigation = (view: SubView) => {
@@ -84,9 +95,21 @@ export function AppMenu({ isOpen, onClose, onNavigate, onOpenAdmin }: AppMenuPro
     onClose();
   };
 
+  const handleTabNavigation = (tab: NavTab) => {
+    onTabChange(tab);
+    onClose();
+  };
+
   const handleAdminClick = () => {
     if (onOpenAdmin) {
       onOpenAdmin();
+    }
+    onClose();
+  };
+
+  const handleHelpClick = () => {
+    if (onOpenHelp) {
+      onOpenHelp();
     }
     onClose();
   };
@@ -110,9 +133,35 @@ export function AppMenu({ isOpen, onClose, onNavigate, onOpenAdmin }: AppMenuPro
           </div>
         </SheetHeader>
 
-        <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-140px)]">
-          {/* Main Features */}
+        <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-180px)] pb-20">
+          {/* Quick Navigation */}
           <p className="text-xs font-semibold text-muted-foreground px-1 pt-2 pb-1">
+            دسترسی سریع
+          </p>
+          
+          <MenuItem
+            icon={Home}
+            label="داشبورد"
+            description="صفحه اصلی و خلاصه وضعیت"
+            onClick={() => handleTabNavigation('home')}
+          />
+          
+          <MenuItem
+            icon={BarChart3}
+            label="گزارش‌ها"
+            description="مشاهده تاریخچه و آمار تراکنش‌ها"
+            onClick={() => handleTabNavigation('reports')}
+          />
+          
+          <MenuItem
+            icon={Settings}
+            label="تنظیمات"
+            description="شخصی‌سازی اپلیکیشن"
+            onClick={() => handleTabNavigation('settings')}
+          />
+
+          {/* Main Features */}
+          <p className="text-xs font-semibold text-muted-foreground px-1 pt-4 pb-1">
             امکانات اصلی
           </p>
           
@@ -155,12 +204,9 @@ export function AppMenu({ isOpen, onClose, onNavigate, onOpenAdmin }: AppMenuPro
           
           <MenuItem
             icon={TrendingUp}
-            label="تحلیل هوشمند"
-            description="گزارش‌های AI از وضعیت مالی"
-            onClick={() => {
-              onNavigate('main');
-              onClose();
-            }}
+            label="تحلیل هوشمند AI"
+            description="گزارش‌های هوش مصنوعی از وضعیت مالی"
+            onClick={() => handleTabNavigation('reports')}
           />
           
           <MenuItem
@@ -168,16 +214,6 @@ export function AppMenu({ isOpen, onClose, onNavigate, onOpenAdmin }: AppMenuPro
             label="بودجه‌بندی"
             description="تنظیم سقف هزینه ماهانه"
             onClick={() => handleNavigation('categories')}
-          />
-          
-          <MenuItem
-            icon={FileText}
-            label="گزارش‌ها"
-            description="مشاهده تاریخچه تراکنش‌ها"
-            onClick={() => {
-              onNavigate('main');
-              onClose();
-            }}
           />
 
           {/* Admin Section - Only for admins */}
@@ -206,7 +242,7 @@ export function AppMenu({ isOpen, onClose, onNavigate, onOpenAdmin }: AppMenuPro
             icon={HelpCircle}
             label="راهنمای استفاده"
             description="آموزش کار با اپلیکیشن"
-            onClick={onClose}
+            onClick={handleHelpClick}
           />
         </div>
 

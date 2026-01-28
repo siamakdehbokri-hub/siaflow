@@ -118,7 +118,12 @@ const Index = () => {
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         onNavigate={setSubView}
+        onTabChange={handleTabChange}
         onOpenAdmin={() => navigate('/admin')}
+        onOpenHelp={() => {
+          // TODO: Add help guide modal
+          setActiveTab('settings');
+        }}
       />
 
       {/* Sub-view back button */}
