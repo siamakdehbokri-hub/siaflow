@@ -42,39 +42,41 @@ export function AIInsightCard({
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-right p-4 rounded-2xl border transition-all duration-300",
-        "bg-card hover:shadow-lg active:scale-[0.98]",
+        // Full-width touch target with proper sizing
+        "w-full text-right p-4 rounded-2xl border-2 transition-all duration-200",
+        "bg-card hover:shadow-md active:scale-[0.98]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         config.borderColor,
         "animate-fade-in"
       )}
       style={{ animationDelay: '200ms' }}
     >
       <div className="flex items-start gap-3">
-        {/* Icon */}
+        {/* Icon - 44px for touch */}
         <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+          "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
           config.bgColor
         )}>
-          <Sparkles className={cn("w-5 h-5", config.color)} />
+          <Sparkles className={cn("w-6 h-6", config.color)} strokeWidth={2} />
         </div>
         
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
               بینش هوشمند
             </span>
           </div>
-          <h4 className="text-sm font-semibold text-foreground mb-1 line-clamp-1">
+          <h4 className="text-sm font-bold text-foreground mb-1 line-clamp-1">
             {title}
           </h4>
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
             {message}
           </p>
         </div>
         
-        {/* Arrow */}
-        <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0 mt-2" />
+        {/* Arrow - proper alignment */}
+        <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0 self-center" strokeWidth={2} />
       </div>
     </button>
   );

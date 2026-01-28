@@ -29,10 +29,10 @@ export function AppHeader({
       {/* Safe area padding */}
       <div className="pt-safe" />
       
-      {/* Header content - fixed height */}
+      {/* Header content - 56px height for consistency */}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-4">
         {/* Notifications (right side in RTL) */}
-        <div className="flex items-center gap-1 justify-self-start min-w-0">
+        <div className="flex items-center gap-0.5 justify-self-start min-w-0">
           <DebtReminderNotifications 
             reminders={debtReminders} 
             onDismiss={onDismissDebtReminder || (() => {})} 
@@ -44,20 +44,21 @@ export function AppHeader({
           />
         </div>
         
-        {/* Title - truly centered regardless of side widths */}
-        <h1 className="text-lg font-bold justify-self-center text-center truncate max-w-[70vw]">
+        {/* Title - truly centered */}
+        <h1 className="text-lg font-bold justify-self-center text-center truncate max-w-[60vw]">
           {title}
         </h1>
         
-        {/* Menu icon (left side in RTL) */}
+        {/* Menu icon (left side in RTL) - 44px touch target */}
         <div className="justify-self-end">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onMenuClick}
-            className="text-primary-foreground hover:bg-white/10 rounded-full"
+            className="text-primary-foreground hover:bg-white/15 rounded-xl h-11 w-11"
+            aria-label="منو"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-6 h-6" strokeWidth={2} />
           </Button>
         </div>
       </div>

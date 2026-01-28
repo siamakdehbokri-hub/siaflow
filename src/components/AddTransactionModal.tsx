@@ -183,7 +183,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               required
             />
             
-            {/* Quick Amounts */}
+            {/* Quick Amounts - 44px touch targets */}
             <div className="grid grid-cols-4 gap-2">
               {quickAmounts.map((qa) => (
                 <button
@@ -191,10 +191,12 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                   type="button"
                   onClick={() => setAmount(qa.value)}
                   className={cn(
-                    "py-2.5 text-xs font-medium rounded-lg border transition-all",
+                    // 44px minimum height for iOS compliance
+                    "h-11 text-xs font-semibold rounded-xl border-2 transition-all active:scale-95",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     amount === qa.value
                       ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-muted/30 text-muted-foreground hover:border-primary/50"
+                      : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-muted/50"
                   )}
                 >
                   {qa.label}
