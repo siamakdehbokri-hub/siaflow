@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Calendar, Users } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Wallet, PieChart, Users, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -55,14 +55,14 @@ export function HomeScreen({
   const persianDate = formatPersianDateFull(today.toISOString());
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 animate-fade-in">
       {/* Welcome & Date Section */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <h2 className="text-base font-bold text-foreground truncate">
             سلام، {userName} 👋
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-muted-foreground mt-1">
             خوش آمدی!
           </p>
         </div>
@@ -72,74 +72,76 @@ export function HomeScreen({
       </div>
 
       {/* Hero Card - Today's spending */}
-      <div className="bg-card rounded-2xl p-4 border border-border">
-        <div className="flex items-start justify-between gap-3">
+      <div className="bg-card rounded-2xl p-5 border-2 border-border/40">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground mb-1">امروز چقدر خرج کردی؟</p>
-            <div className="flex items-baseline gap-1 flex-wrap">
-              <span className="text-2xl font-bold tabular-nums truncate">
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">امروز چقدر خرج کردی؟</p>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-3xl font-bold tabular-nums truncate">
                 {formatCompactCurrency(financialData.expense)}
               </span>
-              <span className="text-xs text-muted-foreground">تومان</span>
+              <span className="text-sm text-muted-foreground">تومان</span>
             </div>
           </div>
           
-          {/* Quick add button */}
+          {/* Quick add button - 48px touch target */}
           <button
             onClick={() => onAddTransaction()}
-            className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors shrink-0"
+            className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="افزودن تراکنش"
           >
-            <Plus className="w-6 h-6 text-primary" />
+            <Plus className="w-6 h-6 text-primary" strokeWidth={2} />
           </button>
         </div>
         
-        {/* Quick action icons */}
-        <div className="flex items-center justify-around mt-4 pt-3 border-t border-border">
+        {/* Quick action icons - 44px touch targets */}
+        <div className="flex items-center justify-around mt-5 pt-4 border-t border-border">
           <QuickActionButton 
-            icon={Calendar} 
+            icon={Wallet} 
             label="تراکنش‌ها" 
-            color="bg-blue-500"
+            bgColor="bg-primary"
             onClick={onViewAllTransactions}
           />
           <QuickActionButton 
-            icon={Calendar} 
+            icon={PieChart} 
             label="بودجه‌بندی" 
-            color="bg-green-500"
-            onClick={() => {}}
+            bgColor="bg-success"
+            onClick={onViewAllTransactions}
           />
           <QuickActionButton 
             icon={Users} 
             label="دونگ‌ها" 
-            color="bg-orange-500"
+            bgColor="bg-warning"
             onClick={() => {}}
+            disabled
           />
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-card rounded-xl p-3 border border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
-              <ArrowUpRight className="w-4 h-4 text-success" />
+      {/* Summary Cards - Consistent sizing */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-card rounded-2xl p-4 border-2 border-border/40">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+              <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] text-muted-foreground">درآمد ماه</p>
-              <p className="text-sm font-bold text-success tabular-nums truncate">
+              <p className="text-[11px] font-medium text-muted-foreground">درآمد ماه</p>
+              <p className="text-sm font-bold text-success tabular-nums truncate mt-0.5">
                 {formatCompactCurrency(financialData.income)}
               </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-card rounded-xl p-3 border border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
-              <ArrowDownRight className="w-4 h-4 text-destructive" />
+        <div className="bg-card rounded-2xl p-4 border-2 border-border/40">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+              <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] text-muted-foreground">هزینه ماه</p>
-              <p className="text-sm font-bold text-destructive tabular-nums truncate">
+              <p className="text-[11px] font-medium text-muted-foreground">هزینه ماه</p>
+              <p className="text-sm font-bold text-destructive tabular-nums truncate mt-0.5">
                 {formatCompactCurrency(financialData.expense)}
               </p>
             </div>
@@ -148,56 +150,56 @@ export function HomeScreen({
       </div>
 
       {/* Recent Transactions */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-foreground">فعالیت اخیر</h3>
+          <h3 className="text-sm font-semibold text-foreground">فعالیت اخیر</h3>
           <button 
             onClick={onViewAllTransactions}
-            className="flex items-center gap-1 text-xs text-primary"
+            className="flex items-center gap-1 text-xs font-medium text-primary py-2 px-1 -ml-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             همه
-            <ChevronLeft className="w-3 h-3" />
+            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
           </button>
         </div>
         
         {financialData.recentTransactions.length === 0 ? (
-          <div className="bg-card rounded-xl p-5 border border-border text-center">
-            <Clock className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
+          <div className="bg-card rounded-2xl p-6 border-2 border-border/40 text-center">
+            <Clock className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" strokeWidth={1.5} />
+            <p className="text-xs font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
           </div>
         ) : (
-          <div className="bg-card rounded-xl border border-border divide-y divide-border overflow-hidden">
+          <div className="bg-card rounded-2xl border-2 border-border/40 divide-y divide-border/40 overflow-hidden">
             {financialData.recentTransactions.map((transaction) => {
               const isIncome = transaction.type === 'income';
               
               return (
                 <div 
                   key={transaction.id} 
-                  className="flex items-center gap-2 p-3 active:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-4 active:bg-muted/50 transition-colors"
                 >
                   <div className={cn(
-                    "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
+                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
                     isIncome ? "bg-success/10" : "bg-destructive/10"
                   )}>
                     {isIncome ? (
-                      <ArrowUpRight className="w-4 h-4 text-success" />
+                      <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
                     ) : (
-                      <ArrowDownRight className="w-4 h-4 text-destructive" />
+                      <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
                     )}
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
+                    <p className="text-sm font-semibold text-foreground truncate">
                       {transaction.category}
                     </p>
-                    <p className="text-[10px] text-muted-foreground truncate">
+                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                       {transaction.description || '—'}
                     </p>
                   </div>
                   
                   <div className="text-left shrink-0">
                     <p className={cn(
-                      "text-xs font-semibold tabular-nums",
+                      "text-sm font-bold tabular-nums",
                       isIncome ? "text-success" : "text-destructive"
                     )}>
                       {isIncome ? '+' : '-'}{formatCompactCurrency(transaction.amount)}
@@ -214,19 +216,28 @@ export function HomeScreen({
 }
 
 interface QuickActionButtonProps {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   label: string;
-  color: string;
+  bgColor: string;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-function QuickActionButton({ icon: Icon, label, color, onClick }: QuickActionButtonProps) {
+function QuickActionButton({ icon: Icon, label, bgColor, onClick, disabled }: QuickActionButtonProps) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1.5 min-w-0">
-      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center", color)}>
-        <Icon className="w-5 h-5 text-white" />
+    <button 
+      onClick={onClick} 
+      disabled={disabled}
+      className={cn(
+        "flex flex-col items-center gap-2 min-w-0 py-1 px-2 rounded-xl transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        disabled ? "opacity-50 cursor-not-allowed" : "active:scale-95"
+      )}
+    >
+      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", bgColor)}>
+        <Icon className="w-6 h-6 text-white" strokeWidth={2} />
       </div>
-      <span className="text-[10px] text-foreground truncate max-w-[60px]">{label}</span>
+      <span className="text-[11px] font-medium text-foreground truncate max-w-[70px]">{label}</span>
     </button>
   );
 }
