@@ -1,14 +1,14 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BottomNav, NavTab } from '@/components/navigation/BottomNav';
 import { AppHeader } from '@/components/layout/AppHeader';
+import { AppMenu } from '@/components/layout/AppMenu';
 import { HomeScreen } from '@/components/home/HomeScreen';
 import { ReportsHub } from '@/components/reports/ReportsHub';
 import { Settings } from '@/components/Settings';
 import { CategoryManagement } from '@/components/CategoryManagement';
 import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { EditTransactionModal } from '@/components/EditTransactionModal';
-import { ReminderNotifications } from '@/components/ReminderNotifications';
-import { DebtReminderNotifications } from '@/components/DebtReminderNotifications';
 import { SavingGoals } from '@/components/SavingGoals';
 import { DebtManagement } from '@/components/DebtManagement';
 import { TransferManagement } from '@/components/TransferManagement';
@@ -26,6 +26,8 @@ import { Button } from '@/components/ui/button';
 type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [subView, setSubView] = useState<SubView>('main');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -103,11 +105,20 @@ const Index = () => {
       {/* Header */}
       <AppHeader 
         title={getPageTitle()} 
+        onMenuClick={() => setIsMenuOpen(true)}
         debtReminders={debtReminders}
         reminders={reminders}
         onDismissDebtReminder={dismissDebtReminder}
         onDismissReminder={dismissReminder}
         onEnableNotifications={requestNotificationPermission}
+      />
+
+      {/* Side Menu */}
+      <AppMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onNavigate={setSubView}
+        onOpenAdmin={() => navigate('/admin')}
       />
 
       {/* Sub-view back button */}
