@@ -58,8 +58,13 @@ export function useDebts() {
   };
 
   useEffect(() => {
-    fetchDebts();
-  }, [user]);
+    if (user) {
+      fetchDebts();
+    } else {
+      setDebts([]);
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   const addDebt = async (debt: Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;

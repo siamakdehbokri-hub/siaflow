@@ -67,8 +67,13 @@ export function useSavingGoals() {
   };
 
   useEffect(() => {
-    fetchGoals();
-  }, [user]);
+    if (user) {
+      fetchGoals();
+    } else {
+      setGoals([]);
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   const addGoal = async (goal: Omit<SavingGoal, 'id' | 'createdAt' | 'updatedAt' | 'currentAmount'>) => {
     if (!user) return;

@@ -47,8 +47,13 @@ export function useTransactions() {
   };
 
   useEffect(() => {
-    fetchTransactions();
-  }, [user]);
+    if (user) {
+      fetchTransactions();
+    } else {
+      setTransactions([]);
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     if (!user) return;
@@ -195,8 +200,13 @@ export function useCategories() {
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, [user]);
+    if (user) {
+      fetchCategories();
+    } else {
+      setCategories([]);
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   const addCategory = async (category: Omit<Category, 'id'>) => {
     if (!user) return;
