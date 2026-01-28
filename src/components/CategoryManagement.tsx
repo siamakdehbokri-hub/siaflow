@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, Sparkles, FolderTree } from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree } from 'lucide-react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
   Smartphone, Plane, Book, Music, MoreHorizontal,
   ShoppingCart, GraduationCap, CreditCard, Landmark, Users
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,12 +60,12 @@ const iconOptions = [
 ];
 
 const colorOptions = [
+  'hsl(211, 100%, 50%)',
   'hsl(38, 92%, 50%)',
   'hsl(199, 89%, 48%)',
   'hsl(262, 83%, 58%)',
   'hsl(0, 72%, 51%)',
-  'hsl(142, 71%, 45%)',
-  'hsl(168, 76%, 42%)',
+  'hsl(145, 65%, 42%)',
   'hsl(330, 80%, 60%)',
   'hsl(25, 95%, 53%)',
 ];
@@ -211,13 +210,13 @@ export function CategoryManagement({
         onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
       >
         <div 
-          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-all group"
+          className="flex items-center gap-3 p-4 bg-card border border-border rounded-2xl hover:border-primary/30 transition-all group"
         >
           {/* Tree Toggle */}
           <CollapsibleTrigger asChild>
             <button 
               className={cn(
-                "p-1 rounded-lg hover:bg-background/50 transition-colors",
+                "p-1.5 rounded-xl hover:bg-accent transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center",
                 !hasSubcategories && "invisible"
               )}
               disabled={!hasSubcategories}
@@ -231,8 +230,8 @@ export function CategoryManagement({
           </CollapsibleTrigger>
 
           <div 
-            className="p-2.5 rounded-xl shrink-0 transition-transform group-hover:scale-110"
-            style={{ backgroundColor: `${category.color}20` }}
+            className="p-3 rounded-xl shrink-0"
+            style={{ backgroundColor: `${category.color}15` }}
           >
             <Icon 
               className="w-5 h-5" 
@@ -241,11 +240,11 @@ export function CategoryManagement({
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-foreground">{category.name}</span>
+                <span className="font-semibold text-foreground text-sm">{category.name}</span>
                 {hasSubcategories && (
-                  <Badge variant="secondary" className="text-[10px]">
+                  <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground border-0">
                     {subcatNames.length} زیردسته
                   </Badge>
                 )}
@@ -258,12 +257,12 @@ export function CategoryManagement({
               </span>
             </div>
             {category.budget && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <Progress 
                   value={Math.min(progress, 100)} 
-                  className={cn("h-1.5", isOverBudget && "[&>div]:bg-destructive")}
+                  className={cn("h-2", isOverBudget && "[&>div]:bg-destructive")}
                 />
-                <div className="flex justify-between text-[10px] text-muted-foreground">
+                <div className="flex justify-between text-[11px] text-muted-foreground">
                   <span>{formatCurrency(category.spent || 0)} خرج شده</span>
                   <span>{Math.round(progress)}%</span>
                 </div>
@@ -274,17 +273,17 @@ export function CategoryManagement({
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button 
               variant="ghost" 
-              size="icon-sm"
+              size="icon"
               onClick={() => openEditModal(category)}
-              className="h-8 w-8"
+              className="h-10 w-10 rounded-xl hover:bg-accent"
             >
-              <Edit3 className="w-4 h-4" />
+              <Edit3 className="w-4 h-4 text-muted-foreground" />
             </Button>
             <Button 
               variant="ghost" 
-              size="icon-sm"
+              size="icon"
               onClick={() => setDeleteId(category.id)}
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-10 w-10 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -294,17 +293,17 @@ export function CategoryManagement({
         {/* Subcategories Tree */}
         <CollapsibleContent>
           {hasSubcategories && (
-            <div className="mr-10 mt-1 space-y-1 border-r-2 border-dashed border-muted pr-4">
+            <div className="mr-12 mt-2 space-y-1.5 border-r-2 border-primary/20 pr-4">
               {subcatNames.map((subcat, idx) => (
                 <div 
                   key={idx}
-                  className="flex items-center gap-2 p-2 rounded-lg bg-background/50 text-sm"
+                  className="flex items-center gap-2.5 p-3 rounded-xl bg-accent/50 text-sm"
                 >
                   <div 
-                    className="w-2 h-2 rounded-full"
+                    className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: category.color }}
                   />
-                  <span className="text-muted-foreground">{subcat}</span>
+                  <span className="text-foreground font-medium">{subcat}</span>
                 </div>
               ))}
             </div>
@@ -316,61 +315,73 @@ export function CategoryManagement({
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl gradient-primary">
-            <FolderTree className="w-5 h-5 text-primary-foreground" />
+      {/* Header - Clean Blue Style */}
+      <div className="bg-primary rounded-2xl p-5 text-primary-foreground">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-white/20">
+              <FolderTree className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">مدیریت دسته‌بندی‌ها</h2>
+              <p className="text-xs text-primary-foreground/70">{categories.length} دسته‌بندی</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-foreground">مدیریت دسته‌بندی‌ها</h2>
-            <p className="text-xs text-muted-foreground">{categories.length} دسته‌بندی</p>
-          </div>
+          <Button 
+            onClick={openAddModal} 
+            size="sm" 
+            className="rounded-xl bg-white text-primary hover:bg-white/90 font-semibold"
+          >
+            <Plus className="w-4 h-4 ml-1.5" />
+            جدید
+          </Button>
         </div>
-        <Button onClick={openAddModal} size="sm" className="rounded-xl">
-          <Plus className="w-4 h-4 ml-2" />
-          دسته جدید
-        </Button>
       </div>
 
-      {/* Expense Categories */}
-      <Card variant="glass">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-destructive" />
-              دسته‌بندی هزینه‌ها
-            </CardTitle>
-            <Badge variant="secondary" className="text-xs">{expenseCategories.length}</Badge>
+      {/* Expense Categories Card */}
+      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-3 h-3 rounded-full bg-destructive" />
+            <h3 className="font-bold text-foreground">دسته‌بندی هزینه‌ها</h3>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
+          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground">
+            {expenseCategories.length}
+          </Badge>
+        </div>
+        <div className="p-4 space-y-3">
           {expenseCategories.length === 0 ? (
-            <p className="text-center text-muted-foreground py-6 text-sm">
-              هنوز دسته‌بندی هزینه‌ای ندارید
-            </p>
+            <div className="text-center py-8">
+              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-3 flex items-center justify-center">
+                <Receipt className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-sm">هنوز دسته‌بندی هزینه‌ای ندارید</p>
+            </div>
           ) : (
             expenseCategories.map(renderCategoryItem)
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Income Categories */}
-      <Card variant="glass">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-success" />
-              دسته‌بندی درآمدها
-            </CardTitle>
-            <Badge variant="secondary" className="text-xs">{incomeCategories.length}</Badge>
+      {/* Income Categories Card */}
+      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-3 h-3 rounded-full bg-success" />
+            <h3 className="font-bold text-foreground">دسته‌بندی درآمدها</h3>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
+          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground">
+            {incomeCategories.length}
+          </Badge>
+        </div>
+        <div className="p-4 space-y-3">
           {incomeCategories.length === 0 ? (
-            <p className="text-center text-muted-foreground py-6 text-sm">
-              هنوز دسته‌بندی درآمدی ندارید
-            </p>
+            <div className="text-center py-8">
+              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-3 flex items-center justify-center">
+                <Wallet className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-sm">هنوز دسته‌بندی درآمدی ندارید</p>
+            </div>
           ) : (
             incomeCategories.map((category) => {
               const Icon = iconMap[category.icon] || Receipt;
@@ -386,13 +397,13 @@ export function CategoryManagement({
                   onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
                 >
                   <div 
-                    className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-all group"
+                    className="flex items-center gap-3 p-4 bg-card border border-border rounded-2xl hover:border-primary/30 transition-all group"
                   >
                     {/* Tree Toggle */}
                     <CollapsibleTrigger asChild>
                       <button 
                         className={cn(
-                          "p-1 rounded-lg hover:bg-background/50 transition-colors",
+                          "p-1.5 rounded-xl hover:bg-accent transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center",
                           !hasSubcategories && "invisible"
                         )}
                         disabled={!hasSubcategories}
@@ -406,8 +417,8 @@ export function CategoryManagement({
                     </CollapsibleTrigger>
 
                     <div 
-                      className="p-2.5 rounded-xl shrink-0 transition-transform group-hover:scale-110"
-                      style={{ backgroundColor: `${category.color}20` }}
+                      className="p-3 rounded-xl shrink-0"
+                      style={{ backgroundColor: `${category.color}15` }}
                     >
                       <Icon 
                         className="w-5 h-5" 
@@ -416,9 +427,9 @@ export function CategoryManagement({
                     </div>
                     
                     <div className="flex items-center gap-2 flex-1">
-                      <span className="font-medium text-foreground">{category.name}</span>
+                      <span className="font-semibold text-foreground text-sm">{category.name}</span>
                       {hasSubcategories && (
-                        <Badge variant="secondary" className="text-[10px]">
+                        <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground border-0">
                           {subcatNames.length} زیردسته
                         </Badge>
                       )}
@@ -427,17 +438,17 @@ export function CategoryManagement({
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button 
                         variant="ghost" 
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => openEditModal(category)}
-                        className="h-8 w-8"
+                        className="h-10 w-10 rounded-xl hover:bg-accent"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit3 className="w-4 h-4 text-muted-foreground" />
                       </Button>
                       <Button 
                         variant="ghost" 
-                        size="icon-sm"
+                        size="icon"
                         onClick={() => setDeleteId(category.id)}
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="h-10 w-10 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -447,17 +458,17 @@ export function CategoryManagement({
                   {/* Subcategories Tree */}
                   <CollapsibleContent>
                     {hasSubcategories && (
-                      <div className="mr-10 mt-1 space-y-1 border-r-2 border-dashed border-muted pr-4">
+                      <div className="mr-12 mt-2 space-y-1.5 border-r-2 border-primary/20 pr-4">
                         {subcatNames.map((subcat, idx) => (
                           <div 
                             key={idx}
-                            className="flex items-center gap-2 p-2 rounded-lg bg-background/50 text-sm"
+                            className="flex items-center gap-2.5 p-3 rounded-xl bg-accent/50 text-sm"
                           >
                             <div 
-                              className="w-2 h-2 rounded-full"
+                              className="w-2.5 h-2.5 rounded-full"
                               style={{ backgroundColor: category.color }}
                             />
-                            <span className="text-muted-foreground">{subcat}</span>
+                            <span className="text-foreground font-medium">{subcat}</span>
                           </div>
                         ))}
                       </div>
@@ -467,41 +478,41 @@ export function CategoryManagement({
               );
             })
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit Modal - Clean Blue Header */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="bg-primary text-primary-foreground p-5 rounded-t-2xl">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
               {editingCategory ? (
                 <>
-                  <Edit3 className="w-5 h-5 text-primary" />
+                  <Edit3 className="w-5 h-5" />
                   ویرایش دسته‌بندی
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5 text-primary" />
+                  <Plus className="w-5 h-5" />
                   دسته‌بندی جدید
                 </>
               )}
             </DialogTitle>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+          <form onSubmit={handleSubmit} className="p-5 space-y-5 overflow-y-auto max-h-[calc(90vh-100px)]">
             {/* Type Selection */}
-            <div className="space-y-2">
-              <Label>نوع دسته‌بندی</Label>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2.5">
+              <Label className="font-semibold">نوع دسته‌بندی</Label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setCategoryType('expense')}
                   className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-center font-medium",
+                    "p-4 rounded-xl border-2 transition-all text-center font-semibold",
                     categoryType === 'expense'
                       ? "border-destructive bg-destructive/10 text-destructive"
-                      : "border-border hover:border-muted-foreground"
+                      : "border-border hover:border-primary/30"
                   )}
                 >
                   هزینه
@@ -510,10 +521,10 @@ export function CategoryManagement({
                   type="button"
                   onClick={() => setCategoryType('income')}
                   className={cn(
-                    "p-3 rounded-xl border-2 transition-all text-center font-medium",
+                    "p-4 rounded-xl border-2 transition-all text-center font-semibold",
                     categoryType === 'income'
                       ? "border-success bg-success/10 text-success"
-                      : "border-border hover:border-muted-foreground"
+                      : "border-border hover:border-primary/30"
                   )}
                 >
                   درآمد
@@ -521,36 +532,36 @@ export function CategoryManagement({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cat-name">نام دسته‌بندی</Label>
+            <div className="space-y-2.5">
+              <Label htmlFor="cat-name" className="font-semibold">نام دسته‌بندی</Label>
               <Input
                 id="cat-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="مثلا: خرید لباس"
-                className="h-12 rounded-xl"
+                className="h-12 rounded-xl border-2"
                 required
               />
             </div>
 
             {/* Subcategories Input */}
-            <div className="space-y-2">
-              <Label htmlFor="cat-subcategories">زیردسته‌ها (با ویرگول جدا کنید)</Label>
+            <div className="space-y-2.5">
+              <Label htmlFor="cat-subcategories" className="font-semibold">زیردسته‌ها (با ویرگول جدا کنید)</Label>
               <Input
                 id="cat-subcategories"
                 value={subcategoriesInput}
                 onChange={(e) => setSubcategoriesInput(e.target.value)}
                 placeholder="مثلا: لباس، کفش، اکسسوری"
-                className="h-12 rounded-xl"
+                className="h-12 rounded-xl border-2"
               />
               <p className="text-xs text-muted-foreground">
                 زیردسته‌ها را با ویرگول (،) یا کاما (,) جدا کنید
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>آیکون</Label>
-              <div className="grid grid-cols-5 sm:grid-cols-8 gap-2">
+            <div className="space-y-2.5">
+              <Label className="font-semibold">آیکون</Label>
+              <div className="grid grid-cols-6 gap-2">
                 {iconOptions.map((opt) => {
                   const Icon = opt.icon;
                   return (
@@ -559,10 +570,10 @@ export function CategoryManagement({
                       type="button"
                       onClick={() => setSelectedIcon(opt.name)}
                       className={cn(
-                        "p-2.5 rounded-xl transition-all aspect-square flex items-center justify-center",
+                        "p-3 rounded-xl transition-all aspect-square flex items-center justify-center border-2",
                         selectedIcon === opt.name
-                          ? "bg-primary text-primary-foreground shadow-md scale-110"
-                          : "bg-muted hover:bg-accent"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border hover:border-primary/30 bg-card"
                       )}
                     >
                       <Icon className="w-5 h-5" />
@@ -572,17 +583,19 @@ export function CategoryManagement({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>رنگ</Label>
-              <div className="flex gap-2 flex-wrap">
+            <div className="space-y-2.5">
+              <Label className="font-semibold">رنگ</Label>
+              <div className="flex gap-2.5 flex-wrap">
                 {colorOptions.map((color) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => setSelectedColor(color)}
                     className={cn(
-                      "w-10 h-10 rounded-xl transition-all",
-                      selectedColor === color && "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110"
+                      "w-11 h-11 rounded-xl transition-all border-2",
+                      selectedColor === color 
+                        ? "border-foreground scale-110 shadow-lg" 
+                        : "border-transparent hover:scale-105"
                     )}
                     style={{ backgroundColor: color }}
                   />
@@ -591,8 +604,8 @@ export function CategoryManagement({
             </div>
 
             {categoryType === 'expense' && (
-              <div className="space-y-2 animate-fade-in">
-                <Label htmlFor="cat-budget">بودجه ماهانه (اختیاری)</Label>
+              <div className="space-y-2.5 animate-fade-in">
+                <Label htmlFor="cat-budget" className="font-semibold">بودجه ماهانه (اختیاری)</Label>
                 <Input
                   id="cat-budget"
                   type="text"
@@ -600,12 +613,12 @@ export function CategoryManagement({
                   value={budget}
                   onChange={(e) => setBudget(formatAmount(e.target.value))}
                   placeholder="مثلا: 5,000,000 تومان"
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-xl border-2"
                 />
               </div>
             )}
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-3 pt-3">
               <Button
                 type="button"
                 variant="outline"
@@ -613,11 +626,11 @@ export function CategoryManagement({
                   setIsModalOpen(false);
                   resetForm();
                 }}
-                className="flex-1 rounded-xl"
+                className="flex-1 rounded-xl h-12 border-2 font-semibold"
               >
                 انصراف
               </Button>
-              <Button type="submit" className="flex-1 rounded-xl">
+              <Button type="submit" className="flex-1 rounded-xl h-12 font-semibold">
                 {editingCategory ? 'ذخیره تغییرات' : 'افزودن'}
               </Button>
             </div>
@@ -627,16 +640,16 @@ export function CategoryManagement({
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف دسته‌بندی</AlertDialogTitle>
+            <AlertDialogTitle className="font-bold">حذف دسته‌بندی</AlertDialogTitle>
             <AlertDialogDescription>
               آیا مطمئنید؟ این عمل قابل بازگشت نیست.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>انصراف</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="rounded-xl border-2">انصراف</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 rounded-xl">
               حذف
             </AlertDialogAction>
           </AlertDialogFooter>
