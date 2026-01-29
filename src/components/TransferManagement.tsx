@@ -36,10 +36,10 @@ interface TransferManagementProps {
 }
 
 const accountTypes = [
-  { id: 'checking', label: 'حساب جاری', icon: Building2 },
-  { id: 'savings', label: 'حساب پس‌انداز', icon: PiggyBank },
-  { id: 'cash', label: 'نقدی', icon: Banknote },
-  { id: 'card', label: 'کارت بانکی', icon: CreditCard },
+  { id: 'checking', label: 'حساب جاری', icon: Building2, iconName: 'Building2' },
+  { id: 'savings', label: 'حساب پس‌انداز', icon: PiggyBank, iconName: 'PiggyBank' },
+  { id: 'cash', label: 'نقدی', icon: Banknote, iconName: 'Banknote' },
+  { id: 'card', label: 'کارت بانکی', icon: CreditCard, iconName: 'CreditCard' },
 ];
 
 const accountColors = [
@@ -94,7 +94,7 @@ export function TransferManagement({ goals, onTransferToGoal }: TransferManageme
       type: newAccount.type,
       balance: newAccount.balance,
       color: newAccount.color,
-      icon: accountTypes.find(t => t.id === newAccount.type)?.icon.name || 'Wallet',
+      icon: accountTypes.find(t => t.id === newAccount.type)?.iconName || 'Wallet',
       isDefault: accounts.length === 0,
     });
     setIsSubmitting(false);
