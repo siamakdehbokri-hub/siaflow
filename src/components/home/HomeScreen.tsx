@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Wallet, PieChart, Users, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Wallet, PieChart, CreditCard, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull } from '@/utils/persianDate';
+import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull, isTodayJalali } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
 interface HomeScreenProps {
@@ -10,6 +10,7 @@ interface HomeScreenProps {
   userName?: string;
   onAddTransaction: (type?: string) => void;
   onViewAllTransactions: () => void;
+  onOpenDebts?: () => void;
 }
 
 // Format currency with compact notation for mobile
@@ -29,9 +30,15 @@ export function HomeScreen({
   userName = 'کاربر',
   onAddTransaction,
   onViewAllTransactions,
+  onOpenDebts,
 }: HomeScreenProps) {
   const financialData = useMemo(() => {
     const monthlyTransactions = transactions.filter(t => isInCurrentJalaliMonth(t.date));
+    
+    // Today's expense - filter transactions that are from today in Jalali calendar
+    const todayExpense = transactions
+      .filter(t => t.type === 'expense' && isTodayJalali(t.date))
+      .reduce((sum, t) => sum + t.amount, 0);
     
     const income = monthlyTransactions
       .filter(t => t.type === 'income')
@@ -46,6 +53,7 @@ export function HomeScreen({
     return {
       income,
       expense,
+      todayExpense,
       balance,
       recentTransactions: transactions.slice(0, 3),
     };
@@ -78,7 +86,7 @@ export function HomeScreen({
             <p className="text-xs font-medium text-muted-foreground mb-1.5">امروز چقدر خرج کردی؟</p>
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-3xl font-bold tabular-nums truncate">
-                {formatCompactCurrency(financialData.expense)}
+                {formatCompactCurrency(financialData.todayExpense)}
               </span>
               <span className="text-sm text-muted-foreground">تومان</span>
             </div>
@@ -109,11 +117,10 @@ export function HomeScreen({
             onClick={onViewAllTransactions}
           />
           <QuickActionButton 
-            icon={Users} 
-            label="دونگ‌ها" 
-            bgColor="bg-warning"
-            onClick={() => {}}
-            disabled
+            icon={CreditCard} 
+            label="بدهی‌ها" 
+            bgColor="bg-destructive"
+            onClick={() => onOpenDebts?.()}
           />
         </div>
       </div>

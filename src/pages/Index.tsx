@@ -183,6 +183,7 @@ const Index = () => {
                   userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
                   onAddTransaction={openAddModal}
                   onViewAllTransactions={() => setActiveTab('reports')}
+                  onOpenDebts={() => setSubView('debts')}
                 />
               )}
               {activeTab === 'reports' && (
