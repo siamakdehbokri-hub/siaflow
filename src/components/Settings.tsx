@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   User, Palette, FolderOpen, HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor,
-  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail
+  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { ProfileEdit } from './ProfileEdit';
 import { HelpGuide } from './HelpGuide';
+import { SecuritySettings } from './SecuritySettings';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Sheet,
@@ -36,7 +37,7 @@ interface SettingsProps {
   onOpenCategories?: () => void;
 }
 
-type SettingsView = 'main' | 'profile' | 'help';
+type SettingsView = 'main' | 'profile' | 'help' | 'security';
 
 export function Settings({ onOpenCategories }: SettingsProps) {
   const [currentView, setCurrentView] = useState<SettingsView>('main');
@@ -107,6 +108,10 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
   if (currentView === 'help') {
     return <HelpGuide onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'security') {
+    return <SecuritySettings onBack={() => setCurrentView('main')} />;
   }
 
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
@@ -233,6 +238,21 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <div className="flex-1 text-right">
             <p className="font-semibold text-foreground">دسته‌بندی‌ها</p>
             <p className="text-sm text-muted-foreground">مدیریت دسته‌های هزینه و درآمد</p>
+          </div>
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+        </button>
+
+        {/* Security */}
+        <button 
+          onClick={() => setCurrentView('security')}
+          className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
+        >
+          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+            <Shield className="w-6 h-6 text-red-500" />
+          </div>
+          <div className="flex-1 text-right">
+            <p className="font-semibold text-foreground">امنیت</p>
+            <p className="text-sm text-muted-foreground">تغییر رمز عبور و تنظیمات امنیتی</p>
           </div>
           <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         </button>
