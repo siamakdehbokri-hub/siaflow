@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { 
-  Plus, CreditCard, Trash2, Edit3, DollarSign, 
-  User, FileText, TrendingDown, CheckCircle2,
-  AlertCircle, Loader2, Calendar
+  Plus, Landmark, Trash2, Pencil, Banknote, 
+  UserRound, FileText, TrendingDown, CheckCircle2,
+  AlertCircle, Loader2, CalendarDays
 } from 'lucide-react';
 import { PersianDatePicker } from './PersianDatePicker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -132,7 +132,7 @@ export function DebtManagement({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-rose-500/30">
-            <CreditCard className="w-6 h-6 text-white" />
+            <Landmark className="w-6 h-6 text-white" strokeWidth={2} />
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">مدیریت بدهی‌ها</h2>
@@ -197,7 +197,7 @@ export function DebtManagement({
           <Card variant="glass">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-rose-500/10 flex items-center justify-center">
-                <CreditCard className="w-8 h-8 text-rose-500/50" />
+                <Landmark className="w-8 h-8 text-rose-500/50" strokeWidth={2} />
               </div>
               <p className="text-muted-foreground mb-2">هنوز بدهی‌ای ثبت نکرده‌اید</p>
               <p className="text-xs text-muted-foreground/70 mb-4">
@@ -237,7 +237,7 @@ export function DebtManagement({
                       ) : isOverdue ? (
                         <AlertCircle className="w-5 h-5 text-rose-500" />
                       ) : (
-                        <CreditCard className="w-5 h-5 text-rose-500" />
+                        <Landmark className="w-5 h-5 text-rose-500" strokeWidth={2} />
                       )}
                     </div>
 
@@ -257,12 +257,12 @@ export function DebtManagement({
                       </div>
 
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                        <User className="w-3 h-3" />
+                        <UserRound className="w-3 h-3" strokeWidth={2} />
                         <span>{debt.creditor}</span>
                         {debt.dueDate && (
                           <>
                             <span className="text-border">•</span>
-                        <Calendar className="w-3 h-3" />
+                        <CalendarDays className="w-3 h-3" strokeWidth={2} />
                             <span>{formatPersianDateShort(debt.dueDate)}</span>
                           </>
                         )}
@@ -311,7 +311,7 @@ export function DebtManagement({
                         className="flex-1 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white"
                         onClick={() => setPaymentModal(debt.id)}
                       >
-                        <DollarSign className="w-4 h-4 ml-1" />
+                        <Banknote className="w-4 h-4 ml-1" strokeWidth={2} />
                         ثبت پرداخت
                       </Button>
                     )}
@@ -321,7 +321,7 @@ export function DebtManagement({
                       className="h-9 rounded-xl"
                       onClick={() => openEditModal(debt)}
                     >
-                      <Edit3 className="w-4 h-4" />
+                      <Pencil className="w-4 h-4" strokeWidth={2} />
                     </Button>
                     <Button
                       size="sm"
@@ -350,7 +350,7 @@ export function DebtManagement({
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-rose-500" />
+              <Landmark className="w-5 h-5 text-rose-500" strokeWidth={2} />
               {editingDebt ? 'ویرایش بدهی' : 'ثبت بدهی جدید'}
             </DialogTitle>
           </DialogHeader>
@@ -436,7 +436,7 @@ export function DebtManagement({
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-emerald-500" />
+              <Banknote className="w-5 h-5 text-emerald-500" strokeWidth={2} />
               ثبت پرداخت
             </DialogTitle>
           </DialogHeader>

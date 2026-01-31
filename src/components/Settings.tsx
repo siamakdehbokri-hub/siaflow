@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  User, Palette, FolderOpen, HelpCircle, LogOut, ChevronLeft, Moon, Sun, Monitor,
-  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Shield
+  UserCircle, Palette, Layers, LifeBuoy, LogOut, ChevronLeft, Moon, Sun, Monitor,
+  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Lock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -233,13 +233,13 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
         >
           <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-            <FolderOpen className="w-6 h-6 text-cyan-500" />
+            <Layers className="w-6 h-6 text-cyan-500" strokeWidth={2} />
           </div>
           <div className="flex-1 text-right">
             <p className="font-semibold text-foreground">دسته‌بندی‌ها</p>
             <p className="text-sm text-muted-foreground">مدیریت دسته‌های هزینه و درآمد</p>
           </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
         </button>
 
         {/* Security */}
@@ -248,13 +248,13 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
         >
           <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-red-500" />
+            <Lock className="w-6 h-6 text-red-500" strokeWidth={2} />
           </div>
           <div className="flex-1 text-right">
             <p className="font-semibold text-foreground">امنیت</p>
             <p className="text-sm text-muted-foreground">تغییر رمز عبور و تنظیمات امنیتی</p>
           </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
         </button>
 
         {/* Help */}
@@ -263,20 +263,20 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
         >
           <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-            <HelpCircle className="w-6 h-6 text-indigo-500" />
+            <LifeBuoy className="w-6 h-6 text-indigo-500" strokeWidth={2} />
           </div>
           <div className="flex-1 text-right">
             <p className="font-semibold text-foreground">راهنما</p>
             <p className="text-sm text-muted-foreground">آموزش کار با اپلیکیشن</p>
           </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
         </button>
       </div>
 
       {/* About & Contact */}
       <div className="bg-card rounded-xl border-2 border-border p-4 space-y-3">
         <div className="flex items-center gap-3">
-          <Info className="w-5 h-5 text-primary" />
+          <Info className="w-5 h-5 text-primary" strokeWidth={2} />
           <div>
             <p className="font-semibold text-foreground">درباره ما</p>
             <p className="text-sm text-muted-foreground">طراحی و توسعه توسط Siamak.D</p>
@@ -284,7 +284,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         </div>
         <div className="border-t border-border pt-3">
           <div className="flex items-center gap-3">
-            <Mail className="w-5 h-5 text-primary" />
+            <Mail className="w-5 h-5 text-primary" strokeWidth={2} />
             <div>
               <p className="font-semibold text-foreground">ارتباط با ما</p>
               <p className="text-sm text-muted-foreground" dir="ltr">siamakflow@gmail.com</p>
@@ -299,7 +299,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         className="w-full h-14 rounded-xl border-2 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"
         onClick={handleSignOut}
       >
-        <LogOut className="w-5 h-5 ml-2" />
+        <LogOut className="w-5 h-5 ml-2" strokeWidth={2} />
         خروج از حساب
       </Button>
 
@@ -323,7 +323,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۲.۰.۱
+        SiaFlow نسخه ۲.۰.۲
       </p>
 
       {/* Delete Account Dialog */}

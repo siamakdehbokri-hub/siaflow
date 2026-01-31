@@ -1,5 +1,5 @@
 import { useState, useMemo, lazy, Suspense, useCallback } from 'react';
-import { Search, X, ArrowUpRight, ArrowDownRight, Brain, PiggyBank, CreditCard, ChartPie, Sparkles, ChevronLeft, ChevronRight, Calendar, Loader2 } from 'lucide-react';
+import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Target, Landmark, ChartPie, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { Debt } from '@/hooks/useDebts';
@@ -166,7 +166,7 @@ export function ReportsHub({
           </button>
           
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
+            <CalendarDays className="w-5 h-5 text-primary" strokeWidth={2} />
             <span className="text-lg font-bold text-foreground">
               {getJalaliMonthName(selectedMonth)}
             </span>
@@ -333,7 +333,7 @@ export function ReportsHub({
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                <PiggyBank className="w-6 h-6 text-success" />
+                <Target className="w-6 h-6 text-success" strokeWidth={2} />
               </div>
               <div className="flex-1">
                 <p className="font-bold text-foreground">اهداف پس‌انداز</p>
@@ -361,10 +361,10 @@ export function ReportsHub({
                 "w-12 h-12 rounded-xl flex items-center justify-center",
                 planningStats.debts.overdueCount > 0 ? "bg-destructive/10" : "bg-warning/10"
               )}>
-                <CreditCard className={cn(
+                <Landmark className={cn(
                   "w-6 h-6",
                   planningStats.debts.overdueCount > 0 ? "text-destructive" : "text-warning"
-                )} />
+                )} strokeWidth={2} />
               </div>
               <div className="flex-1">
                 <p className="font-bold text-foreground">مدیریت بدهی</p>

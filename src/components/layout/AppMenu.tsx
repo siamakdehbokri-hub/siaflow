@@ -5,18 +5,17 @@ import {
   SheetTitle 
 } from '@/components/ui/sheet';
 import { 
-  FolderOpen, 
+  Layers, 
   Target, 
-  CreditCard, 
-  ArrowLeftRight, 
-  Shield, 
-  HelpCircle,
-  FileText,
-  TrendingUp,
-  PiggyBank,
-  Home,
-  BarChart3,
-  Settings,
+  Landmark, 
+  ArrowRightLeft, 
+  ShieldCheck, 
+  LifeBuoy,
+  Sparkles,
+  Wallet,
+  LayoutDashboard,
+  BarChart2,
+  Settings2,
   type LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -140,21 +139,21 @@ export function AppMenu({
           </p>
           
           <MenuItem
-            icon={Home}
+            icon={LayoutDashboard}
             label="داشبورد"
             description="صفحه اصلی و خلاصه وضعیت"
             onClick={() => handleTabNavigation('home')}
           />
           
           <MenuItem
-            icon={BarChart3}
+            icon={BarChart2}
             label="گزارش‌ها"
             description="مشاهده تاریخچه و آمار تراکنش‌ها"
             onClick={() => handleTabNavigation('reports')}
           />
           
           <MenuItem
-            icon={Settings}
+            icon={Settings2}
             label="تنظیمات"
             description="شخصی‌سازی اپلیکیشن"
             onClick={() => handleTabNavigation('settings')}
@@ -166,7 +165,7 @@ export function AppMenu({
           </p>
           
           <MenuItem
-            icon={FolderOpen}
+            icon={Layers}
             label="دسته‌بندی‌ها"
             description="مدیریت دسته‌بندی هزینه و درآمد"
             onClick={() => handleNavigation('categories')}
@@ -182,7 +181,7 @@ export function AppMenu({
           />
           
           <MenuItem
-            icon={CreditCard}
+            icon={Landmark}
             label="مدیریت بدهی"
             description="ثبت و پیگیری بدهی‌ها"
             onClick={() => handleNavigation('debts')}
@@ -190,7 +189,7 @@ export function AppMenu({
           />
           
           <MenuItem
-            icon={ArrowLeftRight}
+            icon={ArrowRightLeft}
             label="انتقال پول"
             description="انتقال به اهداف پس‌انداز"
             onClick={() => handleNavigation('transfers')}
@@ -203,14 +202,14 @@ export function AppMenu({
           </p>
           
           <MenuItem
-            icon={TrendingUp}
+            icon={Sparkles}
             label="تحلیل هوشمند AI"
             description="گزارش‌های هوش مصنوعی از وضعیت مالی"
             onClick={() => handleTabNavigation('reports')}
           />
           
           <MenuItem
-            icon={PiggyBank}
+            icon={Wallet}
             label="بودجه‌بندی"
             description="تنظیم سقف هزینه ماهانه"
             onClick={() => handleNavigation('categories')}
@@ -224,7 +223,7 @@ export function AppMenu({
               </p>
               
               <MenuItem
-                icon={Shield}
+                icon={ShieldCheck}
                 label="پنل مدیریت"
                 description="دسترسی ادمین سیستم"
                 onClick={handleAdminClick}
@@ -239,7 +238,7 @@ export function AppMenu({
           </p>
           
           <MenuItem
-            icon={HelpCircle}
+            icon={LifeBuoy}
             label="راهنمای استفاده"
             description="آموزش کار با اپلیکیشن"
             onClick={handleHelpClick}
@@ -249,7 +248,7 @@ export function AppMenu({
         {/* Version Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
           <p className="text-[11px] text-center text-muted-foreground">
-            نسخه ۲.۰.۱ • ساخته شده با ❤️
+            نسخه ۲.۰.۲ • ساخته شده با ❤️
           </p>
         </div>
       </SheetContent>
