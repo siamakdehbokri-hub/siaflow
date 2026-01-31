@@ -59,8 +59,19 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
       if (data && !error) {
         if (data.display_name) setDisplayName(data.display_name);
-        if (data.avatar_url) setAvatarUrl(data.avatar_url);
         if (data.phone) setPhone(data.phone);
+        
+        // For private bucket, get signed URL
+        if (data.avatar_url) {
+          const filePath = `${user.id}/avatar.png`;
+          const { data: signedData, error: signedError } = await supabase.storage
+            .from('avatars')
+            .createSignedUrl(filePath, 3600); // 1 hour expiry
+          
+          if (signedData && !signedError) {
+            setAvatarUrl(signedData.signedUrl);
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -128,21 +139,21 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL for private bucket
+      const { data: signedData, error: signedError } = await supabase.storage
         .from('avatars')
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 3600); // 1 hour expiry
 
-      // Add cache-busting query param
-      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
-      setAvatarUrl(urlWithCacheBust);
+      if (signedError) throw signedError;
 
-      // Update profile in database
+      setAvatarUrl(signedData.signedUrl);
+
+      // Update profile in database - store just the path reference
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           id: user.id,
-          avatar_url: publicUrl,
+          avatar_url: fileName, // Store path, not URL
           updated_at: new Date().toISOString()
         });
 
@@ -206,7 +217,7 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
       if (authError) throw authError;
 
-      // Update profile in database
+      // Update profile in database - preserve avatar path
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -214,7 +225,6 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
           display_name: displayName,
           email: user.email,
           phone: phone,
-          avatar_url: avatarUrl?.split('?')[0] || null, // Remove cache-busting param
           updated_at: new Date().toISOString()
         });
 
