@@ -63,13 +63,20 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
         
         // For private bucket, get signed URL
         if (data.avatar_url) {
-          const filePath = `${user.id}/avatar.png`;
+          const filePath = data.avatar_url.includes('/') 
+            ? data.avatar_url 
+            : `${user.id}/avatar.png`;
+          
           const { data: signedData, error: signedError } = await supabase.storage
             .from('avatars')
             .createSignedUrl(filePath, 3600); // 1 hour expiry
           
           if (signedData && !signedError) {
-            setAvatarUrl(signedData.signedUrl);
+            // Ensure we have a complete URL
+            const signedUrl = signedData.signedUrl.startsWith('http') 
+              ? signedData.signedUrl 
+              : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1${signedData.signedUrl}`;
+            setAvatarUrl(signedUrl);
           }
         }
       }
@@ -146,7 +153,11 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
 
       if (signedError) throw signedError;
 
-      setAvatarUrl(signedData.signedUrl);
+      // Ensure we have a complete URL
+      const signedUrl = signedData.signedUrl.startsWith('http') 
+        ? signedData.signedUrl 
+        : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1${signedData.signedUrl}`;
+      setAvatarUrl(signedUrl);
 
       // Update profile in database - store just the path reference
       const { error: profileError } = await supabase
@@ -256,12 +267,16 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
       <Card variant="glass">
         <CardContent className="p-5 flex flex-col items-center">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground overflow-hidden border-4 border-background shadow-xl">
+            <div className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center text-3xl font-bold text-primary-foreground overflow-hidden border-4 border-background shadow-xl relative">
               {avatarUrl ? (
                 <img 
                   src={avatarUrl} 
                   alt="Avatar" 
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    console.error('Avatar load error:', e);
+                    setAvatarUrl(null);
+                  }}
                 />
               ) : (
                 initials
