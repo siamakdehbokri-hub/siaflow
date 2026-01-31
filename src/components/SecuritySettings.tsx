@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Lock, Shield, Key, Mail, Loader2 } from 'lucide-react';
+import { ArrowRight, Lock, ShieldCheck, KeyRound, Mail, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -78,7 +78,7 @@ export function SecuritySettings({ onBack }: SecuritySettingsProps) {
             className="w-full justify-start"
             onClick={() => setCurrentView('password')}
           >
-            <Key className="w-4 h-4 ml-2" />
+            <KeyRound className="w-4 h-4 ml-2" strokeWidth={2} />
             تغییر رمز عبور
           </Button>
 
@@ -119,7 +119,7 @@ export function SecuritySettings({ onBack }: SecuritySettingsProps) {
       <Card variant="glass" className="opacity-60">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
+            <ShieldCheck className="w-5 h-5 text-primary" strokeWidth={2} />
             احراز هویت دو مرحله‌ای
             <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
               به زودی
@@ -141,7 +141,7 @@ export function SecuritySettings({ onBack }: SecuritySettingsProps) {
       <Card variant="glass" className="bg-primary/5 border-primary/20">
         <CardContent className="p-4">
           <div className="flex gap-3">
-            <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+            <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" strokeWidth={2} />
             <div>
               <p className="text-sm font-medium text-foreground mb-1">
                 داده‌های شما امن هستند

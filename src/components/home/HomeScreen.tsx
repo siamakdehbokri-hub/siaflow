@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Wallet, PieChart, CreditCard, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Receipt, PieChart, Landmark, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull, isTodayJalali } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -105,7 +105,7 @@ export function HomeScreen({
         {/* Quick action icons - 44px touch targets */}
         <div className="flex items-center justify-around mt-5 pt-4 border-t border-border">
           <QuickActionButton 
-            icon={Wallet} 
+            icon={Receipt} 
             label="تراکنش‌ها" 
             bgColor="bg-primary"
             onClick={onViewAllTransactions}
@@ -117,7 +117,7 @@ export function HomeScreen({
             onClick={onViewAllTransactions}
           />
           <QuickActionButton 
-            icon={CreditCard} 
+            icon={Landmark} 
             label="بدهی‌ها" 
             bgColor="bg-destructive"
             onClick={() => onOpenDebts?.()}

@@ -1,4 +1,4 @@
-import { ArrowRight, Plus, Edit3, Trash2, PieChart, Download, Settings, FolderOpen, Moon, Sun, CreditCard, TrendingUp, Calendar } from 'lucide-react';
+import { ArrowRight, Plus, Pencil, Trash2, PieChart, Download, Layers, Moon, Wallet, Sparkles, CalendarDays } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -24,7 +24,7 @@ const guideItems = [
   {
     id: 'edit-delete',
     title: 'ویرایش و حذف تراکنش',
-    icon: Edit3,
+    icon: Pencil,
     content: `برای ویرایش یا حذف تراکنش:
 • در موبایل: تراکنش را به چپ بکشید تا دکمه‌های ویرایش و حذف ظاهر شوند
 • در دسکتاپ: روی تراکنش کلیک کنید تا صفحه ویرایش باز شود
@@ -33,7 +33,7 @@ const guideItems = [
   {
     id: 'categories',
     title: 'مدیریت دسته‌بندی‌ها',
-    icon: FolderOpen,
+    icon: Layers,
     content: `برای مدیریت دسته‌بندی‌ها:
 1. به تنظیمات بروید
 2. روی آیکون پوشه در بالای صفحه بزنید
@@ -64,7 +64,7 @@ const guideItems = [
   {
     id: 'budget',
     title: 'مدیریت بودجه',
-    icon: CreditCard,
+    icon: Wallet,
     content: `برای مدیریت بودجه:
 1. به مدیریت دسته‌بندی‌ها بروید
 2. برای هر دسته‌بندی هزینه، بودجه ماهانه تعیین کنید
@@ -74,7 +74,7 @@ const guideItems = [
   {
     id: 'date-filter',
     title: 'فیلتر تاریخی',
-    icon: Calendar,
+    icon: CalendarDays,
     content: `برای فیلتر کردن تراکنش‌ها بر اساس تاریخ:
 1. به بخش تراکنش‌ها بروید
 2. روی دکمه تقویم بزنید
@@ -108,7 +108,7 @@ export function HelpGuide({ onBack }: HelpGuideProps) {
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl gradient-primary">
-              <TrendingUp className="w-6 h-6 text-primary-foreground" />
+              <Sparkles className="w-6 h-6 text-primary-foreground" strokeWidth={2} />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">به مدیریت هزینه خوش آمدید!</h3>
@@ -134,7 +134,7 @@ export function HelpGuide({ onBack }: HelpGuideProps) {
                   <AccordionTrigger className="px-4 py-3 hover:bg-accent/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="p-1.5 rounded-lg bg-muted">
-                        <Icon className="w-4 h-4 text-primary" />
+                        <Icon className="w-4 h-4 text-primary" strokeWidth={2} />
                       </div>
                       <span className="font-medium text-foreground">{item.title}</span>
                     </div>
@@ -180,7 +180,7 @@ export function HelpGuide({ onBack }: HelpGuideProps) {
 
       {/* Version Info */}
       <p className="text-center text-xs text-muted-foreground">
-        نسخه ۱.۴.۰ - تقویم شمسی کامل
+        نسخه ۲.۰.۲ - تقویم شمسی کامل
       </p>
     </div>
   );

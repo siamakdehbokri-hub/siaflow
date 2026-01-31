@@ -1,4 +1,4 @@
-import { Home, BarChart3, Settings, Plus, LucideIcon } from 'lucide-react';
+import { Home, BarChart2, Settings2, Plus, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type NavTab = 'home' | 'reports' | 'settings';
@@ -11,8 +11,8 @@ interface BottomNavProps {
 
 const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
   { id: 'home', icon: Home, label: 'داشبورد' },
-  { id: 'reports', icon: BarChart3, label: 'گزارش‌ها' },
-  { id: 'settings', icon: Settings, label: 'تنظیمات' },
+  { id: 'reports', icon: BarChart2, label: 'گزارش‌ها' },
+  { id: 'settings', icon: Settings2, label: 'تنظیمات' },
 ];
 
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
