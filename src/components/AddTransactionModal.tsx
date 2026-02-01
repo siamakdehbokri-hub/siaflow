@@ -15,6 +15,7 @@ import {
 import { Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
+import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -63,7 +64,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       await onAdd({
         id: Date.now().toString(),
         type,
-        amount: parseInt(amount.replace(/,/g, '')),
+        amount: parseAmount(amount),
         category,
         subcategory: subcategory || undefined,
         description,
@@ -86,9 +87,8 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     }
   };
 
-  const formatAmount = (value: string) => {
-    const num = value.replace(/,/g, '').replace(/\D/g, '');
-    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const handleAmountChange = (value: string) => {
+    setAmount(formatAmountInput(value));
   };
 
   const handleCategoryChange = (value: string) => {
@@ -178,7 +178,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               inputMode="numeric"
               placeholder="۰"
               value={amount}
-              onChange={(e) => setAmount(formatAmount(e.target.value))}
+              onChange={(e) => handleAmountChange(e.target.value)}
               className="text-2xl font-bold text-center h-14 rounded-xl border-2 border-border focus:border-primary"
               required
             />
