@@ -180,7 +180,7 @@ export function HelpGuide({ onBack }: HelpGuideProps) {
 
       {/* Version Info */}
       <p className="text-center text-xs text-muted-foreground">
-        نسخه ۲.۰.۲ - تقویم شمسی کامل
+        نسخه ۲.۰.۳ - تقویم شمسی کامل
       </p>
     </div>
   );

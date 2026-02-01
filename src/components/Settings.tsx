@@ -323,7 +323,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
       {/* Version */}
       <p className="text-center text-xs text-muted-foreground/60">
-        SiaFlow نسخه ۲.۰.۲
+        SiaFlow نسخه ۲.۰.۳
       </p>
 
       {/* Delete Account Dialog */}

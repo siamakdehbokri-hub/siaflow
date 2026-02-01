@@ -11,40 +11,50 @@ interface MobileCategoryCardProps {
 
 export function MobileCategoryCard({ category, onDelete }: MobileCategoryCardProps) {
   return (
-    <div className="bg-card rounded-xl border-2 border-border p-4">
+    <div className="bg-card rounded-2xl border-2 border-border p-4 hover:border-primary/30 transition-all active:scale-[0.99]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           {/* Color Icon */}
           <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ backgroundColor: category.color + '20' }}
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+            style={{ backgroundColor: category.color + '15' }}
           >
-            <span className="text-lg" style={{ color: category.color }}>●</span>
+            <div 
+              className="w-5 h-5 rounded-full"
+              style={{ backgroundColor: category.color }}
+            />
           </div>
 
-          <div className="min-w-0 space-y-1">
-            <p className="font-semibold text-sm truncate">{category.name}</p>
+          <div className="min-w-0 space-y-1.5">
+            <p className="font-bold text-sm truncate text-foreground">{category.name}</p>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-muted-foreground">{category.userName}</span>
-              <Badge variant="outline" className="rounded-lg text-xs">
+              <Badge 
+                variant="outline" 
+                className={`rounded-xl text-xs h-6 px-2 font-medium border-2 ${
+                  category.type === 'income' 
+                    ? 'bg-success/10 text-success border-success/30' 
+                    : 'bg-destructive/10 text-destructive border-destructive/30'
+                }`}
+              >
                 {category.type === 'income' ? 'درآمد' : 'هزینه'}
               </Badge>
             </div>
             {category.budget && (
-              <p className="font-mono text-xs text-muted-foreground">
-                بودجه: {formatCurrency(category.budget)}
+              <p className="font-mono text-xs text-primary bg-primary/10 px-2 py-1 rounded-lg inline-block">
+                💰 بودجه: {formatCurrency(category.budget)}
               </p>
             )}
           </div>
         </div>
 
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={() => onDelete(category)}
-          className="text-destructive hover:text-destructive rounded-xl h-10 w-10 shrink-0"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-2 border-destructive/30"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-4 h-4" strokeWidth={2} />
         </Button>
       </div>
     </div>

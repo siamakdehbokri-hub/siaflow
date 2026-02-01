@@ -26,6 +26,7 @@ import {
 import { Transaction, Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
+import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -86,7 +87,7 @@ export function EditTransactionModal({
     onSave({
       ...transaction,
       type,
-      amount: parseInt(amount.replace(/,/g, '')),
+      amount: parseAmount(amount),
       category,
       subcategory: subcategory || undefined,
       description,
@@ -110,9 +111,8 @@ export function EditTransactionModal({
     setSubcategory('');
   };
 
-  const formatAmount = (value: string) => {
-    const num = value.replace(/,/g, '').replace(/\D/g, '');
-    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const handleAmountChange = (value: string) => {
+    setAmount(formatAmountInput(value));
   };
 
   // Quick amount buttons
@@ -220,7 +220,7 @@ export function EditTransactionModal({
                   inputMode="numeric"
                   placeholder="0"
                   value={amount}
-                  onChange={(e) => setAmount(formatAmount(e.target.value))}
+                  onChange={(e) => handleAmountChange(e.target.value)}
                   className={cn(
                     "text-3xl font-bold text-center h-16 rounded-2xl border-2 transition-all",
                     type === 'expense' 
