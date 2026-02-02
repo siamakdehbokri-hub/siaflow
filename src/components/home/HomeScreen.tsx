@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Receipt, PieChart, Landmark, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull, isTodayJalali } from '@/utils/persianDate';
+import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull, isTodayJalali, formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
+import { getTodayLocalISO } from '@/utils/dateUtils';
 
 interface HomeScreenProps {
   transactions: Transaction[];
@@ -63,47 +64,46 @@ export function HomeScreen({
   const persianDate = formatPersianDateFull(today.toISOString());
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      {/* Welcome & Date Section */}
-      <div className="flex items-start justify-between gap-3">
+    <div className="space-y-5 animate-fade-in">
+      {/* Welcome & Date Section - Improved spacing */}
+      <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-bold text-foreground truncate">
+          <h2 className="text-lg font-bold text-foreground leading-relaxed truncate">
             سلام، {userName} 👋
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            خوش آمدی!
+          <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
+            {persianDate}
           </p>
-        </div>
-        <div className="text-left shrink-0">
-          <p className="text-xs font-medium text-muted-foreground">{persianDate}</p>
         </div>
       </div>
 
-      {/* Hero Card - Today's spending */}
-      <div className="bg-card rounded-2xl p-5 border-2 border-border/40">
+      {/* Hero Card - Today's spending - Enhanced visual hierarchy */}
+      <div className="bg-card rounded-2xl p-6 border-2 border-border shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-muted-foreground mb-1.5">امروز چقدر خرج کردی؟</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
+              امروز چقدر خرج کردی؟
+            </p>
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-3xl font-bold tabular-nums truncate">
+              <span className="text-4xl font-bold tabular-nums tracking-tight">
                 {formatCompactCurrency(financialData.todayExpense)}
               </span>
-              <span className="text-sm text-muted-foreground">تومان</span>
+              <span className="text-base text-muted-foreground">تومان</span>
             </div>
           </div>
           
           {/* Quick add button - 48px touch target */}
           <button
             onClick={() => onAddTransaction()}
-            className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center hover:bg-primary/90 active:scale-95 transition-all shrink-0 shadow-lg shadow-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="افزودن تراکنش"
           >
-            <Plus className="w-6 h-6 text-primary" strokeWidth={2} />
+            <Plus className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
           </button>
         </div>
         
-        {/* Quick action icons - 44px touch targets */}
-        <div className="flex items-center justify-around mt-5 pt-4 border-t border-border">
+        {/* Quick action icons - 48px touch targets */}
+        <div className="flex items-center justify-around mt-6 pt-5 border-t-2 border-border/60">
           <QuickActionButton 
             icon={Receipt} 
             label="تراکنش‌ها" 
@@ -125,34 +125,30 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* Summary Cards - Consistent sizing */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-card rounded-2xl p-4 border-2 border-border/40">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
-              <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
+      {/* Summary Cards - Enhanced visual hierarchy with larger numbers */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-card rounded-2xl p-5 border-2 border-success/20 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+              <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2} />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-medium text-muted-foreground">درآمد ماه</p>
-              <p className="text-sm font-bold text-success tabular-nums truncate mt-0.5">
-                {formatCompactCurrency(financialData.income)}
-              </p>
-            </div>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد ماه</p>
           </div>
+          <p className="text-xl font-bold text-success tabular-nums truncate">
+            {formatCompactCurrency(financialData.income)}
+          </p>
         </div>
         
-        <div className="bg-card rounded-2xl p-4 border-2 border-border/40">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
-              <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
+        <div className="bg-card rounded-2xl p-5 border-2 border-destructive/20 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+              <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2} />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-medium text-muted-foreground">هزینه ماه</p>
-              <p className="text-sm font-bold text-destructive tabular-nums truncate mt-0.5">
-                {formatCompactCurrency(financialData.expense)}
-              </p>
-            </div>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه ماه</p>
           </div>
+          <p className="text-xl font-bold text-destructive tabular-nums truncate">
+            {formatCompactCurrency(financialData.expense)}
+          </p>
         </div>
       </div>
 
@@ -236,15 +232,15 @@ function QuickActionButton({ icon: Icon, label, bgColor, onClick, disabled }: Qu
       onClick={onClick} 
       disabled={disabled}
       className={cn(
-        "flex flex-col items-center gap-2 min-w-0 py-1 px-2 rounded-xl transition-all",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "flex flex-col items-center gap-2.5 min-w-0 py-2 px-3 rounded-2xl transition-all",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         disabled ? "opacity-50 cursor-not-allowed" : "active:scale-95"
       )}
     >
-      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", bgColor)}>
-        <Icon className="w-6 h-6 text-white" strokeWidth={2} />
+      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-md", bgColor)}>
+        <Icon className="w-7 h-7 text-white" strokeWidth={2} />
       </div>
-      <span className="text-[11px] font-medium text-foreground truncate max-w-[70px]">{label}</span>
+      <span className="text-xs font-semibold text-foreground truncate max-w-[80px] leading-relaxed">{label}</span>
     </button>
   );
 }

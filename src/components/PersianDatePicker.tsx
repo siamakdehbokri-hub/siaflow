@@ -16,6 +16,7 @@ import {
 } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
 import { CalendarIcon } from 'lucide-react';
+import { toLocalISODateString, parseLocalDate } from '@/utils/dateUtils';
 
 interface PersianDatePickerProps {
   value: string;
@@ -41,8 +42,8 @@ export function PersianDatePicker({ value, onChange, placeholder = 'انتخاب
   const persianStartDay = startDayOfWeek === 6 ? 0 : startDayOfWeek + 1;
   
   const handleDateSelect = (date: Date) => {
-    // Convert to ISO string for storage (Gregorian format for database)
-    onChange(date.toISOString().split('T')[0]);
+    // Use local timezone conversion to prevent off-by-one date bug
+    onChange(toLocalISODateString(date));
     setOpen(false);
   };
   

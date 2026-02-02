@@ -18,23 +18,23 @@ const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
   return (
     <>
-      {/* Floating Add Button - Left side with safe area consideration */}
+      {/* Floating Add Button - Right side for RTL layout (better thumb reach) */}
       <button
         onClick={onAddClick}
-        className="fixed z-50 flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="fixed z-50 flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         style={{ 
-          bottom: 'calc(96px + env(safe-area-inset-bottom, 0px))',
-          left: 'max(16px, env(safe-area-inset-left, 16px))'
+          bottom: 'calc(100px + env(safe-area-inset-bottom, 0px))',
+          right: 'max(20px, env(safe-area-inset-right, 20px))'
         }}
         aria-label="افزودن تراکنش"
       >
-        <Plus className="w-6 h-6" strokeWidth={2.5} />
+        <Plus className="w-7 h-7" strokeWidth={2.5} />
       </button>
 
-      {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
+      {/* Bottom Navigation Bar - Enhanced touch targets and visual feedback */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-border shadow-lg shadow-foreground/5">
         <div className="pb-safe">
-          <div className="flex items-stretch h-16">
+          <div className="flex items-stretch h-[72px]">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -44,28 +44,34 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
                   className={cn(
-                    "flex-1 flex flex-col items-center justify-center gap-1 relative transition-colors",
+                    "flex-1 flex flex-col items-center justify-center gap-1.5 relative transition-all",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     isActive 
                       ? "text-primary" 
-                      : "text-muted-foreground active:text-foreground"
+                      : "text-muted-foreground active:text-foreground active:bg-muted/30"
                   )}
                 >
-                  <Icon 
-                    className="w-6 h-6" 
-                    strokeWidth={isActive ? 2 : 1.5} 
-                  />
+                  <div className={cn(
+                    "p-2 rounded-xl transition-colors",
+                    isActive && "bg-primary/10"
+                  )}>
+                    <Icon 
+                      className="w-6 h-6" 
+                      strokeWidth={2} 
+                    />
+                  </div>
                   <span 
                     className={cn(
-                      "text-[11px]",
-                      isActive ? "font-semibold" : "font-normal"
+                      "text-xs leading-relaxed",
+                      isActive ? "font-bold" : "font-medium"
                     )}
                   >
                     {item.label}
                   </span>
                   
-                  {/* Active indicator line */}
+                  {/* Active indicator line - More prominent */}
                   {isActive && (
-                    <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-primary rounded-full" />
+                    <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-primary rounded-b-full" />
                   )}
                 </button>
               );
