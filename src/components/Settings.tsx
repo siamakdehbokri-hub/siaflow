@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
   UserCircle, Palette, Layers, LifeBuoy, LogOut, ChevronLeft, Moon, Sun, Monitor,
-  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Lock
+  Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Lock, Download, 
+  Calendar, Globe, Database, Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -31,6 +32,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
 interface SettingsProps {
@@ -169,125 +171,199 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         )}
       </div>
 
-      {/* Settings List - Simple Cards */}
-      <div className="space-y-2">
-        {/* Theme */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                <ThemeIcon className="w-6 h-6 text-purple-500" />
+      {/* Settings List - Organized into Sections */}
+      <div className="space-y-6">
+        {/* Appearance Section */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-3">ظاهر و نمایش</h3>
+          
+          {/* Theme */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                  <ThemeIcon className="w-6 h-6 text-purple-500" strokeWidth={2} />
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="font-semibold text-foreground leading-relaxed">تم برنامه</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{themeLabel}</p>
+                </div>
+                <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-auto rounded-t-3xl">
+              <SheetHeader className="text-right pb-4">
+                <SheetTitle className="text-xl flex items-center gap-2">
+                  <Palette className="w-6 h-6 text-purple-500" strokeWidth={2} />
+                  انتخاب تم
+                </SheetTitle>
+                <SheetDescription className="leading-relaxed">تم مورد نظر خود را انتخاب کنید</SheetDescription>
+              </SheetHeader>
+              <div className="space-y-3 pb-8">
+                {[
+                  { value: 'light', label: 'حالت روشن', icon: Sun, bg: 'bg-amber-100', iconColor: 'text-amber-600' },
+                  { value: 'dark', label: 'حالت تاریک', icon: Moon, bg: 'bg-slate-700', iconColor: 'text-slate-200' },
+                  { value: 'system', label: 'سیستم', icon: Monitor, bg: 'bg-gradient-to-br from-amber-100 to-slate-700', iconColor: 'text-foreground' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setTheme(option.value as any);
+                      toast.success(`${option.label} فعال شد`);
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-4 p-4 rounded-2xl transition-all border-2 min-h-[72px]",
+                      theme === option.value 
+                        ? "bg-primary/5 border-primary" 
+                        : "bg-muted/30 border-transparent hover:border-border"
+                    )}
+                  >
+                    <div className={cn("p-3 rounded-xl", option.bg)}>
+                      <option.icon className={cn("w-6 h-6", option.iconColor)} strokeWidth={2} />
+                    </div>
+                    <p className="font-semibold text-foreground flex-1 text-right leading-relaxed">{option.label}</p>
+                    {theme === option.value && (
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Data Management Section */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-3">مدیریت داده‌ها</h3>
+          
+          {/* Categories */}
+          <button 
+            onClick={() => onOpenCategories?.()}
+            className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+              <Layers className="w-6 h-6 text-cyan-500" strokeWidth={2} />
+            </div>
+            <div className="flex-1 text-right">
+              <p className="font-semibold text-foreground leading-relaxed">دسته‌بندی‌ها</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">مدیریت دسته‌های هزینه و درآمد</p>
+            </div>
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+          </button>
+
+          {/* Backup & Export */}
+          <button 
+            onClick={() => toast.info('این قابلیت به زودی فعال خواهد شد')}
+            className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <Download className="w-6 h-6 text-emerald-500" strokeWidth={2} />
+            </div>
+            <div className="flex-1 text-right">
+              <p className="font-semibold text-foreground leading-relaxed">پشتیبان‌گیری و خروجی</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">دانلود داده‌های شما</p>
+            </div>
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Preferences Section */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-3">ترجیحات</h3>
+          
+          {/* Calendar & Timezone */}
+          <div className="bg-card rounded-xl border-2 border-border p-4 min-h-[72px]">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-orange-500" strokeWidth={2} />
               </div>
               <div className="flex-1 text-right">
-                <p className="font-semibold text-foreground">تم برنامه</p>
-                <p className="text-sm text-muted-foreground">{themeLabel}</p>
+                <p className="font-semibold text-foreground leading-relaxed">تقویم</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">شمسی (جلالی)</p>
               </div>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-auto rounded-t-3xl">
-            <SheetHeader className="text-right pb-4">
-              <SheetTitle className="text-xl flex items-center gap-2">
-                <Palette className="w-6 h-6 text-purple-500" />
-                انتخاب تم
-              </SheetTitle>
-              <SheetDescription>تم مورد نظر خود را انتخاب کنید</SheetDescription>
-            </SheetHeader>
-            <div className="space-y-3 pb-8">
-              {[
-                { value: 'light', label: 'حالت روشن', icon: Sun, bg: 'bg-amber-100', iconColor: 'text-amber-600' },
-                { value: 'dark', label: 'حالت تاریک', icon: Moon, bg: 'bg-slate-700', iconColor: 'text-slate-200' },
-                { value: 'system', label: 'سیستم', icon: Monitor, bg: 'bg-gradient-to-br from-amber-100 to-slate-700', iconColor: 'text-foreground' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    setTheme(option.value as any);
-                    toast.success(`${option.label} فعال شد`);
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-4 p-4 rounded-2xl transition-all border-2",
-                    theme === option.value 
-                      ? "bg-primary/5 border-primary" 
-                      : "bg-muted/30 border-transparent hover:border-border"
-                  )}
-                >
-                  <div className={cn("p-3 rounded-xl", option.bg)}>
-                    <option.icon className={cn("w-6 h-6", option.iconColor)} />
-                  </div>
-                  <p className="font-semibold text-foreground flex-1 text-right">{option.label}</p>
-                  {theme === option.value && (
-                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
-                    </div>
-                  )}
-                </button>
-              ))}
+              <div className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+                فعال
+              </div>
             </div>
-          </SheetContent>
-        </Sheet>
+          </div>
 
-        {/* Categories */}
-        <button 
-          onClick={() => onOpenCategories?.()}
-          className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
-        >
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-            <Layers className="w-6 h-6 text-cyan-500" strokeWidth={2} />
-          </div>
-          <div className="flex-1 text-right">
-            <p className="font-semibold text-foreground">دسته‌بندی‌ها</p>
-            <p className="text-sm text-muted-foreground">مدیریت دسته‌های هزینه و درآمد</p>
-          </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
-        </button>
-
-        {/* Security */}
-        <button 
-          onClick={() => setCurrentView('security')}
-          className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
-        >
-          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-red-500" strokeWidth={2} />
-          </div>
-          <div className="flex-1 text-right">
-            <p className="font-semibold text-foreground">امنیت</p>
-            <p className="text-sm text-muted-foreground">تغییر رمز عبور و تنظیمات امنیتی</p>
-          </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
-        </button>
-
-        {/* Help */}
-        <button 
-          onClick={() => setCurrentView('help')}
-          className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all"
-        >
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-            <LifeBuoy className="w-6 h-6 text-indigo-500" strokeWidth={2} />
-          </div>
-          <div className="flex-1 text-right">
-            <p className="font-semibold text-foreground">راهنما</p>
-            <p className="text-sm text-muted-foreground">آموزش کار با اپلیکیشن</p>
-          </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
-        </button>
-      </div>
-
-      {/* About & Contact */}
-      <div className="bg-card rounded-xl border-2 border-border p-4 space-y-3">
-        <div className="flex items-center gap-3">
-          <Info className="w-5 h-5 text-primary" strokeWidth={2} />
-          <div>
-            <p className="font-semibold text-foreground">درباره ما</p>
-            <p className="text-sm text-muted-foreground">طراحی و توسعه توسط Siamak.D</p>
+          {/* Currency */}
+          <div className="bg-card rounded-xl border-2 border-border p-4 min-h-[72px]">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <Globe className="w-6 h-6 text-amber-500" strokeWidth={2} />
+              </div>
+              <div className="flex-1 text-right">
+                <p className="font-semibold text-foreground leading-relaxed">واحد پول</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">تومان</p>
+              </div>
+              <div className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-sm font-medium">
+                پیش‌فرض
+              </div>
+            </div>
           </div>
         </div>
-        <div className="border-t border-border pt-3">
-          <div className="flex items-center gap-3">
-            <Mail className="w-5 h-5 text-primary" strokeWidth={2} />
+
+        {/* Security Section */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-3">امنیت و حریم خصوصی</h3>
+          
+          <button 
+            onClick={() => setCurrentView('security')}
+            className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+              <Lock className="w-6 h-6 text-red-500" strokeWidth={2} />
+            </div>
+            <div className="flex-1 text-right">
+              <p className="font-semibold text-foreground leading-relaxed">امنیت</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">تغییر رمز عبور و تنظیمات امنیتی</p>
+            </div>
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* Support Section */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-3">پشتیبانی</h3>
+          
+          <button 
+            onClick={() => setCurrentView('help')}
+            className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+              <LifeBuoy className="w-6 h-6 text-indigo-500" strokeWidth={2} />
+            </div>
+            <div className="flex-1 text-right">
+              <p className="font-semibold text-foreground leading-relaxed">راهنما</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">آموزش کار با اپلیکیشن</p>
+            </div>
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+
+      {/* About & Contact - Improved spacing */}
+      <div className="bg-card rounded-xl border-2 border-border p-5 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Info className="w-5 h-5 text-primary" strokeWidth={2} />
+          </div>
+          <div>
+            <p className="font-semibold text-foreground leading-relaxed">درباره ما</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">طراحی و توسعه توسط Siamak.D</p>
+          </div>
+        </div>
+        <div className="border-t-2 border-border pt-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Mail className="w-5 h-5 text-primary" strokeWidth={2} />
+            </div>
             <div>
-              <p className="font-semibold text-foreground">ارتباط با ما</p>
-              <p className="text-sm text-muted-foreground" dir="ltr">siamakflow@gmail.com</p>
+              <p className="font-semibold text-foreground leading-relaxed">ارتباط با ما</p>
+              <p className="text-sm text-muted-foreground leading-relaxed" dir="ltr">siamakflow@gmail.com</p>
             </div>
           </div>
         </div>

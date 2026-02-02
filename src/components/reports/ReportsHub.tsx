@@ -155,70 +155,72 @@ export function ReportsHub({
 
   return (
     <div className="space-y-4 animate-fade-in">
-      {/* Month Picker */}
-      <div className="bg-card rounded-2xl border-2 border-border p-4">
+      {/* Month Picker - Enhanced touch targets and visual clarity */}
+      <div className="bg-card rounded-2xl border-2 border-border p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <button
             onClick={goToNextMonth}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-95 transition-all"
+            className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="ماه بعد"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-6 h-6" strokeWidth={2} />
           </button>
           
-          <div className="flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-primary" strokeWidth={2} />
-            <span className="text-lg font-bold text-foreground">
+          <div className="flex items-center gap-3">
+            <CalendarDays className="w-6 h-6 text-primary" strokeWidth={2} />
+            <span className="text-xl font-bold text-foreground tracking-tight">
               {getJalaliMonthName(selectedMonth)}
             </span>
           </div>
           
           <button
             onClick={goToPrevMonth}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-95 transition-all"
+            className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="ماه قبل"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-card rounded-xl border-2 border-border p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-              <ArrowUpRight className="w-5 h-5 text-success" />
+      {/* Summary Cards - Enhanced visual hierarchy */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-card rounded-2xl border-2 border-success/20 p-5 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+              <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2} />
             </div>
-            <p className="text-sm text-muted-foreground">درآمد</p>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد</p>
           </div>
-          <p className="text-xl font-bold text-success tabular-nums">
+          <p className="text-2xl font-bold text-success tabular-nums">
             {formatCurrency(monthlySummary.income)}
           </p>
         </div>
         
-        <div className="bg-card rounded-xl border-2 border-border p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
-              <ArrowDownRight className="w-5 h-5 text-destructive" />
+        <div className="bg-card rounded-2xl border-2 border-destructive/20 p-5 shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2} />
             </div>
-            <p className="text-sm text-muted-foreground">هزینه</p>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه</p>
           </div>
-          <p className="text-xl font-bold text-destructive tabular-nums">
+          <p className="text-2xl font-bold text-destructive tabular-nums">
             {formatCurrency(monthlySummary.expense)}
           </p>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex gap-1 p-1 rounded-xl bg-muted/50 border border-border">
+      {/* Tab Navigation - Enhanced active state */}
+      <div className="flex gap-1.5 p-1.5 rounded-2xl bg-muted/60 border-2 border-border">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all",
+              "flex-1 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               activeTab === tab.id
-                ? "bg-card text-primary shadow-sm border border-primary/20"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/50"
             )}
           >
             {tab.label}
