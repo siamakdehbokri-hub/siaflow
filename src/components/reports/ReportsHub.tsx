@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 // Lazy load heavy chart components
 const AIReport = lazy(() => import('@/components/AIReport').then(m => ({ default: m.AIReport })));
-const SpendingChart = lazy(() => import('@/components/SpendingChart').then(m => ({ default: m.SpendingChart })));
+const CategoryBreakdown = lazy(() => import('@/components/reports/CategoryBreakdown').then(m => ({ default: m.CategoryBreakdown })));
 const TrendChart = lazy(() => import('@/components/TrendChart').then(m => ({ default: m.TrendChart })));
 const MonthlyComparisonChart = lazy(() => import('@/components/MonthlyComparisonChart').then(m => ({ default: m.MonthlyComparisonChart })));
 
@@ -411,28 +411,28 @@ export function ReportsHub({
             </div>
           </button>
 
-          {/* Charts */}
-          <div className="space-y-4">
-            <div className="p-4 rounded-2xl bg-card border-2 border-border">
-              <h4 className="text-sm font-medium text-muted-foreground mb-4">تفکیک هزینه‌ها</h4>
-              <Suspense fallback={<ChartLoader />}>
-                <SpendingChart categories={categories} />
-              </Suspense>
-            </div>
+          {/* Category Breakdown - uses monthly filtered data */}
+          <div className="p-4 rounded-2xl bg-card border-2 border-border">
+            <h4 className="text-sm font-bold text-foreground mb-4">تفکیک هزینه‌های ماه</h4>
+            <Suspense fallback={<ChartLoader />}>
+              <CategoryBreakdown transactions={monthlyTransactions} categories={categories} />
+            </Suspense>
+          </div>
 
-            <div className="p-4 rounded-2xl bg-card border-2 border-border">
-              <h4 className="text-sm font-medium text-muted-foreground mb-4">روند هزینه‌ها</h4>
-              <Suspense fallback={<ChartLoader />}>
-                <TrendChart transactions={transactions} />
-              </Suspense>
-            </div>
+          {/* Trend Chart - uses all transactions for multi-month view */}
+          <div className="p-4 rounded-2xl bg-card border-2 border-border">
+            <h4 className="text-sm font-bold text-foreground mb-4">روند ۶ ماه اخیر</h4>
+            <Suspense fallback={<ChartLoader />}>
+              <TrendChart transactions={transactions} />
+            </Suspense>
+          </div>
 
-            <div className="p-4 rounded-2xl bg-card border-2 border-border">
-              <h4 className="text-sm font-medium text-muted-foreground mb-4">مقایسه ماهانه</h4>
-              <Suspense fallback={<ChartLoader />}>
-                <MonthlyComparisonChart transactions={transactions} />
-              </Suspense>
-            </div>
+          {/* Monthly Comparison */}
+          <div className="p-4 rounded-2xl bg-card border-2 border-border">
+            <h4 className="text-sm font-bold text-foreground mb-4">مقایسه ماهانه</h4>
+            <Suspense fallback={<ChartLoader />}>
+              <MonthlyComparisonChart transactions={transactions} />
+            </Suspense>
           </div>
         </div>
       )}
