@@ -1,14 +1,15 @@
-import { useState, useMemo, lazy, Suspense, useCallback } from 'react';
-import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Target, Landmark, ChartPie, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
+import { useState, useMemo, lazy, Suspense } from 'react';
+import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { Debt } from '@/hooks/useDebts';
 import { SwipeableTransaction } from '@/components/SwipeableTransaction';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { formatCurrency, formatPersianMonth, getJalaliMonthName } from '@/utils/persianDate';
+import { formatCurrency, getJalaliMonthName, toPersianNum } from '@/utils/persianDate';
 import { startOfMonth, endOfMonth, subMonths, addMonths, isWithinInterval, parseISO } from 'date-fns-jalali';
 import { cn } from '@/lib/utils';
+import { PlanningCard, FinancialHealthCard } from '@/components/reports/PlanningCards';
+import { SegmentedControl, FilterPill } from '@/components/ui/segmented-control';
 
 // Lazy load heavy chart components
 const AIReport = lazy(() => import('@/components/AIReport').then(m => ({ default: m.AIReport })));
@@ -210,23 +211,13 @@ export function ReportsHub({
         </div>
       </div>
 
-      {/* Tab Navigation - Enhanced active state */}
-      <div className="flex gap-1.5 p-1.5 rounded-2xl bg-muted/60 border-2 border-border">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "flex-1 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              activeTab === tab.id
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tab Navigation - Segmented Control */}
+      <SegmentedControl<ReportsTab>
+        options={tabs}
+        value={activeTab}
+        onChange={(tab) => setActiveTab(tab)}
+        size="md"
+      />
 
       {/* Transactions Tab */}
       {activeTab === 'transactions' && (
@@ -250,22 +241,25 @@ export function ReportsHub({
             )}
           </div>
 
-          {/* Type Filter */}
+          {/* Type Filter - Improved pills */}
           <div className="flex gap-2">
-            {(['all', 'expense', 'income'] as const).map((type) => (
-              <button
-                key={type}
-                onClick={() => setTypeFilter(type)}
-                className={cn(
-                  "flex-1 px-4 py-3 rounded-xl text-sm font-medium border-2 transition-all",
-                  typeFilter === type
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card border-border text-muted-foreground hover:border-primary/30"
-                )}
-              >
-                {type === 'all' ? 'همه' : type === 'expense' ? 'هزینه' : 'درآمد'}
-              </button>
-            ))}
+            <FilterPill
+              label="همه"
+              isActive={typeFilter === 'all'}
+              onClick={() => setTypeFilter('all')}
+            />
+            <FilterPill
+              label="هزینه"
+              isActive={typeFilter === 'expense'}
+              onClick={() => setTypeFilter('expense')}
+              variant="danger"
+            />
+            <FilterPill
+              label="درآمد"
+              isActive={typeFilter === 'income'}
+              onClick={() => setTypeFilter('income')}
+              variant="success"
+            />
           </div>
 
           {/* Transaction Count */}
@@ -294,95 +288,61 @@ export function ReportsHub({
         </div>
       )}
 
-      {/* Planning Tab */}
+      {/* Planning Tab - Redesigned with product logic */}
       {activeTab === 'planning' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
+          {/* Financial Health Overview */}
+          <FinancialHealthCard
+            budgetPercent={planningStats.budget.percent}
+            goalsPercent={planningStats.goals.percent}
+            debtPercent={planningStats.debts.percent}
+            hasData={planningStats.budget.count > 0 || planningStats.goals.count > 0 || planningStats.debts.count > 0}
+          />
+          
+          {/* Section Header */}
+          <div className="flex items-center gap-2 pt-2">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium text-muted-foreground px-2">برنامه‌ریزی مالی</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          
           {/* Budget Card */}
-          <button
+          <PlanningCard
+            type="budget"
+            stats={{
+              total: planningStats.budget.total,
+              current: planningStats.budget.spent,
+              percent: planningStats.budget.percent,
+              count: planningStats.budget.count,
+              alertCount: planningStats.budget.overBudgetCount,
+            }}
             onClick={onOpenBudget}
-            className="w-full p-4 rounded-2xl bg-card border-2 border-border hover:border-primary/30 active:bg-muted/30 transition-all text-right"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-chart-1/10 flex items-center justify-center">
-                <ChartPie className="w-6 h-6 text-chart-1" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-foreground">بودجه ماهانه</p>
-                <p className="text-sm text-muted-foreground">
-                  {planningStats.budget.count > 0 
-                    ? `${Math.round(planningStats.budget.percent)}% استفاده شده`
-                    : 'بودجه تعیین کنید'
-                  }
-                </p>
-              </div>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-            </div>
-            {planningStats.budget.total > 0 && (
-              <>
-                <Progress value={Math.min(planningStats.budget.percent, 100)} className="h-2" />
-                <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <span className="tabular-nums">{formatCurrency(planningStats.budget.spent)}</span>
-                  <span className="tabular-nums">{formatCurrency(planningStats.budget.total)}</span>
-                </div>
-              </>
-            )}
-          </button>
+          />
 
           {/* Goals Card */}
-          <button
+          <PlanningCard
+            type="goals"
+            stats={{
+              total: planningStats.goals.target,
+              current: planningStats.goals.saved,
+              percent: planningStats.goals.percent,
+              count: planningStats.goals.count,
+            }}
             onClick={onOpenGoals}
-            className="w-full p-4 rounded-2xl bg-card border-2 border-border hover:border-primary/30 active:bg-muted/30 transition-all text-right"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                <Target className="w-6 h-6 text-success" strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-foreground">اهداف پس‌انداز</p>
-                <p className="text-sm text-muted-foreground">
-                  {planningStats.goals.count > 0 
-                    ? `${Math.round(planningStats.goals.percent)}% تکمیل`
-                    : 'هدف جدید بسازید'
-                  }
-                </p>
-              </div>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-            </div>
-            {planningStats.goals.count > 0 && (
-              <Progress value={planningStats.goals.percent} className="h-2 [&>div]:bg-success" />
-            )}
-          </button>
+          />
 
           {/* Debts Card */}
-          <button
+          <PlanningCard
+            type="debts"
+            stats={{
+              total: debts.reduce((sum, d) => sum + d.totalAmount, 0),
+              current: debts.reduce((sum, d) => sum + d.paidAmount, 0),
+              percent: planningStats.debts.percent,
+              count: planningStats.debts.count,
+              alertCount: planningStats.debts.overdueCount,
+            }}
             onClick={onOpenDebts}
-            className="w-full p-4 rounded-2xl bg-card border-2 border-border hover:border-primary/30 active:bg-muted/30 transition-all text-right"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center",
-                planningStats.debts.overdueCount > 0 ? "bg-destructive/10" : "bg-warning/10"
-              )}>
-                <Landmark className={cn(
-                  "w-6 h-6",
-                  planningStats.debts.overdueCount > 0 ? "text-destructive" : "text-warning"
-                )} strokeWidth={2} />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-foreground">مدیریت بدهی</p>
-                <p className="text-sm text-muted-foreground">
-                  {planningStats.debts.count > 0 
-                    ? formatCurrency(planningStats.debts.remaining) + ' باقی‌مانده'
-                    : 'بدون بدهی!'
-                  }
-                </p>
-              </div>
-              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-            </div>
-            {planningStats.debts.count > 0 && (
-              <Progress value={planningStats.debts.percent} className="h-2 [&>div]:bg-warning" />
-            )}
-          </button>
+          />
         </div>
       )}
 
