@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* IranSans X Font - already loaded in index.html */
+/* Vazirmatn Font - loaded asynchronously in index.html */
+/* Fallback font stack ensures text is visible during font load (FOUT over FOIT) */
 
 @layer base {
   :root {

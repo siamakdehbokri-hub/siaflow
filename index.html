@@ -21,10 +21,16 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />
     
+    <!-- Preload critical font for faster FCP -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/pwa-192x192.png" />
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    
+    <!-- Load font CSS asynchronously to prevent render-blocking -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"></noscript>
     
     <style>
       .pb-safe {
