@@ -2,7 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Crown, ChevronDown, Eye, UserX, UserCheck, Trash2 
+  Crown, MoreVertical, Eye, UserX, UserCheck, Trash2, 
+  Activity, AlertTriangle, Clock
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -36,107 +37,144 @@ export function MobileUserCard({
 }: MobileUserCardProps) {
   const isCurrentUser = adminUser.id === currentUserId;
   const isAdmin = adminUser.roles.includes('admin');
+  
+  // Risk indicators
+  const isInactive = !adminUser.isActive;
+  const hasNoTransactions = adminUser.transactionCount === 0;
+  const lastLoginText = formatLastLogin(adminUser.lastLogin);
 
   return (
-    <div className="bg-card rounded-2xl border-2 border-border p-4 space-y-3 hover:border-primary/30 transition-all active:scale-[0.99]">
-      {/* Header: Avatar + Name */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <Avatar className="w-14 h-14 border-2 border-primary/20 shrink-0 shadow-sm">
+    <div className={cn(
+      "bg-white dark:bg-slate-900 rounded-xl border-2 p-3 space-y-2.5 transition-all",
+      isInactive 
+        ? "border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20" 
+        : "border-slate-200 dark:border-slate-800"
+    )}>
+      {/* Row 1: User Info + Actions */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <Avatar className="w-10 h-10 border-2 border-slate-200 dark:border-slate-700 shrink-0">
             <AvatarImage src={adminUser.avatarUrl || undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-lg">
+            <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm">
               {adminUser.displayName?.charAt(0)?.toUpperCase() || '?'}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-base truncate text-foreground">{adminUser.displayName}</p>
-            <p className="text-xs text-muted-foreground truncate mt-0.5" dir="ltr">{adminUser.email}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="font-semibold text-sm truncate text-slate-900 dark:text-slate-100">
+                {adminUser.displayName || 'بدون نام'}
+              </p>
+              {isAdmin && (
+                <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" strokeWidth={2} />
+              )}
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate" dir="ltr">
+              {adminUser.email}
+            </p>
           </div>
         </div>
 
-        {/* Actions Dropdown */}
+        {/* Actions */}
         {!isCurrentUser ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-xl h-11 w-11 shrink-0 border-2">
-                <ChevronDown className="w-5 h-5" strokeWidth={2} />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-9 w-9 rounded-lg shrink-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                <MoreVertical className="w-4 h-4" strokeWidth={2} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 rounded-xl">
-              <DropdownMenuLabel className="text-xs text-muted-foreground">عملیات کاربر</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-48 rounded-xl">
+              <DropdownMenuLabel className="text-xs text-slate-500">عملیات</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onViewDetails(adminUser)} className="py-3 rounded-lg">
-                <Eye className="w-5 h-5 ml-3" strokeWidth={2} />
+              <DropdownMenuItem onClick={() => onViewDetails(adminUser)} className="py-2.5 rounded-lg">
+                <Eye className="w-4 h-4 ml-2" strokeWidth={2} />
                 مشاهده جزئیات
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onToggleStatus(adminUser.id)} className="py-3 rounded-lg">
+              <DropdownMenuItem onClick={() => onToggleStatus(adminUser.id)} className="py-2.5 rounded-lg">
                 {adminUser.isActive ? (
                   <>
-                    <UserX className="w-5 h-5 ml-3 text-orange-500" strokeWidth={2} />
-                    غیرفعال‌سازی
+                    <UserX className="w-4 h-4 ml-2 text-orange-500" strokeWidth={2} />
+                    غیرفعال کردن
                   </>
                 ) : (
                   <>
-                    <UserCheck className="w-5 h-5 ml-3 text-green-500" strokeWidth={2} />
-                    فعال‌سازی
+                    <UserCheck className="w-4 h-4 ml-2 text-emerald-500" strokeWidth={2} />
+                    فعال کردن
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onToggleAdmin(adminUser)} className="py-3 rounded-lg">
+              <DropdownMenuItem onClick={() => onToggleAdmin(adminUser)} className="py-2.5 rounded-lg">
                 <Crown className={cn(
-                  "w-5 h-5 ml-3",
-                  isAdmin ? "text-amber-500" : "text-muted-foreground"
+                  "w-4 h-4 ml-2",
+                  isAdmin ? "text-amber-500" : "text-slate-400"
                 )} strokeWidth={2} />
-                {isAdmin ? 'حذف نقش ادمین' : 'افزودن نقش ادمین'}
+                {isAdmin ? 'حذف ادمین' : 'ادمین کردن'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => onDelete(adminUser)}
-                className="text-destructive focus:text-destructive py-3 rounded-lg"
+                className="text-red-600 focus:text-red-600 py-2.5 rounded-lg"
               >
-                <Trash2 className="w-5 h-5 ml-3" strokeWidth={2} />
+                <Trash2 className="w-4 h-4 ml-2" strokeWidth={2} />
                 حذف کاربر
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Badge variant="outline" className="text-xs rounded-xl h-8 px-3 border-2 border-primary/30 bg-primary/5 text-primary shrink-0">شما</Badge>
+          <Badge variant="outline" className="text-[10px] rounded-lg h-6 px-2 border-slate-300 dark:border-slate-600 text-slate-500 shrink-0">
+            شما
+          </Badge>
         )}
       </div>
 
-      {/* Stats Row */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Row 2: Status Badges */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Status */}
         <Badge 
           variant="outline"
           className={cn(
-            "rounded-xl text-xs h-7 px-2.5 font-medium border-2",
+            "rounded-lg text-[10px] h-6 px-2 font-medium border",
             adminUser.isActive 
-              ? "bg-success/10 text-success border-success/30" 
-              : "bg-destructive/10 text-destructive border-destructive/30"
+              ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" 
+              : "bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
           )}
         >
           <span className={cn(
-            "w-2 h-2 rounded-full ml-1.5",
-            adminUser.isActive ? "bg-success" : "bg-destructive"
+            "w-1.5 h-1.5 rounded-full ml-1.5",
+            adminUser.isActive ? "bg-emerald-500" : "bg-red-500"
           )} />
           {adminUser.isActive ? 'فعال' : 'غیرفعال'}
         </Badge>
 
+        {/* Role */}
         {isAdmin && (
-          <Badge className="bg-amber-500/10 text-amber-600 border-2 border-amber-500/30 rounded-xl text-xs h-7 px-2.5 font-medium">
-            <Crown className="w-3.5 h-3.5 ml-1.5" strokeWidth={2} />
+          <Badge className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-lg text-[10px] h-6 px-2 font-medium">
             ادمین
           </Badge>
         )}
 
-        <Badge variant="outline" className="rounded-xl text-xs h-7 px-2.5 font-mono border-2">
-          {adminUser.transactionCount} تراکنش
+        {/* Transaction Count */}
+        <Badge variant="outline" className="rounded-lg text-[10px] h-6 px-2 font-mono border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+          <Activity className="w-3 h-3 ml-1" strokeWidth={2} />
+          {adminUser.transactionCount}
         </Badge>
+
+        {/* Warning indicators */}
+        {hasNoTransactions && (
+          <Badge variant="outline" className="rounded-lg text-[10px] h-6 px-2 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50">
+            <AlertTriangle className="w-3 h-3 ml-1" strokeWidth={2} />
+            بدون فعالیت
+          </Badge>
+        )}
       </div>
 
-      {/* Last Login */}
-      <div className="text-xs text-muted-foreground bg-muted/50 rounded-xl px-3 py-2">
-        🕐 آخرین ورود: {formatLastLogin(adminUser.lastLogin)}
+      {/* Row 3: Last Login */}
+      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+        <Clock className="w-3.5 h-3.5" strokeWidth={2} />
+        <span>آخرین ورود: {lastLoginText}</span>
       </div>
     </div>
   );
