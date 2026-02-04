@@ -23,10 +23,13 @@ export function SegmentedControl<T extends string>({
   size = 'md',
   fullWidth = true,
 }: SegmentedControlProps<T>) {
+  const activeIndex = options.findIndex(o => o.id === value);
+  const segmentCount = options.length;
+  
   const sizeClasses = {
-    sm: 'h-10 text-xs',
-    md: 'h-12 text-sm',
-    lg: 'h-14 text-base',
+    sm: 'h-10 text-[11px] sm:text-xs',
+    md: 'h-11 sm:h-12 text-xs sm:text-sm',
+    lg: 'h-12 sm:h-14 text-sm sm:text-base',
   };
 
   return (
@@ -37,13 +40,12 @@ export function SegmentedControl<T extends string>({
       )}
       role="tablist"
     >
-      {/* Animated background indicator */}
+      {/* Animated background indicator - RTL optimized */}
       <div
-        className="absolute top-1 bottom-1 rounded-xl bg-primary shadow-md transition-all duration-300 ease-out"
+        className="absolute top-1 bottom-1 rounded-xl bg-primary shadow-md transition-all duration-300 ease-out pointer-events-none"
         style={{
-          width: `calc(${100 / options.length}% - 4px)`,
-          transform: `translateX(calc(-${options.findIndex(o => o.id === value) * 100}% - ${options.findIndex(o => o.id === value) * 4}px))`,
-          right: `calc(${options.findIndex(o => o.id === value) * (100 / options.length)}% + 2px)`,
+          width: `calc(${100 / segmentCount}% - 4px)`,
+          right: `calc(${(activeIndex / segmentCount) * 100}% + 2px)`,
         }}
       />
 
@@ -58,12 +60,13 @@ export function SegmentedControl<T extends string>({
             aria-selected={isActive}
             onClick={() => onChange(option.id)}
             className={cn(
-              "relative flex-1 flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors duration-200",
+              "relative flex-1 flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl font-semibold transition-colors duration-200 min-w-0",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              "active:scale-[0.98]",
               sizeClasses[size],
               isActive
                 ? "text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground active:text-foreground"
             )}
           >
             {Icon && (
@@ -75,12 +78,12 @@ export function SegmentedControl<T extends string>({
                 strokeWidth={2} 
               />
             )}
-            <span className="truncate">{option.label}</span>
+            <span className="truncate max-w-[80px] sm:max-w-none">{option.label}</span>
             
             {/* Badge */}
             {option.badge !== undefined && option.badge > 0 && (
               <span className={cn(
-                "flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] font-bold",
+                "flex items-center justify-center min-w-[16px] sm:min-w-[18px] h-[16px] sm:h-[18px] rounded-full text-[9px] sm:text-[10px] font-bold",
                 isActive 
                   ? "bg-primary-foreground/20 text-primary-foreground" 
                   : "bg-destructive text-destructive-foreground"
