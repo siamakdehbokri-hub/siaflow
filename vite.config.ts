@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: "script-defer", // Defer SW registration to avoid render-blocking
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: false, // Using external manifest.json
       workbox: {
