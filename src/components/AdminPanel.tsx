@@ -60,7 +60,10 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCurrency } from '@/utils/persianDate';
 
-// Mobile Card Components
+// Admin Components
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminMetrics } from '@/components/admin/AdminMetrics';
+import { AdminNavigation, type AdminTabValue } from '@/components/admin/AdminNavigation';
 import { MobileUserCard } from '@/components/admin/MobileUserCard';
 import { MobileTransactionCard } from '@/components/admin/MobileTransactionCard';
 import { MobileCategoryCard } from '@/components/admin/MobileCategoryCard';
@@ -379,138 +382,36 @@ export function AdminPanel() {
 
   return (
     <div className="space-y-4" dir="rtl">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <Button
-          variant="outline"
-          onClick={() => navigate('/')}
-          className="rounded-xl gap-2 border-2"
-        >
-          <Home className="w-4 h-4" />
-          <span className="text-sm">خانه</span>
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={refreshAll}
-          disabled={usersLoading || statsLoading}
-          className="rounded-xl border-2"
-        >
-          <RefreshCw className={cn("w-4 h-4 ml-2", (usersLoading || statsLoading) && "animate-spin")} />
-          بروزرسانی
-        </Button>
-      </div>
+      {/* Admin Header */}
+      <AdminHeader
+        onNavigateHome={() => navigate('/')}
+        onRefresh={refreshAll}
+        isLoading={usersLoading || statsLoading}
+      />
 
-      {/* Financial Summary Cards */}
-      {financialSummary && (
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-card rounded-xl border-2 border-border p-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
-                <TrendingUp className="w-4 h-4 text-success" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">کل درآمد</p>
-                <p className="text-sm font-bold text-success truncate">{formatCurrency(financialSummary.totalIncome)}</p>
-              </div>
-            </div>
-          </div>
+      {/* Metrics Dashboard */}
+      <AdminMetrics
+        financialSummary={financialSummary}
+        stats={stats}
+        isLoading={financialSummaryLoading || statsLoading}
+      />
 
-          <div className="bg-card rounded-xl border-2 border-border p-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
-                <TrendingDown className="w-4 h-4 text-destructive" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">کل هزینه</p>
-                <p className="text-sm font-bold text-destructive truncate">{formatCurrency(financialSummary.totalExpense)}</p>
-              </div>
-            </div>
-          </div>
+      {/* Navigation */}
+      <AdminNavigation
+        activeTab={activeTab as AdminTabValue}
+        onTabChange={(tab) => setActiveTab(tab)}
+        counts={{
+          users: users.length,
+          transactions: transactions.length,
+          categories: categories.length,
+          debts: debts.length,
+          goals: goals.length,
+          accounts: accounts.length,
+        }}
+      />
 
-          <div className="bg-card rounded-xl border-2 border-border p-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Wallet className="w-4 h-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">موجودی</p>
-                <p className="text-sm font-bold text-primary truncate">{formatCurrency(financialSummary.totalAccountBalance)}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card rounded-xl border-2 border-border p-3">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                <Target className="w-4 h-4 text-purple-500" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">پیشرفت اهداف</p>
-                <p className="text-sm font-bold text-purple-500">{financialSummary.totalGoalProgress}%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-2">
-        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
-          <p className="text-lg font-bold text-primary">{stats?.totalUsers ?? '-'}</p>
-          <p className="text-[10px] text-muted-foreground">کاربران</p>
-        </div>
-        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
-          <p className="text-lg font-bold text-success">{stats?.activeUsers ?? '-'}</p>
-          <p className="text-[10px] text-muted-foreground">فعال</p>
-        </div>
-        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
-          <p className="text-lg font-bold text-foreground">{stats?.totalTransactions ?? '-'}</p>
-          <p className="text-[10px] text-muted-foreground">تراکنش</p>
-        </div>
-        <div className="bg-card rounded-xl border-2 border-border p-3 text-center">
-          <p className="text-lg font-bold text-foreground">{stats?.totalCategories ?? '-'}</p>
-          <p className="text-[10px] text-muted-foreground">دسته‌بندی</p>
-        </div>
-      </div>
-
-      {/* Tabs - Horizontal Scroll for Mobile */}
+      {/* Tab Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <div className="overflow-x-auto w-full" dir="rtl">
-          <div className="p-1 rounded-xl bg-muted/50 border-2 border-border min-w-max">
-            <TabsList className="flex w-full bg-transparent p-0 h-auto gap-1 justify-end">
-              <TabsTrigger value="settings" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Settings className="w-4 h-4 ml-1.5" />
-                تنظیمات
-              </TabsTrigger>
-              <TabsTrigger value="accounts" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Wallet className="w-4 h-4 ml-1.5" />
-                حساب‌ها
-              </TabsTrigger>
-              <TabsTrigger value="goals" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Target className="w-4 h-4 ml-1.5" />
-                اهداف
-              </TabsTrigger>
-              <TabsTrigger value="debts" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Banknote className="w-4 h-4 ml-1.5" />
-                بدهی‌ها
-              </TabsTrigger>
-              <TabsTrigger value="categories" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Tag className="w-4 h-4 ml-1.5" />
-                دسته‌ها
-              </TabsTrigger>
-              <TabsTrigger value="transactions" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <CreditCard className="w-4 h-4 ml-1.5" />
-                تراکنش‌ها
-              </TabsTrigger>
-              <TabsTrigger value="users" className="shrink-0 rounded-lg py-3 px-4 text-xs font-medium whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/20 data-[state=active]:shadow-sm">
-                <Users className="w-4 h-4 ml-1.5" />
-                کاربران
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
 
         {/* Users Tab */}
         <TabsContent value="users" className="mt-4 space-y-3">

@@ -1,6 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, MoreVertical, User, Calendar, FileText } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { AdminTransaction } from '@/hooks/useAdmin';
 import { formatCurrency } from '@/utils/persianDate';
@@ -14,59 +20,79 @@ export function MobileTransactionCard({ transaction, onDelete }: MobileTransacti
   const isIncome = transaction.type === 'income';
 
   return (
-    <div className="bg-card rounded-2xl border-2 border-border p-4 hover:border-primary/30 transition-all active:scale-[0.99]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0 space-y-2">
-          {/* Category & Type */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-sm text-foreground">{transaction.category}</span>
+    <div className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-800 p-3 transition-all">
+      <div className="flex items-center justify-between gap-2">
+        {/* Left: Amount (Primary) */}
+        <div className="shrink-0">
+          <span className={cn(
+            "font-mono font-bold text-lg tabular-nums",
+            isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+          )} dir="ltr">
+            {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
+          </span>
+        </div>
+
+        {/* Center: Details */}
+        <div className="flex-1 min-w-0 mx-2">
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">
+              {transaction.category}
+            </span>
             <Badge 
               variant="outline" 
               className={cn(
-                "rounded-xl text-xs h-6 px-2 font-medium border-2",
+                "rounded-md text-[9px] h-5 px-1.5 font-medium border shrink-0",
                 isIncome 
-                  ? "bg-success/10 text-success border-success/30" 
-                  : "bg-destructive/10 text-destructive border-destructive/30"
+                  ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" 
+                  : "bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
               )}
             >
-              {isIncome ? '+ درآمد' : '- هزینه'}
+              {isIncome ? 'درآمد' : 'هزینه'}
             </Badge>
           </div>
-
-          {/* User & Date */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-medium">{transaction.userName}</span>
-            <span className="text-border">•</span>
-            <span dir="ltr">{transaction.date}</span>
+          
+          {/* Metadata Row */}
+          <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-0.5">
+              <User className="w-3 h-3" strokeWidth={2} />
+              {transaction.userName}
+            </span>
+            <span className="flex items-center gap-0.5">
+              <Calendar className="w-3 h-3" strokeWidth={2} />
+              <span dir="ltr">{transaction.date}</span>
+            </span>
           </div>
-
+          
           {/* Description */}
           {transaction.description && (
-            <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-2 py-1.5 truncate">
-              {transaction.description}
-            </p>
+            <div className="flex items-center gap-1 mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+              <FileText className="w-3 h-3 shrink-0" strokeWidth={2} />
+              <span className="truncate">{transaction.description}</span>
+            </div>
           )}
         </div>
 
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          {/* Amount */}
-          <span className={cn(
-            "font-mono font-bold text-base tabular-nums",
-            isIncome ? 'text-success' : 'text-destructive'
-          )}>
-            {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
-          </span>
-
-          {/* Delete Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onDelete(transaction)}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-10 w-10 border-2 border-destructive/30"
-          >
-            <Trash2 className="w-4 h-4" strokeWidth={2} />
-          </Button>
-        </div>
+        {/* Right: Actions (Secondary) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-lg shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            >
+              <MoreVertical className="w-4 h-4" strokeWidth={2} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36 rounded-xl">
+            <DropdownMenuItem 
+              onClick={() => onDelete(transaction)}
+              className="text-red-600 focus:text-red-600 py-2.5 rounded-lg"
+            >
+              <Trash2 className="w-4 h-4 ml-2" strokeWidth={2} />
+              حذف تراکنش
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
