@@ -8,6 +8,7 @@ import {
 import { Transaction } from '@/types/expense';
 import { formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
+ import { useCurrency } from '@/hooks/useCurrency';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   // New categories
@@ -52,10 +53,7 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
   const CategoryIcon = iconMap[transaction.category] || Receipt;
   const isIncome = transaction.type === 'income';
   const DirectionIcon = isIncome ? ArrowUpRight : ArrowDownRight;
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('fa-IR').format(amount);
-  };
+  const { formatAmount } = useCurrency();
 
   return (
     <div 
@@ -130,7 +128,7 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
                 "w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 group-hover:scale-110",
                 isIncome ? "text-success" : "text-destructive"
               )} />
-              {formatCurrency(transaction.amount)}
+              {formatAmount(transaction.amount)}
             </p>
             <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
               {formatPersianDateShort(transaction.date)}

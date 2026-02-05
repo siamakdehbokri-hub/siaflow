@@ -1,5 +1,6 @@
 import { ArrowUpRight, ArrowDownRight, Wallet, Zap, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+ import { useCurrency } from '@/hooks/useCurrency';
 
 interface BalanceCardProps {
   balance: number;
@@ -8,7 +9,12 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
+  const { formatAmount, currencyInfo, currency } = useCurrency();
+ 
   const formatCurrency = (amount: number) => {
+    if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US').format(Math.abs(amount));
+    }
     return new Intl.NumberFormat('fa-IR').format(Math.abs(amount));
   };
 
@@ -72,7 +78,7 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
                 {formatCurrency(balance)}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-white/60 text-sm font-medium">تومان</span>
+                <span className="text-white/60 text-sm font-medium">{currencyInfo.symbol}</span>
                 {savingsRate > 0 && (
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 font-bold">
                     {savingsRate}% پس‌انداز

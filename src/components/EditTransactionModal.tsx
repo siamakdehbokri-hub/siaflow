@@ -45,7 +45,7 @@ export function EditTransactionModal({
   onDelete,
   categories 
 }: EditTransactionModalProps) {
-  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [type, setType] = useState<'income' | 'expense' | 'saving'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
@@ -121,7 +121,8 @@ export function EditTransactionModal({
   if (!isOpen || !transaction) return null;
 
   const expenseCategories = categories.filter(c => c.budget);
-  const incomeCategories = categories.filter(c => !c.budget);
+  const incomeCategories = categories.filter(c => !c.budget && c.type !== 'saving');
+  const savingCategories = categories.filter(c => c.type === 'saving');
 
   return (
     <>
@@ -170,8 +171,8 @@ export function EditTransactionModal({
           </div>
 
           <form onSubmit={handleSubmit} className="p-5 space-y-5">
-            {/* Type Toggle */}
-            <div className="flex gap-2 p-1.5 bg-muted rounded-2xl overflow-hidden">
+            {/* Type Toggle - 3 types */}
+            <div className="grid grid-cols-3 gap-2 p-1.5 bg-muted rounded-2xl overflow-hidden">
               <button
                 type="button"
                 onClick={() => {
@@ -180,14 +181,14 @@ export function EditTransactionModal({
                   setSubcategory('');
                 }}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 px-3 rounded-xl font-semibold transition-all duration-300 min-w-0",
+                  "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all duration-300",
                   type === 'expense' 
-                    ? "gradient-expense text-destructive-foreground shadow-lg scale-[1.02]" 
+                    ? "bg-destructive text-destructive-foreground shadow-lg" 
                     : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 )}
               >
-                <Minus className="w-5 h-5 shrink-0" />
-                <span className="truncate">هزینه</span>
+                <Minus className="w-4 h-4" />
+                <span className="text-xs">هزینه</span>
               </button>
               <button
                 type="button"
@@ -197,14 +198,31 @@ export function EditTransactionModal({
                   setSubcategory('');
                 }}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-2 py-3.5 px-3 rounded-xl font-semibold transition-all duration-300 min-w-0",
+                  "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all duration-300",
                   type === 'income' 
-                    ? "gradient-income text-success-foreground shadow-lg scale-[1.02]" 
+                    ? "bg-success text-success-foreground shadow-lg" 
                     : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 )}
               >
-                <Plus className="w-5 h-5 shrink-0" />
-                <span className="truncate">درآمد</span>
+                <Plus className="w-4 h-4" />
+                <span className="text-xs">درآمد</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setType('saving');
+                  setCategory('');
+                  setSubcategory('');
+                }}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all duration-300",
+                  type === 'saving' 
+                    ? "bg-primary text-primary-foreground shadow-lg" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                )}
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="text-xs">پس‌انداز</span>
               </button>
             </div>
 
@@ -253,7 +271,7 @@ export function EditTransactionModal({
                   <SelectValue placeholder="انتخاب دسته‌بندی" />
                 </SelectTrigger>
                 <SelectContent className="max-h-64">
-                  {(type === 'expense' ? expenseCategories : incomeCategories).map((cat) => (
+                  {(type === 'expense' ? expenseCategories : type === 'income' ? incomeCategories : savingCategories).map((cat) => (
                     <SelectItem key={cat.id} value={cat.name} className="py-3">
                       <div className="flex items-center gap-2">
                         <div 

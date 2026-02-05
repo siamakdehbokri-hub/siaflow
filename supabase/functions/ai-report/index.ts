@@ -12,7 +12,7 @@ function isValidTransaction(t: unknown): t is { amount: number; type: string; ca
   const obj = t as Record<string, unknown>;
   
   if (typeof obj.amount !== 'number' || isNaN(obj.amount)) return false;
-  if (obj.type !== 'income' && obj.type !== 'expense') return false;
+  if (obj.type !== 'income' && obj.type !== 'expense' && obj.type !== 'saving') return false;
   if (typeof obj.category !== 'string' || obj.category.length === 0 || obj.category.length > 100) return false;
   if (obj.description !== undefined && obj.description !== null) {
     if (typeof obj.description !== 'string' || obj.description.length > 500) return false;
@@ -232,10 +232,14 @@ serve(async (req) => {
     const totalExpense = hardenedTransactions
       .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
+    
+    const totalSaving = hardenedTransactions
+      .filter((t) => t.type === 'saving')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     if (hardenedTransactions.length === 0) {
       return new Response(
-        JSON.stringify({ report: "📊 هنوز تراکنشی ثبت نشده است.\n\nبا ثبت تراکنش‌های درآمد و هزینه، می‌توانم تحلیل مالی هوشمند برایتان ارائه دهم." }),
+        JSON.stringify({ report: "📊 هنوز تراکنشی ثبت نشده است.\n\nبا ثبت تراکنش‌های درآمد، هزینه و پس‌انداز، می‌توانم تحلیل مالی هوشمند برایتان ارائه دهم." }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -281,8 +285,10 @@ serve(async (req) => {
         userPrompt = `خلاصه مالی ماه کاربر:
 - مجموع درآمد: ${totalIncome.toLocaleString('fa-IR')} تومان
 - مجموع هزینه: ${totalExpense.toLocaleString('fa-IR')} تومان  
-- تراز: ${(totalIncome - totalExpense).toLocaleString('fa-IR')} تومان
+- مجموع پس‌انداز/سرمایه‌گذاری: ${totalSaving.toLocaleString('fa-IR')} تومان
+- تراز خالص: ${(totalIncome - totalExpense - totalSaving).toLocaleString('fa-IR')} تومان
 - تعداد تراکنش: ${hardenedTransactions.length}
+- نرخ پس‌انداز: ${totalIncome > 0 ? Math.round((totalSaving / totalIncome) * 100) : 0}%
 
 ${topCategories.length > 0 ? `دسته‌بندی‌های پرهزینه:
 ${topCategories.map((c, i) => `${i + 1}. ${c.name}: ${c.amount.toLocaleString('fa-IR')} تومان`).join('\n')}` : ''}
@@ -300,12 +306,13 @@ ${topCategories.map((c, i) => `${i + 1}. ${c.name}: ${c.amount.toLocaleString('f
       userPrompt = `داده‌های مالی:
 - درآمد ماهانه: ${totalIncome.toLocaleString('fa-IR')} تومان
 - هزینه ماهانه: ${totalExpense.toLocaleString('fa-IR')} تومان
-- نرخ پس‌انداز: ${totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0}%
+- پس‌انداز/سرمایه‌گذاری: ${totalSaving.toLocaleString('fa-IR')} تومان
+- نرخ پس‌انداز: ${totalIncome > 0 ? Math.round((totalSaving / totalIncome) * 100) : 0}%
 
 دسته‌بندی‌های پرهزینه:
 ${topCategories.map((c, i) => `${i + 1}. ${c.name}: ${c.amount.toLocaleString('fa-IR')} تومان`).join('\n')}
 
-لطفاً پیشنهادهای عملی برای صرفه‌جویی ارائه بده و بگو کاربر در کدام دسته‌ها می‌تواند کمتر خرج کند.`;
+لطفاً پیشنهادهای عملی برای افزایش پس‌انداز ارائه بده و بگو کاربر در کدام دسته‌ها می‌تواند کمتر خرج کند تا بیشتر پس‌انداز کند.`;
 
     } else if (reportType === "budget") {
       const budgetCategories = categories.filter((c) => c.budget && c.budget > 0);
@@ -332,7 +339,8 @@ ${budgetCategories
       userPrompt = `داده‌های مالی:
 - درآمد: ${totalIncome.toLocaleString('fa-IR')} تومان
 - هزینه: ${totalExpense.toLocaleString('fa-IR')} تومان
-- تراز: ${(totalIncome - totalExpense).toLocaleString('fa-IR')} تومان
+- پس‌انداز: ${totalSaving.toLocaleString('fa-IR')} تومان
+- تراز خالص: ${(totalIncome - totalExpense - totalSaving).toLocaleString('fa-IR')} تومان
 
 یک نکته کوتاه و انگیزشی برای مدیریت مالی بهتر بگو.`;
     }

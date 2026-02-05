@@ -3,7 +3,8 @@ import { Calendar, TrendingUp, TrendingDown, Wallet, Sparkles } from 'lucide-rea
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Transaction, Category } from '@/types/expense';
-import { formatCurrency, getJalaliMonthName, getCurrentJalaliMonthBounds } from '@/utils/persianDate';
+ import { getJalaliMonthName, getCurrentJalaliMonthBounds } from '@/utils/persianDate';
+ import { useCurrency } from '@/hooks/useCurrency';
 import { endOfMonth } from 'date-fns-jalali';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +14,8 @@ interface MonthlySummaryProps {
 }
 
 export function MonthlySummary({ transactions, categories }: MonthlySummaryProps) {
+  const { formatAmount, currencyInfo } = useCurrency();
+  
   const monthlyData = useMemo(() => {
     const currentDate = new Date();
     // Use Jalali month bounds for filtering
@@ -121,14 +124,14 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
             <TrendingUp className="w-4 h-4 text-success mx-auto mb-1" />
             <p className="text-xs text-muted-foreground">درآمد</p>
             <p className="text-sm font-bold text-success">
-              {monthlyData.hasIncome ? formatCurrency(monthlyData.income).replace(' تومان', '') : '—'}
+              {monthlyData.hasIncome ? formatAmount(monthlyData.income) : '—'}
             </p>
           </div>
           <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
             <TrendingDown className="w-4 h-4 text-destructive mx-auto mb-1" />
             <p className="text-xs text-muted-foreground">هزینه</p>
             <p className="text-sm font-bold text-destructive">
-              {monthlyData.hasExpenses ? formatCurrency(monthlyData.expense).replace(' تومان', '') : '—'}
+              {monthlyData.hasExpenses ? formatAmount(monthlyData.expense) : '—'}
             </p>
           </div>
           <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
@@ -161,8 +164,8 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
               )}
             />
             <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
-              <span>{formatCurrency(monthlyData.expense)} خرج شده</span>
-              <span>{formatCurrency(Math.max(0, monthlyData.totalBudget - monthlyData.expense))} باقیمانده</span>
+              <span>{formatAmount(monthlyData.expense)} خرج شده</span>
+              <span>{formatAmount(Math.max(0, monthlyData.totalBudget - monthlyData.expense))} باقیمانده</span>
             </div>
           </div>
         )}
@@ -179,7 +182,7 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
                 />
                 <span className="flex-1 text-sm text-foreground truncate">{cat.name}</span>
                 <span className="text-xs font-medium text-muted-foreground">
-                  {formatCurrency(cat.amount).replace(' تومان', '')}
+                  {formatAmount(cat.amount)}
                 </span>
               </div>
             ))}
@@ -197,7 +200,7 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
             <Wallet className="w-4 h-4 shrink-0" />
             <span>
               {monthlyData.dailyAllowance > 0 
-                ? `روزانه ${formatCurrency(Math.round(monthlyData.dailyAllowance)).replace(' تومان', '')} تومان قابل خرج`
+                ? `روزانه ${formatAmount(Math.round(monthlyData.dailyAllowance))} قابل خرج`
                 : 'بودجه ماهانه تمام شده!'
               }
               {' '}({monthlyData.daysRemaining} روز مانده)

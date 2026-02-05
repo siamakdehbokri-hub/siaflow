@@ -1,7 +1,7 @@
 export interface Transaction {
   id: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'saving';
   category: string;
   subcategory?: string;
   description: string;
@@ -19,7 +19,7 @@ export interface Category {
   color: string;
   budget?: number;
   spent?: number;
-  type?: 'expense' | 'income';
+  type?: 'expense' | 'income' | 'saving';
   subcategories?: string[] | Subcategory[];
 }
 
@@ -151,3 +151,25 @@ export const defaultIncomeCategories = [
     subcategories: ['هدیه', 'فروش اجناس', 'متفرقه']
   }
 ];
+ 
+ // Default saving categories (separate from expenses)
+ export const defaultSavingCategories = [
+   {
+     name: 'پس‌انداز و سرمایه‌گذاری',
+     icon: 'PiggyBank',
+     color: 'hsl(175, 85%, 42%)',
+     subcategories: ['پس‌انداز ماهانه', 'سرمایه‌گذاری', 'صندوق اضطراری']
+   },
+   {
+     name: 'خرید سرمایه‌ای',
+     icon: 'Coins',
+     color: 'hsl(45, 93%, 47%)',
+     subcategories: ['طلا و سکه', 'ارز دیجیتال', 'سهام', 'ملک']
+   },
+   {
+     name: 'اهداف مالی',
+     icon: 'Target',
+     color: 'hsl(210, 80%, 55%)',
+     subcategories: ['خرید خانه', 'خرید ماشین', 'سفر', 'تحصیل']
+   }
+ ];
