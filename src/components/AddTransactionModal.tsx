@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown } from 'lucide-react';
+import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import { Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
 import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
+ import { useCurrency } from '@/hooks/useCurrency';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -25,7 +26,8 @@ interface AddTransactionModalProps {
 }
 
 export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddTransactionModalProps) {
-  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [type, setType] = useState<'income' | 'expense' | 'saving'>('expense');
+  const { currencyInfo } = useCurrency();
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
@@ -35,12 +37,17 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const expenseCategories = useMemo(() => 
-    categories.filter(c => c.budget !== undefined && c.budget !== null && c.budget > 0), 
+    categories.filter(c => c.type === 'expense' || (c.budget !== undefined && c.budget !== null && c.budget > 0)), 
     [categories]
   );
   
   const incomeCategories = useMemo(() => 
-    categories.filter(c => c.budget === undefined || c.budget === null || c.budget === 0), 
+    categories.filter(c => c.type === 'income' || (!c.type && (c.budget === undefined || c.budget === null || c.budget === 0))), 
+    [categories]
+  );
+  
+  const savingCategories = useMemo(() => 
+    categories.filter(c => c.type === 'saving'), 
     [categories]
   );
 
@@ -105,7 +112,11 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
   if (!isOpen) return null;
 
-  const currentCategories = type === 'expense' ? expenseCategories : incomeCategories;
+  const currentCategories = type === 'expense' 
+    ? expenseCategories 
+    : type === 'income' 
+      ? incomeCategories 
+      : savingCategories;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
@@ -133,7 +144,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
           
           {/* Type Toggle */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => {
@@ -142,14 +153,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex items-center justify-center gap-2 py-4 rounded-xl font-semibold transition-all border-2",
+                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all border-2",
                 type === 'expense' 
                   ? "bg-destructive text-white border-destructive" 
                   : "bg-card text-muted-foreground border-border hover:border-destructive/50"
               )}
             >
-              <Minus className="w-5 h-5" />
-              هزینه
+              <Minus className="w-4 h-4" />
+              <span className="text-xs">هزینه</span>
             </button>
             <button
               type="button"
@@ -159,20 +170,37 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex items-center justify-center gap-2 py-4 rounded-xl font-semibold transition-all border-2",
+                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all border-2",
                 type === 'income' 
                   ? "bg-success text-white border-success" 
                   : "bg-card text-muted-foreground border-border hover:border-success/50"
               )}
             >
-              <Plus className="w-5 h-5" />
-              درآمد
+              <Plus className="w-4 h-4" />
+              <span className="text-xs">درآمد</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setType('saving');
+                setCategory('');
+                setSubcategory('');
+              }}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all border-2",
+                type === 'saving' 
+                  ? "bg-primary text-white border-primary" 
+                  : "bg-card text-muted-foreground border-border hover:border-primary/50"
+              )}
+            >
+              <PiggyBank className="w-4 h-4" />
+              <span className="text-xs">پس‌انداز</span>
             </button>
           </div>
 
           {/* Amount */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">مبلغ (تومان)</Label>
+            <Label className="text-sm font-medium text-foreground">مبلغ ({currencyInfo.name})</Label>
             <Input
               type="text"
               inputMode="numeric"
@@ -319,7 +347,9 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             onClick={handleSubmit}
             className={cn(
               "w-full h-14 rounded-xl font-bold text-base",
-              type === 'income' 
+              type === 'saving'
+                ? 'bg-primary hover:bg-primary/90'
+                : type === 'income' 
                 ? 'bg-success hover:bg-success/90' 
                 : 'bg-destructive hover:bg-destructive/90'
             )}
@@ -329,6 +359,11 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               <>
                 <RefreshCw className="w-5 h-5 animate-spin ml-2" />
                 در حال ثبت...
+              </>
+            ) : type === 'saving' ? (
+              <>
+                <PiggyBank className="w-5 h-5 ml-2" />
+                ثبت پس‌انداز
               </>
             ) : type === 'income' ? (
               <>

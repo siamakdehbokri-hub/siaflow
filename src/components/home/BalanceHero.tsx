@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/utils/persianDate';
+ import { useCurrency } from '@/hooks/useCurrency';
 
 interface BalanceHeroProps {
   balance: number;
@@ -11,6 +11,7 @@ interface BalanceHeroProps {
 
 export function BalanceHero({ balance, income, expense, savingsRate = 0 }: BalanceHeroProps) {
   const isPositive = balance >= 0;
+  const { formatAmount, currencyInfo } = useCurrency();
   
   return (
     <div className="relative overflow-hidden rounded-2xl bg-card border-2 border-border/40 p-5 animate-fade-in shadow-sm">
@@ -47,10 +48,10 @@ export function BalanceHero({ balance, income, expense, savingsRate = 0 }: Balan
           "text-4xl sm:text-5xl font-bold tracking-tight",
           isPositive ? "text-foreground" : "text-destructive"
         )}>
-          {formatCurrency(Math.abs(balance))}
+          {formatAmount(Math.abs(balance))}
         </p>
         <p className="text-sm text-muted-foreground mt-1 font-medium">
-          {isPositive ? "تومان" : "تومان منفی"}
+          {isPositive ? "" : "منفی"}
         </p>
       </div>
       
@@ -64,7 +65,7 @@ export function BalanceHero({ balance, income, expense, savingsRate = 0 }: Balan
           <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground mb-0.5">درآمد</p>
             <p className="text-sm font-bold text-success truncate">
-              {formatCurrency(income)}
+              {formatAmount(income)}
             </p>
           </div>
         </div>
@@ -77,7 +78,7 @@ export function BalanceHero({ balance, income, expense, savingsRate = 0 }: Balan
           <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground mb-0.5">هزینه</p>
             <p className="text-sm font-bold text-destructive truncate">
-              {formatCurrency(expense)}
+              {formatAmount(expense)}
             </p>
           </div>
         </div>

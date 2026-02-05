@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+ import { useCurrency, currencies, CurrencyCode } from '@/hooks/useCurrency';
 
 interface SettingsProps {
   onOpenCategories?: () => void;
@@ -50,6 +51,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const { theme, setTheme } = useTheme();
+  const { currency, setCurrency, currencyInfo } = useCurrency();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -290,20 +292,61 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           </div>
 
           {/* Currency */}
-          <div className="bg-card rounded-xl border-2 border-border p-4 min-h-[72px]">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <Globe className="w-6 h-6 text-amber-500" strokeWidth={2} />
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <Globe className="w-6 h-6 text-amber-500" strokeWidth={2} />
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="font-semibold text-foreground leading-relaxed">واحد پول</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{currencyInfo.name}</p>
+                </div>
+                <ChevronLeft className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-auto rounded-t-3xl">
+              <SheetHeader className="text-right pb-4">
+                <SheetTitle className="text-xl flex items-center gap-2">
+                  <Globe className="w-6 h-6 text-amber-500" strokeWidth={2} />
+                  انتخاب واحد پول
+                </SheetTitle>
+                <SheetDescription className="leading-relaxed">واحد پول مورد نظر را انتخاب کنید</SheetDescription>
+              </SheetHeader>
+              <div className="space-y-3 pb-8">
+                {[
+                  { value: 'IRT' as CurrencyCode, label: 'تومان', symbol: 'تومان', flag: '🇮🇷' },
+                  { value: 'IRR' as CurrencyCode, label: 'ریال', symbol: 'ریال', flag: '🇮🇷' },
+                  { value: 'USD' as CurrencyCode, label: 'دلار آمریکا', symbol: '$', flag: '🇺🇸' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setCurrency(option.value);
+                      toast.success(`واحد پول به ${option.label} تغییر کرد`);
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-4 p-4 rounded-2xl transition-all border-2 min-h-[72px]",
+                      currency === option.value 
+                        ? "bg-primary/5 border-primary" 
+                        : "bg-muted/30 border-transparent hover:border-border"
+                    )}
+                  >
+                    <div className="text-2xl">{option.flag}</div>
+                    <div className="flex-1 text-right">
+                      <p className="font-semibold text-foreground leading-relaxed">{option.label}</p>
+                      <p className="text-sm text-muted-foreground">{option.symbol}</p>
+                    </div>
+                    {currency === option.value && (
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
-              <div className="flex-1 text-right">
-                <p className="font-semibold text-foreground leading-relaxed">واحد پول</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">تومان</p>
-              </div>
-              <div className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-sm font-medium">
-                پیش‌فرض
-              </div>
-            </div>
-          </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Security Section */}
