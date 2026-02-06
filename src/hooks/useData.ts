@@ -28,7 +28,7 @@ export function useTransactions() {
       const mappedData: Transaction[] = (data || []).map(t => ({
         id: t.id,
         amount: Number(t.amount),
-        type: t.type as 'income' | 'expense',
+        type: t.type as 'income' | 'expense' | 'saving',
         category: t.category,
         subcategory: t.subcategory || undefined,
         description: t.description || '',
@@ -185,8 +185,8 @@ export function useCategories() {
         icon: c.icon,
         color: c.color,
         budget: c.budget ? Number(c.budget) : undefined,
-        spent: 0, // Will be calculated from transactions
-        type: c.budget ? 'expense' : 'income',
+        spent: 0,
+        type: (c.type as 'expense' | 'income' | 'saving') || (c.budget ? 'expense' : 'income'),
         subcategories: (c as any).subcategories || [],
       }));
 
