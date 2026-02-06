@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree } from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree, PiggyBank, Coins, Target } from 'lucide-react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
@@ -57,6 +57,9 @@ const iconOptions = [
   { name: 'Plane', icon: Plane, label: 'سفر' },
   { name: 'Receipt', icon: Receipt, label: 'قبوض' },
   { name: 'MoreHorizontal', icon: MoreHorizontal, label: 'سایر' },
+  { name: 'PiggyBank', icon: PiggyBank, label: 'پس‌انداز' },
+  { name: 'Coins', icon: Coins, label: 'سکه' },
+  { name: 'Target', icon: Target, label: 'هدف' },
 ];
 
 const colorOptions = [
@@ -74,7 +77,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
   Smartphone, Plane, Book, Music, MoreHorizontal,
-  ShoppingCart, GraduationCap, CreditCard, Landmark, Users
+  ShoppingCart, GraduationCap, CreditCard, Landmark, Users,
+  PiggyBank, Coins, Target
 };
 
 interface CategoryManagementProps {
@@ -99,7 +103,7 @@ export function CategoryManagement({
   const [selectedIcon, setSelectedIcon] = useState('Receipt');
   const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
   const [budget, setBudget] = useState('');
-  const [categoryType, setCategoryType] = useState<'expense' | 'income'>('expense');
+  const [categoryType, setCategoryType] = useState<'expense' | 'income' | 'saving'>('expense');
   const [subcategoriesInput, setSubcategoriesInput] = useState('');
 
   const toggleExpanded = (id: string) => {
@@ -133,7 +137,7 @@ export function CategoryManagement({
     setSelectedIcon(category.icon);
     setSelectedColor(category.color);
     setBudget(category.budget?.toString() || '');
-    setCategoryType(category.budget ? 'expense' : 'income');
+    setCategoryType(category.type || (category.budget ? 'expense' : 'income'));
     const subs = category.subcategories || [];
     const subNames = subs.map(s => typeof s === 'string' ? s : s.name);
     setSubcategoriesInput(subNames.join('، '));
@@ -189,8 +193,9 @@ export function CategoryManagement({
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const expenseCategories = categories.filter(c => c.budget || c.type === 'expense');
-  const incomeCategories = categories.filter(c => !c.budget && c.type !== 'expense');
+  const expenseCategories = categories.filter(c => c.type === 'expense' || (!c.type && c.budget));
+  const incomeCategories = categories.filter(c => c.type === 'income' || (!c.type && !c.budget && c.type !== 'saving'));
+  const savingCategories = categories.filter(c => c.type === 'saving');
 
   const renderCategoryItem = (category: Category) => {
     const Icon = iconMap[category.icon] || Receipt;
@@ -409,6 +414,31 @@ export function CategoryManagement({
         </div>
       </div>
 
+      {/* Saving Categories Card */}
+      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
+        <div className="p-3 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+            <h3 className="font-bold text-foreground text-sm">دسته‌بندی پس‌انداز</h3>
+          </div>
+          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground text-xs">
+            {savingCategories.length}
+          </Badge>
+        </div>
+        <div className="p-3 space-y-2">
+          {savingCategories.length === 0 ? (
+            <div className="text-center py-6">
+              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-2 flex items-center justify-center">
+                <PiggyBank className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-sm">هنوز دسته‌بندی پس‌اندازی ندارید</p>
+            </div>
+          ) : (
+            savingCategories.map(renderCategoryItem)
+          )}
+        </div>
+      </div>
+
       {/* Add/Edit Modal - Full Mobile Sheet Style */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-[100vw] w-full sm:max-w-md max-h-[95vh] overflow-hidden p-0 rounded-t-3xl sm:rounded-2xl">
@@ -432,7 +462,7 @@ export function CategoryManagement({
             {/* Type Selection - Mobile Optimized */}
             <div className="space-y-2">
               <Label className="font-bold text-sm">نوع دسته‌بندی</Label>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setCategoryType('expense')}
@@ -456,6 +486,18 @@ export function CategoryManagement({
                   )}
                 >
                   درآمد
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCategoryType('saving')}
+                  className={cn(
+                    "h-12 rounded-xl border-2 transition-all text-center font-bold text-sm",
+                    categoryType === 'saving'
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border active:border-primary/50"
+                  )}
+                >
+                  پس‌انداز
                 </button>
               </div>
             </div>
