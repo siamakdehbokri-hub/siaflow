@@ -27,7 +27,11 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const balance = totalIncome - totalExpense;
+  const totalSaving = transactions
+    .filter(t => t.type === 'saving')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const balance = totalIncome - totalExpense - totalSaving;
   const recentTransactions = transactions.slice(0, 4);
 
   const renderWidget = (widget: DashboardWidget, index: number) => {

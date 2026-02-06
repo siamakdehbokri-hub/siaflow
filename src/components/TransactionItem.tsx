@@ -2,8 +2,9 @@ import { memo } from 'react';
 import { 
   UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
   Gamepad2, Wallet, TrendingUp, RefreshCw,
-  Home, Gift, Book, MoreHorizontal, ArrowUpRight, ArrowDownRight,
-  ShoppingCart, GraduationCap, CreditCard, Landmark, Users, Briefcase
+  Home, Gift, Book, MoreHorizontal, ArrowUpRight, ArrowDownRight, ArrowRight,
+  ShoppingCart, GraduationCap, CreditCard, Landmark, Users, Briefcase,
+  PiggyBank, Coins, Target
 } from 'lucide-react';
 import { Transaction } from '@/types/expense';
 import { formatPersianDateShort } from '@/utils/persianDate';
@@ -42,6 +43,10 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'سلامت': Heart,
   'تفریح': Gamepad2,
   'حقوق': Wallet,
+  // Saving categories
+  'پس‌انداز و سرمایه‌گذاری': PiggyBank,
+  'خرید سرمایه‌ای': Coins,
+  'اهداف مالی': Target,
 };
 
 interface TransactionItemProps {
@@ -52,7 +57,8 @@ interface TransactionItemProps {
 function TransactionItemComponent({ transaction, onClick }: TransactionItemProps) {
   const CategoryIcon = iconMap[transaction.category] || Receipt;
   const isIncome = transaction.type === 'income';
-  const DirectionIcon = isIncome ? ArrowUpRight : ArrowDownRight;
+  const isSaving = transaction.type === 'saving';
+  const DirectionIcon = isSaving ? ArrowRight : isIncome ? ArrowUpRight : ArrowDownRight;
   const { formatAmount } = useCurrency();
 
   return (
@@ -74,19 +80,21 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
       {/* Icon Container - Mobile optimized */}
       <div className={cn(
         "relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-400 group-hover:scale-110",
-        isIncome 
-          ? "bg-gradient-to-br from-success/20 to-success/5" 
-          : "bg-gradient-to-br from-destructive/15 to-destructive/5"
+        isSaving
+          ? "bg-gradient-to-br from-primary/20 to-primary/5"
+          : isIncome 
+            ? "bg-gradient-to-br from-success/20 to-success/5" 
+            : "bg-gradient-to-br from-destructive/15 to-destructive/5"
       )}>
         {/* Inner glow */}
         <div className={cn(
           "absolute inset-0 rounded-xl sm:rounded-2xl opacity-50 blur-md",
-          isIncome ? "bg-success/20" : "bg-destructive/10"
+          isSaving ? "bg-primary/20" : isIncome ? "bg-success/20" : "bg-destructive/10"
         )} />
         
         <CategoryIcon className={cn(
           "relative w-4.5 h-4.5 sm:w-5 sm:h-5",
-          isIncome ? "text-success" : "text-destructive"
+          isSaving ? "text-primary" : isIncome ? "text-success" : "text-destructive"
         )} />
         
         {/* Recurring indicator */}
@@ -122,11 +130,11 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
           <div className="text-left shrink-0">
             <p className={cn(
               "font-bold text-sm sm:text-base tabular-nums flex items-center gap-0.5 sm:gap-1",
-              isIncome ? "text-success" : "text-foreground"
+              isSaving ? "text-primary" : isIncome ? "text-success" : "text-foreground"
             )}>
               <DirectionIcon className={cn(
                 "w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 group-hover:scale-110",
-                isIncome ? "text-success" : "text-destructive"
+                isSaving ? "text-primary" : isIncome ? "text-success" : "text-destructive"
               )} />
               {formatAmount(transaction.amount)}
             </p>
