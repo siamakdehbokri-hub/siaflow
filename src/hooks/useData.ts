@@ -239,7 +239,7 @@ export function useCategories() {
         color: data.color,
         budget: data.budget ? Number(data.budget) : undefined,
         spent: 0,
-        type: data.budget ? 'expense' : 'income',
+        type: (data.type as 'expense' | 'income' | 'saving') || (data.budget ? 'expense' : 'income'),
         subcategories: (data as any).subcategories || [],
       };
 
