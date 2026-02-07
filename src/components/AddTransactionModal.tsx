@@ -12,11 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import { Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
 import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
- import { useCurrency } from '@/hooks/useCurrency';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -110,8 +117,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     { value: '1,000,000', label: '۱ میلیون' },
   ];
 
-  if (!isOpen) return null;
-
   const currentCategories = type === 'expense' 
     ? expenseCategories 
     : type === 'income' 
@@ -119,26 +124,19 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       : savingCategories;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative w-full max-w-lg bg-card rounded-t-2xl shadow-xl animate-slide-up max-h-[90vh] overflow-hidden flex flex-col">
-        
+    <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DrawerContent className="max-h-[90vh] flex flex-col">
         {/* Header - Clean Blue */}
-        <div className="bg-primary text-primary-foreground px-5 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">ثبت تراکنش جدید</h2>
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        <DrawerHeader className="bg-primary text-primary-foreground px-5 py-4 flex items-center justify-between rounded-t-2xl">
+          <DrawerTitle className="text-lg font-bold text-primary-foreground">ثبت تراکنش جدید</DrawerTitle>
+          <DrawerClose asChild>
+            <button
+              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </DrawerClose>
+        </DrawerHeader>
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -219,7 +217,6 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                   type="button"
                   onClick={() => setAmount(qa.value)}
                   className={cn(
-                    // 44px minimum height for iOS compliance
                     "h-11 text-xs font-semibold rounded-xl border-2 transition-all active:scale-95",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     amount === qa.value
@@ -378,7 +375,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             )}
           </Button>
         </div>
-      </div>
-    </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
