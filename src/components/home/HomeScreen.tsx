@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Receipt, PieChart, Landmark, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isInCurrentJalaliMonth, formatCurrency, formatPersianDateFull, isTodayJalali, formatPersianDateShort } from '@/utils/persianDate';
+import { isInCurrentJalaliMonth, formatPersianDateFull, isTodayJalali, formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 import { getTodayLocalISO } from '@/utils/dateUtils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface HomeScreenProps {
   transactions: Transaction[];
@@ -14,17 +15,6 @@ interface HomeScreenProps {
   onOpenDebts?: () => void;
 }
 
-// Format currency with compact notation for mobile
-function formatCompactCurrency(amount: number): string {
-  if (amount >= 1000000000) {
-    return `${(amount / 1000000000).toFixed(1)} میلیارد`;
-  }
-  if (amount >= 1000000) {
-    return `${(amount / 1000000).toFixed(1)} میلیون`;
-  }
-  return formatCurrency(amount);
-}
-
 export function HomeScreen({
   transactions,
   categories,
@@ -33,6 +23,7 @@ export function HomeScreen({
   onViewAllTransactions,
   onOpenDebts,
 }: HomeScreenProps) {
+  const { formatAmountCompact, currencyInfo } = useCurrency();
   const financialData = useMemo(() => {
     const monthlyTransactions = transactions.filter(t => isInCurrentJalaliMonth(t.date));
     
@@ -86,9 +77,9 @@ export function HomeScreen({
             </p>
             <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-4xl font-bold tabular-nums tracking-tight">
-                {formatCompactCurrency(financialData.todayExpense)}
+                {formatAmountCompact(financialData.todayExpense)}
               </span>
-              <span className="text-base text-muted-foreground">تومان</span>
+              <span className="text-base text-muted-foreground">{currencyInfo.symbol}</span>
             </div>
           </div>
           
@@ -135,7 +126,7 @@ export function HomeScreen({
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد ماه</p>
           </div>
           <p className="text-xl font-bold text-success tabular-nums truncate">
-            {formatCompactCurrency(financialData.income)}
+            {formatAmountCompact(financialData.income)}
           </p>
         </div>
         
@@ -147,7 +138,7 @@ export function HomeScreen({
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه ماه</p>
           </div>
           <p className="text-xl font-bold text-destructive tabular-nums truncate">
-            {formatCompactCurrency(financialData.expense)}
+            {formatAmountCompact(financialData.expense)}
           </p>
         </div>
       </div>
@@ -205,7 +196,7 @@ export function HomeScreen({
                       "text-sm font-bold tabular-nums",
                       isIncome ? "text-success" : "text-destructive"
                     )}>
-                      {isIncome ? '+' : '-'}{formatCompactCurrency(transaction.amount)}
+                      {isIncome ? '+' : '-'}{formatAmountCompact(transaction.amount)}
                     </p>
                   </div>
                 </div>

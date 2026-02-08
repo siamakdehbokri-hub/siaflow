@@ -9,14 +9,7 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
-  const { formatAmount, currencyInfo, currency } = useCurrency();
- 
-  const formatCurrency = (amount: number) => {
-    if (currency === 'USD') {
-      return new Intl.NumberFormat('en-US').format(Math.abs(amount));
-    }
-    return new Intl.NumberFormat('fa-IR').format(Math.abs(amount));
-  };
+  const { formatAmount, formatAmountCompact, currencyInfo, currency } = useCurrency();
 
   const isPositive = balance >= 0;
   const savingsRate = income > 0 ? Math.round(((income - expense) / income) * 100) : 0;
@@ -75,7 +68,7 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
           <div className="mb-6 text-center">
             <div className="inline-flex flex-col items-center">
               <p className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-2xl animate-bounce-in" style={{ animationDelay: '0.1s' }}>
-                {formatCurrency(balance)}
+                {formatAmountCompact(Math.abs(balance))}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-white/60 text-sm font-medium">{currencyInfo.symbol}</span>
@@ -110,7 +103,7 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-white/60 text-[10px] font-medium">درآمد</p>
-                  <p className="text-white font-bold text-sm sm:text-base truncate">{formatCurrency(income)}</p>
+                  <p className="text-white font-bold text-sm sm:text-base truncate">{formatAmountCompact(income)}</p>
                 </div>
               </div>
             </div>
@@ -135,7 +128,7 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-white/60 text-[10px] font-medium">هزینه</p>
-                  <p className="text-white font-bold text-sm sm:text-base truncate">{formatCurrency(expense)}</p>
+                  <p className="text-white font-bold text-sm sm:text-base truncate">{formatAmountCompact(expense)}</p>
                 </div>
               </div>
             </div>
