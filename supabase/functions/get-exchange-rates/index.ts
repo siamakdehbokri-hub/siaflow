@@ -6,63 +6,55 @@ const corsHeaders = {
 };
 
 // Cache rates for 30 minutes
-let cachedRates: { usd_to_irr: number; usd_to_irt: number; timestamp: number } | null = null;
+let cachedRates: { usd_to_irr: number; usd_to_irt: number; timestamp: number; source: string } | null = null;
 const CACHE_DURATION_MS = 30 * 60 * 1000;
 
-async function fetchRatesFromTgju(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
-  // Try tgju.org (Iranian financial data)
-  const res = await fetch("https://api.tgju.org/v1/data/sana/json", {
+// Source 1: exchangerate-api.com (free, reliable, no key needed)
+async function fetchFromExchangeRateApi(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
+  const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD", {
     headers: { "User-Agent": "Mozilla/5.0" },
   });
-  
-  if (res.ok) {
-    const data = await res.json();
-    // tgju returns rates in Rial
-    if (data?.spidr_summary?.items?.["price_dollar_rl"]?.p) {
-      const rialRate = parseFloat(data.spidr_summary.items["price_dollar_rl"].p.replace(/,/g, ""));
-      if (!isNaN(rialRate) && rialRate > 0) {
-        return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
-      }
-    }
-  }
-  
-  throw new Error("tgju failed");
-}
-
-async function fetchRatesFromOpenER(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
-  // Fallback: open.er-api.com (free, no key)
-  const res = await fetch("https://open.er-api.com/v6/latest/USD");
-  if (res.ok) {
-    const data = await res.json();
-    if (data?.rates?.IRR) {
-      const rialRate = data.rates.IRR;
+  if (!res.ok) throw new Error(`exchangerate-api status ${res.status}`);
+  const data = await res.json();
+  if (data?.rates?.IRR) {
+    const rialRate = data.rates.IRR;
+    if (rialRate > 100000) {
       return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
     }
   }
-  throw new Error("open.er-api failed");
+  throw new Error("exchangerate-api: no IRR rate");
 }
 
-async function fetchRatesFromBonbastScrape(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
-  // Try fetching bonbast page and extracting USD rate
-  const res = await fetch("https://www.bonbast.com/", {
-    headers: { 
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      "Accept": "text/html",
-    },
+// Source 2: open.er-api.com (free, no key)
+async function fetchFromOpenER(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
+  const res = await fetch("https://open.er-api.com/v6/latest/USD", {
+    headers: { "User-Agent": "Mozilla/5.0" },
   });
-  
-  if (res.ok) {
-    const html = await res.text();
-    // Look for USD sell rate pattern in the HTML
-    const match = html.match(/USD.*?(\d{2,3},?\d{3})/s);
-    if (match) {
-      const tomanRate = parseInt(match[1].replace(/,/g, ""));
-      if (!isNaN(tomanRate) && tomanRate > 10000) {
-        return { usd_to_irr: tomanRate * 10, usd_to_irt: tomanRate };
-      }
+  if (!res.ok) throw new Error(`open.er-api status ${res.status}`);
+  const data = await res.json();
+  if (data?.rates?.IRR) {
+    const rialRate = data.rates.IRR;
+    if (rialRate > 100000) {
+      return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
     }
   }
-  throw new Error("bonbast scrape failed");
+  throw new Error("open.er-api: no IRR rate");
+}
+
+// Source 3: fawazahmed0 currency-api (free, GitHub-hosted, reliable)
+async function fetchFromCurrencyApi(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
+  const res = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json", {
+    headers: { "User-Agent": "Mozilla/5.0" },
+  });
+  if (!res.ok) throw new Error(`currency-api status ${res.status}`);
+  const data = await res.json();
+  if (data?.usd?.irr) {
+    const rialRate = data.usd.irr;
+    if (rialRate > 100000) {
+      return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
+    }
+  }
+  throw new Error("currency-api: no IRR rate");
 }
 
 serve(async (req) => {
@@ -76,6 +68,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         usd_to_irr: cachedRates.usd_to_irr,
         usd_to_irt: cachedRates.usd_to_irt,
+        source: cachedRates.source,
         cached: true,
         updated_at: new Date(cachedRates.timestamp).toISOString(),
       }), {
@@ -86,33 +79,32 @@ serve(async (req) => {
     let rates: { usd_to_irr: number; usd_to_irt: number } | null = null;
     let source = "";
 
-    // Try multiple sources in order
-    try {
-      rates = await fetchRatesFromTgju();
-      source = "tgju";
-    } catch {
-      console.log("tgju failed, trying bonbast scrape...");
+    // Try multiple sources in order of reliability
+    const sources = [
+      { fn: fetchFromExchangeRateApi, name: "exchangerate-api" },
+      { fn: fetchFromOpenER, name: "open.er-api" },
+      { fn: fetchFromCurrencyApi, name: "currency-api" },
+    ];
+
+    for (const src of sources) {
       try {
-        rates = await fetchRatesFromBonbastScrape();
-        source = "bonbast";
-      } catch {
-        console.log("bonbast failed, trying open.er-api...");
-        try {
-          rates = await fetchRatesFromOpenER();
-          source = "open.er-api";
-        } catch {
-          console.log("all sources failed");
-        }
+        rates = await src.fn();
+        source = src.name;
+        console.log(`✅ Got rates from ${src.name}: ${rates.usd_to_irt} IRT`);
+        break;
+      } catch (err) {
+        console.log(`❌ ${src.name} failed: ${err.message}`);
       }
     }
 
     if (!rates) {
-      // Fallback hardcoded approximate rate
-      rates = { usd_to_irr: 1620000, usd_to_irt: 162000 };
+      // Last resort fallback
+      rates = { usd_to_irr: 850000, usd_to_irt: 85000 };
       source = "fallback";
+      console.log("⚠️ All sources failed, using fallback rate");
     }
 
-    cachedRates = { ...rates, timestamp: Date.now() };
+    cachedRates = { ...rates, timestamp: Date.now(), source };
 
     return new Response(JSON.stringify({
       usd_to_irr: rates.usd_to_irr,
