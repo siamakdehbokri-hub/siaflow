@@ -27,15 +27,16 @@ global.IntersectionObserver = class IntersectionObserver {
   readonly root: Element | null = null;
   readonly rootMargin: string = '';
   readonly thresholds: ReadonlyArray<number> = [];
+  readonly scrollMargin: number = 0;
 
-  constructor() {}
+  constructor(_callback?: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
   observe() {}
   unobserve() {}
   disconnect() {}
   takeRecords(): IntersectionObserverEntry[] {
     return [];
   }
-};
+} as unknown as typeof IntersectionObserver;
 
 // Mock scrollTo
 Element.prototype.scrollTo = () => {};
