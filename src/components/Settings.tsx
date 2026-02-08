@@ -51,7 +51,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const { theme, setTheme } = useTheme();
-  const { currency, setCurrency, currencyInfo } = useCurrency();
+  const { currency, setCurrency, currencyInfo, exchangeRates, ratesLoading, refreshRates } = useCurrency();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -313,7 +313,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                 </SheetTitle>
                 <SheetDescription className="leading-relaxed">واحد پول مورد نظر را انتخاب کنید</SheetDescription>
               </SheetHeader>
-              <div className="space-y-3 pb-8">
+              <div className="space-y-3 pb-4">
                 {[
                   { value: 'IRT' as CurrencyCode, label: 'تومان', symbol: 'تومان', flag: '🇮🇷' },
                   { value: 'IRR' as CurrencyCode, label: 'ریال', symbol: 'ریال', flag: '🇮🇷' },
@@ -344,6 +344,45 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                     )}
                   </button>
                 ))}
+              </div>
+
+              {/* Exchange Rate Info */}
+              <div className="border-t border-border pt-4 pb-8">
+                <div className="flex items-center justify-between mb-3">
+                  <button
+                    onClick={() => refreshRates()}
+                    disabled={ratesLoading}
+                    className="text-xs text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {ratesLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                    بروزرسانی نرخ
+                  </button>
+                  <p className="text-xs font-medium text-muted-foreground">💱 نرخ لحظه‌ای ارز</p>
+                </div>
+                {exchangeRates ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                      <span className="text-sm font-bold text-foreground">
+                        {new Intl.NumberFormat('fa-IR').format(exchangeRates.usd_to_irt)} تومان
+                      </span>
+                      <span className="text-sm text-muted-foreground">🇺🇸 دلار</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                      <span className="text-sm font-bold text-foreground">
+                        {new Intl.NumberFormat('fa-IR').format(exchangeRates.usd_to_irr)} ریال
+                      </span>
+                      <span className="text-sm text-muted-foreground">🇺🇸 دلار</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground text-center mt-2">
+                      آخرین بروزرسانی: {new Date(exchangeRates.updated_at).toLocaleTimeString('fa-IR')}
+                      {exchangeRates.source ? ` • منبع: ${exchangeRates.source}` : ''}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center">
+                    {ratesLoading ? 'در حال دریافت نرخ...' : 'نرخ ارز در دسترس نیست'}
+                  </p>
+                )}
               </div>
             </SheetContent>
           </Sheet>
