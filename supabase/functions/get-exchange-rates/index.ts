@@ -9,7 +9,37 @@ const corsHeaders = {
 let cachedRates: { usd_to_irr: number; usd_to_irt: number; timestamp: number; source: string } | null = null;
 const CACHE_DURATION_MS = 30 * 60 * 1000;
 
-// Source 1: exchangerate-api.com (free, reliable, no key needed)
+// Source 1: fawazahmed0 currency-api via CDN (free, reliable, updates daily)
+async function fetchFromCurrencyApi(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
+  // Try latest first, then fallback URLs
+  const urls = [
+    "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+    "https://latest.currency-api.pages.dev/v1/currencies/usd.json",
+  ];
+  
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      console.log("currency-api keys:", Object.keys(data));
+      if (data?.usd?.irr) {
+        const rialRate = data.usd.irr;
+        console.log(`currency-api irr rate: ${rialRate}`);
+        if (rialRate > 100000) {
+          return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
+        }
+      }
+    } catch (e) {
+      console.log(`currency-api url ${url} error: ${e.message}`);
+    }
+  }
+  throw new Error("currency-api: no IRR rate found");
+}
+
+// Source 2: exchangerate-api.com (global official rates)
 async function fetchFromExchangeRateApi(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
   const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD", {
     headers: { "User-Agent": "Mozilla/5.0" },
@@ -25,7 +55,7 @@ async function fetchFromExchangeRateApi(): Promise<{ usd_to_irr: number; usd_to_
   throw new Error("exchangerate-api: no IRR rate");
 }
 
-// Source 2: open.er-api.com (free, no key)
+// Source 3: open.er-api.com (free, no key)
 async function fetchFromOpenER(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
   const res = await fetch("https://open.er-api.com/v6/latest/USD", {
     headers: { "User-Agent": "Mozilla/5.0" },
@@ -39,22 +69,6 @@ async function fetchFromOpenER(): Promise<{ usd_to_irr: number; usd_to_irt: numb
     }
   }
   throw new Error("open.er-api: no IRR rate");
-}
-
-// Source 3: fawazahmed0 currency-api (free, GitHub-hosted, reliable)
-async function fetchFromCurrencyApi(): Promise<{ usd_to_irr: number; usd_to_irt: number }> {
-  const res = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json", {
-    headers: { "User-Agent": "Mozilla/5.0" },
-  });
-  if (!res.ok) throw new Error(`currency-api status ${res.status}`);
-  const data = await res.json();
-  if (data?.usd?.irr) {
-    const rialRate = data.usd.irr;
-    if (rialRate > 100000) {
-      return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
-    }
-  }
-  throw new Error("currency-api: no IRR rate");
 }
 
 serve(async (req) => {
@@ -79,18 +93,18 @@ serve(async (req) => {
     let rates: { usd_to_irr: number; usd_to_irt: number } | null = null;
     let source = "";
 
-    // Try multiple sources in order of reliability
+    // Try sources in order - currency-api tends to have closer-to-market rates
     const sources = [
+      { fn: fetchFromCurrencyApi, name: "currency-api" },
       { fn: fetchFromExchangeRateApi, name: "exchangerate-api" },
       { fn: fetchFromOpenER, name: "open.er-api" },
-      { fn: fetchFromCurrencyApi, name: "currency-api" },
     ];
 
     for (const src of sources) {
       try {
         rates = await src.fn();
         source = src.name;
-        console.log(`✅ Got rates from ${src.name}: ${rates.usd_to_irt} IRT`);
+        console.log(`✅ Got rates from ${src.name}: ${rates.usd_to_irt} IRT (${rates.usd_to_irr} IRR)`);
         break;
       } catch (err) {
         console.log(`❌ ${src.name} failed: ${err.message}`);
@@ -98,8 +112,7 @@ serve(async (req) => {
     }
 
     if (!rates) {
-      // Last resort fallback
-      rates = { usd_to_irr: 850000, usd_to_irt: 85000 };
+      rates = { usd_to_irr: 1590000, usd_to_irt: 159000 };
       source = "fallback";
       console.log("⚠️ All sources failed, using fallback rate");
     }
