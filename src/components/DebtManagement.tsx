@@ -131,8 +131,8 @@ export function DebtManagement({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-rose-500/30">
-            <Landmark className="w-6 h-6 text-white" strokeWidth={2} />
+          <div className="p-3 rounded-2xl bg-destructive shadow-lg shadow-destructive/30">
+            <Landmark className="w-6 h-6 text-destructive-foreground" strokeWidth={2} />
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">مدیریت بدهی‌ها</h2>
@@ -142,7 +142,7 @@ export function DebtManagement({
         <Button 
           onClick={() => setIsAddModalOpen(true)} 
           size="sm" 
-          className="rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 shadow-lg shadow-rose-500/20"
+          className="rounded-xl bg-destructive hover:bg-destructive/90 shadow-lg shadow-destructive/20"
         >
           <Plus className="w-4 h-4 ml-2" />
           بدهی جدید
@@ -151,36 +151,36 @@ export function DebtManagement({
 
       {/* Summary Card - Enhanced */}
       {debts.length > 0 && (
-        <Card variant="glass" className="border-rose-500/20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 via-transparent to-pink-500/5 pointer-events-none" />
+        <Card className="bg-card border-2 border-destructive/20 rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-destructive/3 pointer-events-none" />
           <CardContent className="p-5 relative">
             <div className="flex items-center gap-4 mb-5">
-              <div className="p-3 rounded-2xl bg-rose-500/10">
-                <TrendingDown className="w-6 h-6 text-rose-500" />
+              <div className="p-3 rounded-2xl bg-destructive/10">
+                <TrendingDown className="w-6 h-6 text-destructive" />
               </div>
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground mb-1">مجموع بدهی باقی‌مانده</p>
-                <p className="text-3xl font-black text-rose-500">{formatCurrency(stats.totalRemaining)}</p>
+                <p className="text-3xl font-black text-destructive">{formatCurrency(stats.totalRemaining)}</p>
               </div>
             </div>
             
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="p-3 rounded-xl bg-rose-500/5 border border-rose-500/10 text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">کل بدهی</p>
-                <p className="text-base font-bold text-rose-500">{formatCurrency(stats.totalDebt)}</p>
+              <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/10 text-center">
+                <p className="text-xs text-muted-foreground mb-1">کل بدهی</p>
+                <p className="text-base font-bold text-destructive">{formatCurrency(stats.totalDebt)}</p>
               </div>
-              <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">پرداخت شده</p>
-                <p className="text-base font-bold text-emerald-500">{formatCurrency(stats.totalPaid)}</p>
+              <div className="p-3 rounded-xl bg-success/5 border border-success/10 text-center">
+                <p className="text-xs text-muted-foreground mb-1">پرداخت شده</p>
+                <p className="text-base font-bold text-success">{formatCurrency(stats.totalPaid)}</p>
               </div>
               <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">پیشرفت</p>
+                <p className="text-xs text-muted-foreground mb-1">پیشرفت</p>
                 <p className="text-base font-bold text-primary">{Math.round(stats.progress)}%</p>
               </div>
             </div>
             
             <div className="space-y-2">
-              <Progress value={stats.progress} className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-green-400" />
+              <Progress value={stats.progress} className="h-3 [&>div]:bg-success" />
               <p className="text-xs text-muted-foreground text-center">
                 {stats.progress >= 100 
                   ? '🎉 تبریک! تمام بدهی‌ها تسویه شده‌اند' 
@@ -194,10 +194,10 @@ export function DebtManagement({
       {/* Debts List */}
       <div className="space-y-3">
         {debts.length === 0 ? (
-          <Card variant="glass">
+          <Card className="bg-card border-2 border-border rounded-2xl">
             <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-rose-500/10 flex items-center justify-center">
-                <Landmark className="w-8 h-8 text-rose-500/50" strokeWidth={2} />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-destructive/10 flex items-center justify-center">
+                <Landmark className="w-8 h-8 text-destructive/50" strokeWidth={2} />
               </div>
               <p className="text-muted-foreground mb-2">هنوز بدهی‌ای ثبت نکرده‌اید</p>
               <p className="text-xs text-muted-foreground/70 mb-4">
@@ -219,25 +219,24 @@ export function DebtManagement({
             return (
               <Card 
                 key={debt.id} 
-                variant="glass" 
                 className={cn(
-                  "overflow-hidden transition-all hover:shadow-lg",
-                  isComplete && "border-emerald-500/30 bg-emerald-500/5",
-                  isOverdue && "border-rose-500/30 bg-rose-500/5"
+                  "bg-card border-2 border-border rounded-2xl overflow-hidden transition-all",
+                  isComplete && "border-success/30 bg-success/5",
+                  isOverdue && "border-destructive/30 bg-destructive/5"
                 )}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3 mb-3">
                     <div className={cn(
                       "p-2.5 rounded-xl shrink-0",
-                      isComplete ? "bg-emerald-500/10" : isOverdue ? "bg-rose-500/10" : "bg-rose-500/10"
+                      isComplete ? "bg-success/10" : "bg-destructive/10"
                     )}>
                       {isComplete ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        <CheckCircle2 className="w-5 h-5 text-success" />
                       ) : isOverdue ? (
-                        <AlertCircle className="w-5 h-5 text-rose-500" />
+                        <AlertCircle className="w-5 h-5 text-destructive" />
                       ) : (
-                        <Landmark className="w-5 h-5 text-rose-500" strokeWidth={2} />
+                        <Landmark className="w-5 h-5 text-destructive" strokeWidth={2} />
                       )}
                     </div>
 
@@ -245,12 +244,12 @@ export function DebtManagement({
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-bold text-foreground truncate">{debt.name}</h3>
                         {isComplete && (
-                          <Badge className="bg-emerald-500 text-white text-[10px]">
+                          <Badge className="bg-success text-success-foreground text-xs">
                             ✓ تسویه شد
                           </Badge>
                         )}
                         {isOverdue && (
-                          <Badge variant="destructive" className="text-[10px]">
+                          <Badge variant="destructive" className="text-xs">
                             سررسید گذشته
                           </Badge>
                         )}
@@ -277,7 +276,7 @@ export function DebtManagement({
                       <div className="flex items-baseline gap-2 mb-2">
                         <span className={cn(
                           "text-lg font-bold",
-                          isComplete ? "text-emerald-500" : "text-rose-500"
+                          isComplete ? "text-success" : "text-destructive"
                         )}>
                           {formatCurrency(debt.paidAmount)}
                         </span>
@@ -288,9 +287,9 @@ export function DebtManagement({
 
                       <Progress 
                         value={Math.min(progress, 100)} 
-                        className={cn(
+                         className={cn(
                           "h-2",
-                          isComplete && "[&>div]:bg-emerald-500"
+                          isComplete && "[&>div]:bg-success"
                         )}
                       />
                       
@@ -308,7 +307,7 @@ export function DebtManagement({
                     {!isComplete && (
                       <Button
                         size="sm"
-                        className="flex-1 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white"
+                        className="flex-1 h-10 rounded-xl bg-success hover:bg-success/90 text-success-foreground"
                         onClick={() => setPaymentModal(debt.id)}
                       >
                         <Banknote className="w-4 h-4 ml-1" strokeWidth={2} />
@@ -318,7 +317,7 @@ export function DebtManagement({
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 rounded-xl"
+                      className="h-10 rounded-xl"
                       onClick={() => openEditModal(debt)}
                     >
                       <Pencil className="w-4 h-4" strokeWidth={2} />
@@ -326,7 +325,7 @@ export function DebtManagement({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      className="h-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => setDeleteId(debt.id)}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -350,7 +349,7 @@ export function DebtManagement({
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Landmark className="w-5 h-5 text-rose-500" strokeWidth={2} />
+              <Landmark className="w-5 h-5 text-destructive" strokeWidth={2} />
               {editingDebt ? 'ویرایش بدهی' : 'ثبت بدهی جدید'}
             </DialogTitle>
           </DialogHeader>
@@ -436,7 +435,7 @@ export function DebtManagement({
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Banknote className="w-5 h-5 text-emerald-500" strokeWidth={2} />
+              <Banknote className="w-5 h-5 text-success" strokeWidth={2} />
               ثبت پرداخت
             </DialogTitle>
           </DialogHeader>
@@ -458,7 +457,7 @@ export function DebtManagement({
             <Button 
               type="submit" 
               size="lg" 
-              className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-600"
+              className="w-full rounded-xl bg-success hover:bg-success/90 text-success-foreground"
             >
               ثبت پرداخت
             </Button>

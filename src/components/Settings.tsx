@@ -163,7 +163,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <div className="px-4 pb-4">
             <Button
               variant="default"
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold"
+              className="w-full h-12 rounded-xl bg-warning hover:bg-warning/90 text-warning-foreground font-semibold"
               onClick={() => navigate('/admin')}
             >
               <ShieldCheck className="w-5 h-5 ml-2" />
@@ -183,8 +183,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <Sheet>
             <SheetTrigger asChild>
               <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                  <ThemeIcon className="w-6 h-6 text-purple-500" strokeWidth={2} />
+                <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
+                  <ThemeIcon className="w-6 h-6 text-accent-foreground" strokeWidth={2} />
                 </div>
                 <div className="flex-1 text-right">
                   <p className="font-semibold text-foreground leading-relaxed">تم برنامه</p>
@@ -196,16 +196,16 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             <SheetContent side="bottom" className="h-auto rounded-t-3xl">
               <SheetHeader className="text-right pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
-                  <Palette className="w-6 h-6 text-purple-500" strokeWidth={2} />
+                  <Palette className="w-6 h-6 text-primary" strokeWidth={2} />
                   انتخاب تم
                 </SheetTitle>
                 <SheetDescription className="leading-relaxed">تم مورد نظر خود را انتخاب کنید</SheetDescription>
               </SheetHeader>
               <div className="space-y-3 pb-8">
                 {[
-                  { value: 'light', label: 'حالت روشن', icon: Sun, bg: 'bg-amber-100', iconColor: 'text-amber-600' },
-                  { value: 'dark', label: 'حالت تاریک', icon: Moon, bg: 'bg-slate-700', iconColor: 'text-slate-200' },
-                  { value: 'system', label: 'سیستم', icon: Monitor, bg: 'bg-gradient-to-br from-amber-100 to-slate-700', iconColor: 'text-foreground' },
+                  { value: 'light', label: 'حالت روشن', icon: Sun, bg: 'bg-warning/20', iconColor: 'text-warning' },
+                  { value: 'dark', label: 'حالت تاریک', icon: Moon, bg: 'bg-muted', iconColor: 'text-foreground' },
+                  { value: 'system', label: 'سیستم', icon: Monitor, bg: 'bg-accent', iconColor: 'text-accent-foreground' },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -245,8 +245,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             onClick={() => onOpenCategories?.()}
             className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
           >
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-              <Layers className="w-6 h-6 text-cyan-500" strokeWidth={2} />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Layers className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <div className="flex-1 text-right">
               <p className="font-semibold text-foreground leading-relaxed">دسته‌بندی‌ها</p>
@@ -260,8 +260,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             onClick={() => toast.info('این قابلیت به زودی فعال خواهد شد')}
             className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
           >
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <Download className="w-6 h-6 text-emerald-500" strokeWidth={2} />
+            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+              <Download className="w-6 h-6 text-success" strokeWidth={2} />
             </div>
             <div className="flex-1 text-right">
               <p className="font-semibold text-foreground leading-relaxed">پشتیبان‌گیری و خروجی</p>
@@ -278,8 +278,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           {/* Calendar & Timezone */}
           <div className="bg-card rounded-xl border-2 border-border p-4 min-h-[72px]">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-orange-500" strokeWidth={2} />
+              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-warning" strokeWidth={2} />
               </div>
               <div className="flex-1 text-right">
                 <p className="font-semibold text-foreground leading-relaxed">تقویم</p>
@@ -295,8 +295,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <Sheet>
             <SheetTrigger asChild>
               <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]">
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                  <Globe className="w-6 h-6 text-amber-500" strokeWidth={2} />
+                <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <Globe className="w-6 h-6 text-warning" strokeWidth={2} />
                 </div>
                 <div className="flex-1 text-right">
                   <p className="font-semibold text-foreground leading-relaxed">واحد پول</p>
@@ -308,7 +308,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             <SheetContent side="bottom" className="h-auto rounded-t-3xl">
               <SheetHeader className="text-right pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
-                  <Globe className="w-6 h-6 text-amber-500" strokeWidth={2} />
+                  <Globe className="w-6 h-6 text-warning" strokeWidth={2} />
                   انتخاب واحد پول
                 </SheetTitle>
                 <SheetDescription className="leading-relaxed">واحد پول مورد نظر را انتخاب کنید</SheetDescription>
@@ -396,8 +396,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             onClick={() => setCurrentView('security')}
             className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
           >
-            <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-              <Lock className="w-6 h-6 text-red-500" strokeWidth={2} />
+            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <Lock className="w-6 h-6 text-destructive" strokeWidth={2} />
             </div>
             <div className="flex-1 text-right">
               <p className="font-semibold text-foreground leading-relaxed">امنیت</p>
@@ -415,8 +415,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             onClick={() => setCurrentView('help')}
             className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
           >
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-              <LifeBuoy className="w-6 h-6 text-indigo-500" strokeWidth={2} />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <LifeBuoy className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <div className="flex-1 text-right">
               <p className="font-semibold text-foreground leading-relaxed">راهنما</p>
