@@ -90,14 +90,14 @@ export function BudgetStatusCard({
 
   const getStatusColor = (percentage: number, isOver: boolean) => {
     if (isOver) return 'bg-destructive';
-    if (percentage >= 80) return 'bg-amber-500';
+    if (percentage >= 80) return 'bg-warning';
     if (percentage >= 50) return 'bg-primary';
     return 'bg-success';
   };
 
   const getTextColor = (percentage: number, isOver: boolean) => {
     if (isOver) return 'text-destructive';
-    if (percentage >= 80) return 'text-amber-500';
+    if (percentage >= 80) return 'text-warning';
     return 'text-success';
   };
 
@@ -118,7 +118,7 @@ export function BudgetStatusCard({
                 </span>
               )}
               {nearLimitCount > 0 && (
-                <span className="flex items-center gap-1 text-xs text-amber-500">
+                <span className="flex items-center gap-1 text-xs text-warning">
                   <Calendar className="w-3 h-3" />
                   {nearLimitCount} نزدیک سقف
                 </span>

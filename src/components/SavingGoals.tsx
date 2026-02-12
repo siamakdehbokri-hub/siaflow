@@ -136,7 +136,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl gradient-primary shadow-glow-sm">
+          <div className="p-3 rounded-2xl bg-primary shadow-lg shadow-primary/20">
             <PiggyBank className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
@@ -152,7 +152,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
 
       {/* Summary Card - Enhanced */}
       {goals.length > 0 && (
-        <Card variant="glass-glow" className="overflow-hidden">
+        <Card className="bg-card border-2 border-primary/20 rounded-2xl overflow-hidden">
           <CardContent className="p-5">
             <div className="flex items-center gap-4 mb-4">
               <div className="p-3 rounded-2xl bg-primary/10">
@@ -191,7 +191,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
       {/* Goals List */}
       <div className="grid gap-4">
         {goals.length === 0 ? (
-          <Card variant="glass">
+          <Card className="bg-card border-2 border-border rounded-2xl">
             <CardContent className="p-8 text-center">
               <PiggyBank className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground">هنوز هدفی تعریف نکرده‌اید</p>
@@ -215,9 +215,8 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
             return (
               <Card 
                 key={goal.id} 
-                variant="glass" 
                 className={cn(
-                  "overflow-hidden transition-all hover:shadow-lg",
+                  "bg-card border-2 border-border rounded-2xl overflow-hidden transition-all",
                   isComplete && "border-success/30 bg-success/5"
                 )}
               >
@@ -239,7 +238,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-bold text-foreground truncate">{goal.name}</h3>
                         {isComplete && (
-                          <Badge className="bg-success text-success-foreground text-[10px]">
+                          <Badge className="bg-success text-success-foreground text-xs">
                             🎉 تکمیل شد
                           </Badge>
                         )}
@@ -276,7 +275,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-9 rounded-xl border-success/30 text-success hover:bg-success/10 hover:text-success"
+                      className="flex-1 h-10 rounded-xl border-success/30 text-success hover:bg-success/10 hover:text-success"
                       onClick={() => setTransactionModal({ goalId: goal.id, type: 'deposit' })}
                     >
                       <ArrowUpCircle className="w-4 h-4 ml-1" />
@@ -285,7 +284,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
                     <Button
                       size="sm"
                       variant="outline"
-                      className="flex-1 h-9 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="flex-1 h-10 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => setTransactionModal({ goalId: goal.id, type: 'withdraw' })}
                       disabled={goal.currentAmount === 0}
                     >
@@ -295,7 +294,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => setDeleteId(goal.id)}
                     >
                       <Trash2 className="w-4 h-4" />
