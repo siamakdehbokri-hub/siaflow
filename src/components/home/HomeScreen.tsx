@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Receipt, PieChart, Landmark, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Receipt, PieChart, Landmark, PiggyBank, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { isInCurrentJalaliMonth, formatPersianDateFull, isTodayJalali, formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,8 @@ interface HomeScreenProps {
   onAddTransaction: (type?: string) => void;
   onViewAllTransactions: () => void;
   onOpenDebts?: () => void;
+  showAutoSavings?: boolean;
+  onOpenAutoSavings?: () => void;
 }
 
 export function HomeScreen({
@@ -22,6 +24,8 @@ export function HomeScreen({
   onAddTransaction,
   onViewAllTransactions,
   onOpenDebts,
+  showAutoSavings,
+  onOpenAutoSavings,
 }: HomeScreenProps) {
   const { formatAmountCompact, currencyInfo } = useCurrency();
   const financialData = useMemo(() => {
@@ -142,6 +146,23 @@ export function HomeScreen({
           </p>
         </div>
       </div>
+
+      {/* Auto-Savings Suggestion Banner */}
+      {showAutoSavings && onOpenAutoSavings && (
+        <button
+          onClick={onOpenAutoSavings}
+          className="w-full flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-2xl p-4 active:opacity-80 transition-opacity text-right"
+        >
+          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <PiggyBank className="w-6 h-6 text-primary" strokeWidth={2} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">پیشنهاد پس‌انداز هوشمند</p>
+            <p className="text-xs text-muted-foreground mt-0.5">مانده این ماه قابل پس‌انداز است</p>
+          </div>
+          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={2} />
+        </button>
+      )}
 
       {/* Recent Transactions */}
       <div className="space-y-3">

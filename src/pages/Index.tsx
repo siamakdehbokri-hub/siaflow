@@ -12,9 +12,11 @@ import { EditTransactionModal } from '@/components/EditTransactionModal';
 import { SavingGoals } from '@/components/SavingGoals';
 import { DebtManagement } from '@/components/DebtManagement';
 import { TransferManagement } from '@/components/TransferManagement';
+import { AutoSavingsSheet } from '@/components/home/AutoSavingsSheet';
 import { useTransactions, useCategories } from '@/hooks/useData';
 import { useSavingGoals } from '@/hooks/useSavingGoals';
 import { useDebts } from '@/hooks/useDebts';
+import { useAutoSavings } from '@/hooks/useAutoSavings';
 import { useAuth } from '@/hooks/useAuth';
 import { useReminders } from '@/hooks/useReminders';
 import { useDebtReminders } from '@/hooks/useDebtReminders';
@@ -41,7 +43,8 @@ const Index = () => {
   const { debts, loading: debtsLoading, addDebt, updateDebt, deleteDebt, addPayment, stats: debtStats } = useDebts();
   const { reminders, dismissReminder } = useReminders(transactions);
   const { reminders: debtReminders, dismissReminder: dismissDebtReminder, requestNotificationPermission } = useDebtReminders(debts);
-
+  const { suggestion: autoSavingsSuggestion, shouldShow: showAutoSavings, prefs: autoSavingsPrefs, acceptSuggestion, declineSuggestion, enableAutoTransfer } = useAutoSavings(transactions);
+  const [autoSavingsOpen, setAutoSavingsOpen] = useState(false);
   const categoriesWithSpent = useMemo(() => {
     return categories.map(category => {
       const spent = transactions
@@ -184,6 +187,8 @@ const Index = () => {
                   onAddTransaction={openAddModal}
                   onViewAllTransactions={() => setActiveTab('reports')}
                   onOpenDebts={() => setSubView('debts')}
+                  showAutoSavings={showAutoSavings}
+                  onOpenAutoSavings={() => setAutoSavingsOpen(true)}
                 />
               )}
               {activeTab === 'reports' && (
@@ -229,6 +234,28 @@ const Index = () => {
         onDelete={deleteTransaction} 
         categories={categoriesWithSpent} 
       />
+      {autoSavingsSuggestion && (
+        <AutoSavingsSheet
+          open={autoSavingsOpen}
+          onClose={() => setAutoSavingsOpen(false)}
+          suggestion={autoSavingsSuggestion}
+          prefs={autoSavingsPrefs}
+          onAccept={(amount) => {
+            acceptSuggestion(amount);
+            // Create a saving transaction
+            addTransaction({
+              amount,
+              type: 'saving',
+              category: 'پس‌انداز و سرمایه‌گذاری',
+              description: 'پس‌انداز خودکار پایان ماه',
+              date: new Date().toISOString().split('T')[0],
+              tags: ['auto-savings'],
+            });
+          }}
+          onDecline={declineSuggestion}
+          onEnableAuto={enableAutoTransfer}
+        />
+      )}
     </div>
   );
 };
