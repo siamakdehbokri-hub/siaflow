@@ -55,29 +55,29 @@ export function BalanceHero({ balance, income, expense, savingsRate = 0 }: Balan
         </p>
       </div>
       
-      {/* Income / Expense Summary - 48px height for touch */}
-      <div className="relative grid grid-cols-2 gap-3">
+      {/* Income / Expense Summary */}
+      <div className="relative grid grid-cols-2 gap-2.5">
         {/* Income */}
-        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-success/5 border-2 border-success/15">
-          <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
-            <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2} />
+        <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-success/5 border border-success/15">
+          <div className="w-9 h-9 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+            <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground mb-0.5">درآمد</p>
-            <p className="text-sm font-bold text-success truncate">
+          <div className="text-center min-w-0 w-full">
+            <p className="text-xs font-medium text-muted-foreground mb-1">درآمد</p>
+            <p className="text-sm font-bold text-success truncate leading-tight" dir="ltr">
               {formatAmount(income)}
             </p>
           </div>
         </div>
         
         {/* Expense */}
-        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-destructive/5 border-2 border-destructive/15">
-          <div className="w-11 h-11 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
-            <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2} />
+        <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-destructive/5 border border-destructive/15">
+          <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0">
+            <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground mb-0.5">هزینه</p>
-            <p className="text-sm font-bold text-destructive truncate">
+          <div className="text-center min-w-0 w-full">
+            <p className="text-xs font-medium text-muted-foreground mb-1">هزینه</p>
+            <p className="text-sm font-bold text-destructive truncate leading-tight" dir="ltr">
               {formatAmount(expense)}
             </p>
           </div>
