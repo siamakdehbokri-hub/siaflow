@@ -37,7 +37,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 export function CategoryBreakdown({ transactions, categories }: CategoryBreakdownProps) {
   // Calculate expense breakdown by category
   const { chartData, totalExpense, categoryList } = useMemo(() => {
-    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    const expenseTransactions = transactions.filter(t => t.type === 'expense' || t.type === 'saving');
     const total = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
     
     // Group by category

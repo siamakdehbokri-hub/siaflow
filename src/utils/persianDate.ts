@@ -1,5 +1,6 @@
 import { format, formatDistance, getMonth, getYear, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay, isWithinInterval } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
+import { toLocalISODateString } from '@/utils/dateUtils';
 
 export const formatPersianDate = (dateString: string): string => {
   const date = new Date(dateString);
@@ -68,8 +69,8 @@ export const getCurrentJalaliMonthBounds = (): { start: string; end: string } =>
   const startDate = startOfMonth(now);
   const endDate = endOfMonth(now);
   return {
-    start: startDate.toISOString().split('T')[0],
-    end: endDate.toISOString().split('T')[0],
+    start: toLocalISODateString(startDate),
+    end: toLocalISODateString(endDate),
   };
 };
 
@@ -80,8 +81,8 @@ export const getPreviousJalaliMonthBounds = (): { start: string; end: string } =
   const startDate = startOfMonth(prevMonth);
   const endDate = endOfMonth(prevMonth);
   return {
-    start: startDate.toISOString().split('T')[0],
-    end: endDate.toISOString().split('T')[0],
+    start: toLocalISODateString(startDate),
+    end: toLocalISODateString(endDate),
   };
 };
 
