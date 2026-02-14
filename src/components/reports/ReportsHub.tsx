@@ -269,12 +269,6 @@ export function ReportsHub({
               isActive={typeFilter === 'saving'}
               onClick={() => setTypeFilter('saving')}
             />
-            <FilterPill
-              label="درآمد"
-              isActive={typeFilter === 'income'}
-              onClick={() => setTypeFilter('income')}
-              variant="success"
-            />
           </div>
 
           {/* Transaction Count */}
