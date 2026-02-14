@@ -51,7 +51,7 @@ export function ReportsHub({
 }: ReportsHubProps) {
   const [activeTab, setActiveTab] = useState<ReportsTab>('transactions');
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'saving'>('all');
   const [showAIReport, setShowAIReport] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
 
@@ -77,7 +77,11 @@ export function ReportsHub({
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
     
-    return { income, expense, balance: income - expense };
+    const saving = monthlyTransactions
+      .filter(t => t.type === 'saving')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    return { income, expense, saving, balance: income - expense - saving };
   }, [monthlyTransactions]);
 
   // Simple filtered transactions
@@ -253,6 +257,17 @@ export function ReportsHub({
               isActive={typeFilter === 'expense'}
               onClick={() => setTypeFilter('expense')}
               variant="danger"
+            />
+            <FilterPill
+              label="درآمد"
+              isActive={typeFilter === 'income'}
+              onClick={() => setTypeFilter('income')}
+              variant="success"
+            />
+            <FilterPill
+              label="پس‌انداز"
+              isActive={typeFilter === 'saving'}
+              onClick={() => setTypeFilter('saving')}
             />
             <FilterPill
               label="درآمد"
