@@ -120,8 +120,8 @@ export function EditTransactionModal({
 
   if (!isOpen || !transaction) return null;
 
-  const expenseCategories = categories.filter(c => c.budget);
-  const incomeCategories = categories.filter(c => !c.budget && c.type !== 'saving');
+  const expenseCategories = categories.filter(c => c.type === 'expense' || (c.budget !== undefined && c.budget !== null && c.budget > 0));
+  const incomeCategories = categories.filter(c => c.type === 'income' || (!c.type && (c.budget === undefined || c.budget === null || c.budget === 0)));
   const savingCategories = categories.filter(c => c.type === 'saving');
 
   return (
