@@ -230,10 +230,10 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             </div>
           </div>
 
-          {/* Category */}
-          <div className="space-y-2">
+          {/* Category - key forces clean remount when type changes */}
+          <div key={`category-${type}`} className="space-y-2">
             <Label className="text-sm font-medium text-foreground">دسته‌بندی</Label>
-            <Select value={category} onValueChange={handleCategoryChange} required>
+            <Select value={category} onValueChange={handleCategoryChange}>
               <SelectTrigger className="h-12 rounded-xl border-2 border-border">
                 <SelectValue placeholder="انتخاب دسته‌بندی" />
               </SelectTrigger>
