@@ -89,7 +89,7 @@ export function useTransactions() {
         tags: data.tags || [],
       };
 
-      setTransactions([newTransaction, ...transactions]);
+      setTransactions(prev => [newTransaction, ...prev]);
       toast.success('تراکنش با موفقیت ثبت شد');
     } catch (error: any) {
       console.error('Error adding transaction:', error);
@@ -118,7 +118,7 @@ export function useTransactions() {
 
       if (error) throw error;
 
-      setTransactions(transactions.map(t => 
+      setTransactions(prev => prev.map(t => 
         t.id === transaction.id ? transaction : t
       ));
       toast.success('تراکنش با موفقیت ویرایش شد');
@@ -140,7 +140,7 @@ export function useTransactions() {
 
       if (error) throw error;
 
-      setTransactions(transactions.filter(t => t.id !== id));
+      setTransactions(prev => prev.filter(t => t.id !== id));
       toast.success('تراکنش با موفقیت حذف شد');
     } catch (error: any) {
       console.error('Error deleting transaction:', error);
@@ -243,7 +243,7 @@ export function useCategories() {
         subcategories: (data as any).subcategories || [],
       };
 
-      setCategories([...categories, newCategory]);
+      setCategories(prev => [...prev, newCategory]);
       toast.success('دسته‌بندی با موفقیت اضافه شد');
     } catch (error: any) {
       console.error('Error adding category:', error);
@@ -274,7 +274,7 @@ export function useCategories() {
 
       if (error) throw error;
 
-      setCategories(categories.map(c => 
+      setCategories(prev => prev.map(c => 
         c.id === category.id ? { ...category, subcategories: subcats } : c
       ));
       toast.success('دسته‌بندی با موفقیت ویرایش شد');
@@ -296,7 +296,7 @@ export function useCategories() {
 
       if (error) throw error;
 
-      setCategories(categories.filter(c => c.id !== id));
+      setCategories(prev => prev.filter(c => c.id !== id));
       toast.success('دسته‌بندی با موفقیت حذف شد');
     } catch (error: any) {
       console.error('Error deleting category:', error);
