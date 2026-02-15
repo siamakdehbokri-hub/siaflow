@@ -1,6 +1,15 @@
 import { Transaction } from '@/types/expense';
 import { formatPersianDateShort } from '@/utils/persianDate';
 
+/**
+ * Escape HTML special characters to prevent XSS attacks
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 export const exportToExcel = (transactions: Transaction[], filename: string = 'transactions') => {
   // Use CSV export as a secure alternative (xlsx package has known vulnerabilities)
   // CSV files can be opened in Excel and other spreadsheet applications
@@ -118,9 +127,9 @@ export const exportToPDF = (transactions: Transaction[], filename: string = 'tra
             <tr class="${t.type === 'income' ? 'income-row' : 'expense-row'}">
               <td>${t.type === 'income' ? 'درآمد' : 'هزینه'}</td>
               <td>${t.amount.toLocaleString('fa-IR')}</td>
-              <td>${t.category}</td>
-              <td>${t.subcategory || '-'}</td>
-              <td>${t.description || '-'}</td>
+              <td>${escapeHtml(t.category)}</td>
+              <td>${escapeHtml(t.subcategory || '-')}</td>
+              <td>${escapeHtml(t.description || '-')}</td>
               <td>${formatPersianDateShort(t.date)}</td>
             </tr>
           `).join('')}
@@ -220,7 +229,7 @@ export const exportCategoryReport = (categories: { name: string; spent: number; 
             const isOver = c.spent > c.budget;
             return `
               <tr>
-                <td>${c.name}</td>
+                <td>${escapeHtml(c.name)}</td>
                 <td>${c.budget.toLocaleString('fa-IR')}</td>
                 <td class="${isOver ? 'over-budget' : ''}">${c.spent.toLocaleString('fa-IR')}</td>
                 <td class="${isOver ? 'over-budget' : 'under-budget'}">${(c.budget - c.spent).toLocaleString('fa-IR')}</td>
