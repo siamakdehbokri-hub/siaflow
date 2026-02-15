@@ -137,7 +137,7 @@ export function EditTransactionModal({
           <div className="sticky top-0 z-10 overflow-hidden">
             <div className={cn(
               "absolute inset-0",
-              type === 'expense' ? "gradient-expense" : "gradient-income"
+              type === 'expense' ? "gradient-expense" : type === 'saving' ? "bg-primary" : "gradient-income"
             )} />
             <div className="relative p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -263,10 +263,10 @@ export function EditTransactionModal({
               </div>
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
+            {/* Category - key forces clean remount when type changes */}
+            <div key={`category-${type}`} className="space-y-2">
               <Label className="text-sm font-medium">دسته‌بندی</Label>
-              <Select value={category} onValueChange={handleCategoryChange} required>
+              <Select value={category} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="h-12 rounded-xl text-base">
                   <SelectValue placeholder="انتخاب دسته‌بندی" />
                 </SelectTrigger>
