@@ -53,11 +53,10 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     [categories]
   );
   
-  const savingCategories = useMemo(() => {
-    const filtered = categories.filter(c => c.type === 'saving');
-    console.log('[AddTransaction] Saving categories:', filtered.length, 'from total:', categories.length, 'types:', categories.map(c => c.type));
-    return filtered;
-  }, [categories]);
+  const savingCategories = useMemo(() => 
+    categories.filter(c => c.type === 'saving'), 
+    [categories]
+  );
 
   const subcategories = useMemo((): string[] => {
     if (!category) return [];
@@ -71,16 +70,12 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('[AddTransaction] Submit called', { type, amount, category, subcategory, isSubmitting });
-    if (isSubmitting || !amount || !category) {
-      console.log('[AddTransaction] Blocked:', { isSubmitting, amount, category });
-      return;
-    }
+    if (isSubmitting || !amount || !category) return;
     
     setIsSubmitting(true);
     
     try {
-      const transactionData = {
+      await onAdd({
         id: Date.now().toString(),
         type,
         amount: parseAmount(amount),
@@ -90,10 +85,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
         date,
         isRecurring,
         tags: [],
-      };
-      console.log('[AddTransaction] Sending:', transactionData);
-      await onAdd(transactionData);
-      console.log('[AddTransaction] Success');
+      });
       
       setAmount('');
       setCategory('');
@@ -103,7 +95,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       setIsRecurring(false);
       onClose();
     } catch (error) {
-      console.error('[AddTransaction] Error:', error);
+      console.error('Error adding transaction:', error);
     } finally {
       setIsSubmitting(false);
     }
