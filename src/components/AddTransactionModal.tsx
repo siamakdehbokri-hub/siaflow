@@ -44,12 +44,12 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const expenseCategories = useMemo(() => 
-    categories.filter(c => c.type === 'expense' || (c.budget !== undefined && c.budget !== null && c.budget > 0)), 
+    categories.filter(c => c.type === 'expense'), 
     [categories]
   );
   
   const incomeCategories = useMemo(() => 
-    categories.filter(c => c.type === 'income' || (!c.type && (c.budget === undefined || c.budget === null || c.budget === 0))), 
+    categories.filter(c => c.type === 'income'), 
     [categories]
   );
   

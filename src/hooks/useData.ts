@@ -186,7 +186,7 @@ export function useCategories() {
         color: c.color,
         budget: c.budget ? Number(c.budget) : undefined,
         spent: 0,
-        type: (c.type as 'expense' | 'income' | 'saving') || (c.budget ? 'expense' : 'income'),
+        type: (c.type as 'expense' | 'income' | 'saving') || 'expense',
         subcategories: (c as any).subcategories || [],
       }));
 
