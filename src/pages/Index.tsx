@@ -54,7 +54,7 @@ const Index = () => {
     });
   }, [categories, transactions]);
 
-  const handleAddTransaction = async (transaction: any) => {
+  const handleAddTransaction = async (transaction: Omit<Transaction, 'id'> & { id?: string }) => {
     await addTransaction({
       amount: transaction.amount,
       type: transaction.type,

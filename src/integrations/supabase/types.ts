@@ -380,6 +380,36 @@ export type Database = {
         }
         Returns: boolean
       }
+      transfer_between_accounts: {
+        Args: {
+          _amount: number
+          _description?: string
+          _from_account_id: string
+          _to_account_id: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      transfer_to_goal: {
+        Args: {
+          _amount: number
+          _description?: string
+          _from_account_id: string
+          _to_goal_id: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      update_goal_amount: {
+        Args: {
+          _amount: number
+          _goal_id: string
+          _note?: string
+          _type: string
+          _user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"

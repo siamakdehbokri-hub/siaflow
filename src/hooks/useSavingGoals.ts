@@ -107,7 +107,7 @@ export function useSavingGoals() {
         updatedAt: data.updated_at,
       };
 
-      setGoals([newGoal, ...goals]);
+      setGoals(prev => [newGoal, ...prev]);
       toast.success('هدف پس‌انداز با موفقیت ایجاد شد');
     } catch (error: any) {
       console.error('Error adding goal:', error);
@@ -121,39 +121,27 @@ export function useSavingGoals() {
     const goal = goals.find(g => g.id === goalId);
     if (!goal) return;
 
-    const newAmount = type === 'deposit' 
-      ? goal.currentAmount + amount 
-      : Math.max(0, goal.currentAmount - amount);
-
     try {
-      // Update goal amount
-      const { error: updateError } = await supabase
-        .from('saving_goals')
-        .update({ current_amount: newAmount })
-        .eq('id', goalId)
-        .eq('user_id', user.id);
+      const { data, error } = await supabase.rpc('update_goal_amount', {
+        _user_id: user.id,
+        _goal_id: goalId,
+        _amount: amount,
+        _type: type,
+        _note: note || null,
+      });
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
-      // Record transaction
-      const { error: txError } = await supabase
-        .from('saving_goal_transactions')
-        .insert({
-          goal_id: goalId,
-          user_id: user.id,
-          amount,
-          type,
-          note: note || null,
-        });
+      const newAmount = (data as any)?.new_amount ?? (type === 'deposit' 
+        ? goal.currentAmount + amount 
+        : Math.max(0, goal.currentAmount - amount));
 
-      if (txError) throw txError;
-
-      setGoals(goals.map(g => 
-        g.id === goalId ? { ...g, currentAmount: newAmount } : g
+      setGoals(prev => prev.map(g => 
+        g.id === goalId ? { ...g, currentAmount: Number(newAmount) } : g
       ));
 
       // Check if close to goal
-      const progress = (newAmount / goal.targetAmount) * 100;
+      const progress = (Number(newAmount) / goal.targetAmount) * 100;
       if (progress >= 90 && progress < 100) {
         toast.success('🎉 تبریک! شما به هدفتان نزدیک شدید!');
       } else if (progress >= 100) {
@@ -179,7 +167,7 @@ export function useSavingGoals() {
 
       if (error) throw error;
 
-      setGoals(goals.filter(g => g.id !== id));
+      setGoals(prev => prev.filter(g => g.id !== id));
       toast.success('هدف پس‌انداز با موفقیت حذف شد');
     } catch (error: any) {
       console.error('Error deleting goal:', error);

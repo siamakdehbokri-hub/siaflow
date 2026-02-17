@@ -31,7 +31,7 @@ export interface AdminTransaction {
   user_id: string;
   userName: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'saving';
   category: string;
   subcategory?: string;
   description?: string;
@@ -48,7 +48,7 @@ export interface AdminCategory {
   name: string;
   icon: string;
   color: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'saving';
   budget?: number;
   budget_type?: string;
   subcategories?: string[];
