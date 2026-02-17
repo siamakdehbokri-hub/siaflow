@@ -386,9 +386,12 @@ serve(async (req) => {
 
         let totalIncome = 0;
         let totalExpense = 0;
+        let totalSaving = 0;
         transactions?.forEach(t => {
           if (t.type === 'income') {
             totalIncome += Number(t.amount);
+          } else if (t.type === 'saving') {
+            totalSaving += Number(t.amount);
           } else {
             totalExpense += Number(t.amount);
           }
@@ -439,7 +442,8 @@ serve(async (req) => {
             summary: {
               totalIncome,
               totalExpense,
-              netBalance: totalIncome - totalExpense,
+              totalSaving,
+              netBalance: totalIncome - totalExpense - totalSaving,
               totalDebtAmount,
               totalDebtPaid,
               totalDebtRemaining: totalDebtAmount - totalDebtPaid,

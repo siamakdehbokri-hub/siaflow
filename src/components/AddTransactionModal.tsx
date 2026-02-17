@@ -28,7 +28,7 @@ import { useCurrency } from '@/hooks/useCurrency';
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (transaction: any) => void;
+  onAdd: (transaction: Omit<import('@/types/expense').Transaction, 'id'> & { id?: string }) => Promise<void> | void;
   categories: Category[];
 }
 

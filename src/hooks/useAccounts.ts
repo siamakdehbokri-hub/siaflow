@@ -139,7 +139,7 @@ export function useAccounts() {
         updatedAt: data.updated_at,
       };
 
-      setAccounts([...accounts, newAccount]);
+      setAccounts(prev => [...prev, newAccount]);
       toast.success('حساب با موفقیت ایجاد شد');
       return newAccount;
     } catch (error: any) {
@@ -168,7 +168,7 @@ export function useAccounts() {
 
       if (error) throw error;
 
-      setAccounts(accounts.map(a => 
+      setAccounts(prev => prev.map(a => 
         a.id === id ? { ...a, ...updates } : a
       ));
       toast.success('حساب با موفقیت بروزرسانی شد');
@@ -190,7 +190,7 @@ export function useAccounts() {
 
       if (error) throw error;
 
-      setAccounts(accounts.filter(a => a.id !== id));
+      setAccounts(prev => prev.filter(a => a.id !== id));
       toast.success('حساب با موفقیت حذف شد');
     } catch (error: any) {
       console.error('Error deleting account:', error);
@@ -206,53 +206,18 @@ export function useAccounts() {
   ) => {
     if (!user) return;
 
-    const fromAccount = accounts.find(a => a.id === fromAccountId);
-    const toAccount = accounts.find(a => a.id === toAccountId);
-
-    if (!fromAccount || !toAccount) {
-      toast.error('حساب یافت نشد');
-      return;
-    }
-
-    if (fromAccount.balance < amount) {
-      toast.error('موجودی حساب مبدا کافی نیست');
-      return;
-    }
-
     try {
-      // Update from account
-      const { error: error1 } = await supabase
-        .from('accounts')
-        .update({ balance: fromAccount.balance - amount })
-        .eq('id', fromAccountId)
-        .eq('user_id', user.id);
+      const { error } = await supabase.rpc('transfer_between_accounts', {
+        _user_id: user.id,
+        _from_account_id: fromAccountId,
+        _to_account_id: toAccountId,
+        _amount: amount,
+        _description: description || null,
+      });
 
-      if (error1) throw error1;
+      if (error) throw error;
 
-      // Update to account
-      const { error: error2 } = await supabase
-        .from('accounts')
-        .update({ balance: toAccount.balance + amount })
-        .eq('id', toAccountId)
-        .eq('user_id', user.id);
-
-      if (error2) throw error2;
-
-      // Record transfer
-      const { error: error3 } = await supabase
-        .from('transfers')
-        .insert({
-          user_id: user.id,
-          from_account_id: fromAccountId,
-          to_account_id: toAccountId,
-          amount,
-          description: description || null,
-          transfer_type: 'account_to_account',
-        });
-
-      if (error3) throw error3;
-
-      setAccounts(accounts.map(a => {
+      setAccounts(prev => prev.map(a => {
         if (a.id === fromAccountId) return { ...a, balance: a.balance - amount };
         if (a.id === toAccountId) return { ...a, balance: a.balance + amount };
         return a;
@@ -262,7 +227,10 @@ export function useAccounts() {
       toast.success('انتقال با موفقیت انجام شد');
     } catch (error: any) {
       console.error('Error transferring:', error);
-      toast.error('خطا در انتقال');
+      const msg = error?.message?.includes('Insufficient balance')
+        ? 'موجودی حساب مبدا کافی نیست'
+        : 'خطا در انتقال';
+      toast.error(msg);
     }
   };
 
@@ -272,45 +240,20 @@ export function useAccounts() {
     amount: number,
     description?: string
   ) => {
-    if (!user) return;
-
-    const fromAccount = accounts.find(a => a.id === fromAccountId);
-
-    if (!fromAccount) {
-      toast.error('حساب یافت نشد');
-      return;
-    }
-
-    if (fromAccount.balance < amount) {
-      toast.error('موجودی حساب مبدا کافی نیست');
-      return;
-    }
+    if (!user) return false;
 
     try {
-      // Update from account
-      const { error: error1 } = await supabase
-        .from('accounts')
-        .update({ balance: fromAccount.balance - amount })
-        .eq('id', fromAccountId)
-        .eq('user_id', user.id);
+      const { error } = await supabase.rpc('transfer_to_goal', {
+        _user_id: user.id,
+        _from_account_id: fromAccountId,
+        _to_goal_id: toGoalId,
+        _amount: amount,
+        _description: description || null,
+      });
 
-      if (error1) throw error1;
+      if (error) throw error;
 
-      // Record transfer
-      const { error: error2 } = await supabase
-        .from('transfers')
-        .insert({
-          user_id: user.id,
-          from_account_id: fromAccountId,
-          to_goal_id: toGoalId,
-          amount,
-          description: description || null,
-          transfer_type: 'account_to_goal',
-        });
-
-      if (error2) throw error2;
-
-      setAccounts(accounts.map(a => 
+      setAccounts(prev => prev.map(a => 
         a.id === fromAccountId ? { ...a, balance: a.balance - amount } : a
       ));
 
@@ -319,7 +262,10 @@ export function useAccounts() {
       return true;
     } catch (error: any) {
       console.error('Error transferring to goal:', error);
-      toast.error('خطا در انتقال');
+      const msg = error?.message?.includes('Insufficient balance')
+        ? 'موجودی حساب مبدا کافی نیست'
+        : 'خطا در انتقال';
+      toast.error(msg);
       return false;
     }
   };
