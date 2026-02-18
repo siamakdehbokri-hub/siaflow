@@ -1,10 +1,19 @@
-import { useTheme } from "next-themes";
 import { Toaster as Sonner, toast } from "sonner";
+import { useEffect, useState } from "react";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
+function useThemeState() {
+  const [theme, setTheme] = useState<"light" | "dark" | "system">("dark");
+  useEffect(() => {
+    const stored = localStorage.getItem("app-theme") as "light" | "dark" | "system" | null;
+    setTheme(stored || "dark");
+  }, []);
+  return theme;
+}
+
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const theme = useThemeState();
 
   return (
     <Sonner

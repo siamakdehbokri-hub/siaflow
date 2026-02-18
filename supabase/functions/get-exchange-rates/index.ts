@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Cache rates for 30 minutes
@@ -48,28 +48,45 @@ serve(async (req) => {
   }
 
   try {
-    // Accept manual rate update via POST
+    // Accept manual rate update via POST (requires auth)
     if (req.method === "POST") {
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       try {
         const body = await req.json();
-        if (body.usd_to_irt && body.usd_to_irt > 10000) {
-          cachedRates = {
-            usd_to_irr: body.usd_to_irt * 10,
-            usd_to_irt: body.usd_to_irt,
-            timestamp: Date.now(),
-            source: "manual",
-          };
-          return new Response(JSON.stringify({
-            usd_to_irr: cachedRates.usd_to_irr,
-            usd_to_irt: cachedRates.usd_to_irt,
-            source: "manual",
-            cached: false,
-            updated_at: new Date().toISOString(),
-          }), {
+        const rate = Number(body?.usd_to_irt);
+        if (!rate || !isFinite(rate) || rate < 10000 || rate > 10000000) {
+          return new Response(JSON.stringify({ error: "Invalid rate value" }), {
+            status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-      } catch {}
+        cachedRates = {
+          usd_to_irr: rate * 10,
+          usd_to_irt: rate,
+          timestamp: Date.now(),
+          source: "manual",
+        };
+        return new Response(JSON.stringify({
+          usd_to_irr: cachedRates.usd_to_irr,
+          usd_to_irt: cachedRates.usd_to_irt,
+          source: "manual",
+          cached: false,
+          updated_at: new Date().toISOString(),
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch {
+        return new Response(JSON.stringify({ error: "Invalid request body" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Return cached rates if fresh

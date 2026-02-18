@@ -58,7 +58,7 @@ export function useSavingGoals() {
       }));
 
       setGoals(mappedData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching saving goals:', error);
       toast.error('خطا در بارگذاری اهداف پس‌انداز');
     } finally {
@@ -109,7 +109,7 @@ export function useSavingGoals() {
 
       setGoals(prev => [newGoal, ...prev]);
       toast.success('هدف پس‌انداز با موفقیت ایجاد شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding goal:', error);
       toast.error('خطا در ایجاد هدف');
     }
@@ -132,7 +132,8 @@ export function useSavingGoals() {
 
       if (error) throw error;
 
-      const newAmount = (data as any)?.new_amount ?? (type === 'deposit' 
+      const result = data as { new_amount?: number } | null;
+      const newAmount = result?.new_amount ?? (type === 'deposit' 
         ? goal.currentAmount + amount 
         : Math.max(0, goal.currentAmount - amount));
 
@@ -149,7 +150,7 @@ export function useSavingGoals() {
       } else {
         toast.success(type === 'deposit' ? 'واریز با موفقیت ثبت شد' : 'برداشت با موفقیت ثبت شد');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating goal amount:', error);
       toast.error('خطا در ثبت تراکنش');
     }
@@ -169,7 +170,7 @@ export function useSavingGoals() {
 
       setGoals(prev => prev.filter(g => g.id !== id));
       toast.success('هدف پس‌انداز با موفقیت حذف شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting goal:', error);
       toast.error('خطا در حذف هدف');
     }

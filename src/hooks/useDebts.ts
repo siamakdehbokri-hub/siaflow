@@ -49,7 +49,7 @@ export function useDebts() {
       }));
 
       setDebts(mappedData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching debts:', error);
       toast.error('خطا در بارگذاری بدهی‌ها');
     } finally {
@@ -98,9 +98,9 @@ export function useDebts() {
         updatedAt: data.updated_at,
       };
 
-      setDebts([newDebt, ...debts]);
+      setDebts(prev => [newDebt, ...prev]);
       toast.success('بدهی با موفقیت ثبت شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding debt:', error);
       toast.error('خطا در ثبت بدهی');
     }
@@ -110,7 +110,7 @@ export function useDebts() {
     if (!user) return;
 
     try {
-      const updateData: Record<string, any> = {};
+      const updateData: Record<string, string | number | null | undefined> = {};
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.totalAmount !== undefined) updateData.total_amount = updates.totalAmount;
       if (updates.paidAmount !== undefined) updateData.paid_amount = updates.paidAmount;
@@ -126,11 +126,11 @@ export function useDebts() {
 
       if (error) throw error;
 
-      setDebts(debts.map(d => 
+      setDebts(prev => prev.map(d => 
         d.id === id ? { ...d, ...updates } : d
       ));
       toast.success('بدهی با موفقیت بروزرسانی شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating debt:', error);
       toast.error('خطا در بروزرسانی بدهی');
     }
@@ -148,9 +148,9 @@ export function useDebts() {
 
       if (error) throw error;
 
-      setDebts(debts.filter(d => d.id !== id));
+      setDebts(prev => prev.filter(d => d.id !== id));
       toast.success('بدهی با موفقیت حذف شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting debt:', error);
       toast.error('خطا در حذف بدهی');
     }

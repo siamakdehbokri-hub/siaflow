@@ -61,7 +61,7 @@ export function useAccounts() {
       }));
 
       setAccounts(mappedData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching accounts:', error);
       toast.error('خطا در بارگذاری حساب‌ها');
     } finally {
@@ -97,7 +97,7 @@ export function useAccounts() {
       }));
 
       setTransfers(mappedData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching transfers:', error);
     }
   };
@@ -142,7 +142,7 @@ export function useAccounts() {
       setAccounts(prev => [...prev, newAccount]);
       toast.success('حساب با موفقیت ایجاد شد');
       return newAccount;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding account:', error);
       toast.error('خطا در ایجاد حساب');
     }
@@ -152,7 +152,7 @@ export function useAccounts() {
     if (!user) return;
 
     try {
-      const updateData: Record<string, any> = {};
+      const updateData: Record<string, string | number | boolean | undefined> = {};
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.type !== undefined) updateData.type = updates.type;
       if (updates.balance !== undefined) updateData.balance = updates.balance;
@@ -172,7 +172,7 @@ export function useAccounts() {
         a.id === id ? { ...a, ...updates } : a
       ));
       toast.success('حساب با موفقیت بروزرسانی شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating account:', error);
       toast.error('خطا در بروزرسانی حساب');
     }
@@ -192,7 +192,7 @@ export function useAccounts() {
 
       setAccounts(prev => prev.filter(a => a.id !== id));
       toast.success('حساب با موفقیت حذف شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting account:', error);
       toast.error('خطا در حذف حساب');
     }
@@ -225,9 +225,10 @@ export function useAccounts() {
 
       await fetchTransfers();
       toast.success('انتقال با موفقیت انجام شد');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error transferring:', error);
-      const msg = error?.message?.includes('Insufficient balance')
+      const errorMsg = error instanceof Error ? error.message : '';
+      const msg = errorMsg.includes('Insufficient balance')
         ? 'موجودی حساب مبدا کافی نیست'
         : 'خطا در انتقال';
       toast.error(msg);
@@ -260,9 +261,10 @@ export function useAccounts() {
       await fetchTransfers();
       toast.success('انتقال به هدف پس‌انداز انجام شد');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error transferring to goal:', error);
-      const msg = error?.message?.includes('Insufficient balance')
+      const errorMsg = error instanceof Error ? error.message : '';
+      const msg = errorMsg.includes('Insufficient balance')
         ? 'موجودی حساب مبدا کافی نیست'
         : 'خطا در انتقال';
       toast.error(msg);
