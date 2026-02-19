@@ -13,65 +13,101 @@ interface SwipeableTransactionProps {
 function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: SwipeableTransactionProps) {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSwipeIntent, setIsSwipeIntent] = useState(false);
   const startX = useRef(0);
+  const startY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // In RTL layout, swipe RIGHT (positive direction) to reveal actions on LEFT
+  const SWIPE_THRESHOLD = 30; // Min px before swipe activates (prevents accidental triggers)
+  const SNAP_THRESHOLD = 80; // Min px to snap open
+
   const handleTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
     setIsDragging(true);
+    setIsSwipeIntent(false);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     const currentX = e.touches[0].clientX;
-    const diff = currentX - startX.current; // RTL: positive diff = swipe right
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - startX.current;
+    const diffY = currentY - startY.current;
+    
+    // If vertical movement is dominant, cancel swipe (user is scrolling)
+    if (!isSwipeIntent && Math.abs(diffY) > Math.abs(diffX)) {
+      setIsDragging(false);
+      setOffset(0);
+      return;
+    }
+    
+    // Only activate after threshold
+    if (!isSwipeIntent && Math.abs(diffX) < SWIPE_THRESHOLD) return;
+    
+    if (!isSwipeIntent) setIsSwipeIntent(true);
     
     // Allow right swipe (positive diff) to reveal actions
-    if (diff > 0) {
-      setOffset(Math.min(diff, 140));
+    if (diffX > 0) {
+      setOffset(Math.min(diffX - SWIPE_THRESHOLD, 140));
     } else {
-      setOffset(Math.max(0, offset + diff * 0.3)); // Allow slight resistance when swiping back
+      setOffset(Math.max(0, offset + diffX * 0.3));
     }
   };
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    if (offset > 70) {
+    if (offset > SNAP_THRESHOLD) {
       setOffset(140);
     } else {
       setOffset(0);
     }
+    setIsSwipeIntent(false);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     startX.current = e.clientX;
+    startY.current = e.clientY;
     setIsDragging(true);
+    setIsSwipeIntent(false);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
-    const diff = e.clientX - startX.current; // RTL: positive diff = swipe right
-    if (diff > 0) {
-      setOffset(Math.min(diff, 140));
+    const diffX = e.clientX - startX.current;
+    const diffY = e.clientY - startY.current;
+    
+    if (!isSwipeIntent && Math.abs(diffY) > Math.abs(diffX)) {
+      setIsDragging(false);
+      setOffset(0);
+      return;
+    }
+    
+    if (!isSwipeIntent && Math.abs(diffX) < SWIPE_THRESHOLD) return;
+    if (!isSwipeIntent) setIsSwipeIntent(true);
+    
+    if (diffX > 0) {
+      setOffset(Math.min(diffX - SWIPE_THRESHOLD, 140));
     } else {
-      setOffset(Math.max(0, offset + diff * 0.3));
+      setOffset(Math.max(0, offset + diffX * 0.3));
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    if (offset > 70) {
+    if (offset > SNAP_THRESHOLD) {
       setOffset(140);
     } else {
       setOffset(0);
     }
+    setIsSwipeIntent(false);
   };
 
   const handleMouseLeave = () => {
     if (isDragging) {
       setIsDragging(false);
-      if (offset > 70) {
+      setIsSwipeIntent(false);
+      if (offset > SNAP_THRESHOLD) {
         setOffset(140);
       } else {
         setOffset(0);

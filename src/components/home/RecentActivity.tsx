@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ChevronLeft, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
 import { Transaction } from '@/types/expense';
 import { formatCurrency, formatPersianDateFull } from '@/utils/persianDate';
@@ -9,7 +10,16 @@ interface RecentActivityProps {
 }
 
 export function RecentActivity({ transactions, onViewAll }: RecentActivityProps) {
-  const recentItems = transactions.slice(0, 4);
+  const recentItems = useMemo(() => 
+    [...transactions]
+      .sort((a, b) => {
+        const dateCompare = b.date.localeCompare(a.date);
+        if (dateCompare !== 0) return dateCompare;
+        return b.id.localeCompare(a.id);
+      })
+      .slice(0, 4),
+    [transactions]
+  );
   
   if (recentItems.length === 0) {
     return (

@@ -51,7 +51,14 @@ export function HomeScreen({
       expense,
       todayExpense,
       balance,
-      recentTransactions: transactions.slice(0, 3),
+      recentTransactions: [...transactions]
+        .sort((a, b) => {
+          // Sort by date descending, then by id as tiebreaker (newest first)
+          const dateCompare = b.date.localeCompare(a.date);
+          if (dateCompare !== 0) return dateCompare;
+          return b.id.localeCompare(a.id);
+        })
+        .slice(0, 3),
     };
   }, [transactions]);
 
