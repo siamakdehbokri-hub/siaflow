@@ -50,16 +50,31 @@ serve(async (req) => {
   try {
     // Accept manual rate update via POST (requires auth)
     if (req.method === "POST") {
-      const authHeader = req.headers.get('Authorization');
-      if (!authHeader?.startsWith('Bearer ')) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Check if body has content (manual rate update) vs empty body (just fetching rates)
+      const contentType = req.headers.get('content-type') || '';
+      let body: Record<string, unknown> | null = null;
+      
+      if (contentType.includes('application/json')) {
+        try {
+          const text = await req.text();
+          if (text && text.trim()) {
+            body = JSON.parse(text);
+          }
+        } catch {
+          // Empty or invalid body - treat as a rate fetch request
+        }
       }
-      try {
-        const body = await req.json();
-        const rate = Number(body?.usd_to_irt);
+
+      // If body has usd_to_irt, it's a manual rate update
+      if (body && body.usd_to_irt !== undefined) {
+        const authHeader = req.headers.get('Authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const rate = Number(body.usd_to_irt);
         if (!rate || !isFinite(rate) || rate < 10000 || rate > 10000000) {
           return new Response(JSON.stringify({ error: "Invalid rate value" }), {
             status: 400,
@@ -81,12 +96,8 @@ serve(async (req) => {
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
-      } catch {
-        return new Response(JSON.stringify({ error: "Invalid request body" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
       }
+      // Otherwise fall through to fetch rates below
     }
 
     // Return cached rates if fresh
