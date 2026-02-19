@@ -95,11 +95,9 @@ function sanitizeAIOutput(text: string): string {
   t = t
     .replace(BIDI_CONTROL_RE, "")
     .replace(CONTROL_RE, " ")
-    .replace(/```[\s\S]*?```/g, " ")
     .replace(/\b(system|developer)\s*:/gi, " ");
-  t = collapseWhitespace(t);
   // Keep outputs bounded (defense-in-depth)
-  return t.slice(0, 6000);
+  return t.slice(0, 10000).trim();
 }
 
 function outputLooksUnsafe(text: string): boolean {
@@ -412,12 +410,12 @@ ${budgetCategories
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 1500,
+        max_tokens: 4000,
       }),
     });
 
