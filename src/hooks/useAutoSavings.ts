@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Transaction } from '@/types/expense';
 import { getCurrentJalaliMonthBounds, getPreviousJalaliMonthBounds } from '@/utils/persianDate';
-import { endOfMonth } from 'date-fns-jalali';
+import { endOfMonth, getDaysInMonth, getDate } from 'date-fns-jalali';
 
 export interface AutoSavingsPreferences {
   /** Number of consecutive months user accepted the suggestion */
@@ -22,13 +22,16 @@ export interface AutoSavingsSuggestion {
   suggestedPercentage: number;
   daysUntilMonthEnd: number;
   isEndOfMonth: boolean;
+  isNewMonth: boolean;
   hasRecurringUnpaid: boolean;
   recurringUnpaidTotal: number;
   canAutomate: boolean;
+  previousMonthRemaining: number;
 }
 
 const PREFS_KEY = 'siaflow-auto-savings-prefs';
-const DAYS_THRESHOLD = 3; // Show suggestion when ≤3 days remain
+const END_DAYS_THRESHOLD = 3; // Show suggestion when ≤3 days remain
+const START_DAYS_THRESHOLD = 5; // Show suggestion in first 5 days of new month
 
 function loadPrefs(): AutoSavingsPreferences {
   try {
@@ -54,30 +57,45 @@ export function useAutoSavings(transactions: Transaction[]) {
 
   const suggestion = useMemo<AutoSavingsSuggestion | null>(() => {
     const now = new Date();
-    const monthEnd = endOfMonth(now);
-    const daysRemaining = Math.max(0, Math.ceil((monthEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-    const isEndOfMonth = daysRemaining <= DAYS_THRESHOLD;
+    const jalaliDay = getDate(now);
+    const jalaliDaysInMonth = getDaysInMonth(now);
+    const daysRemaining = jalaliDaysInMonth - jalaliDay;
+    const isEndOfMonth = daysRemaining <= END_DAYS_THRESHOLD;
+    const isNewMonth = jalaliDay <= START_DAYS_THRESHOLD;
 
-    const { start, end } = getCurrentJalaliMonthBounds();
+    // If neither end of month nor start of new month, don't show
+    if (!isEndOfMonth && !isNewMonth) return null;
 
-    const monthTx = transactions.filter(t => t.date >= start && t.date <= end);
-    const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-    const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-    const savings = monthTx.filter(t => t.type === 'saving').reduce((s, t) => s + t.amount, 0);
-    const remaining = income - expense - savings;
+    const { start: curStart, end: curEnd } = getCurrentJalaliMonthBounds();
+    const { start: prevStart, end: prevEnd } = getPreviousJalaliMonthBounds();
 
-    if (remaining <= 0 || !isEndOfMonth) return null;
+    // Calculate previous month's balance
+    const prevMonthTx = transactions.filter(t => t.date >= prevStart && t.date <= prevEnd);
+    const prevIncome = prevMonthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const prevExpense = prevMonthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const prevSavings = prevMonthTx.filter(t => t.type === 'saving').reduce((s, t) => s + t.amount, 0);
+    const previousMonthRemaining = prevIncome - prevExpense - prevSavings;
+
+    // Calculate current month's balance
+    const curMonthTx = transactions.filter(t => t.date >= curStart && t.date <= curEnd);
+    const curIncome = curMonthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const curExpense = curMonthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const curSavings = curMonthTx.filter(t => t.type === 'saving').reduce((s, t) => s + t.amount, 0);
+    const currentRemaining = curIncome - curExpense - curSavings;
+
+    // For new month: suggest based on previous month remaining
+    // For end of month: suggest based on current month remaining
+    const baseRemaining = isNewMonth ? previousMonthRemaining : currentRemaining;
+
+    if (baseRemaining <= 0) return null;
 
     // Detect recurring expenses that haven't been paid this month
     const recurringExpenses = transactions.filter(t => t.isRecurring && t.type === 'expense');
     const recurringCategories = [...new Set(recurringExpenses.map(t => t.category))];
     const unpaidRecurring = recurringCategories.filter(cat => {
-      return !monthTx.some(t => t.type === 'expense' && t.category === cat);
+      return !curMonthTx.some(t => t.type === 'expense' && t.category === cat);
     });
     
-    // Estimate unpaid recurring total from previous months
-    const { start: prevStart, end: prevEnd } = getPreviousJalaliMonthBounds();
-    const prevMonthTx = transactions.filter(t => t.date >= prevStart && t.date <= prevEnd);
     const recurringUnpaidTotal = unpaidRecurring.reduce((sum, cat) => {
       const prevAmount = prevMonthTx
         .filter(t => t.type === 'expense' && t.category === cat)
@@ -85,21 +103,27 @@ export function useAutoSavings(transactions: Transaction[]) {
       return sum + prevAmount;
     }, 0);
 
-    const safeRemaining = Math.max(0, remaining - recurringUnpaidTotal);
+    // Only deduct recurring for end-of-month (not new month, since those are for previous month's balance)
+    const safeRemaining = isNewMonth 
+      ? baseRemaining 
+      : Math.max(0, baseRemaining - recurringUnpaidTotal);
+    
     const percentage = prefs.suggestedPercentage;
     const suggestedAmount = Math.round(safeRemaining * (percentage / 100));
 
     if (suggestedAmount <= 0) return null;
 
     return {
-      remainingBalance: remaining,
+      remainingBalance: baseRemaining,
       suggestedAmount,
       suggestedPercentage: percentage,
       daysUntilMonthEnd: daysRemaining,
       isEndOfMonth,
-      hasRecurringUnpaid: recurringUnpaidTotal > 0,
-      recurringUnpaidTotal,
+      isNewMonth,
+      hasRecurringUnpaid: !isNewMonth && recurringUnpaidTotal > 0,
+      recurringUnpaidTotal: isNewMonth ? 0 : recurringUnpaidTotal,
       canAutomate: prefs.acceptCount >= 3,
+      previousMonthRemaining,
     };
   }, [transactions, prefs.suggestedPercentage, prefs.acceptCount]);
 

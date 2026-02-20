@@ -164,8 +164,8 @@ export function HomeScreen({
             <PiggyBank className="w-6 h-6 text-primary" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">پیشنهاد پس‌انداز هوشمند</p>
-            <p className="text-xs text-muted-foreground mt-0.5">مانده این ماه قابل پس‌انداز است</p>
+            <p className="text-sm font-semibold text-foreground">پس‌انداز کن برای آینده‌ای بهتر!</p>
+            <p className="text-xs text-muted-foreground mt-0.5">از مانده ماه قبل پس‌انداز کن 💰</p>
           </div>
           <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={2} />
         </button>
