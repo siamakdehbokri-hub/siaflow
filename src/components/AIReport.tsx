@@ -68,8 +68,16 @@ export function AIReport({ transactions, categories }: AIReportProps) {
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('ai-report', {
         body: { 
-          transactions: transactions.slice(0, 100), // Limit for API
-          categories: categories.filter(c => c.budget && c.budget > 0),
+          transactions: transactions.slice(0, 150).map(t => ({
+            amount: t.amount,
+            type: t.type,
+            category: t.category,
+            subcategory: t.subcategory || null,
+            description: t.description || '',
+            date: t.date,
+            tags: t.tags || [],
+          })),
+          categories,
           type 
         }
       });

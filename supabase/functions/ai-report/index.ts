@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // Simple validation functions
-function isValidTransaction(t: unknown): t is { amount: number; type: string; category: string; description?: string } {
+function isValidTransaction(t: unknown): t is { amount: number; type: string; category: string; description?: string; subcategory?: string; date?: string; tags?: string[] } {
   if (typeof t !== 'object' || t === null) return false;
   const obj = t as Record<string, unknown>;
   
@@ -170,13 +170,16 @@ serve(async (req) => {
 
     // Limit and validate each transaction
     const transactions = rawTransactions
-      .slice(0, 100)
+      .slice(0, 150)
       .filter(isValidTransaction)
       .map(t => ({
         amount: Math.abs(t.amount),
         type: t.type,
-         category: sanitizeText(t.category, 100),
-         description: t.description ? sanitizeText(t.description, 500) : undefined
+        category: sanitizeText(t.category, 100),
+        subcategory: t.subcategory ? sanitizeText(String(t.subcategory), 100) : undefined,
+        description: t.description ? sanitizeText(t.description, 500) : undefined,
+        date: t.date ? sanitizeText(String(t.date), 20) : undefined,
+        tags: Array.isArray(t.tags) ? t.tags.slice(0, 5).map((tag: string) => sanitizeText(String(tag), 50)) : [],
       }));
 
     // If suspicious input is detected, drop free-text descriptions so they can't act as instructions.
@@ -243,15 +246,23 @@ serve(async (req) => {
     }
 
     const categoryExpenses: Record<string, number> = {};
+    const categoryDetails: Record<string, Array<{ desc: string; amount: number; sub?: string; date?: string }>> = {};
     hardenedTransactions
       .filter((t) => t.type === 'expense')
       .forEach((t) => {
         categoryExpenses[t.category] = (categoryExpenses[t.category] || 0) + (t.amount || 0);
+        if (!categoryDetails[t.category]) categoryDetails[t.category] = [];
+        categoryDetails[t.category].push({
+          desc: t.description || 'بدون توضیح',
+          amount: t.amount,
+          sub: t.subcategory,
+          date: t.date,
+        });
       });
 
     const topCategories = Object.entries(categoryExpenses)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
+      .slice(0, 8)
       .map(([name, amount]) => ({ name, amount }));
 
     const systemPrompt = `تو یک مدیر مالی حرفه‌ای با ۲۰ سال سابقه در مشاوره مالی شخصی و خانوادگی هستی.
@@ -309,13 +320,27 @@ serve(async (req) => {
 - تراز خالص: ${netBalance.toLocaleString('fa-IR')} تومان
 - تعداد تراکنش: ${hardenedTransactions.length}
 
-${topCategories.length > 0 ? `📋 ۵ دسته پرهزینه (از بیشترین به کمترین):
+${topCategories.length > 0 ? `📋 دسته‌های پرهزینه با ریز تراکنش‌ها:
 ${topCategories.map((c, i) => {
   const pct = totalExpense > 0 ? Math.round((c.amount / totalExpense) * 100) : 0;
-  return `${i + 1}. ${c.name}: ${c.amount.toLocaleString('fa-IR')} تومان (${pct}٪ از کل هزینه)`;
-}).join('\n')}` : ''}
+  const details = categoryDetails[c.name] || [];
+  const detailLines = details.slice(0, 10).map(d => 
+    `   • ${d.desc}${d.sub ? ` (${d.sub})` : ''}: ${d.amount.toLocaleString('fa-IR')} ت${d.date ? ` [${d.date}]` : ''}`
+  ).join('\n');
+  return `${i + 1}. ${c.name}: ${c.amount.toLocaleString('fa-IR')} تومان (${pct}٪)\n${detailLines}`;
+}).join('\n\n')}` : ''}
 
-${categories.filter(c => c.budget && c.budget > 0).length > 0 ? `📋 وضعیت بودجه‌ها:
+📋 تراکنش‌های درآمدی:
+${hardenedTransactions.filter(t => t.type === 'income').slice(0, 10).map(t => 
+  `- ${t.category}${t.subcategory ? ` (${t.subcategory})` : ''}: ${t.amount.toLocaleString('fa-IR')} ت - ${t.description || '-'}${t.date ? ` [${t.date}]` : ''}`
+).join('\n') || 'بدون درآمد'}
+
+${hardenedTransactions.filter(t => t.type === 'saving').length > 0 ? `📋 پس‌اندازها:
+${hardenedTransactions.filter(t => t.type === 'saving').slice(0, 10).map(t => 
+  `- ${t.category}: ${t.amount.toLocaleString('fa-IR')} ت - ${t.description || '-'}${t.date ? ` [${t.date}]` : ''}`
+).join('\n')}` : ''}
+
+${categories.filter(c => c.budget && c.budget > 0).length > 0 ? `📋 بودجه‌ها:
 ${categories.filter(c => c.budget && c.budget > 0).map(c => {
   const spent = categoryExpenses[c.name] || 0;
   const pct = c.budget > 0 ? Math.round((spent / c.budget) * 100) : 0;
@@ -323,10 +348,11 @@ ${categories.filter(c => c.budget && c.budget > 0).map(c => {
 }).join('\n')}` : ''}
 
 لطفاً:
-۱. وضعیت کلی مالی را ارزیابی کن (سبز/زرد/قرمز)
-۲. نسبت هزینه به درآمد را با استاندارد ۵۰/۳۰/۲۰ مقایسه کن
-۳. الگوهای خطرناک یا نقاط ضعف را شناسایی کن
-۴. ۳ تا ۵ اقدام عملی و عددی مشخص پیشنهاد بده`;
+۱. توضیحات هر تراکنش را بخوان و تحلیل کن (مثلاً چه چیزی خرج شده)
+۲. وضعیت کلی مالی را ارزیابی کن (سبز/زرد/قرمز)
+۳. الگوهای تکراری یا خطرناک در تراکنش‌ها را شناسایی کن
+۴. نسبت هزینه به درآمد را با استاندارد ۵۰/۳۰/۲۰ مقایسه کن
+۵. ۳ تا ۵ اقدام عملی و عددی مشخص پیشنهاد بده`;
 
     } else if (reportType === "savings") {
       if (totalExpense === 0) {
@@ -345,17 +371,22 @@ ${categories.filter(c => c.budget && c.budget > 0).map(c => {
 - پس‌انداز فعلی: ${totalSaving.toLocaleString('fa-IR')} تومان (نرخ: ${savingRate}٪)
 - مبلغ قابل صرفه‌جویی بالقوه: ${(totalIncome - totalExpense - totalSaving).toLocaleString('fa-IR')} تومان
 
-📋 جزئیات هزینه‌ها (از بیشترین):
+📋 ریز هزینه‌ها به تفکیک دسته و توضیحات:
 ${topCategories.map((c, i) => {
   const pct = totalExpense > 0 ? Math.round((c.amount / totalExpense) * 100) : 0;
-  return `${i + 1}. ${c.name}: ${c.amount.toLocaleString('fa-IR')} تومان (${pct}٪ از کل)`;
-}).join('\n')}
+  const details = categoryDetails[c.name] || [];
+  const detailLines = details.slice(0, 8).map(d => 
+    `   • ${d.desc}${d.sub ? ` (${d.sub})` : ''}: ${d.amount.toLocaleString('fa-IR')} ت`
+  ).join('\n');
+  return `${i + 1}. ${c.name}: ${c.amount.toLocaleString('fa-IR')} تومان (${pct}٪)\n${detailLines}`;
+}).join('\n\n')}
 
 لطفاً:
 ۱. نرخ پس‌انداز فعلی را ارزیابی کن (استاندارد حداقل ۲۰٪)
-۲. مشخصاً بگو در هر دسته چقدر باید کم کند (عدد دقیق بده)
-۳. یک برنامه ۳ ماهه پس‌انداز پیشنهاد بده با اهداف ماهانه مشخص
-۴. اگر نرخ پس‌انداز زیر ۱۰٪ است، هشدار جدی بده`;
+۲. توضیحات هر تراکنش را بخوان و مشخص کن کجا قابل صرفه‌جویی است
+۳. مشخصاً بگو در هر دسته چقدر باید کم کند (عدد دقیق بده)
+۴. یک برنامه ۳ ماهه پس‌انداز پیشنهاد بده با اهداف ماهانه مشخص
+۵. اگر نرخ پس‌انداز زیر ۱۰٪ است، هشدار جدی بده`;
 
     } else if (reportType === "budget") {
       const budgetCategories = categories.filter((c) => c.budget && c.budget > 0);
@@ -369,23 +400,27 @@ ${topCategories.map((c, i) => {
 
       userPrompt = `به‌عنوان مدیر مالی، بودجه‌بندی این کاربر را ارزیابی حرفه‌ای کن:
 
-📋 بودجه‌ها و عملکرد واقعی:
+📋 بودجه‌ها و عملکرد واقعی با ریز تراکنش‌ها:
 ${budgetCategories
   .map((c) => {
     const spent = categoryExpenses[c.name] || 0;
     const percentage = c.budget > 0 ? Math.round((spent / c.budget) * 100) : 0;
     const remaining = c.budget - spent;
     const status = percentage > 100 ? '🔴 تجاوز' : percentage > 80 ? '🟡 هشدار' : '🟢 عادی';
-    return `- ${c.name}: ${spent.toLocaleString('fa-IR')} از ${c.budget.toLocaleString('fa-IR')} تومان (${percentage}٪) ${status} | باقیمانده: ${remaining.toLocaleString('fa-IR')}`;
+    const details = categoryDetails[c.name] || [];
+    const detailLines = details.slice(0, 8).map(d => 
+      `   • ${d.desc}${d.sub ? ` (${d.sub})` : ''}: ${d.amount.toLocaleString('fa-IR')} ت`
+    ).join('\n');
+    return `- ${c.name}: ${spent.toLocaleString('fa-IR')} از ${c.budget.toLocaleString('fa-IR')} تومان (${percentage}٪) ${status}\n${detailLines}`;
   })
-  .join('\n')}
+  .join('\n\n')}
 
 - مجموع درآمد: ${totalIncome.toLocaleString('fa-IR')} تومان
 - مجموع هزینه: ${totalExpense.toLocaleString('fa-IR')} تومان
 
 لطفاً:
-۱. بودجه‌های غیرواقعی (خیلی زیاد یا خیلی کم) را شناسایی کن
-۲. برای بودجه‌های رد شده، علت احتمالی و راه‌حل بگو
+۱. توضیحات تراکنش‌ها را بخوان و تحلیل کن چرا بودجه رد شده
+۲. بودجه‌های غیرواقعی (خیلی زیاد یا خیلی کم) را شناسایی کن
 ۳. پیشنهاد اصلاح بودجه بده (عدد دقیق)
 ۴. اگر مجموع بودجه‌ها با درآمد همخوانی ندارد، هشدار بده`;
 
