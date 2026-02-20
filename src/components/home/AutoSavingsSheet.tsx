@@ -60,24 +60,35 @@ export function AutoSavingsSheet({
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
             <PiggyBank className="w-8 h-8 text-primary" strokeWidth={2} />
           </div>
-          <DrawerTitle className="text-lg font-bold">پیشنهاد پس‌انداز هوشمند</DrawerTitle>
+          <DrawerTitle className="text-lg font-bold">
+            {suggestion.isNewMonth ? 'پس‌انداز از مانده ماه قبل' : 'پیشنهاد پس‌انداز هوشمند'}
+          </DrawerTitle>
           <DrawerDescription className="text-sm text-muted-foreground mt-1">
-            بر اساس مانده حساب شما در این ماه
+            {suggestion.isNewMonth 
+              ? 'ماه جدید شروع شده! از مانده ماه قبل پس‌انداز کن برای آینده‌ای بهتر 🌟'
+              : 'بر اساس مانده حساب شما در این ماه'
+            }
           </DrawerDescription>
         </DrawerHeader>
 
         <div className="px-5 pb-6 space-y-4">
           {/* Remaining Balance Display */}
           <div className="bg-success/5 border border-success/15 rounded-xl p-4 text-center">
-            <p className="text-xs font-medium text-muted-foreground mb-1">مانده قابل پس‌انداز</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1">
+              {suggestion.isNewMonth ? 'مانده ماه گذشته' : 'مانده قابل پس‌انداز'}
+            </p>
             <p className="text-2xl font-bold text-success" dir="ltr">
               {formatAmount(suggestion.remainingBalance)}
             </p>
-            {suggestion.daysUntilMonthEnd > 0 && (
+            {suggestion.isNewMonth ? (
+              <p className="text-xs text-muted-foreground mt-1">
+                برای آینده‌ای بهتر، همین الان پس‌انداز کن! 💪
+              </p>
+            ) : suggestion.daysUntilMonthEnd > 0 ? (
               <p className="text-xs text-muted-foreground mt-1">
                 {suggestion.daysUntilMonthEnd} روز تا پایان ماه
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Recurring Unpaid Warning */}
