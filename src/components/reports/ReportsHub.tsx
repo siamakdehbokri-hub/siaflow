@@ -188,30 +188,36 @@ export function ReportsHub({
         </div>
       </div>
 
-      {/* Summary Cards - Enhanced visual hierarchy */}
+      {/* Summary Cards - 3D Glass Style */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-card rounded-2xl border-2 border-success/20 p-5 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2} />
+        <div className="relative overflow-hidden bg-card rounded-2xl border-2 border-success/20 p-5 shadow-sm">
+          <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-success/8 blur-2xl" />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center shadow-sm border border-success/10">
+                <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2.5} />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد</p>
             </div>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد</p>
+            <p className="text-2xl font-black text-success tabular-nums">
+              {formatCurrency(monthlySummary.income)}
+            </p>
           </div>
-          <p className="text-2xl font-bold text-success tabular-nums">
-            {formatCurrency(monthlySummary.income)}
-          </p>
         </div>
         
-        <div className="bg-card rounded-2xl border-2 border-destructive/20 p-5 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-              <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2} />
+        <div className="relative overflow-hidden bg-card rounded-2xl border-2 border-destructive/20 p-5 shadow-sm">
+          <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-destructive/8 blur-2xl" />
+          <div className="relative">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center shadow-sm border border-destructive/10">
+                <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2.5} />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه</p>
             </div>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه</p>
+            <p className="text-2xl font-black text-destructive tabular-nums">
+              {formatCurrency(monthlySummary.expense)}
+            </p>
           </div>
-          <p className="text-2xl font-bold text-destructive tabular-nums">
-            {formatCurrency(monthlySummary.expense)}
-          </p>
         </div>
       </div>
 
@@ -357,51 +363,154 @@ export function ReportsHub({
 
       {/* Insights Tab */}
       {activeTab === 'insights' && (
-        <div className="space-y-4">
-          {/* AI Report Card */}
+        <div className="space-y-5 animate-fade-in">
+          
+          {/* AI Report - Premium Hero Card */}
           <button
             onClick={() => setShowAIReport(true)}
-            className="w-full relative overflow-hidden p-5 rounded-2xl bg-gradient-to-br from-primary/10 to-card border-2 border-primary/20 text-right active:scale-[0.99] transition-transform"
+            className="w-full relative overflow-hidden rounded-3xl text-right active:scale-[0.98] transition-all duration-300 group"
           >
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-                <Brain className="w-7 h-7 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-foreground">تحلیل هوش مصنوعی</h3>
-                  <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+            {/* Multi-layer gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/70 rounded-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-tl from-transparent via-transparent to-white/10 rounded-3xl" />
+            
+            {/* Decorative 3D orbs */}
+            <div className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-white/10 blur-2xl group-hover:scale-110 transition-transform duration-700" />
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/8 blur-xl" />
+            <div className="absolute top-1/2 left-1/3 w-16 h-16 rounded-full bg-white/5 blur-lg" />
+            
+            <div className="relative p-6">
+              <div className="flex items-start gap-4">
+                {/* 3D Icon Container */}
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-black/10 border border-white/20">
+                    <Brain className="w-8 h-8 text-white drop-shadow-md" strokeWidth={1.8} />
+                  </div>
+                  {/* Floating sparkle */}
+                  <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-warning/90 flex items-center justify-center shadow-md animate-pulse">
+                    <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  گزارش شخصی‌سازی شده با توصیه‌های هوشمند
-                </p>
+                
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-black text-white mb-1 drop-shadow-sm">
+                    تحلیل هوش مصنوعی
+                  </h3>
+                  <p className="text-sm text-white/80 leading-relaxed">
+                    بررسی دقیق تک‌تک تراکنش‌ها و توصیه‌های شخصی‌سازی شده
+                  </p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className="text-[11px] font-bold text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+                      ✨ تحلیل عمیق
+                    </span>
+                    <span className="text-[11px] font-bold text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+                      🎯 پیشنهاد بودجه
+                    </span>
+                  </div>
+                </div>
+                
+                <ChevronLeft className="w-6 h-6 text-white/70 mt-2 shrink-0 group-hover:-translate-x-1 transition-transform" strokeWidth={2} />
               </div>
-              <ChevronLeft className="w-5 h-5 text-primary mt-2" />
             </div>
           </button>
 
-          {/* Category Breakdown - uses monthly filtered data */}
-          <div className="p-4 rounded-2xl bg-card border-2 border-border">
-            <h4 className="text-sm font-bold text-foreground mb-4">تفکیک هزینه‌های ماه</h4>
-            <Suspense fallback={<ChartLoader />}>
-              <CategoryBreakdown transactions={monthlyTransactions} categories={categories} />
-            </Suspense>
+          {/* Quick Stats Row */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="relative overflow-hidden p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
+              <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-success/8 blur-lg" />
+              <div className="relative">
+                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mb-2 shadow-sm">
+                  <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2.5} />
+                </div>
+                <p className="text-[10px] text-muted-foreground mb-0.5">درآمد ماه</p>
+                <p className="text-sm font-black text-success tabular-nums">
+                  {formatCurrency(monthlySummary.income).replace(' تومان', '')}
+                </p>
+              </div>
+            </div>
+            
+            <div className="relative overflow-hidden p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
+              <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-destructive/8 blur-lg" />
+              <div className="relative">
+                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mb-2 shadow-sm">
+                  <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2.5} />
+                </div>
+                <p className="text-[10px] text-muted-foreground mb-0.5">هزینه ماه</p>
+                <p className="text-sm font-black text-destructive tabular-nums">
+                  {formatCurrency(monthlySummary.expense).replace(' تومان', '')}
+                </p>
+              </div>
+            </div>
+            
+            <div className="relative overflow-hidden p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
+              <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-primary/8 blur-lg" />
+              <div className="relative">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 shadow-sm">
+                  <CalendarDays className="w-5 h-5 text-primary" strokeWidth={2.5} />
+                </div>
+                <p className="text-[10px] text-muted-foreground mb-0.5">تراکنش</p>
+                <p className="text-sm font-black text-foreground tabular-nums">
+                  {toPersianNum(monthlyTransactions.length)}
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Trend Chart - uses all transactions for multi-month view */}
-          <div className="p-4 rounded-2xl bg-card border-2 border-border">
-            <h4 className="text-sm font-bold text-foreground mb-4">روند ۶ ماه اخیر</h4>
-            <Suspense fallback={<ChartLoader />}>
-              <TrendChart transactions={transactions} />
-            </Suspense>
+          {/* Category Breakdown - Premium Card */}
+          <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-chart-3/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+            <div className="relative p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-chart-3/20 to-chart-3/5 flex items-center justify-center shadow-sm border border-chart-3/10">
+                  <span className="text-xl">📊</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">تفکیک هزینه‌های ماه</h4>
+                  <p className="text-[11px] text-muted-foreground">سهم هر دسته از کل هزینه‌ها</p>
+                </div>
+              </div>
+              <Suspense fallback={<ChartLoader />}>
+                <CategoryBreakdown transactions={monthlyTransactions} categories={categories} />
+              </Suspense>
+            </div>
           </div>
 
-          {/* Monthly Comparison */}
-          <div className="p-4 rounded-2xl bg-card border-2 border-border">
-            <h4 className="text-sm font-bold text-foreground mb-4">مقایسه ماهانه</h4>
-            <Suspense fallback={<ChartLoader />}>
-              <MonthlyComparisonChart transactions={transactions} />
-            </Suspense>
+          {/* Trend Chart - Premium Card */}
+          <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+            <div className="absolute top-0 left-0 w-28 h-28 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/3" />
+            <div className="relative p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+                  <span className="text-xl">📈</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">روند ۶ ماه اخیر</h4>
+                  <p className="text-[11px] text-muted-foreground">تغییرات درآمد و هزینه در طول زمان</p>
+                </div>
+              </div>
+              <Suspense fallback={<ChartLoader />}>
+                <TrendChart transactions={transactions} />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Monthly Comparison - Premium Card */}
+          <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+            <div className="absolute bottom-0 right-0 w-24 h-24 bg-chart-5/5 rounded-full blur-2xl translate-y-1/3" />
+            <div className="relative p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-chart-5/20 to-chart-5/5 flex items-center justify-center shadow-sm border border-chart-5/10">
+                  <span className="text-xl">📉</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground">مقایسه ماهانه</h4>
+                  <p className="text-[11px] text-muted-foreground">مقایسه عملکرد ماه‌ها با یکدیگر</p>
+                </div>
+              </div>
+              <Suspense fallback={<ChartLoader />}>
+                <MonthlyComparisonChart transactions={transactions} />
+              </Suspense>
+            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, TrendingUp, PiggyBank, Wallet, Loader2, RefreshCw, Bot, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sparkles, TrendingUp, PiggyBank, Wallet, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Transaction, Category } from '@/types/expense';
@@ -15,9 +14,9 @@ interface AIReportProps {
 type ReportType = 'summary' | 'savings' | 'budget' | 'tip';
 
 const reportTypes = [
-  { id: 'summary' as ReportType, label: 'خلاصه مالی', icon: TrendingUp, color: 'text-blue-500' },
-  { id: 'savings' as ReportType, label: 'پیشنهاد صرفه‌جویی', icon: PiggyBank, color: 'text-emerald-500' },
-  { id: 'budget' as ReportType, label: 'تحلیل بودجه', icon: Wallet, color: 'text-purple-500' },
+  { id: 'summary' as ReportType, label: 'خلاصه مالی', icon: TrendingUp, emoji: '📊' },
+  { id: 'savings' as ReportType, label: 'پیشنهاد صرفه‌جویی', icon: PiggyBank, emoji: '💰' },
+  { id: 'budget' as ReportType, label: 'تحلیل بودجه', icon: Wallet, emoji: '🎯' },
 ];
 
 export function AIReport({ transactions, categories }: AIReportProps) {
@@ -26,7 +25,6 @@ export function AIReport({ transactions, categories }: AIReportProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if there's enough data
   const hasTransactions = transactions.length > 0;
   const hasIncome = transactions.some(t => t.type === 'income');
   const hasExpenses = transactions.some(t => t.type === 'expense');
@@ -37,7 +35,6 @@ export function AIReport({ transactions, categories }: AIReportProps) {
     setReport(null);
     setError(null);
 
-    // Check data availability
     if (!hasTransactions) {
       setError('برای دریافت گزارش هوشمند، ابتدا تراکنش‌هایی ثبت کنید.');
       setLoading(false);
@@ -115,59 +112,61 @@ export function AIReport({ transactions, categories }: AIReportProps) {
     }
   };
 
-  // Empty state when no transactions
+  // Empty state
   if (!hasTransactions) {
     return (
-      <Card variant="glass" className="overflow-hidden">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-              <Bot className="w-5 h-5 text-primary" />
+      <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+        <div className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-primary/5 blur-3xl" />
+        <div className="relative p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+              <span className="text-2xl">🤖</span>
             </div>
-            گزارش هوشمند AI
-            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-              جدید
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center gap-4 py-8">
-            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-muted-foreground/30" />
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-foreground mb-1">
-                هنوز داده‌ای برای تحلیل نیست
-              </p>
-              <p className="text-xs text-muted-foreground">
-                با ثبت تراکنش‌ها، گزارش هوشمند دریافت کنید
-              </p>
+            <div>
+              <h3 className="text-base font-bold text-foreground">مشاور هوشمند مالی</h3>
+              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">AI</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shadow-inner">
+              <span className="text-4xl opacity-40">📋</span>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground mb-1">هنوز داده‌ای برای تحلیل نیست</p>
+              <p className="text-xs text-muted-foreground">با ثبت تراکنش‌ها، گزارش هوشمند دریافت کنید</p>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card variant="glass" className="overflow-hidden">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20">
-            <Bot className="w-5 h-5 text-primary" />
+    <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+      {/* Background decoration */}
+      <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/5 blur-3xl" />
+      <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-chart-5/5 blur-2xl" />
+      
+      <div className="relative p-5">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="relative">
+            <div className="w-13 h-13 rounded-xl bg-gradient-to-br from-primary/20 to-chart-5/10 flex items-center justify-center shadow-sm border border-primary/10">
+              <span className="text-2xl">🤖</span>
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success flex items-center justify-center border-2 border-card">
+              <span className="text-[8px] text-white">✓</span>
+            </div>
           </div>
-          گزارش هوشمند AI
-          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-            جدید
-          </span>
-        </CardTitle>
-      </CardHeader>
+          <div className="flex-1">
+            <h3 className="text-base font-bold text-foreground">مشاور هوشمند مالی</h3>
+            <p className="text-[11px] text-muted-foreground">تحلیل دقیق تک‌تک تراکنش‌ها</p>
+          </div>
+        </div>
 
-      <CardContent className="space-y-4">
         {/* Report Type Selector */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
           {reportTypes.map((type) => {
-            const Icon = type.icon;
             const isActive = activeType === type.id;
             return (
               <button
@@ -175,35 +174,41 @@ export function AIReport({ transactions, categories }: AIReportProps) {
                 onClick={() => generateReport(type.id)}
                 disabled={loading}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300",
+                  "relative flex items-center gap-2.5 px-5 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all duration-300",
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-[1.02]"
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent hover:border-border"
                 )}
               >
-                <Icon className="w-4 h-4" />
-                {type.label}
+                {isActive && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl" />
+                )}
+                <span className="relative z-10">{type.emoji}</span>
+                <span className="relative z-10">{type.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Report Content */}
-        <div className="min-h-[200px] relative">
+        <div className="min-h-[220px] relative">
           {loading ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               <div className="relative">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-6 h-6 text-white" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-chart-5 flex items-center justify-center shadow-xl shadow-primary/30">
+                  <span className="text-3xl animate-pulse">🧠</span>
                 </div>
-                <Loader2 className="absolute -right-1 -bottom-1 w-5 h-5 text-primary animate-spin" />
+                <Loader2 className="absolute -right-1.5 -bottom-1.5 w-6 h-6 text-primary animate-spin" />
               </div>
-              <p className="text-sm text-muted-foreground">در حال تحلیل...</p>
+              <div className="text-center">
+                <p className="text-sm font-medium text-foreground mb-1">در حال تحلیل عمیق...</p>
+                <p className="text-xs text-muted-foreground">بررسی تک‌تک تراکنش‌ها</p>
+              </div>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center gap-4 py-8">
-              <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                <AlertCircle className="w-7 h-7 text-destructive" />
+              <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center shadow-sm">
+                <AlertCircle className="w-8 h-8 text-destructive" />
               </div>
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-3">{error}</p>
@@ -211,7 +216,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
                   variant="outline" 
                   size="sm" 
                   onClick={() => generateReport(activeType)}
-                  className="gap-2"
+                  className="gap-2 rounded-xl"
                 >
                   <RefreshCw className="w-4 h-4" />
                   تلاش مجدد
@@ -219,15 +224,17 @@ export function AIReport({ transactions, categories }: AIReportProps) {
               </div>
             </div>
           ) : report ? (
-            <div className="space-y-3">
-              <div className="prose prose-sm max-w-none text-foreground leading-relaxed whitespace-pre-wrap">
-                {report}
+            <div className="space-y-4 pt-2">
+              <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
+                <div className="prose prose-sm max-w-none text-foreground leading-loose whitespace-pre-wrap text-sm">
+                  {report}
+                </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => generateReport(activeType)}
-                className="text-muted-foreground hover:text-primary"
+                className="text-muted-foreground hover:text-primary rounded-xl"
               >
                 <RefreshCw className="w-4 h-4 ml-2" />
                 تحلیل مجدد
@@ -235,14 +242,13 @@ export function AIReport({ transactions, categories }: AIReportProps) {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-4 py-8">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/10 to-blue-500/10 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-primary/50" />
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-chart-5/5 flex items-center justify-center shadow-inner border border-primary/10">
+                <span className="text-4xl">💡</span>
               </div>
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-3">
-                  با هوش مصنوعی، تحلیل مالی هوشمند دریافت کنید
-                </p>
-                <Button onClick={() => generateReport('summary')} className="gap-2">
+                <p className="text-sm font-medium text-foreground mb-1">آماده تحلیل هوشمند</p>
+                <p className="text-xs text-muted-foreground mb-3">یکی از بخش‌های بالا را انتخاب کنید</p>
+                <Button onClick={() => generateReport('summary')} className="gap-2 rounded-xl shadow-lg shadow-primary/20">
                   <Sparkles className="w-4 h-4" />
                   شروع تحلیل
                 </Button>
@@ -250,7 +256,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
