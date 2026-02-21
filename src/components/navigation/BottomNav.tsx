@@ -9,16 +9,16 @@ interface BottomNavProps {
   onAddClick: () => void;
 }
 
-const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
-  { id: 'home', icon: Home, label: 'داشبورد' },
-  { id: 'reports', icon: BarChart2, label: 'گزارش‌ها' },
-  { id: 'settings', icon: Settings2, label: 'تنظیمات' },
+const navItems: { id: NavTab; icon: LucideIcon; label: string; emoji: string }[] = [
+  { id: 'home', icon: Home, label: 'داشبورد', emoji: '🏠' },
+  { id: 'reports', icon: BarChart2, label: 'گزارش‌ها', emoji: '📊' },
+  { id: 'settings', icon: Settings2, label: 'تنظیمات', emoji: '⚙️' },
 ];
 
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
   return (
     <>
-      {/* Floating Add Button - Right side for RTL layout (better thumb reach) */}
+      {/* Floating Add Button - 3D style */}
       <button
         onClick={onAddClick}
         className="fixed z-50 flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -28,11 +28,12 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
         }}
         aria-label="افزودن تراکنش"
       >
-        <Plus className="w-7 h-7" strokeWidth={2.5} />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/25 to-transparent rounded-full" />
+        <Plus className="w-7 h-7 relative z-10" strokeWidth={2.5} />
       </button>
 
-      {/* Bottom Navigation Bar - Enhanced touch targets and visual feedback */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-border shadow-lg shadow-foreground/5">
+      {/* Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-t-2 border-border shadow-lg shadow-foreground/5">
         <div className="pb-safe">
           <div className="flex items-stretch h-[72px]">
             {navItems.map((item) => {
@@ -44,7 +45,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
                   className={cn(
-                    "flex-1 flex flex-col items-center justify-center gap-1.5 relative transition-all",
+                    "flex-1 flex flex-col items-center justify-center gap-1 relative transition-all",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     isActive 
                       ? "text-primary" 
@@ -52,24 +53,24 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
                   )}
                 >
                   <div className={cn(
-                    "p-2 rounded-xl transition-colors",
-                    isActive && "bg-primary/10"
+                    "p-2 rounded-xl transition-all duration-200",
+                    isActive && "bg-primary/10 shadow-sm"
                   )}>
                     <Icon 
                       className="w-6 h-6" 
-                      strokeWidth={2} 
+                      strokeWidth={isActive ? 2.5 : 2} 
                     />
                   </div>
                   <span 
                     className={cn(
-                      "text-xs leading-relaxed",
-                      isActive ? "font-bold" : "font-medium"
+                      "text-[11px] leading-relaxed",
+                      isActive ? "font-black" : "font-medium"
                     )}
                   >
                     {item.label}
                   </span>
                   
-                  {/* Active indicator line - More prominent */}
+                  {/* Active indicator */}
                   {isActive && (
                     <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-primary rounded-b-full" />
                   )}

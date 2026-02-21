@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  // New categories
   'خوراک و خرید روزمره': ShoppingCart,
   'خانه و زندگی': Home,
   'حمل و نقل': Car,
@@ -28,7 +27,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'کار و پول‌سازی': Briefcase,
   'سرمایه‌گذاری': TrendingUp,
   'سایر درآمدها': Gift,
-  // Legacy categories
   'خانه': Home,
   'خوراک و نوشیدنی': UtensilsCrossed,
   'پوشاک و مد': ShoppingBag,
@@ -43,7 +41,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'سلامت': Heart,
   'تفریح': Gamepad2,
   'حقوق': Wallet,
-  // Saving categories
   'پس‌انداز و سرمایه‌گذاری': PiggyBank,
   'خرید سرمایه‌ای': Coins,
   'اهداف مالی': Target,
@@ -70,23 +67,23 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
         "active:bg-muted/50"
       )}
     >
-      {/* Icon Container */}
+      {/* 3D Icon Container */}
       <div className={cn(
-        "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border",
         isSaving
-          ? "bg-primary/10"
+          ? "bg-gradient-to-br from-primary/15 to-primary/5 border-primary/10"
           : isIncome 
-            ? "bg-success/10" 
-            : "bg-destructive/10"
+            ? "bg-gradient-to-br from-success/15 to-success/5 border-success/10" 
+            : "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10"
       )}>
         <CategoryIcon className={cn(
-          "w-5 h-5",
+          "w-5.5 h-5.5",
           isSaving ? "text-primary" : isIncome ? "text-success" : "text-destructive"
-        )} />
+        )} strokeWidth={2} />
         
         {/* Recurring indicator */}
         {transaction.isRecurring && (
-          <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-sm">
+          <div className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-sm border border-card">
             <RefreshCw className="w-2.5 h-2.5 text-primary-foreground" />
           </div>
         )}
@@ -96,7 +93,7 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h4 className="font-semibold text-foreground truncate text-sm">
+            <h4 className="font-bold text-foreground truncate text-sm">
               {transaction.description || transaction.category}
             </h4>
             <div className="flex items-center gap-1.5 mt-0.5">
@@ -116,13 +113,13 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
           
           <div className="text-left shrink-0">
             <p className={cn(
-              "font-bold text-sm tabular-nums flex items-center gap-0.5",
+              "font-black text-sm tabular-nums flex items-center gap-0.5",
               isSaving ? "text-primary" : isIncome ? "text-success" : "text-foreground"
             )}>
               <DirectionIcon className={cn(
                 "w-3.5 h-3.5",
                 isSaving ? "text-primary" : isIncome ? "text-success" : "text-destructive"
-              )} />
+              )} strokeWidth={2.5} />
               {formatAmount(transaction.amount)}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
