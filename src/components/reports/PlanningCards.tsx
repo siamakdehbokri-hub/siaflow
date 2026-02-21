@@ -60,86 +60,93 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
     ? stats.current // paid amount
     : stats.total - stats.current; // remaining
 
+  // Emoji map for card types
+  const emojiMap = { budget: '📊', goals: '🐷', debts: '🏦' };
+
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full p-5 rounded-2xl bg-card border-2 transition-all duration-200 text-right",
+        "relative overflow-hidden w-full p-5 rounded-2xl bg-card border-2 transition-all duration-200 text-right",
         "hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         hasAlert 
           ? "border-destructive/30 hover:border-destructive/50" 
           : "border-border hover:border-primary/30"
       )}
     >
-      {/* Header Row */}
-      <div className="flex items-start gap-4 mb-4">
-        <div className={cn(
-          "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
-          hasAlert ? "bg-destructive/10" : `bg-${config.color}/10`
-        )}>
-          <Icon className={cn(
-            "w-7 h-7",
-            hasAlert ? "text-destructive" : `text-${config.color}`
-          )} strokeWidth={2} />
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-base font-bold text-foreground">{config.title}</h3>
-            {hasAlert && (
-              <AlertTriangle className="w-4 h-4 text-destructive animate-pulse" />
+      {/* Decorative orb */}
+      <div className={cn(
+        "absolute -top-4 -right-4 w-16 h-16 rounded-full blur-xl opacity-30",
+        hasAlert ? "bg-destructive" : `bg-${config.color}`
+      )} />
+      
+      <div className="relative">
+        {/* Header Row */}
+        <div className="flex items-start gap-4 mb-4">
+          <div className={cn(
+            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border",
+            hasAlert 
+              ? "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10" 
+              : `bg-gradient-to-br from-${config.color}/15 to-${config.color}/5 border-${config.color}/10`
+          )}>
+            <span className="text-2xl">{emojiMap[type]}</span>
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-base font-black text-foreground">{config.title}</h3>
+              {hasAlert && (
+                <AlertTriangle className="w-4 h-4 text-destructive animate-pulse" />
+              )}
+            </div>
+            
+            {hasData ? (
+              <>
+                <p className="text-2xl font-black text-foreground tabular-nums tracking-tight">
+                  {formatCurrency(primaryValue).replace(' تومان', '')}
+                  <span className="text-sm font-normal text-muted-foreground mr-1">تومان</span>
+                </p>
+                
+                {hasAlert && (
+                  <p className="text-xs text-destructive font-bold mt-1">
+                    ⚠️ {toPersianNum(stats.alertCount || 0)} {config.alertLabel}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">{config.emptyText}</p>
             )}
           </div>
           
-          {hasData ? (
-            <>
-              {/* Primary Value - Large and prominent */}
-              <p className="text-2xl font-black text-foreground tabular-nums tracking-tight">
-                {formatCurrency(primaryValue).replace(' تومان', '')}
-                <span className="text-sm font-normal text-muted-foreground mr-1">تومان</span>
-              </p>
-              
-              {/* Alert Badge */}
-              {hasAlert && (
-                <p className="text-xs text-destructive font-medium mt-1">
-                  ⚠️ {toPersianNum(stats.alertCount || 0)} {config.alertLabel}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{config.emptyText}</p>
-          )}
+          <ChevronLeft className="w-5 h-5 text-muted-foreground mt-2 shrink-0" strokeWidth={2} />
         </div>
         
-        <ChevronLeft className="w-5 h-5 text-muted-foreground mt-2 shrink-0" />
-      </div>
-      
-      {/* Progress Section */}
-      {hasData && (
-        <div className="space-y-2">
-          <Progress 
-            value={stats.percent} 
-            size="md" 
-            variant={config.variant}
-          />
-          
-          {/* Stats Row */}
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground tabular-nums">
-              {toPersianNum(Math.round(stats.percent))}٪ {config.progressLabel}
-            </span>
-            <span className={cn(
-              "font-medium tabular-nums",
-              type === 'debts' ? "text-success" : "text-muted-foreground"
-            )}>
-              {type === 'debts' 
-                ? `${formatCurrency(stats.current).replace(' تومان', '')} پرداخت شده`
-                : `${formatCurrency(stats.total).replace(' تومان', '')} کل`
-              }
-            </span>
+        {/* Progress Section */}
+        {hasData && (
+          <div className="space-y-2">
+            <Progress 
+              value={stats.percent} 
+              size="md" 
+              variant={config.variant}
+            />
+            
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground tabular-nums">
+                {toPersianNum(Math.round(stats.percent))}٪ {config.progressLabel}
+              </span>
+              <span className={cn(
+                "font-bold tabular-nums",
+                type === 'debts' ? "text-success" : "text-muted-foreground"
+              )}>
+                {type === 'debts' 
+                  ? `${formatCurrency(stats.current).replace(' تومان', '')} پرداخت شده`
+                  : `${formatCurrency(stats.total).replace(' تومان', '')} کل`
+                }
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </button>
   );
 }
@@ -171,13 +178,14 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
 
   if (!hasData) {
     return (
-      <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/5 to-card border-2 border-primary/10">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Sparkles className="w-7 h-7 text-primary" />
+      <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-primary/5 to-card border-2 border-primary/10 shadow-sm">
+        <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-primary/5 blur-xl" />
+        <div className="relative flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+            <span className="text-3xl">✨</span>
           </div>
           <div>
-            <h3 className="text-base font-bold text-foreground">سلامت مالی</h3>
+            <h3 className="text-base font-black text-foreground">سلامت مالی</h3>
             <p className="text-sm text-muted-foreground">
               با ثبت بودجه و اهداف، وضعیت مالی خود را ببینید
             </p>
@@ -188,53 +196,58 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
   }
 
   return (
-    <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/5 via-card to-card border-2 border-primary/10">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-primary" />
+    <div className="relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-primary/5 via-card to-card border-2 border-primary/10 shadow-sm">
+      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-primary/5 blur-2xl" />
+      <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-chart-5/5 blur-xl" />
+      
+      <div className="relative">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+              <span className="text-2xl">💪</span>
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-foreground">سلامت مالی</h3>
+              <p className="text-xs text-muted-foreground">امتیاز کلی</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-foreground">سلامت مالی</h3>
-            <p className="text-xs text-muted-foreground">امتیاز کلی</p>
+          
+          <div className={cn("px-3 py-1.5 rounded-xl shadow-sm", status.bg)}>
+            <span className={cn("text-sm font-black", status.color)}>
+              {status.label}
+            </span>
           </div>
         </div>
         
-        <div className={cn("px-3 py-1.5 rounded-xl", status.bg)}>
-          <span className={cn("text-sm font-bold", status.color)}>
-            {status.label}
-          </span>
-        </div>
-      </div>
-      
-      {/* Mini Progress Bars */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="text-center">
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
-            <div 
-              className="h-full bg-chart-1 rounded-full transition-all"
-              style={{ width: `${Math.min(100 - budgetPercent, 100)}%` }}
-            />
+        {/* Mini Progress Bars */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center p-2 rounded-xl bg-card/80 border border-border/30">
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
+              <div 
+                className="h-full bg-chart-1 rounded-full transition-all"
+                style={{ width: `${Math.min(100 - budgetPercent, 100)}%` }}
+              />
+            </div>
+            <p className="text-[10px] font-medium text-muted-foreground">بودجه</p>
           </div>
-          <p className="text-[10px] text-muted-foreground">بودجه</p>
-        </div>
-        <div className="text-center">
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
-            <div 
-              className="h-full bg-success rounded-full transition-all"
-              style={{ width: `${goalsPercent}%` }}
-            />
+          <div className="text-center p-2 rounded-xl bg-card/80 border border-border/30">
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
+              <div 
+                className="h-full bg-success rounded-full transition-all"
+                style={{ width: `${goalsPercent}%` }}
+              />
+            </div>
+            <p className="text-[10px] font-medium text-muted-foreground">پس‌انداز</p>
           </div>
-          <p className="text-[10px] text-muted-foreground">پس‌انداز</p>
-        </div>
-        <div className="text-center">
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
-            <div 
-              className="h-full bg-warning rounded-full transition-all"
-              style={{ width: `${debtPercent}%` }}
-            />
+          <div className="text-center p-2 rounded-xl bg-card/80 border border-border/30">
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
+              <div 
+                className="h-full bg-warning rounded-full transition-all"
+                style={{ width: `${debtPercent}%` }}
+              />
+            </div>
+            <p className="text-[10px] font-medium text-muted-foreground">بدهی</p>
           </div>
-          <p className="text-[10px] text-muted-foreground">بدهی</p>
         </div>
       </div>
     </div>
