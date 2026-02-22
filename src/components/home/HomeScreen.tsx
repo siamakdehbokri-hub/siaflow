@@ -168,6 +168,77 @@ export function HomeScreen({
         </div>
       </div>
 
+      {/* Balance Detail Card */}
+      <div className="relative overflow-hidden bg-card rounded-2xl border-2 border-primary/15 shadow-sm">
+        <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-primary/6 blur-xl" />
+        <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full bg-chart-4/6 blur-xl" />
+        
+        <div className="relative p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
+              <span className="text-xl">💰</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-foreground">مانده دارایی</p>
+              <p className="text-xs text-muted-foreground">خلاصه مالی این ماه</p>
+            </div>
+          </div>
+
+          {/* Balance Amount */}
+          <div className="text-center mb-4 py-3 rounded-xl bg-muted/30">
+            <p className="text-xs text-muted-foreground mb-1">موجودی فعلی</p>
+            <p className={cn(
+              "text-3xl font-black tabular-nums tracking-tight",
+              financialData.balance >= 0 ? "text-success" : "text-destructive"
+            )}>
+              {financialData.balance >= 0 ? '+' : ''}{formatAmountCompact(financialData.balance)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">{currencyInfo.symbol}</p>
+          </div>
+
+          {/* Detail Rows */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-success/5 border border-success/10">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">📈</span>
+                <span className="text-xs font-medium text-muted-foreground">کل درآمد</span>
+              </div>
+              <span className="text-sm font-bold text-success tabular-nums">{formatAmountCompact(financialData.income)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-destructive/5 border border-destructive/10">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">📉</span>
+                <span className="text-xs font-medium text-muted-foreground">کل هزینه</span>
+              </div>
+              <span className="text-sm font-bold text-destructive tabular-nums">{formatAmountCompact(financialData.expense)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/10">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">💵</span>
+                <span className="text-xs font-medium text-muted-foreground">مانده</span>
+              </div>
+              <span className={cn(
+                "text-sm font-bold tabular-nums",
+                financialData.balance >= 0 ? "text-primary" : "text-destructive"
+              )}>
+                {formatAmountCompact(Math.abs(financialData.balance))}
+              </span>
+            </div>
+            {financialData.income > 0 && (
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-chart-3/5 border border-chart-3/10">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">📊</span>
+                  <span className="text-xs font-medium text-muted-foreground">نرخ پس‌انداز</span>
+                </div>
+                <span className="text-sm font-bold text-chart-3 tabular-nums">
+                  {Math.round(((financialData.income - financialData.expense) / financialData.income) * 100)}%
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Auto-Savings Banner - Premium */}
       {showAutoSavings && onOpenAutoSavings && (
         <button
