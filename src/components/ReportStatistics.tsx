@@ -30,18 +30,21 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
       };
     }
 
-    // Total income and expense with validation
+    // Total income, expense, and saving with validation
     const incomeTransactions = transactions.filter(t => t.type === 'income' && t.amount > 0);
     const expenseTransactions = transactions.filter(t => t.type === 'expense' && t.amount > 0);
+    const savingTransactions = transactions.filter(t => t.type === 'saving' && t.amount > 0);
     
     const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
     const totalExpense = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const balance = totalIncome - totalExpense;
+    const totalSaving = savingTransactions.reduce((sum, t) => sum + t.amount, 0);
+    // Net balance = Income - Expense - Saving
+    const balance = totalIncome - totalExpense - totalSaving;
     
-    // Calculate savings rate (percentage of income saved)
-    // Formula: (Income - Expense) / Income * 100
+    // Calculate savings rate (percentage of income saved via saving transactions)
+    // Formula: Saving / Income * 100
     const savingsRate = totalIncome > 0 
-      ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) 
+      ? Math.round((totalSaving / totalIncome) * 100) 
       : 0;
 
     // Calculate average transaction amount

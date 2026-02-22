@@ -25,6 +25,7 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
     const monthTransactions = transactions.filter(t => t.date >= monthStart && t.date <= monthEnd);
     const income = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const expense = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const saving = monthTransactions.filter(t => t.type === 'saving').reduce((sum, t) => sum + t.amount, 0);
     
     // Top expense categories
     const categoryExpenses = monthTransactions
@@ -53,7 +54,8 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
     // Calculate daily spending allowance:
     // (درآمد ماهانه − هزینه‌ها) ÷ روزهای باقی‌مانده
     // Only show if there's actual income
-    const remaining = income - expense;
+    // Net remaining = Income - Expense - Saving
+    const remaining = income - expense - saving;
     const dailyAllowance = daysRemaining > 0 && income > 0 ? Math.max(0, remaining / daysRemaining) : 0;
     
     // Has meaningful data
@@ -65,7 +67,8 @@ export function MonthlySummary({ transactions, categories }: MonthlySummaryProps
     return {
       income,
       expense,
-      balance: income - expense,
+      saving,
+      balance: income - expense - saving,
       topCategories,
       daysRemaining,
       totalBudget,

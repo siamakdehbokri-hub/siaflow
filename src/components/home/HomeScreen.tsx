@@ -43,11 +43,16 @@ export function HomeScreen({
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
     
-    const balance = income - expense;
+    const saving = monthlyTransactions
+      .filter(t => t.type === 'saving')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const balance = income - expense - saving;
     
     return {
       income,
       expense,
+      saving,
       todayExpense,
       balance,
       recentTransactions: [...transactions]
@@ -212,10 +217,19 @@ export function HomeScreen({
               </div>
               <span className="text-sm font-bold text-destructive tabular-nums">{formatAmountCompact(financialData.expense)}</span>
             </div>
+            {financialData.saving > 0 && (
+              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-chart-4/5 border border-chart-4/10">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">🐷</span>
+                  <span className="text-xs font-medium text-muted-foreground">پس‌انداز</span>
+                </div>
+                <span className="text-sm font-bold text-chart-4 tabular-nums">{formatAmountCompact(financialData.saving)}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/10">
               <div className="flex items-center gap-2">
                 <span className="text-sm">💵</span>
-                <span className="text-xs font-medium text-muted-foreground">مانده</span>
+                <span className="text-xs font-medium text-muted-foreground">مانده خالص</span>
               </div>
               <span className={cn(
                 "text-sm font-bold tabular-nums",
@@ -231,7 +245,7 @@ export function HomeScreen({
                   <span className="text-xs font-medium text-muted-foreground">نرخ پس‌انداز</span>
                 </div>
                 <span className="text-sm font-bold text-chart-3 tabular-nums">
-                  {Math.round(((financialData.income - financialData.expense) / financialData.income) * 100)}%
+                  {Math.round((financialData.saving / financialData.income) * 100)}%
                 </span>
               </div>
             )}
