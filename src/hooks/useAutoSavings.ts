@@ -137,9 +137,10 @@ export function useAutoSavings(transactions: Transaction[]) {
     if (!suggestion) return false;
     if (isDismissed) return false;
     if (prefs.lastDismissedMonth === currentMonthKey) return false;
-    if (prefs.autoTransferEnabled) return false; // auto-mode, no prompt needed
+    if (prefs.lastSuggestedMonth === currentMonthKey) return false; // Already saved this month
+    if (prefs.autoTransferEnabled) return false;
     return true;
-  }, [suggestion, isDismissed, prefs.lastDismissedMonth, prefs.autoTransferEnabled, currentMonthKey]);
+  }, [suggestion, isDismissed, prefs.lastDismissedMonth, prefs.lastSuggestedMonth, prefs.autoTransferEnabled, currentMonthKey]);
 
   const acceptSuggestion = useCallback((amount: number) => {
     const newPrefs: AutoSavingsPreferences = {
