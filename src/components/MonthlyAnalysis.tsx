@@ -51,6 +51,7 @@ export function MonthlyAnalysis({ transactions, categories }: MonthlyAnalysisPro
     );
     const currentIncome = currentMonthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const currentExpense = currentMonthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const currentSaving = currentMonthTx.filter(t => t.type === 'saving').reduce((sum, t) => sum + t.amount, 0);
 
     // Last month data using Jalali calendar
     const lastMonthTx = filterByCategory(
@@ -58,12 +59,14 @@ export function MonthlyAnalysis({ transactions, categories }: MonthlyAnalysisPro
     );
     const lastIncome = lastMonthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const lastExpense = lastMonthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const lastSaving = lastMonthTx.filter(t => t.type === 'saving').reduce((sum, t) => sum + t.amount, 0);
 
     // Calculate changes
     const incomeChange = lastIncome > 0 ? ((currentIncome - lastIncome) / lastIncome) * 100 : 0;
     const expenseChange = lastExpense > 0 ? ((currentExpense - lastExpense) / lastExpense) * 100 : 0;
-    const savingCurrent = currentIncome - currentExpense;
-    const savingLast = lastIncome - lastExpense;
+    // Net remaining = Income - Expense - Saving
+    const savingCurrent = currentIncome - currentExpense - currentSaving;
+    const savingLast = lastIncome - lastExpense - lastSaving;
     const savingChange = savingLast !== 0 ? ((savingCurrent - savingLast) / Math.abs(savingLast)) * 100 : 0;
 
     // Dangerous categories (over budget)
