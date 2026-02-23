@@ -1,4 +1,4 @@
-import { PiggyBank, ChevronLeft, Target, CreditCard, Plus } from 'lucide-react';
+import { ChevronLeft, Target, CreditCard, PiggyBank, Plus, TrendingUp, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { Debt } from '@/hooks/useDebts';
@@ -60,11 +60,11 @@ export function GoalsPreview({
           <h3 className="text-sm font-bold text-foreground">برنامه‌ریزی مالی</h3>
         </div>
         
-        <div className="relative overflow-hidden p-5 rounded-2xl bg-card border-2 border-border/40 text-center">
-          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-primary/5 blur-xl" />
-          <div className="relative">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center mx-auto mb-3 shadow-sm border border-primary/10">
-              <span className="text-3xl">🎯</span>
+        <div className="relative overflow-hidden p-5 rounded-2xl text-center glass-card">
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
+          <div className="relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-primary/12 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 border border-primary/15">
+              <Target className="w-7 h-7 text-primary" strokeWidth={2} />
             </div>
             <h4 className="text-sm font-bold text-foreground mb-1">شروع برنامه‌ریزی</h4>
             <p className="text-xs text-muted-foreground mb-4">
@@ -72,9 +72,9 @@ export function GoalsPreview({
             </p>
             <button
               onClick={onViewGoals}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold active:scale-95 transition-all shadow-md shadow-primary/20"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold active:scale-95 transition-all shadow-lg shadow-primary/25"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4" strokeWidth={2} />
               ایجاد اولین هدف
             </button>
           </div>
@@ -94,12 +94,12 @@ export function GoalsPreview({
         {goalsStats.count > 0 && (
           <button
             onClick={onViewGoals}
-            className="relative overflow-hidden w-full p-4 rounded-2xl bg-card border-2 border-border/40 hover:border-success/30 transition-all duration-300 hover:shadow-md active:scale-[0.98] text-right"
+            className="relative overflow-hidden w-full p-4 rounded-2xl transition-all duration-300 active:scale-[0.98] text-right glass-card hover:shadow-card-hover"
           >
-            <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-success/6 blur-lg" />
-            <div className="relative flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-success/15 to-success/5 flex items-center justify-center shrink-0 shadow-sm border border-success/10">
-                <span className="text-lg">🐷</span>
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-success/8 blur-xl pointer-events-none" />
+            <div className="relative z-10 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-success/12 backdrop-blur-sm flex items-center justify-center shrink-0 border border-success/15">
+                <PiggyBank className="w-5 h-5 text-success" strokeWidth={2} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
@@ -120,12 +120,12 @@ export function GoalsPreview({
         {budgetStats.count > 0 && (
           <button
             onClick={onViewBudget}
-            className="relative overflow-hidden w-full p-4 rounded-2xl bg-card border-2 border-border/40 hover:border-chart-1/30 transition-all duration-300 hover:shadow-md active:scale-[0.98] text-right"
+            className="relative overflow-hidden w-full p-4 rounded-2xl transition-all duration-300 active:scale-[0.98] text-right glass-card hover:shadow-card-hover"
           >
-            <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-chart-1/6 blur-lg" />
-            <div className="relative flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-chart-1/15 to-chart-1/5 flex items-center justify-center shrink-0 shadow-sm border border-chart-1/10">
-                <span className="text-lg">📊</span>
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-chart-1/8 blur-xl pointer-events-none" />
+            <div className="relative z-10 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-chart-1/12 backdrop-blur-sm flex items-center justify-center shrink-0 border border-chart-1/15">
+                <TrendingUp className="w-5 h-5 text-chart-1" strokeWidth={2} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
@@ -142,8 +142,9 @@ export function GoalsPreview({
                   className={cn("h-1.5", budgetStats.usedPercent > 100 && "[&>div]:bg-destructive")} 
                 />
                 {budgetStats.overBudgetCount > 0 && (
-                  <p className="text-[10px] text-destructive mt-1.5">
-                    ⚠️ {budgetStats.overBudgetCount} دسته بیش از بودجه
+                  <p className="text-[10px] text-destructive mt-1.5 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" strokeWidth={2} />
+                    {budgetStats.overBudgetCount} دسته بیش از بودجه
                   </p>
                 )}
               </div>
@@ -157,21 +158,18 @@ export function GoalsPreview({
           <button
             onClick={onViewDebts}
             className={cn(
-              "relative overflow-hidden w-full p-4 rounded-2xl bg-card border-2 transition-all duration-300 hover:shadow-md active:scale-[0.98] text-right",
-              debtStats.overdueCount > 0 
-                ? "border-destructive/30 hover:border-destructive/50" 
-                : "border-border/40 hover:border-warning/30"
+              "relative overflow-hidden w-full p-4 rounded-2xl transition-all duration-300 active:scale-[0.98] text-right glass-card hover:shadow-card-hover"
             )}
           >
-            <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full blur-lg" style={{ background: debtStats.overdueCount > 0 ? 'hsl(var(--destructive) / 0.06)' : 'hsl(var(--warning) / 0.06)' }} />
-            <div className="relative flex items-center gap-3">
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full blur-xl pointer-events-none" style={{ background: debtStats.overdueCount > 0 ? 'hsl(var(--destructive) / 0.08)' : 'hsl(var(--warning) / 0.08)' }} />
+            <div className="relative z-10 flex items-center gap-3">
               <div className={cn(
-                "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm border",
+                "w-11 h-11 rounded-xl backdrop-blur-sm flex items-center justify-center shrink-0 border",
                 debtStats.overdueCount > 0 
-                  ? "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10" 
-                  : "bg-gradient-to-br from-warning/15 to-warning/5 border-warning/10"
+                  ? "bg-destructive/12 border-destructive/15" 
+                  : "bg-warning/12 border-warning/15"
               )}>
-                <span className="text-lg">🏦</span>
+                <CreditCard className={cn("w-5 h-5", debtStats.overdueCount > 0 ? "text-destructive" : "text-warning")} strokeWidth={2} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
@@ -188,8 +186,9 @@ export function GoalsPreview({
                   className={cn("h-1.5", debtStats.overdueCount > 0 ? "[&>div]:bg-destructive" : "[&>div]:bg-warning")} 
                 />
                 {debtStats.overdueCount > 0 && (
-                  <p className="text-[10px] text-destructive mt-1.5">
-                    ⚠️ {debtStats.overdueCount} بدهی سررسید شده
+                  <p className="text-[10px] text-destructive mt-1.5 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" strokeWidth={2} />
+                    {debtStats.overdueCount} بدهی سررسید شده
                   </p>
                 )}
               </div>

@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Clock, Plus, Receipt, PieChart, Landmark, PiggyBank, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Plus, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isInCurrentJalaliMonth, formatPersianDateFull, isTodayJalali, formatPersianDateShort } from '@/utils/persianDate';
+import { isInCurrentJalaliMonth, formatPersianDateFull, isTodayJalali } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
-import { getTodayLocalISO } from '@/utils/dateUtils';
 import { useCurrency } from '@/hooks/useCurrency';
 
 interface HomeScreenProps {
@@ -82,106 +81,104 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* Hero Card - Premium 3D Style */}
-      <div className="relative overflow-hidden bg-card rounded-3xl p-6 border-2 border-border shadow-sm">
-        {/* Decorative orbs */}
-        <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-primary/8 blur-2xl" />
-        <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-chart-3/6 blur-xl" />
+      {/* Hero Card - Glassmorphic */}
+      <div className="relative overflow-hidden rounded-3xl p-6 glass-heavy">
+        {/* Decorative gradient orbs */}
+        <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-chart-5/10 blur-2xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-chart-4/5 blur-3xl pointer-events-none" />
         
-        <div className="relative">
+        <div className="relative z-10">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
                 امروز چقدر خرج کردی؟
               </p>
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-4xl font-black tabular-nums tracking-tight">
+                <span className="text-4xl font-black tabular-nums tracking-tight text-foreground">
                   {formatAmountCompact(financialData.todayExpense)}
                 </span>
                 <span className="text-base text-muted-foreground">{currencyInfo.symbol}</span>
               </div>
             </div>
             
-            {/* 3D Add button */}
+            {/* Glassmorphic Add button */}
             <button
               onClick={() => onAddTransaction()}
               className="relative w-14 h-14 rounded-2xl bg-primary flex items-center justify-center active:scale-95 transition-all shrink-0 shadow-lg shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label="افزودن تراکنش"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-foreground/25 to-transparent rounded-2xl" />
               <Plus className="w-7 h-7 text-primary-foreground relative z-10" strokeWidth={2.5} />
             </button>
           </div>
           
-          {/* Quick actions - 3D icon style */}
-          <div className="flex items-center justify-around mt-6 pt-5 border-t-2 border-border/50">
+          {/* Quick actions - Glassmorphic pill style */}
+          <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/30">
             <QuickActionButton 
               icon={Receipt} 
               label="تراکنش‌ها"
-              emoji="📋"
-              bgColor="bg-primary"
+              color="primary"
               onClick={onViewAllTransactions}
             />
             <QuickActionButton 
               icon={PieChart} 
               label="بودجه‌بندی"
-              emoji="📊"
-              bgColor="bg-success"
+              color="success"
               onClick={onViewAllTransactions}
             />
             <QuickActionButton 
               icon={Landmark} 
               label="بدهی‌ها"
-              emoji="🏦"
-              bgColor="bg-destructive"
+              color="destructive"
               onClick={() => onOpenDebts?.()}
             />
           </div>
         </div>
       </div>
 
-      {/* Summary Cards - 3D Depth */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="relative overflow-hidden bg-card rounded-2xl p-5 border-2 border-success/20 shadow-sm">
-          <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-success/8 blur-xl" />
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center shrink-0 shadow-sm border border-success/10">
-                <span className="text-xl">📈</span>
+      {/* Summary Cards - Glassmorphic */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="relative overflow-hidden rounded-2xl p-4 glass-card">
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-success/10 blur-2xl pointer-events-none" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-success/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-success/20">
+                <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
               </div>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد ماه</p>
+              <p className="text-xs font-medium text-muted-foreground leading-relaxed">درآمد ماه</p>
             </div>
-            <p className="text-xl font-black text-success tabular-nums truncate">
+            <p className="text-lg font-black text-success tabular-nums truncate">
               {formatAmountCompact(financialData.income)}
             </p>
           </div>
         </div>
         
-        <div className="relative overflow-hidden bg-card rounded-2xl p-5 border-2 border-destructive/20 shadow-sm">
-          <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-destructive/8 blur-xl" />
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center shrink-0 shadow-sm border border-destructive/10">
-                <span className="text-xl">📉</span>
+        <div className="relative overflow-hidden rounded-2xl p-4 glass-card">
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-destructive/10 blur-2xl pointer-events-none" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-destructive/20">
+                <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
               </div>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه ماه</p>
+              <p className="text-xs font-medium text-muted-foreground leading-relaxed">هزینه ماه</p>
             </div>
-            <p className="text-xl font-black text-destructive tabular-nums truncate">
+            <p className="text-lg font-black text-destructive tabular-nums truncate">
               {formatAmountCompact(financialData.expense)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Balance Detail Card */}
-      <div className="relative overflow-hidden bg-card rounded-2xl border-2 border-primary/15 shadow-sm">
-        <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-primary/6 blur-xl" />
-        <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full bg-chart-4/6 blur-xl" />
+      {/* Balance Detail Card - Glassmorphic */}
+      <div className="relative overflow-hidden rounded-3xl glass-heavy">
+        <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-chart-4/8 blur-2xl pointer-events-none" />
         
-        <div className="relative p-5">
+        <div className="relative z-10 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
-              <span className="text-xl">💰</span>
+            <div className="w-11 h-11 rounded-xl bg-primary/15 backdrop-blur-sm flex items-center justify-center border border-primary/20">
+              <Wallet className="w-5 h-5 text-primary" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground">مانده دارایی</p>
@@ -190,7 +187,7 @@ export function HomeScreen({
           </div>
 
           {/* Balance Amount */}
-          <div className="text-center mb-4 py-3 rounded-xl bg-muted/30">
+          <div className="text-center mb-4 py-3.5 rounded-2xl glass-subtle">
             <p className="text-xs text-muted-foreground mb-1">موجودی فعلی</p>
             <p className={cn(
               "text-3xl font-black tabular-nums tracking-tight",
@@ -202,76 +199,69 @@ export function HomeScreen({
           </div>
 
           {/* Detail Rows */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-success/5 border border-success/10">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">📈</span>
-                <span className="text-xs font-medium text-muted-foreground">کل درآمد</span>
-              </div>
-              <span className="text-sm font-bold text-success tabular-nums">{formatAmountCompact(financialData.income)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-destructive/5 border border-destructive/10">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">📉</span>
-                <span className="text-xs font-medium text-muted-foreground">کل هزینه</span>
-              </div>
-              <span className="text-sm font-bold text-destructive tabular-nums">{formatAmountCompact(financialData.expense)}</span>
-            </div>
+          <div className="space-y-2">
+            <DetailRow
+              icon={<ArrowUpRight className="w-4 h-4 text-success" strokeWidth={2} />}
+              label="کل درآمد"
+              value={formatAmountCompact(financialData.income)}
+              valueColor="text-success"
+              bgClass="bg-success/8 border-success/15"
+            />
+            <DetailRow
+              icon={<ArrowDownRight className="w-4 h-4 text-destructive" strokeWidth={2} />}
+              label="کل هزینه"
+              value={formatAmountCompact(financialData.expense)}
+              valueColor="text-destructive"
+              bgClass="bg-destructive/8 border-destructive/15"
+            />
             {financialData.saving > 0 && (
-              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-chart-4/5 border border-chart-4/10">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🐷</span>
-                  <span className="text-xs font-medium text-muted-foreground">پس‌انداز</span>
-                </div>
-                <span className="text-sm font-bold text-chart-4 tabular-nums">{formatAmountCompact(financialData.saving)}</span>
-              </div>
+              <DetailRow
+                icon={<PiggyBank className="w-4 h-4 text-chart-4" strokeWidth={2} />}
+                label="پس‌انداز"
+                value={formatAmountCompact(financialData.saving)}
+                valueColor="text-chart-4"
+                bgClass="bg-chart-4/8 border-chart-4/15"
+              />
             )}
-            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/10">
-              <div className="flex items-center gap-2">
-                <span className="text-sm">💵</span>
-                <span className="text-xs font-medium text-muted-foreground">مانده خالص</span>
-              </div>
-              <span className={cn(
-                "text-sm font-bold tabular-nums",
-                financialData.balance >= 0 ? "text-primary" : "text-destructive"
-              )}>
-                {formatAmountCompact(Math.abs(financialData.balance))}
-              </span>
-            </div>
+            <DetailRow
+              icon={<Wallet className="w-4 h-4 text-primary" strokeWidth={2} />}
+              label="مانده خالص"
+              value={formatAmountCompact(Math.abs(financialData.balance))}
+              valueColor={financialData.balance >= 0 ? "text-primary" : "text-destructive"}
+              bgClass="bg-primary/8 border-primary/15"
+            />
             {financialData.income > 0 && (
-              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-chart-3/5 border border-chart-3/10">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">📊</span>
-                  <span className="text-xs font-medium text-muted-foreground">نرخ پس‌انداز</span>
-                </div>
-                <span className="text-sm font-bold text-chart-3 tabular-nums">
-                  {Math.round((financialData.saving / financialData.income) * 100)}%
-                </span>
-              </div>
+              <DetailRow
+                icon={<TrendingUp className="w-4 h-4 text-chart-3" strokeWidth={2} />}
+                label="نرخ پس‌انداز"
+                value={`${Math.round((financialData.saving / financialData.income) * 100)}%`}
+                valueColor="text-chart-3"
+                bgClass="bg-chart-3/8 border-chart-3/15"
+              />
             )}
           </div>
         </div>
       </div>
 
-      {/* Auto-Savings Banner - Premium */}
+      {/* Auto-Savings Banner - Glassmorphic */}
       {showAutoSavings && onOpenAutoSavings && (
         <button
           onClick={onOpenAutoSavings}
-          className="w-full relative overflow-hidden flex items-center gap-3 bg-primary/5 border-2 border-primary/15 rounded-2xl p-4 active:opacity-80 transition-opacity text-right"
+          className="w-full relative overflow-hidden flex items-center gap-3 rounded-2xl p-4 active:opacity-80 transition-opacity text-right glass-card"
         >
-          <div className="absolute -left-4 -top-4 w-16 h-16 rounded-full bg-primary/5 blur-xl" />
-          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
-            <span className="text-2xl">🐷</span>
+          <div className="absolute -left-6 -top-6 w-20 h-20 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
+          <div className="relative z-10 w-11 h-11 rounded-xl bg-primary/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-primary/20">
+            <PiggyBank className="w-5 h-5 text-primary" strokeWidth={2} />
           </div>
-          <div className="flex-1 min-w-0 relative">
+          <div className="flex-1 min-w-0 relative z-10">
             <p className="text-sm font-bold text-foreground">پس‌انداز کن برای آینده‌ای بهتر!</p>
             <p className="text-xs text-muted-foreground mt-0.5">از مانده ماه قبل پس‌انداز کن 💰</p>
           </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0 relative" strokeWidth={2} />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0 relative z-10" strokeWidth={2} />
         </button>
       )}
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions - Glassmorphic */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-foreground">فعالیت اخیر</h3>
@@ -285,32 +275,32 @@ export function HomeScreen({
         </div>
         
         {financialData.recentTransactions.length === 0 ? (
-          <div className="bg-card rounded-2xl p-6 border-2 border-border/40 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
-              <span className="text-3xl opacity-40">📝</span>
+          <div className="rounded-2xl p-6 text-center glass-card">
+            <div className="w-14 h-14 rounded-2xl bg-muted/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 border border-border/30">
+              <Receipt className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
             </div>
             <p className="text-xs font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
           </div>
         ) : (
-          <div className="bg-card rounded-2xl border-2 border-border/40 divide-y divide-border/40 overflow-hidden">
+          <div className="rounded-2xl divide-y divide-border/30 overflow-hidden glass-card">
             {financialData.recentTransactions.map((transaction) => {
               const isIncome = transaction.type === 'income';
               
               return (
                 <div 
                   key={transaction.id} 
-                  className="flex items-center gap-3 p-4 active:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-4 active:bg-muted/20 transition-colors"
                 >
                   <div className={cn(
-                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm border",
+                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-sm border",
                     isIncome 
-                      ? "bg-gradient-to-br from-success/15 to-success/5 border-success/10" 
-                      : "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10"
+                      ? "bg-success/12 border-success/20" 
+                      : "bg-destructive/12 border-destructive/20"
                   )}>
                     {isIncome ? (
-                      <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2.5} />
+                      <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
                     ) : (
-                      <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2.5} />
+                      <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
                     )}
                   </div>
                   
@@ -341,16 +331,43 @@ export function HomeScreen({
   );
 }
 
+// --- Sub-components ---
+
+interface DetailRowProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  valueColor: string;
+  bgClass: string;
+}
+
+function DetailRow({ icon, label, value, valueColor, bgClass }: DetailRowProps) {
+  return (
+    <div className={cn("flex items-center justify-between gap-2 p-2.5 rounded-xl border backdrop-blur-sm", bgClass)}>
+      <div className="flex items-center gap-2">
+        {icon}
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      </div>
+      <span className={cn("text-sm font-bold tabular-nums", valueColor)}>{value}</span>
+    </div>
+  );
+}
+
 interface QuickActionButtonProps {
   icon: LucideIcon;
   label: string;
-  emoji: string;
-  bgColor: string;
+  color: 'primary' | 'success' | 'destructive';
   onClick: () => void;
   disabled?: boolean;
 }
 
-function QuickActionButton({ icon: Icon, label, emoji, bgColor, onClick, disabled }: QuickActionButtonProps) {
+function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: QuickActionButtonProps) {
+  const colorMap = {
+    primary: 'bg-primary/15 border-primary/20 text-primary',
+    success: 'bg-success/15 border-success/20 text-success',
+    destructive: 'bg-destructive/15 border-destructive/20 text-destructive',
+  };
+
   return (
     <button 
       onClick={onClick} 
@@ -362,11 +379,10 @@ function QuickActionButton({ icon: Icon, label, emoji, bgColor, onClick, disable
       )}
     >
       <div className={cn(
-        "relative w-14 h-14 rounded-2xl flex items-center justify-center shadow-md",
-        bgColor
+        "relative w-13 h-13 rounded-2xl flex items-center justify-center backdrop-blur-sm border",
+        colorMap[color]
       )}>
-        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
-        <span className="text-2xl relative z-10 drop-shadow-sm">{emoji}</span>
+        <Icon className="w-6 h-6" strokeWidth={2} />
       </div>
       <span className="text-xs font-bold text-foreground truncate max-w-[80px] leading-relaxed">{label}</span>
     </button>
