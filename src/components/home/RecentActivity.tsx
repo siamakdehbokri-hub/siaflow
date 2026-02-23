@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ChevronLeft, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
+import { ChevronLeft, ArrowUpRight, ArrowDownRight, Receipt } from 'lucide-react';
 import { Transaction } from '@/types/expense';
 import { formatCurrency, formatPersianDateFull } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -23,8 +23,10 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
   
   if (recentItems.length === 0) {
     return (
-      <div className="p-6 rounded-2xl bg-card border-2 border-border/40 text-center animate-fade-in" style={{ animationDelay: '300ms' }}>
-        <Clock className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" strokeWidth={1.5} />
+      <div className="p-6 rounded-2xl text-center animate-fade-in glass-card" style={{ animationDelay: '300ms' }}>
+        <div className="w-14 h-14 rounded-2xl bg-muted/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 border border-border/30">
+          <Receipt className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
+        </div>
         <p className="text-sm font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
         <p className="text-xs text-muted-foreground/70 mt-1">با دکمه + اولین تراکنش خود را ثبت کنید</p>
       </div>
@@ -44,24 +46,24 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
         </button>
       </div>
       
-      <div className="bg-card rounded-2xl border-2 border-border/40 divide-y divide-border/40 overflow-hidden">
-        {recentItems.map((transaction, index) => {
+      <div className="rounded-2xl divide-y divide-border/30 overflow-hidden glass-card">
+        {recentItems.map((transaction) => {
           const isIncome = transaction.type === 'income';
           
           return (
             <div 
               key={transaction.id} 
-              className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors"
+              className="flex items-center gap-3 p-4 hover:bg-muted/15 transition-colors"
             >
-              {/* Icon - 44px container */}
+              {/* Icon */}
               <div className={cn(
-                "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
-                isIncome ? "bg-success/10" : "bg-destructive/10"
+                "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-sm border",
+                isIncome ? "bg-success/12 border-success/15" : "bg-destructive/12 border-destructive/15"
               )}>
                 {isIncome ? (
-                  <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2} />
+                  <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
                 ) : (
-                  <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2} />
+                  <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
                 )}
               </div>
               
@@ -78,7 +80,7 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
               {/* Amount */}
               <div className="text-left shrink-0">
                 <p className={cn(
-                  "text-sm font-bold",
+                  "text-sm font-bold tabular-nums",
                   isIncome ? "text-success" : "text-destructive"
                 )}>
                   {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
