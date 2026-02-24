@@ -127,11 +127,11 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DrawerContent className="max-h-[90vh] flex flex-col">
         {/* Header - Clean Blue */}
-        <DrawerHeader className="bg-primary text-primary-foreground px-5 py-4 flex items-center justify-between rounded-t-2xl">
-          <DrawerTitle className="text-lg font-bold text-primary-foreground">ثبت تراکنش جدید</DrawerTitle>
+        <DrawerHeader className="px-5 py-4 flex items-center justify-between rounded-t-2xl" style={{ background: 'hsl(var(--card) / 0.9)', borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
+          <DrawerTitle className="text-lg font-bold text-foreground">ثبت تراکنش جدید</DrawerTitle>
           <DrawerClose asChild>
             <button
-              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors" style={{ background: 'hsl(var(--muted) / 0.5)' }}
             >
               <X className="w-5 h-5" />
             </button>
@@ -151,11 +151,18 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all border-2",
+                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all",
                 type === 'expense' 
-                  ? "bg-destructive text-white border-destructive" 
-                  : "bg-card text-muted-foreground border-border hover:border-destructive/50"
+                  ? "text-white" 
+                  : "text-muted-foreground"
               )}
+              style={type === 'expense' ? {
+                background: 'hsl(var(--destructive))',
+                border: '1px solid hsl(var(--destructive))',
+              } : {
+                background: 'hsl(var(--card) / 0.5)',
+                border: '1px solid hsl(var(--border) / 0.4)',
+              }}
             >
               <Minus className="w-4 h-4" />
               <span className="text-xs">هزینه</span>
@@ -168,11 +175,18 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all border-2",
+                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all",
                 type === 'income' 
-                  ? "bg-success text-white border-success" 
-                  : "bg-card text-muted-foreground border-border hover:border-success/50"
+                  ? "text-white" 
+                  : "text-muted-foreground"
               )}
+              style={type === 'income' ? {
+                background: 'hsl(var(--success))',
+                border: '1px solid hsl(var(--success))',
+              } : {
+                background: 'hsl(var(--card) / 0.5)',
+                border: '1px solid hsl(var(--border) / 0.4)',
+              }}
             >
               <Plus className="w-4 h-4" />
               <span className="text-xs">درآمد</span>
@@ -185,11 +199,18 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 setSubcategory('');
               }}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all border-2",
+                "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all",
                 type === 'saving' 
-                  ? "bg-primary text-white border-primary" 
-                  : "bg-card text-muted-foreground border-border hover:border-primary/50"
+                  ? "text-white" 
+                  : "text-muted-foreground"
               )}
+              style={type === 'saving' ? {
+                background: 'hsl(var(--primary))',
+                border: '1px solid hsl(var(--primary))',
+              } : {
+                background: 'hsl(var(--card) / 0.5)',
+                border: '1px solid hsl(var(--border) / 0.4)',
+              }}
             >
               <PiggyBank className="w-4 h-4" />
               <span className="text-xs">پس‌انداز</span>
@@ -205,8 +226,8 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               placeholder="۰"
               value={amount}
               onChange={(e) => handleAmountChange(e.target.value)}
-              className="text-2xl font-bold text-center h-14 rounded-xl border-2 border-border focus:border-primary"
-              required
+              className="text-2xl font-bold text-center h-14 rounded-xl focus:border-primary"
+              style={{ background: 'hsl(var(--card) / 0.5)', borderWidth: '1px', borderColor: 'hsl(var(--border) / 0.4)' }}
             />
             
             {/* Quick Amounts - 44px touch targets */}
@@ -217,12 +238,19 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                   type="button"
                   onClick={() => setAmount(qa.value)}
                   className={cn(
-                    "h-11 text-xs font-semibold rounded-xl border-2 transition-all active:scale-95",
+                    "h-11 text-xs font-semibold rounded-xl transition-all active:scale-95",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     amount === qa.value
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-muted/50"
+                      ? "text-primary"
+                      : "text-foreground"
                   )}
+                  style={amount === qa.value ? {
+                    background: 'hsl(var(--primary) / 0.12)',
+                    border: '1px solid hsl(var(--primary) / 0.3)',
+                  } : {
+                    background: 'hsl(var(--card) / 0.5)',
+                    border: '1px solid hsl(var(--border) / 0.4)',
+                  }}
                 >
                   {qa.label}
                 </button>
@@ -234,8 +262,9 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
           <div key={`category-${type}`} className="space-y-2">
             <Label className="text-sm font-medium text-foreground">دسته‌بندی</Label>
             <Select value={category} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="h-12 rounded-xl border-2 border-border">
-                <SelectValue placeholder="انتخاب دسته‌بندی" />
+              <SelectTrigger className="h-12 rounded-xl"
+                style={{ background: 'hsl(var(--card) / 0.5)', borderWidth: '1px', borderColor: 'hsl(var(--border) / 0.4)' }}
+              >
               </SelectTrigger>
               <SelectContent className="max-h-64">
                 {currentCategories.length > 0 ? (
@@ -294,7 +323,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="rounded-xl border-2 border-border resize-none"
+              className="rounded-xl resize-none" style={{ background: 'hsl(var(--card) / 0.5)', borderWidth: '1px', borderColor: 'hsl(var(--border) / 0.4)' }}
             />
           </div>
 
@@ -313,11 +342,16 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
           {/* Recurring Toggle */}
           <div className={cn(
-            "flex items-center justify-between p-4 rounded-xl border-2 transition-all",
-            isRecurring 
-              ? "border-primary bg-primary/5" 
-              : "border-border bg-muted/20"
-          )}>
+            "flex items-center justify-between p-4 rounded-xl transition-all",
+          )}
+            style={isRecurring ? {
+              background: 'hsl(var(--primary) / 0.08)',
+              border: '1px solid hsl(var(--primary) / 0.2)',
+            } : {
+              background: 'hsl(var(--muted) / 0.2)',
+              border: '1px solid hsl(var(--border) / 0.4)',
+            }}
+          >
             <div className="flex items-center gap-3">
               <div className={cn(
                 "w-10 h-10 rounded-lg flex items-center justify-center",
@@ -338,7 +372,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
         </form>
 
         {/* Footer - Submit Button */}
-        <div className="p-5 border-t border-border bg-card">
+        <div className="p-5 border-t border-border/30" style={{ background: 'hsl(var(--card) / 0.8)' }}>
           <Button 
             type="submit"
             onClick={handleSubmit}

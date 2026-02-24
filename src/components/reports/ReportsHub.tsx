@@ -160,12 +160,19 @@ export function ReportsHub({
 
   return (
     <div className="space-y-4 animate-fade-in">
-      {/* Month Picker - Enhanced touch targets and visual clarity */}
-      <div className="bg-card rounded-2xl border-2 border-border p-4 shadow-sm">
+      {/* Month Picker */}
+      <div className="rounded-2xl p-4"
+        style={{
+          background: 'hsl(var(--card) / 0.6)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid hsl(var(--border) / 0.4)',
+        }}
+      >
         <div className="flex items-center justify-between">
           <button
             onClick={goToNextMonth}
-            className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ background: 'hsl(var(--muted) / 0.5)' }}
             aria-label="ماه بعد"
           >
             <ChevronRight className="w-6 h-6" strokeWidth={2} />
@@ -180,7 +187,8 @@ export function ReportsHub({
           
           <button
             onClick={goToPrevMonth}
-            className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center hover:bg-muted/80 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ background: 'hsl(var(--muted) / 0.5)' }}
             aria-label="ماه قبل"
           >
             <ChevronLeft className="w-6 h-6" strokeWidth={2} />
@@ -188,13 +196,20 @@ export function ReportsHub({
         </div>
       </div>
 
-      {/* Summary Cards - 3D Glass Style */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="relative overflow-hidden bg-card rounded-2xl border-2 border-success/20 p-5 shadow-sm">
-          <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-success/8 blur-2xl" />
+        <div className="relative overflow-hidden rounded-2xl p-5"
+          style={{
+            background: 'hsl(var(--card) / 0.6)',
+            border: '1px solid hsl(var(--success) / 0.15)',
+            backdropFilter: 'blur(20px)',
+          }}
+        >
           <div className="relative">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center shadow-sm border border-success/10">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: 'hsl(var(--success) / 0.12)', border: '1px solid hsl(var(--success) / 0.2)' }}
+              >
                 <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2.5} />
               </div>
               <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد</p>
@@ -205,11 +220,18 @@ export function ReportsHub({
           </div>
         </div>
         
-        <div className="relative overflow-hidden bg-card rounded-2xl border-2 border-destructive/20 p-5 shadow-sm">
-          <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-destructive/8 blur-2xl" />
+        <div className="relative overflow-hidden rounded-2xl p-5"
+          style={{
+            background: 'hsl(var(--card) / 0.6)',
+            border: '1px solid hsl(var(--destructive) / 0.15)',
+            backdropFilter: 'blur(20px)',
+          }}
+        >
           <div className="relative">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center shadow-sm border border-destructive/10">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: 'hsl(var(--destructive) / 0.12)', border: '1px solid hsl(var(--destructive) / 0.2)' }}
+              >
                 <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2.5} />
               </div>
               <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه</p>
@@ -239,7 +261,8 @@ export function ReportsHub({
               placeholder="جستجو..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-12 h-12 rounded-xl bg-card border-2 border-border"
+              className="pr-12 h-12 rounded-xl border-border/40"
+              style={{ background: 'hsl(var(--card) / 0.6)', borderWidth: '1px' }}
             />
             {searchQuery && (
               <button
@@ -294,7 +317,7 @@ export function ReportsHub({
             ))}
 
             {filteredTransactions.length === 0 && (
-              <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+              <div className="text-center py-12 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}>
                 <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground">تراکنشی یافت نشد</p>
               </div>
@@ -416,7 +439,7 @@ export function ReportsHub({
 
           {/* Quick Stats Row */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="relative overflow-hidden p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
+            <div className="relative overflow-hidden p-4 rounded-2xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
               <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-success/8 blur-lg" />
               <div className="relative">
                 <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mb-2 shadow-sm">
@@ -429,7 +452,7 @@ export function ReportsHub({
               </div>
             </div>
             
-            <div className="relative overflow-hidden p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
+            <div className="relative overflow-hidden p-4 rounded-2xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
               <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-destructive/8 blur-lg" />
               <div className="relative">
                 <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mb-2 shadow-sm">
@@ -442,7 +465,7 @@ export function ReportsHub({
               </div>
             </div>
             
-            <div className="relative overflow-hidden p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
+            <div className="relative overflow-hidden p-4 rounded-2xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
               <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-primary/8 blur-lg" />
               <div className="relative">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 shadow-sm">
@@ -457,7 +480,7 @@ export function ReportsHub({
           </div>
 
           {/* Category Breakdown - Premium Card */}
-          <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-chart-3/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
             <div className="relative p-5">
               <div className="flex items-center gap-3 mb-5">
@@ -476,7 +499,7 @@ export function ReportsHub({
           </div>
 
           {/* Trend Chart - Premium Card */}
-          <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
             <div className="absolute top-0 left-0 w-28 h-28 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/3" />
             <div className="relative p-5">
               <div className="flex items-center gap-3 mb-5">
@@ -495,7 +518,7 @@ export function ReportsHub({
           </div>
 
           {/* Monthly Comparison - Premium Card */}
-          <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
             <div className="absolute bottom-0 right-0 w-24 h-24 bg-chart-5/5 rounded-full blur-2xl translate-y-1/3" />
             <div className="relative p-5">
               <div className="flex items-center gap-3 mb-5">

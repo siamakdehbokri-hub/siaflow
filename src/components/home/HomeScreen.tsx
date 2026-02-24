@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Plus, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Plus, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { isInCurrentJalaliMonth, formatPersianDateFull, isTodayJalali } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -81,12 +81,18 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* Hero Card - Glassmorphic */}
-      <div className="relative overflow-hidden rounded-3xl p-6 glass-heavy">
+      {/* Hero Card - Deep Glass */}
+      <div className="relative overflow-hidden rounded-3xl p-6"
+        style={{
+          background: 'linear-gradient(145deg, hsl(var(--card) / 0.8) 0%, hsl(var(--card) / 0.5) 100%)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          border: '1px solid hsl(var(--border) / 0.6)',
+          boxShadow: '0 12px 40px hsl(var(--primary) / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.06)',
+        }}
+      >
         {/* Decorative gradient orbs */}
-        <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-chart-5/10 blur-2xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-chart-4/5 blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none" style={{ background: 'hsl(var(--primary) / 0.15)' }} />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-3xl pointer-events-none" style={{ background: 'hsl(var(--chart-5) / 0.1)' }} />
         
         <div className="relative z-10">
           <div className="flex items-start justify-between gap-4">
@@ -102,19 +108,22 @@ export function HomeScreen({
               </div>
             </div>
             
-            {/* Glassmorphic Add button */}
+            {/* Add button */}
             <button
               onClick={() => onAddTransaction()}
-              className="relative w-14 h-14 rounded-2xl bg-primary flex items-center justify-center active:scale-95 transition-all shrink-0 shadow-lg shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="relative w-14 h-14 rounded-2xl flex items-center justify-center active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              style={{
+                background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%)',
+                boxShadow: '0 8px 24px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.2)',
+              }}
               aria-label="افزودن تراکنش"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-foreground/25 to-transparent rounded-2xl" />
-              <Plus className="w-7 h-7 text-primary-foreground relative z-10" strokeWidth={2.5} />
+              <Plus className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
             </button>
           </div>
           
-          {/* Quick actions - Glassmorphic pill style */}
-          <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/30">
+          {/* Quick actions */}
+          <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/20">
             <QuickActionButton 
               icon={Receipt} 
               label="تراکنش‌ها"
@@ -137,47 +146,45 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* Summary Cards - Glassmorphic */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="relative overflow-hidden rounded-2xl p-4 glass-card">
-          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-success/10 blur-2xl pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-success/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-success/20">
-                <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
-              </div>
-              <p className="text-xs font-medium text-muted-foreground leading-relaxed">درآمد ماه</p>
-            </div>
-            <p className="text-lg font-black text-success tabular-nums truncate">
-              {formatAmountCompact(financialData.income)}
-            </p>
-          </div>
-        </div>
-        
-        <div className="relative overflow-hidden rounded-2xl p-4 glass-card">
-          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-destructive/10 blur-2xl pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-destructive/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-destructive/20">
-                <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
-              </div>
-              <p className="text-xs font-medium text-muted-foreground leading-relaxed">هزینه ماه</p>
-            </div>
-            <p className="text-lg font-black text-destructive tabular-nums truncate">
-              {formatAmountCompact(financialData.expense)}
-            </p>
-          </div>
-        </div>
+        <SummaryCard
+          icon={ArrowUpRight}
+          label="درآمد ماه"
+          value={formatAmountCompact(financialData.income)}
+          valueColor="text-success"
+          iconColor="text-success"
+          glowColor="var(--success)"
+        />
+        <SummaryCard
+          icon={ArrowDownRight}
+          label="هزینه ماه"
+          value={formatAmountCompact(financialData.expense)}
+          valueColor="text-destructive"
+          iconColor="text-destructive"
+          glowColor="var(--destructive)"
+        />
       </div>
 
-      {/* Balance Detail Card - Glassmorphic */}
-      <div className="relative overflow-hidden rounded-3xl glass-heavy">
-        <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-chart-4/8 blur-2xl pointer-events-none" />
+      {/* Balance Detail Card */}
+      <div className="relative overflow-hidden rounded-3xl"
+        style={{
+          background: 'linear-gradient(160deg, hsl(var(--card) / 0.8) 0%, hsl(var(--card) / 0.5) 100%)',
+          backdropFilter: 'blur(30px) saturate(180%)',
+          border: '1px solid hsl(var(--border) / 0.5)',
+          boxShadow: '0 12px 40px hsl(var(--primary) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.05)',
+        }}
+      >
+        <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: 'hsl(var(--primary) / 0.1)' }} />
         
         <div className="relative z-10 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-11 h-11 rounded-xl bg-primary/15 backdrop-blur-sm flex items-center justify-center border border-primary/20">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'hsl(var(--primary) / 0.12)',
+                border: '1px solid hsl(var(--primary) / 0.2)',
+              }}
+            >
               <Wallet className="w-5 h-5 text-primary" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
@@ -187,7 +194,12 @@ export function HomeScreen({
           </div>
 
           {/* Balance Amount */}
-          <div className="text-center mb-4 py-3.5 rounded-2xl glass-subtle">
+          <div className="text-center mb-4 py-3.5 rounded-2xl"
+            style={{
+              background: 'linear-gradient(135deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.3) 100%)',
+              border: '1px solid hsl(var(--border) / 0.3)',
+            }}
+          >
             <p className="text-xs text-muted-foreground mb-1">موجودی فعلی</p>
             <p className={cn(
               "text-3xl font-black tabular-nums tracking-tight",
@@ -205,14 +217,12 @@ export function HomeScreen({
               label="کل درآمد"
               value={formatAmountCompact(financialData.income)}
               valueColor="text-success"
-              bgClass="bg-success/8 border-success/15"
             />
             <DetailRow
               icon={<ArrowDownRight className="w-4 h-4 text-destructive" strokeWidth={2} />}
               label="کل هزینه"
               value={formatAmountCompact(financialData.expense)}
               valueColor="text-destructive"
-              bgClass="bg-destructive/8 border-destructive/15"
             />
             {financialData.saving > 0 && (
               <DetailRow
@@ -220,7 +230,6 @@ export function HomeScreen({
                 label="پس‌انداز"
                 value={formatAmountCompact(financialData.saving)}
                 valueColor="text-chart-4"
-                bgClass="bg-chart-4/8 border-chart-4/15"
               />
             )}
             <DetailRow
@@ -228,29 +237,33 @@ export function HomeScreen({
               label="مانده خالص"
               value={formatAmountCompact(Math.abs(financialData.balance))}
               valueColor={financialData.balance >= 0 ? "text-primary" : "text-destructive"}
-              bgClass="bg-primary/8 border-primary/15"
             />
             {financialData.income > 0 && (
               <DetailRow
-                icon={<TrendingUp className="w-4 h-4 text-chart-3" strokeWidth={2} />}
+                icon={<BarChart3 className="w-4 h-4 text-chart-3" strokeWidth={2} />}
                 label="نرخ پس‌انداز"
                 value={`${Math.round((financialData.saving / financialData.income) * 100)}%`}
                 valueColor="text-chart-3"
-                bgClass="bg-chart-3/8 border-chart-3/15"
               />
             )}
           </div>
         </div>
       </div>
 
-      {/* Auto-Savings Banner - Glassmorphic */}
+      {/* Auto-Savings Banner */}
       {showAutoSavings && onOpenAutoSavings && (
         <button
           onClick={onOpenAutoSavings}
-          className="w-full relative overflow-hidden flex items-center gap-3 rounded-2xl p-4 active:opacity-80 transition-opacity text-right glass-card"
+          className="w-full relative overflow-hidden flex items-center gap-3 rounded-2xl p-4 active:opacity-80 transition-opacity text-right"
+          style={{
+            background: 'linear-gradient(135deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid hsl(var(--primary) / 0.2)',
+          }}
         >
-          <div className="absolute -left-6 -top-6 w-20 h-20 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
-          <div className="relative z-10 w-11 h-11 rounded-xl bg-primary/15 backdrop-blur-sm flex items-center justify-center shrink-0 border border-primary/20">
+          <div className="relative z-10 w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'hsl(var(--primary) / 0.15)', border: '1px solid hsl(var(--primary) / 0.2)' }}
+          >
             <PiggyBank className="w-5 h-5 text-primary" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0 relative z-10">
@@ -261,7 +274,7 @@ export function HomeScreen({
         </button>
       )}
 
-      {/* Recent Transactions - Glassmorphic */}
+      {/* Recent Transactions */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-foreground">فعالیت اخیر</h3>
@@ -275,27 +288,39 @@ export function HomeScreen({
         </div>
         
         {financialData.recentTransactions.length === 0 ? (
-          <div className="rounded-2xl p-6 text-center glass-card">
-            <div className="w-14 h-14 rounded-2xl bg-muted/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-3 border border-border/30">
+          <div className="rounded-2xl p-6 text-center"
+            style={{
+              background: 'hsl(var(--card) / 0.5)',
+              border: '1px solid hsl(var(--border) / 0.4)',
+            }}
+          >
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+              style={{ background: 'hsl(var(--muted) / 0.3)' }}
+            >
               <Receipt className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
             </div>
             <p className="text-xs font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
           </div>
         ) : (
-          <div className="rounded-2xl divide-y divide-border/30 overflow-hidden glass-card">
+          <div className="rounded-2xl divide-y divide-border/20 overflow-hidden"
+            style={{
+              background: 'hsl(var(--card) / 0.5)',
+              border: '1px solid hsl(var(--border) / 0.4)',
+            }}
+          >
             {financialData.recentTransactions.map((transaction) => {
               const isIncome = transaction.type === 'income';
               
               return (
                 <div 
                   key={transaction.id} 
-                  className="flex items-center gap-3 p-4 active:bg-muted/20 transition-colors"
+                  className="flex items-center gap-3 p-4 active:bg-muted/10 transition-colors"
                 >
                   <div className={cn(
-                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0 backdrop-blur-sm border",
+                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
                     isIncome 
-                      ? "bg-success/12 border-success/20" 
-                      : "bg-destructive/12 border-destructive/20"
+                      ? "bg-success/12 border border-success/20" 
+                      : "bg-destructive/12 border border-destructive/20"
                   )}>
                     {isIncome ? (
                       <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
@@ -333,17 +358,59 @@ export function HomeScreen({
 
 // --- Sub-components ---
 
+interface SummaryCardProps {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  valueColor: string;
+  iconColor: string;
+  glowColor: string;
+}
+
+function SummaryCard({ icon: Icon, label, value, valueColor, iconColor, glowColor }: SummaryCardProps) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl p-4"
+      style={{
+        background: 'linear-gradient(145deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid hsl(var(--border) / 0.4)',
+      }}
+    >
+      <div className="relative z-10">
+        <div className="flex items-center gap-2.5 mb-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background: `hsl(${glowColor} / 0.12)`,
+              border: `1px solid hsl(${glowColor} / 0.2)`,
+            }}
+          >
+            <Icon className={cn("w-5 h-5", iconColor)} strokeWidth={2} />
+          </div>
+          <p className="text-xs font-medium text-muted-foreground leading-relaxed">{label}</p>
+        </div>
+        <p className={cn("text-lg font-black tabular-nums truncate", valueColor)}>
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 interface DetailRowProps {
   icon: React.ReactNode;
   label: string;
   value: string;
   valueColor: string;
-  bgClass: string;
 }
 
-function DetailRow({ icon, label, value, valueColor, bgClass }: DetailRowProps) {
+function DetailRow({ icon, label, value, valueColor }: DetailRowProps) {
   return (
-    <div className={cn("flex items-center justify-between gap-2 p-2.5 rounded-xl border backdrop-blur-sm", bgClass)}>
+    <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl"
+      style={{
+        background: 'hsl(var(--card) / 0.4)',
+        border: '1px solid hsl(var(--border) / 0.25)',
+      }}
+    >
       <div className="flex items-center gap-2">
         {icon}
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
@@ -363,10 +430,11 @@ interface QuickActionButtonProps {
 
 function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: QuickActionButtonProps) {
   const colorMap = {
-    primary: 'bg-primary/15 border-primary/20 text-primary',
-    success: 'bg-success/15 border-success/20 text-success',
-    destructive: 'bg-destructive/15 border-destructive/20 text-destructive',
+    primary: { bg: 'hsl(var(--primary) / 0.12)', border: 'hsl(var(--primary) / 0.25)', text: 'text-primary' },
+    success: { bg: 'hsl(var(--success) / 0.12)', border: 'hsl(var(--success) / 0.25)', text: 'text-success' },
+    destructive: { bg: 'hsl(var(--destructive) / 0.12)', border: 'hsl(var(--destructive) / 0.25)', text: 'text-destructive' },
   };
+  const c = colorMap[color];
 
   return (
     <button 
@@ -378,11 +446,10 @@ function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: Quic
         disabled ? "opacity-50 cursor-not-allowed" : "active:scale-95"
       )}
     >
-      <div className={cn(
-        "relative w-13 h-13 rounded-2xl flex items-center justify-center backdrop-blur-sm border",
-        colorMap[color]
-      )}>
-        <Icon className="w-6 h-6" strokeWidth={2} />
+      <div className="relative w-13 h-13 rounded-2xl flex items-center justify-center"
+        style={{ background: c.bg, border: `1px solid ${c.border}` }}
+      >
+        <Icon className={cn("w-6 h-6", c.text)} strokeWidth={2} />
       </div>
       <span className="text-xs font-bold text-foreground truncate max-w-[80px] leading-relaxed">{label}</span>
     </button>

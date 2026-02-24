@@ -62,19 +62,22 @@ function TransactionItemComponent({ transaction, onClick }: TransactionItemProps
     <div 
       onClick={onClick}
       className={cn(
-        "relative flex items-center gap-3 p-4 rounded-2xl transition-colors",
-        "bg-card border-2 border-border/40 cursor-pointer",
-        "active:bg-muted/50"
+        "relative flex items-center gap-3 p-4 rounded-2xl transition-colors cursor-pointer",
+        "active:bg-muted/20"
       )}
+      style={{
+        background: 'hsl(var(--card) / 0.5)',
+        border: '1px solid hsl(var(--border) / 0.35)',
+      }}
     >
       {/* 3D Icon Container */}
       <div className={cn(
-        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border",
+        "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
         isSaving
-          ? "bg-gradient-to-br from-primary/15 to-primary/5 border-primary/10"
+          ? "bg-primary/12 border border-primary/20"
           : isIncome 
-            ? "bg-gradient-to-br from-success/15 to-success/5 border-success/10" 
-            : "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10"
+            ? "bg-success/12 border border-success/20" 
+            : "bg-destructive/12 border border-destructive/20"
       )}>
         <CategoryIcon className={cn(
           "w-5.5 h-5.5",

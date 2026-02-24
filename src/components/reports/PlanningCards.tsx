@@ -67,12 +67,14 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
     <button
       onClick={onClick}
       className={cn(
-        "relative overflow-hidden w-full p-5 rounded-2xl bg-card border-2 transition-all duration-200 text-right",
-        "hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        hasAlert 
-          ? "border-destructive/30 hover:border-destructive/50" 
-          : "border-border hover:border-primary/30"
+        "relative overflow-hidden w-full p-5 rounded-2xl transition-all duration-200 text-right",
+        "active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
       )}
+      style={{
+        background: 'linear-gradient(145deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)',
+        backdropFilter: 'blur(20px)',
+        border: hasAlert ? '1px solid hsl(var(--destructive) / 0.3)' : '1px solid hsl(var(--border) / 0.4)',
+      }}
     >
       {/* Decorative orb */}
       <div className={cn(
@@ -178,8 +180,13 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
 
   if (!hasData) {
     return (
-      <div className="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br from-primary/5 to-card border-2 border-primary/10 shadow-sm">
-        <div className="absolute -top-6 -left-6 w-20 h-20 rounded-full bg-primary/5 blur-xl" />
+      <div className="relative overflow-hidden p-6 rounded-3xl"
+        style={{
+          background: 'linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--card) / 0.6) 100%)',
+          border: '1px solid hsl(var(--primary) / 0.15)',
+          backdropFilter: 'blur(20px)',
+        }}
+      >
         <div className="relative flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
             <span className="text-3xl">✨</span>
@@ -196,9 +203,13 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
   }
 
   return (
-    <div className="relative overflow-hidden p-5 rounded-3xl bg-gradient-to-br from-primary/5 via-card to-card border-2 border-primary/10 shadow-sm">
-      <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-primary/5 blur-2xl" />
-      <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-chart-5/5 blur-xl" />
+    <div className="relative overflow-hidden p-5 rounded-3xl"
+      style={{
+        background: 'linear-gradient(145deg, hsl(var(--primary) / 0.06) 0%, hsl(var(--card) / 0.6) 100%)',
+        border: '1px solid hsl(var(--primary) / 0.12)',
+        backdropFilter: 'blur(20px)',
+      }}
+    >
       
       <div className="relative">
         <div className="flex items-center justify-between mb-4">
@@ -221,7 +232,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
         
         {/* Mini Progress Bars */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-2 rounded-xl bg-card/80 border border-border/30">
+          <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
                 className="h-full bg-chart-1 rounded-full transition-all"
@@ -230,7 +241,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
             </div>
             <p className="text-[10px] font-medium text-muted-foreground">بودجه</p>
           </div>
-          <div className="text-center p-2 rounded-xl bg-card/80 border border-border/30">
+          <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
                 className="h-full bg-success rounded-full transition-all"
@@ -239,7 +250,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
             </div>
             <p className="text-[10px] font-medium text-muted-foreground">پس‌انداز</p>
           </div>
-          <div className="text-center p-2 rounded-xl bg-card/80 border border-border/30">
+          <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
                 className="h-full bg-warning rounded-full transition-all"

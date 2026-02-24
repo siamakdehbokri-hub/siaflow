@@ -129,8 +129,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
 
   return (
     <div className="space-y-4 animate-fade-in pb-6">
-      {/* Profile Card - Clean Blue Style */}
-      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
+      {/* Profile Card */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)', backdropFilter: 'blur(20px)' }}>
         <div className="flex items-center gap-4 p-4">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-xl font-bold text-primary-foreground overflow-hidden border-4 border-primary/20">
@@ -182,7 +182,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           {/* Theme */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]">
+              <button className="w-full flex items-center gap-4 p-4 rounded-xl active:bg-muted/20 transition-all min-h-[72px]" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}>
                 <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
                   <ThemeIcon className="w-6 h-6 text-accent-foreground" strokeWidth={2} />
                 </div>
@@ -276,7 +276,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <h3 className="text-sm font-semibold text-muted-foreground px-1 mb-3">ترجیحات</h3>
           
           {/* Calendar & Timezone */}
-          <div className="bg-card rounded-xl border-2 border-border p-4 min-h-[72px]">
+          <div className="rounded-xl p-4 min-h-[72px]" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-warning" strokeWidth={2} />
@@ -294,7 +294,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           {/* Currency */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]">
+              <button className="w-full flex items-center gap-4 p-4 rounded-xl active:bg-muted/20 transition-all min-h-[72px]" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}>
                 <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
                   <Globe className="w-6 h-6 text-warning" strokeWidth={2} />
                 </div>
@@ -394,7 +394,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           
           <button 
             onClick={() => setCurrentView('security')}
-            className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
+            className="w-full flex items-center gap-4 p-4 rounded-xl active:bg-muted/20 transition-all min-h-[72px]"
+            style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}
           >
             <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
               <Lock className="w-6 h-6 text-destructive" strokeWidth={2} />
@@ -413,7 +414,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           
           <button 
             onClick={() => setCurrentView('help')}
-            className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border-2 border-border hover:border-primary/30 active:bg-muted/50 transition-all min-h-[72px]"
+            className="w-full flex items-center gap-4 p-4 rounded-xl active:bg-muted/20 transition-all min-h-[72px]"
+            style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}
           >
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
               <LifeBuoy className="w-6 h-6 text-primary" strokeWidth={2} />
@@ -428,7 +430,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       </div>
 
       {/* About & Contact - Improved spacing */}
-      <div className="bg-card rounded-xl border-2 border-border p-5 space-y-4">
+      <div className="rounded-xl p-5 space-y-4" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.4)' }}>
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Info className="w-5 h-5 text-primary" strokeWidth={2} />
@@ -438,7 +440,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
             <p className="text-sm text-muted-foreground leading-relaxed">طراحی و توسعه توسط Siamak.D</p>
           </div>
         </div>
-        <div className="border-t-2 border-border pt-4">
+        <div className="border-t border-border/30 pt-4">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Mail className="w-5 h-5 text-primary" strokeWidth={2} />
@@ -454,7 +456,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
       {/* Logout Button */}
       <Button 
         variant="outline" 
-        className="w-full h-14 rounded-xl border-2 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"
+        className="w-full h-14 rounded-xl border border-border/40 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all"
         onClick={handleSignOut}
       >
         <LogOut className="w-5 h-5 ml-2" strokeWidth={2} />

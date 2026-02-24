@@ -24,7 +24,7 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-popover border-2 border-border rounded-xl p-3 shadow-lg">
+      <div className="rounded-xl p-3 shadow-lg" style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border) / 0.5)' }}>
         <p className="text-sm font-bold text-foreground mb-1">{data.name}</p>
         <p className="text-sm text-muted-foreground tabular-nums">{formatCurrency(data.value)}</p>
         <p className="text-xs text-primary font-medium">{data.percentage.toFixed(1)}٪</p>
@@ -125,7 +125,7 @@ export function CategoryBreakdown({ transactions, categories }: CategoryBreakdow
       {/* Category List */}
       <div className="space-y-2">
         {categoryList.slice(0, 6).map((item, index) => (
-          <div key={item.name} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+          <div key={item.name} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'hsl(var(--muted) / 0.3)' }}>
             <div 
               className="w-3 h-10 rounded-full shrink-0"
               style={{ backgroundColor: item.color }}
