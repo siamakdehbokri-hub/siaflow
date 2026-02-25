@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav, NavTab } from '@/components/navigation/BottomNav';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -13,6 +13,7 @@ import { SavingGoals } from '@/components/SavingGoals';
 import { DebtManagement } from '@/components/DebtManagement';
 import { TransferManagement } from '@/components/TransferManagement';
 import { AutoSavingsSheet } from '@/components/home/AutoSavingsSheet';
+import { HelpGuide } from '@/components/HelpGuide';
 import { useTransactions, useCategories } from '@/hooks/useData';
 import { useSavingGoals } from '@/hooks/useSavingGoals';
 import { useDebts } from '@/hooks/useDebts';
@@ -25,7 +26,7 @@ import { isInCurrentJalaliMonth } from '@/utils/persianDate';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers';
+type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'help';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -46,12 +47,17 @@ const Index = () => {
   const { suggestion: autoSavingsSuggestion, shouldShow: showAutoSavings, prefs: autoSavingsPrefs, acceptSuggestion, declineSuggestion, enableAutoTransfer } = useAutoSavings(transactions);
   const [autoSavingsOpen, setAutoSavingsOpen] = useState(false);
   const categoriesWithSpent = useMemo(() => {
-    return categories.map(category => {
-      const spent = transactions
-        .filter(t => t.type === 'expense' && t.category === category.name && isInCurrentJalaliMonth(t.date))
-        .reduce((sum, t) => sum + t.amount, 0);
-      return { ...category, spent };
-    });
+    // Pre-compute spending map in a single pass over transactions
+    const spendingMap = new Map<string, number>();
+    for (const t of transactions) {
+      if (t.type === 'expense' && isInCurrentJalaliMonth(t.date)) {
+        spendingMap.set(t.category, (spendingMap.get(t.category) || 0) + t.amount);
+      }
+    }
+    return categories.map(category => ({
+      ...category,
+      spent: spendingMap.get(category.name) || 0,
+    }));
   }, [categories, transactions]);
 
   const handleAddTransaction = async (transaction: Omit<Transaction, 'id'> & { id?: string }) => {
@@ -82,6 +88,7 @@ const Index = () => {
     if (subView === 'goals') return 'اهداف پس‌انداز';
     if (subView === 'debts') return 'مدیریت بدهی';
     if (subView === 'transfers') return 'انتقال پول';
+    if (subView === 'help') return 'راهنمای استفاده';
     switch (activeTab) {
       case 'home': return 'داشبورد';
       case 'reports': return 'گزارش‌ها';
@@ -124,8 +131,8 @@ const Index = () => {
         onTabChange={handleTabChange}
         onOpenAdmin={() => navigate('/admin')}
         onOpenHelp={() => {
-          // TODO: Add help guide modal
-          setActiveTab('settings');
+          setSubView('help');
+          setIsMenuOpen(false);
         }}
       />
 
@@ -177,6 +184,8 @@ const Index = () => {
               goals={goals} 
               onTransferToGoal={async (goalId, amount) => await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب')} 
             />
+          ) : subView === 'help' ? (
+            <HelpGuide onBack={() => setSubView('main')} />
           ) : (
             <>
               {activeTab === 'home' && (

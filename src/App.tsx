@@ -14,24 +14,41 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Initialize theme from localStorage on app load
+// Initialize theme from localStorage and listen for OS theme changes
 function ThemeInitializer() {
   useEffect(() => {
-    const stored = localStorage.getItem('app-theme');
-    const theme = stored || 'dark';
-    
-    if (theme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        document.documentElement.classList.add('dark');
+    const applyTheme = () => {
+      const stored = localStorage.getItem('app-theme');
+      const theme = stored || 'dark';
+      const root = document.documentElement;
+
+      let isDark: boolean;
+      if (theme === 'system') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       } else {
-        document.documentElement.classList.remove('dark');
+        isDark = theme === 'dark';
       }
-    } else if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+
+      root.classList.toggle('dark', isDark);
+
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+      }
+    };
+
+    applyTheme();
+
+    // Listen for OS theme changes (relevant when theme is 'system')
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+      const stored = localStorage.getItem('app-theme');
+      if (stored === 'system' || !stored) {
+        applyTheme();
+      }
+    };
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
   return null;

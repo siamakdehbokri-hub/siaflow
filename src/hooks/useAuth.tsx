@@ -26,18 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Update phone in profile after sign up (deferred to avoid deadlock)
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(async () => {
-            const phone = session.user.user_metadata?.phone;
-            if (phone) {
-              await supabase
-                .from('profiles')
-                .update({ phone })
-                .eq('id', session.user.id);
-            }
-          }, 0);
-        }
+        // Phone is now saved automatically by the handle_new_user DB trigger
+        // No client-side workaround needed
       }
     );
 
