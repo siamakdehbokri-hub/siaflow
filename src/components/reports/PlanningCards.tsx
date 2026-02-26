@@ -158,10 +158,11 @@ interface HealthSummaryProps {
   budgetPercent: number;
   goalsPercent: number;
   debtPercent: number;
+  savingsRate: number;
   hasData: boolean;
 }
 
-export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, hasData }: HealthSummaryProps) {
+export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, savingsRate, hasData }: HealthSummaryProps) {
   // Calculate overall health score using weighted average of ACTIVE dimensions only
   // budgetPercent = % used (lower is better) → score = 100 - used
   // goalsPercent = % saved toward target (higher is better)
@@ -169,11 +170,12 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
   
   const dimensions: { score: number; weight: number }[] = [];
   
-  // Only include dimensions the user actually has data for
   if (budgetPercent > 0 || budgetPercent === 0) {
-    // Budget: if user has budgets, score = how much is remaining
-    // But we only add this if there's actual budget data (passed via hasData context)
     dimensions.push({ score: Math.max(0, 100 - Math.min(budgetPercent, 150)), weight: 1 });
+  }
+  if (savingsRate > 0) {
+    // Savings rate: 20%+ is excellent (score 100), 0% is poor (score 0)
+    dimensions.push({ score: Math.min(savingsRate * 5, 100), weight: 1 });
   }
   if (goalsPercent > 0) {
     dimensions.push({ score: Math.min(goalsPercent, 100), weight: 1 });
@@ -256,7 +258,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
         </div>
         
         {/* Mini Progress Bars */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-2">
           <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
@@ -266,6 +268,16 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
             </div>
             <p className="text-[10px] font-medium text-muted-foreground">بودجه</p>
             <p className="text-[9px] font-bold text-muted-foreground/70">{Math.round(budgetBarValue)}٪ باقی</p>
+          </div>
+          <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
+              <div 
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${Math.min(savingsRate, 100)}%` }}
+              />
+            </div>
+            <p className="text-[10px] font-medium text-muted-foreground">پس‌انداز</p>
+            <p className="text-[9px] font-bold text-muted-foreground/70">{Math.round(savingsRate)}٪</p>
           </div>
           <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">

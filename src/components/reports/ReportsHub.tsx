@@ -343,6 +343,7 @@ export function ReportsHub({
             budgetPercent={planningStats.budget.percent}
             goalsPercent={planningStats.goals.percent}
             debtPercent={planningStats.debts.percent}
+            savingsRate={monthlySummary.savingsRate}
             hasData={planningStats.budget.count > 0 || planningStats.goals.count > 0 || planningStats.debts.count > 0}
           />
           
