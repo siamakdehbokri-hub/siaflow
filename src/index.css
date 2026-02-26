@@ -192,15 +192,27 @@
 }
 
 @layer utilities {
-  /* Flat card - no glass */
+  /* Regular glass cards */
   .glass,
-  .glass-heavy,
   .glass-subtle,
-  .glass-card,
-  .glass-glow {
-    background: #111118;
-    border: 1px solid rgba(255,255,255,0.07);
+  .glass-card {
+    background: rgba(255,255,255,0.046);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.09);
     border-radius: 16px;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* Heavy / hero glass cards */
+  .glass-heavy,
+  .glass-glow {
+    background: rgba(255,255,255,0.062);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    box-shadow: 0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09);
   }
 
   .glass::before,
@@ -209,7 +221,7 @@
     display: none;
   }
 
-  /* Gradients - simplified, no glow shadows */
+  /* Gradients */
   .gradient-primary {
     background: #7C3AED;
   }
@@ -246,17 +258,25 @@
     @apply text-primary;
   }
 
-  /* No shadows */
+  /* Subtle shadows */
   .shadow-glow,
-  .shadow-glow-sm,
-  .shadow-glow-lg,
-  .shadow-card,
-  .shadow-card-hover,
+  .shadow-glow-sm {
+    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+  }
+  .shadow-glow-lg {
+    box-shadow: 0 4px 36px rgba(0,0,0,0.34);
+  }
+  .shadow-card {
+    box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09);
+  }
   .shadow-float,
   .shadow-elevation-1,
   .shadow-elevation-2,
   .shadow-elevation-3 {
-    box-shadow: none;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
   }
 
   /* Animations */
