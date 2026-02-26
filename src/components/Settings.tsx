@@ -96,6 +96,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profileDisplayName, setProfileDisplayName] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
   const { theme, setTheme } = useTheme();
@@ -103,13 +104,14 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAvatar = async () => {
+    const fetchProfile = async () => {
       if (!user) return;
       const { data } = await supabase
         .from('profiles')
-        .select('avatar_url')
+        .select('avatar_url, display_name')
         .eq('id', user.id)
         .maybeSingle();
+      if (data?.display_name) setProfileDisplayName(data.display_name);
       if (data?.avatar_url) {
         // avatar_url may be a relative path in the 'avatars' bucket — generate a signed URL
         const rawPath = data.avatar_url;
@@ -129,7 +131,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         }
       }
     };
-    fetchAvatar();
+    fetchProfile();
   }, [user?.id, currentView]);
 
   const handleSignOut = async () => {
@@ -170,7 +172,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
   if (currentView === 'help') return <HelpGuide onBack={() => setCurrentView('main')} />;
   if (currentView === 'security') return <SecuritySettings onBack={() => setCurrentView('main')} />;
 
-  const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر';
+  const displayName = profileDisplayName || user?.user_metadata?.display_name || 'کاربر';
   const emailPart = user?.email?.replace('@siaflow.app', '') || '';
   const phone = /^09\d{9}$/.test(emailPart) ? emailPart : '';
   const displayPhone = phone ? `${phone.slice(0, 4)} ${phone.slice(4, 7)} ${phone.slice(7)}` : user?.email || '';
@@ -212,7 +214,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           <div className="px-5 pb-5 pt-0">
             <Button
               variant="default"
-              className="w-full h-11 rounded-xl bg-warning hover:bg-warning/90 text-warning-foreground font-semibold text-sm"
+              className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm"
               onClick={() => navigate('/admin')}
             >
               <ShieldCheck className="w-4.5 h-4.5 ml-2" />

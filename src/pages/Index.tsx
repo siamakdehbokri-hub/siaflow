@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav, NavTab } from '@/components/navigation/BottomNav';
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -22,6 +22,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReminders } from '@/hooks/useReminders';
 import { useDebtReminders } from '@/hooks/useDebtReminders';
 import { Transaction } from '@/types/expense';
+import { supabase } from '@/integrations/supabase/client';
 import { isInCurrentJalaliMonth } from '@/utils/persianDate';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,20 @@ const Index = () => {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   
   const { user } = useAuth();
+  const [profileName, setProfileName] = useState<string | null>(null);
+
+  // Fetch display_name from profiles table
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.display_name) setProfileName(data.display_name);
+      });
+  }, [user?.id]);
   const { transactions, loading: transactionsLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { categories, loading: categoriesLoading, addCategory, updateCategory, deleteCategory } = useCategories();
   const { goals, loading: goalsLoading, addGoal, updateGoalAmount, deleteGoal } = useSavingGoals();
@@ -197,7 +212,7 @@ const Index = () => {
                 <HomeScreen
                   transactions={transactions}
                   categories={categoriesWithSpent}
-                  userName={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'کاربر'}
+                  userName={profileName || user?.user_metadata?.display_name || 'کاربر'}
                   onAddTransaction={openAddModal}
                   onViewAllTransactions={() => setActiveTab('reports')}
                   onOpenDebts={() => setSubView('debts')}

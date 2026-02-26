@@ -27,7 +27,7 @@ export function HomeScreen({
   showAutoSavings,
   onOpenAutoSavings,
 }: HomeScreenProps) {
-  const { formatAmountCompact, currencyInfo } = useCurrency();
+  const { formatAmountCompact } = useCurrency();
   const financialData = useMemo(() => {
     // Use the centralized financial engine for ALL calculations
     const summary = getCurrentMonthSummary(transactions, categories);
@@ -82,7 +82,6 @@ export function HomeScreen({
               امروز چقدر خرج کردی؟
             </p>
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-base text-muted-foreground">{currencyInfo.symbol}</span>
               <span className="text-4xl font-black tabular-nums tracking-tight text-success">
                 {formatAmountCompact(financialData.todayExpense)}
               </span>
@@ -166,7 +165,7 @@ export function HomeScreen({
             )}>
               {financialData.balance >= 0 ? '+' : ''}{formatAmountCompact(financialData.balance)}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">{currencyInfo.symbol}</p>
+            
           </div>
 
           {/* Detail Rows */}
