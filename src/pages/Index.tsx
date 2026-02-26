@@ -1,19 +1,9 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav, NavTab } from '@/components/navigation/BottomNav';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AppMenu } from '@/components/layout/AppMenu';
 import { HomeScreen } from '@/components/home/HomeScreen';
-import { ReportsHub } from '@/components/reports/ReportsHub';
-import { Settings } from '@/components/Settings';
-import { CategoryManagement } from '@/components/CategoryManagement';
-import { AddTransactionModal } from '@/components/AddTransactionModal';
-import { EditTransactionModal } from '@/components/EditTransactionModal';
-import { SavingGoals } from '@/components/SavingGoals';
-import { DebtManagement } from '@/components/DebtManagement';
-import { TransferManagement } from '@/components/TransferManagement';
-import { AutoSavingsSheet } from '@/components/home/AutoSavingsSheet';
-import { HelpGuide } from '@/components/HelpGuide';
 import { useTransactions, useCategories } from '@/hooks/useData';
 import { useSavingGoals } from '@/hooks/useSavingGoals';
 import { useDebts } from '@/hooks/useDebts';
@@ -26,6 +16,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { isInCurrentJalaliMonth } from '@/utils/persianDate';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+// Lazy load heavy components
+const ReportsHub = lazy(() => import('@/components/reports/ReportsHub').then(m => ({ default: m.ReportsHub })));
+const Settings = lazy(() => import('@/components/Settings').then(m => ({ default: m.Settings })));
+const CategoryManagement = lazy(() => import('@/components/CategoryManagement').then(m => ({ default: m.CategoryManagement })));
+const AddTransactionModal = lazy(() => import('@/components/AddTransactionModal').then(m => ({ default: m.AddTransactionModal })));
+const EditTransactionModal = lazy(() => import('@/components/EditTransactionModal').then(m => ({ default: m.EditTransactionModal })));
+const SavingGoals = lazy(() => import('@/components/SavingGoals').then(m => ({ default: m.SavingGoals })));
+const DebtManagement = lazy(() => import('@/components/DebtManagement').then(m => ({ default: m.DebtManagement })));
+const TransferManagement = lazy(() => import('@/components/TransferManagement').then(m => ({ default: m.TransferManagement })));
+const AutoSavingsSheet = lazy(() => import('@/components/home/AutoSavingsSheet').then(m => ({ default: m.AutoSavingsSheet })));
+const HelpGuide = lazy(() => import('@/components/HelpGuide').then(m => ({ default: m.HelpGuide })));
 
 type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'help';
 
@@ -176,6 +178,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-24">
         <div className="max-w-2xl mx-auto px-4 py-4">
+          <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
           {subView === 'categories' ? (
             <CategoryManagement 
               categories={categoriesWithSpent} 
@@ -238,6 +241,7 @@ const Index = () => {
               )}
             </>
           )}
+          </Suspense>
         </div>
       </main>
 
@@ -248,43 +252,44 @@ const Index = () => {
         onAddClick={() => openAddModal()} 
       />
 
-      {/* Modals */}
-      <AddTransactionModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
-        onAdd={handleAddTransaction} 
-        categories={categoriesWithSpent} 
-      />
-      <EditTransactionModal 
-        isOpen={!!editingTransaction} 
-        transaction={editingTransaction} 
-        onClose={() => setEditingTransaction(null)} 
-        onSave={updateTransaction} 
-        onDelete={deleteTransaction} 
-        categories={categoriesWithSpent} 
-      />
-      {autoSavingsSuggestion && (
-        <AutoSavingsSheet
-          open={autoSavingsOpen}
-          onClose={() => setAutoSavingsOpen(false)}
-          suggestion={autoSavingsSuggestion}
-          prefs={autoSavingsPrefs}
-          onAccept={(amount) => {
-            acceptSuggestion(amount);
-            // Create a saving transaction
-            addTransaction({
-              amount,
-              type: 'saving',
-              category: 'پس‌انداز و سرمایه‌گذاری',
-              description: 'پس‌انداز خودکار پایان ماه',
-              date: new Date().toISOString().split('T')[0],
-              tags: ['auto-savings'],
-            });
-          }}
-          onDecline={declineSuggestion}
-          onEnableAuto={enableAutoTransfer}
+      {/* Modals - lazy loaded */}
+      <Suspense fallback={null}>
+        <AddTransactionModal 
+          isOpen={isAddModalOpen} 
+          onClose={() => setIsAddModalOpen(false)} 
+          onAdd={handleAddTransaction} 
+          categories={categoriesWithSpent} 
         />
-      )}
+        <EditTransactionModal 
+          isOpen={!!editingTransaction} 
+          transaction={editingTransaction} 
+          onClose={() => setEditingTransaction(null)} 
+          onSave={updateTransaction} 
+          onDelete={deleteTransaction} 
+          categories={categoriesWithSpent} 
+        />
+        {autoSavingsSuggestion && (
+          <AutoSavingsSheet
+            open={autoSavingsOpen}
+            onClose={() => setAutoSavingsOpen(false)}
+            suggestion={autoSavingsSuggestion}
+            prefs={autoSavingsPrefs}
+            onAccept={(amount) => {
+              acceptSuggestion(amount);
+              addTransaction({
+                amount,
+                type: 'saving',
+                category: 'پس‌انداز و سرمایه‌گذاری',
+                description: 'پس‌انداز خودکار پایان ماه',
+                date: new Date().toISOString().split('T')[0],
+                tags: ['auto-savings'],
+              });
+            }}
+            onDecline={declineSuggestion}
+            onEnableAuto={enableAutoTransfer}
+          />
+        )}
+      </Suspense>
     </div>
   );
 };
