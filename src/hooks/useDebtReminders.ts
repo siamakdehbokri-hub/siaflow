@@ -123,7 +123,7 @@ export function useDebtReminders(debts: Debt[]) {
     
     if (overdueReminders.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
       overdueReminders.forEach(reminder => {
-        const title = reminder.isOverdue ? '⚠️ بدهی عقب‌افتاده!' : '🔔 سررسید بدهی امروز';
+        const title = reminder.isOverdue ? 'بدهی عقب‌افتاده!' : 'سررسید بدهی امروز';
         const body = `${reminder.name} به ${reminder.creditor} - مبلغ: ${reminder.remainingAmount.toLocaleString('fa-IR')} تومان`;
         sendBrowserNotification(title, body);
       });

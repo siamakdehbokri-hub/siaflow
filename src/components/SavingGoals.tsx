@@ -239,7 +239,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
                         <h3 className="font-bold text-foreground truncate">{goal.name}</h3>
                         {isComplete && (
                           <Badge className="bg-success text-success-foreground text-xs">
-                            🎉 تکمیل شد
+                            تکمیل شد
                           </Badge>
                         )}
                       </div>
