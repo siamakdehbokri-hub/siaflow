@@ -1,5 +1,5 @@
 import { useState, useMemo, lazy, Suspense } from 'react';
-import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2 } from 'lucide-react';
+import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2, PieChart, TrendingUp, BarChart3 } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { Debt } from '@/hooks/useDebts';
@@ -485,7 +485,7 @@ export function ReportsHub({
             <div className="relative p-5">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-chart-3/20 to-chart-3/5 flex items-center justify-center shadow-sm border border-chart-3/10">
-                  <span className="text-xl">📊</span>
+                  <PieChart className="w-6 h-6 text-chart-3" strokeWidth={2} />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">تفکیک هزینه‌های ماه</h4>
@@ -504,7 +504,7 @@ export function ReportsHub({
             <div className="relative p-5">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
-                  <span className="text-xl">📈</span>
+                  <TrendingUp className="w-6 h-6 text-primary" strokeWidth={2} />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">روند ۶ ماه اخیر</h4>
@@ -523,7 +523,7 @@ export function ReportsHub({
             <div className="relative p-5">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-chart-5/20 to-chart-5/5 flex items-center justify-center shadow-sm border border-chart-5/10">
-                  <span className="text-xl">📉</span>
+                  <BarChart3 className="w-6 h-6 text-chart-5" strokeWidth={2} />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-foreground">مقایسه ماهانه</h4>

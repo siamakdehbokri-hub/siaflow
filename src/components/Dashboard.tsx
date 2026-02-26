@@ -135,14 +135,7 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
     return 'شب بخیر';
   };
 
-  // Get greeting emoji
-  const getGreetingEmoji = () => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return '🌅';
-    if (hour >= 12 && hour < 17) return '☀️';
-    if (hour >= 17 && hour < 21) return '🌆';
-    return '🌙';
-  };
+  // Greeting removed - no emojis needed
 
   // Filter chart widgets that should actually show
   const visibleChartWidgets = chartWidgets.filter(w => {
@@ -164,8 +157,7 @@ export function Dashboard({ transactions, categories, widgets, userName, onViewA
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-              {getGreeting()}، {userName} 
-              <span className="text-lg sm:text-xl">{getGreetingEmoji()}</span>
+              {getGreeting()}، {userName}
             </p>
             <p className="text-xs sm:text-sm text-muted-foreground">{formatPersianDateFull(today)}</p>
           </div>

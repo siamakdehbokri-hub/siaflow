@@ -65,7 +65,7 @@ export function AutoSavingsSheet({
           </DrawerTitle>
           <DrawerDescription className="text-sm text-muted-foreground mt-1">
             {suggestion.isNewMonth 
-              ? 'ماه جدید شروع شده! از مانده ماه قبل پس‌انداز کن برای آینده‌ای بهتر 🌟'
+              ? 'ماه جدید شروع شده! از مانده ماه قبل پس‌انداز کن برای آینده‌ای بهتر'
               : 'بر اساس مانده حساب شما در این ماه'
             }
           </DrawerDescription>

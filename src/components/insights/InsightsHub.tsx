@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, TrendingUp, PieChart, Brain, ChevronLeft } from 'lucide-react';
+import { Sparkles, TrendingUp, PieChart, Brain, ChevronLeft, TrendingDown, BarChart3, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Category, Transaction } from '@/types/expense';
 import { AIReport } from '@/components/AIReport';
@@ -15,7 +15,7 @@ interface InsightsHubProps {
 }
 
 interface InsightCardProps {
-  emoji: string;
+  icon: LucideIcon;
   title: string;
   description: string;
   color: string;
@@ -25,7 +25,7 @@ interface InsightCardProps {
   badge?: string;
 }
 
-function InsightCard({ emoji, title, description, color, bgColor, borderColor, onClick, badge }: InsightCardProps) {
+function InsightCard({ icon: Icon, title, description, color, bgColor, borderColor, onClick, badge }: InsightCardProps) {
   return (
     <button
       onClick={onClick}
@@ -37,7 +37,7 @@ function InsightCard({ emoji, title, description, color, bgColor, borderColor, o
     >
       <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full blur-lg opacity-30" />
       <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border", bgColor)}>
-        <span className="text-xl">{emoji}</span>
+        <Icon className="w-6 h-6 text-foreground" strokeWidth={2} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
           <div className="relative">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-chart-2/15 to-chart-2/5 flex items-center justify-center shadow-sm border border-chart-2/10">
-                <span className="text-lg">📈</span>
+                <TrendingUp className="w-5 h-5 text-chart-2" strokeWidth={2} />
               </div>
               <h3 className="text-sm font-bold text-foreground">روند هزینه‌ها</h3>
             </div>
@@ -96,7 +96,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
         <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-chart-5/15 to-chart-5/5 flex items-center justify-center shadow-sm border border-chart-5/10">
-              <span className="text-lg">📉</span>
+              <TrendingDown className="w-5 h-5 text-chart-5" strokeWidth={2} />
             </div>
             <h3 className="text-sm font-bold text-foreground">مقایسه ماهانه</h3>
           </div>
@@ -115,7 +115,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
           <div className="relative">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-chart-3/15 to-chart-3/5 flex items-center justify-center shadow-sm border border-chart-3/10">
-                <span className="text-lg">🍰</span>
+                <PieChart className="w-5 h-5 text-chart-3" strokeWidth={2} />
               </div>
               <h3 className="text-sm font-bold text-foreground">تفکیک هزینه‌ها</h3>
             </div>
@@ -174,7 +174,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-muted-foreground px-1">تحلیل‌های بیشتر</h3>
         <InsightCard
-          emoji="📈"
+          icon={TrendingUp}
           title="روند هزینه‌ها"
           description="مشاهده تغییرات هزینه در طول زمان"
           color="text-chart-2"
@@ -183,7 +183,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
           onClick={() => setActiveView('trends')}
         />
         <InsightCard
-          emoji="🍰"
+          icon={PieChart}
           title="تفکیک دسته‌بندی"
           description="سهم هر دسته از کل هزینه‌ها"
           color="text-chart-3"

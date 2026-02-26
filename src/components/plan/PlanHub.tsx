@@ -1,4 +1,4 @@
-import { Target, PiggyBank, CreditCard, ChartPie, ChevronLeft } from 'lucide-react';
+import { Target, PiggyBank, CreditCard, ChartPie, ChevronLeft, Landmark, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Category, Transaction } from '@/types/expense';
 import { SavingGoal } from '@/hooks/useSavingGoals';
@@ -17,8 +17,7 @@ interface PlanHubProps {
 }
 
 interface QuickStatProps {
-  icon: typeof Target;
-  emoji: string;
+  icon: LucideIcon;
   label: string;
   value: string;
   subtext?: string;
@@ -28,7 +27,7 @@ interface QuickStatProps {
   onClick?: () => void;
 }
 
-function QuickStat({ icon: Icon, emoji, label, value, subtext, color, bgColor, borderColor, onClick }: QuickStatProps) {
+function QuickStat({ icon: Icon, label, value, subtext, color, bgColor, borderColor, onClick }: QuickStatProps) {
   return (
     <button
       onClick={onClick}
@@ -44,7 +43,7 @@ function QuickStat({ icon: Icon, emoji, label, value, subtext, color, bgColor, b
           "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm border",
           bgColor
         )}>
-          <span className="text-xl">{emoji}</span>
+          <Icon className="w-6 h-6 text-foreground" strokeWidth={2} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs text-muted-foreground">{label}</p>
@@ -112,7 +111,7 @@ export function PlanHub({
         <div className="relative">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
-              <span className="text-2xl">🎯</span>
+              <Target className="w-7 h-7 text-primary" strokeWidth={2} />
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">سلامت مالی</h3>
@@ -142,10 +141,9 @@ export function PlanHub({
         <h3 className="text-sm font-bold text-muted-foreground px-1">مدیریت بودجه</h3>
         <QuickStat
           icon={ChartPie}
-          emoji="📊"
           label="بودجه ماهانه"
           value={budgetStats.totalBudget > 0 ? `${Math.round(budgetStats.usedPercent)}% استفاده شده` : 'بدون بودجه'}
-          subtext={budgetStats.overBudgetCount > 0 ? `⚠️ ${budgetStats.overBudgetCount} دسته بیش از بودجه` : undefined}
+          subtext={budgetStats.overBudgetCount > 0 ? `${budgetStats.overBudgetCount} دسته بیش از بودجه` : undefined}
           color="chart-1"
           bgColor="bg-gradient-to-br from-chart-1/15 to-chart-1/5 border-chart-1/10"
           borderColor="border-border hover:border-chart-1/30"
@@ -167,7 +165,6 @@ export function PlanHub({
         <h3 className="text-sm font-bold text-muted-foreground px-1">اهداف پس‌انداز</h3>
         <QuickStat
           icon={PiggyBank}
-          emoji="🐷"
           label="پیشرفت کلی"
           value={goalsStats.count > 0 ? `${Math.round(goalsStats.progress)}% تکمیل` : 'هدف جدید بسازید'}
           subtext={goalsStats.count > 0 ? `${formatCurrency(goalsStats.totalSaved)} از ${formatCurrency(goalsStats.totalTarget)}` : undefined}
@@ -187,11 +184,10 @@ export function PlanHub({
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-muted-foreground px-1">مدیریت بدهی</h3>
         <QuickStat
-          icon={CreditCard}
-          emoji="🏦"
+          icon={Landmark}
           label="بدهی باقی‌مانده"
-          value={debtStats.count > 0 ? formatCurrency(debtStats.remaining) : 'بدون بدهی! 🎉'}
-          subtext={debtStats.overdueCount > 0 ? `⚠️ ${debtStats.overdueCount} بدهی سررسید شده` : debtStats.count > 0 ? `${Math.round(debtStats.progress)}% پرداخت شده` : undefined}
+          value={debtStats.count > 0 ? formatCurrency(debtStats.remaining) : 'بدون بدهی!'}
+          subtext={debtStats.overdueCount > 0 ? `${debtStats.overdueCount} بدهی سررسید شده` : debtStats.count > 0 ? `${Math.round(debtStats.progress)}% پرداخت شده` : undefined}
           color={debtStats.overdueCount > 0 ? "destructive" : "warning"}
           bgColor={cn(
             "border",
