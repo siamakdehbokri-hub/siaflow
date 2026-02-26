@@ -114,20 +114,8 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Ambient background blobs for glassmorphism */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div style={{
-          position: 'absolute', top: -120, right: -90,
-          width: 340, height: 340,
-          background: 'rgba(90,68,200,0.24)',
-          filter: 'blur(80px)',
-          borderRadius: '50%',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: -80, left: -70,
-          width: 280, height: 280,
-          background: 'rgba(18,108,92,0.18)',
-          filter: 'blur(80px)',
-          borderRadius: '50%',
-        }} />
+        <div className="absolute -top-[120px] -right-[90px] w-[340px] h-[340px] rounded-full bg-primary/15 dark:bg-[rgba(90,68,200,0.24)]" style={{ filter: 'blur(80px)' }} />
+        <div className="absolute -bottom-[80px] -left-[70px] w-[280px] h-[280px] rounded-full bg-success/10 dark:bg-[rgba(18,108,92,0.18)]" style={{ filter: 'blur(80px)' }} />
       </div>
       {/* Header */}
       <AppHeader
