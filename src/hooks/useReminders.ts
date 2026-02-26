@@ -71,13 +71,13 @@ export function useReminders(transactions: Transaction[]) {
     reminders.forEach(reminder => {
       if (reminder.daysUntilDue === 0) {
         toast({
-          title: '⚠️ سررسید امروز',
+          title: 'سررسید امروز',
           description: `${reminder.title}: ${reminder.amount.toLocaleString('fa-IR')} تومان`,
           variant: 'destructive',
         });
       } else if (reminder.daysUntilDue <= 1) {
         toast({
-          title: '🔔 یادآور فردا',
+          title: 'یادآور فردا',
           description: `${reminder.title}: ${reminder.amount.toLocaleString('fa-IR')} تومان`,
         });
       }

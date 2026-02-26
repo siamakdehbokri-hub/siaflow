@@ -165,7 +165,7 @@ export function useDebts() {
 
     // Check if fully paid
     if (newPaidAmount >= debt.totalAmount) {
-      toast.success('🎉 تبریک! بدهی به طور کامل پرداخت شد!');
+      toast.success('تبریک! بدهی به طور کامل پرداخت شد!');
     }
   };
 

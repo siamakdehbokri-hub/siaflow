@@ -1,4 +1,4 @@
-import { ChartPie, Target, Landmark, ChevronLeft, AlertTriangle, TrendingUp, Sparkles } from 'lucide-react';
+import { ChartPie, Target, Landmark, ChevronLeft, AlertTriangle, TrendingUp, Sparkles, Activity } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { formatCurrency, toPersianNum } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
@@ -60,8 +60,8 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
     ? stats.current // paid amount
     : stats.total - stats.current; // remaining
 
-  // Emoji map for card types
-  const emojiMap = { budget: '📊', goals: '🐷', debts: '🏦' };
+  // Icon map for card types
+  const iconMap = { budget: ChartPie, goals: Target, debts: Landmark };
 
   return (
     <button
@@ -91,7 +91,7 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
               ? "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10" 
               : `bg-gradient-to-br from-${config.color}/15 to-${config.color}/5 border-${config.color}/10`
           )}>
-            <span className="text-2xl">{emojiMap[type]}</span>
+            {(() => { const CardIcon = iconMap[type]; return <CardIcon className="w-7 h-7 text-foreground" strokeWidth={2} />; })()}
           </div>
           
           <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
                 
                 {hasAlert && (
                   <p className="text-xs text-destructive font-bold mt-1">
-                    ⚠️ {toPersianNum(stats.alertCount || 0)} {config.alertLabel}
+                    {toPersianNum(stats.alertCount || 0)} {config.alertLabel}
                   </p>
                 )}
               </>
@@ -189,7 +189,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
       >
         <div className="relative flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
-            <span className="text-3xl">✨</span>
+            <Sparkles className="w-8 h-8 text-primary" strokeWidth={1.8} />
           </div>
           <div>
             <h3 className="text-base font-black text-foreground">سلامت مالی</h3>
@@ -215,7 +215,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
-              <span className="text-2xl">💪</span>
+              <Activity className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <div>
               <h3 className="text-sm font-black text-foreground">سلامت مالی</h3>

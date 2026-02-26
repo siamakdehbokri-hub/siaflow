@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trash2, User } from 'lucide-react';
+import { Trash2, User, Target, PiggyBank } from 'lucide-react';
 import { AdminGoal } from '@/hooks/useAdmin';
 import { formatCurrency } from '@/utils/persianDate';
 
@@ -51,11 +51,11 @@ export function MobileGoalCard({ goal, onDelete }: MobileGoalCardProps) {
       {/* Amount Info */}
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="bg-muted/50 rounded-xl p-3 border-2 border-border/50">
-          <p className="text-muted-foreground mb-1">🎯 هدف</p>
+          <p className="text-muted-foreground mb-1 flex items-center gap-1"><Target className="w-3.5 h-3.5" strokeWidth={2} /> هدف</p>
           <p className="font-mono font-bold text-sm text-foreground">{formatCurrency(goal.target_amount)}</p>
         </div>
         <div className="bg-success/10 rounded-xl p-3 border-2 border-success/20">
-          <p className="text-muted-foreground mb-1">💰 پس‌انداز</p>
+          <p className="text-muted-foreground mb-1 flex items-center gap-1"><PiggyBank className="w-3.5 h-3.5" strokeWidth={2} /> پس‌انداز</p>
           <p className="font-mono font-bold text-sm text-success">{formatCurrency(goal.current_amount)}</p>
         </div>
       </div>

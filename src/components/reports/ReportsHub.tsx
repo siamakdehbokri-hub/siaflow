@@ -424,10 +424,10 @@ export function ReportsHub({
                   </p>
                   <div className="flex items-center gap-2 mt-3">
                     <span className="text-[11px] font-bold text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-                      ✨ تحلیل عمیق
+                      تحلیل عمیق
                     </span>
                     <span className="text-[11px] font-bold text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-                      🎯 پیشنهاد بودجه
+                      پیشنهاد بودجه
                     </span>
                   </div>
                 </div>

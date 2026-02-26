@@ -148,7 +148,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
           <div className="flex items-start gap-4">
             <div className="relative">
               <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/20">
-                <span className="text-3xl drop-shadow-md">🧠</span>
+                <span className="text-3xl drop-shadow-md"><Brain className="w-8 h-8 text-white" strokeWidth={1.8} /></span>
               </div>
               <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-warning/90 flex items-center justify-center shadow-md animate-pulse">
                 <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
@@ -161,7 +161,7 @@ export function InsightsHub({ transactions, categories }: InsightsHubProps) {
               </p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="text-[11px] font-bold text-white bg-white/20 px-3 py-1 rounded-full border border-white/10">
-                  ✨ تحلیل عمیق
+                  تحلیل عمیق
                 </span>
               </div>
             </div>

@@ -73,7 +73,7 @@ export function HomeScreen({
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
           <h2 className="text-lg font-bold text-foreground leading-relaxed truncate">
-            سلام، {userName} 👋
+            سلام، {userName}
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
             {persianDate}
@@ -268,7 +268,7 @@ export function HomeScreen({
           </div>
           <div className="flex-1 min-w-0 relative z-10">
             <p className="text-sm font-bold text-foreground">پس‌انداز کن برای آینده‌ای بهتر!</p>
-            <p className="text-xs text-muted-foreground mt-0.5">از مانده ماه قبل پس‌انداز کن 💰</p>
+            <p className="text-xs text-muted-foreground mt-0.5">از مانده ماه قبل پس‌انداز کن</p>
           </div>
           <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0 relative z-10" strokeWidth={2} />
         </button>

@@ -144,9 +144,9 @@ export function useSavingGoals() {
       // Check if close to goal
       const progress = (Number(newAmount) / goal.targetAmount) * 100;
       if (progress >= 90 && progress < 100) {
-        toast.success('🎉 تبریک! شما به هدفتان نزدیک شدید!');
+        toast.success('تبریک! شما به هدفتان نزدیک شدید!');
       } else if (progress >= 100) {
-        toast.success('🏆 تبریک! به هدف پس‌انداز خود رسیدید!');
+        toast.success('تبریک! به هدف پس‌انداز خود رسیدید!');
       } else {
         toast.success(type === 'deposit' ? 'واریز با موفقیت ثبت شد' : 'برداشت با موفقیت ثبت شد');
       }
