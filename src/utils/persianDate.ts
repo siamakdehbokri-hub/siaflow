@@ -1,4 +1,4 @@
-import { format, formatDistance, getMonth, getYear, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay, isWithinInterval } from 'date-fns-jalali';
+import { format, formatDistance, getMonth, getYear, startOfMonth, endOfMonth, subMonths } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
 import { toLocalISODateString } from '@/utils/dateUtils';
 
@@ -119,9 +119,6 @@ export const toPersianNum = (num: number | string): string => {
 
 // Check if a date string is today in Jalali calendar
 export const isTodayJalali = (dateString: string): boolean => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const todayStart = startOfDay(now);
-  const todayEnd = endOfDay(now);
-  return isWithinInterval(date, { start: todayStart, end: todayEnd });
+  const todayStr = toLocalISODateString(new Date());
+  return dateString === todayStr;
 };

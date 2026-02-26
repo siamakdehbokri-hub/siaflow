@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { ArrowUpRight, ArrowDownRight, ChevronLeft, Plus, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isInCurrentJalaliMonth, formatPersianDateFull, isTodayJalali } from '@/utils/persianDate';
+import { isTodayJalali, formatPersianDateFull } from '@/utils/persianDate';
+import { getCurrentMonthSummary } from '@/utils/financialEngine';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
 
@@ -28,32 +29,21 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const { formatAmountCompact, currencyInfo } = useCurrency();
   const financialData = useMemo(() => {
-    const monthlyTransactions = transactions.filter(t => isInCurrentJalaliMonth(t.date));
+    // Use the centralized financial engine for ALL calculations
+    const summary = getCurrentMonthSummary(transactions, categories);
     
     const todayExpense = transactions
       .filter(t => t.type === 'expense' && isTodayJalali(t.date))
       .reduce((sum, t) => sum + t.amount, 0);
     
-    const income = monthlyTransactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    const expense = monthlyTransactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    const saving = monthlyTransactions
-      .filter(t => t.type === 'saving')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    const balance = income - expense - saving;
-    
     return {
-      income,
-      expense,
-      saving,
+      income: summary.totalIncome,
+      expense: summary.totalExpense,
+      saving: summary.totalSaving,
       todayExpense,
-      balance,
+      balance: summary.netBalance,
+      savingsRate: summary.savingsRate,
+      expenseToIncomeRatio: summary.expenseToIncomeRatio,
       recentTransactions: [...transactions]
         .sort((a, b) => {
           const dateCompare = b.date.localeCompare(a.date);
@@ -62,7 +52,7 @@ export function HomeScreen({
         })
         .slice(0, 3),
     };
-  }, [transactions]);
+  }, [transactions, categories]);
 
   const today = new Date();
   const persianDate = formatPersianDateFull(today.toISOString());
@@ -216,8 +206,8 @@ export function HomeScreen({
                 icon={<BarChart3 className="w-4 h-4 text-warning" strokeWidth={2} />}
                 iconBg="bg-warning/10"
                 label="نرخ پس‌انداز"
-                value={`${Math.round((financialData.saving / financialData.income) * 100)}%`}
-                valueClassName="text-warning"
+                value={`${financialData.savingsRate}%`}
+                valueClassName={financialData.savingsRate >= 20 ? "text-success" : financialData.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"}
               />
             )}
           </div>
