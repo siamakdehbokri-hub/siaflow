@@ -84,7 +84,7 @@ function SettingRow({ icon: Icon, iconBg, iconColor, title, subtitle, trailing, 
 function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-bold text-muted-foreground px-1 mb-2 uppercase tracking-wide">{title}</h3>
+      <h3 className="text-sm font-bold text-foreground/70 px-1 mb-3 tracking-wide">{title}</h3>
       <div className="glass rounded-2xl overflow-hidden">
         {children}
       </div>
