@@ -12,7 +12,16 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Initialize theme from localStorage and listen for OS theme changes
 function ThemeInitializer() {
@@ -33,7 +42,7 @@ function ThemeInitializer() {
 
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) {
-        meta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+        meta.setAttribute('content', isDark ? '#090910' : '#f7f9fb');
       }
     };
 
@@ -69,7 +78,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  return children;
 }
 
 function AuthRoute({ children }: { children: React.ReactNode }) {
@@ -87,7 +96,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  return children;
 }
 
 const App = () => (

@@ -202,6 +202,7 @@ const Auth = () => {
                     onChange={(e) => setDisplayName(e.target.value)}
                     className="pr-11 h-12 rounded-xl border-2 border-border focus:border-primary"
                     required={!isLogin}
+                    autoComplete="name"
                   />
                 </div>
               </div>
@@ -224,6 +225,7 @@ const Auth = () => {
                     )}
                     required={authMethod === 'phone'}
                     dir="ltr"
+                    autoComplete="tel"
                   />
                   {phone.length > 0 && isPhoneValid && (
                     <CheckCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
@@ -249,6 +251,7 @@ const Auth = () => {
                     )}
                     required={authMethod === 'email'}
                     dir="ltr"
+                    autoComplete="email"
                   />
                   {email.length > 0 && isEmailValid && (
                     <CheckCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
@@ -271,6 +274,7 @@ const Auth = () => {
                   required
                   minLength={isLogin ? 6 : 8}
                   dir="ltr"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
                 />
                 <button
                   type="button"
