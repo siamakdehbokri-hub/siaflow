@@ -178,7 +178,7 @@ export function PasswordChange({ onBack }: PasswordChangeProps) {
       <Card variant="glass" className="bg-amber-500/10 border-amber-500/20">
         <CardContent className="p-4">
           <p className="text-sm text-amber-600 dark:text-amber-400">
-            💡 پس از تغییر رمز، ممکن است نیاز به ورود مجدد داشته باشید.
+            پس از تغییر رمز، ممکن است نیاز به ورود مجدد داشته باشید.
           </p>
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, TrendingUp, PiggyBank, Wallet, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Sparkles, TrendingUp, PiggyBank, Wallet, Loader2, RefreshCw, AlertCircle, Brain, ClipboardList, Lightbulb, Bot, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Transaction, Category } from '@/types/expense';
@@ -14,9 +14,9 @@ interface AIReportProps {
 type ReportType = 'summary' | 'savings' | 'budget' | 'tip';
 
 const reportTypes = [
-  { id: 'summary' as ReportType, label: 'خلاصه مالی', icon: TrendingUp, emoji: '📊' },
-  { id: 'savings' as ReportType, label: 'پیشنهاد صرفه‌جویی', icon: PiggyBank, emoji: '💰' },
-  { id: 'budget' as ReportType, label: 'تحلیل بودجه', icon: Wallet, emoji: '🎯' },
+  { id: 'summary' as ReportType, label: 'خلاصه مالی', icon: TrendingUp },
+  { id: 'savings' as ReportType, label: 'پیشنهاد صرفه‌جویی', icon: PiggyBank },
+  { id: 'budget' as ReportType, label: 'تحلیل بودجه', icon: Wallet },
 ];
 
 export function AIReport({ transactions, categories }: AIReportProps) {
@@ -120,7 +120,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
         <div className="relative p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-sm border border-primary/10">
-              <span className="text-2xl">🤖</span>
+              <Bot className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <div>
               <h3 className="text-base font-bold text-foreground">مشاور هوشمند مالی</h3>
@@ -129,7 +129,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
           </div>
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shadow-inner">
-              <span className="text-4xl opacity-40">📋</span>
+              <ClipboardList className="w-10 h-10 text-muted-foreground/40" strokeWidth={1.5} />
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-foreground mb-1">هنوز داده‌ای برای تحلیل نیست</p>
@@ -152,10 +152,10 @@ export function AIReport({ transactions, categories }: AIReportProps) {
         <div className="flex items-center gap-3 mb-5">
           <div className="relative">
             <div className="w-13 h-13 rounded-xl bg-gradient-to-br from-primary/20 to-chart-5/10 flex items-center justify-center shadow-sm border border-primary/10">
-              <span className="text-2xl">🤖</span>
+              <Bot className="w-6 h-6 text-primary" strokeWidth={2} />
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-success flex items-center justify-center border-2 border-card">
-              <span className="text-[8px] text-white">✓</span>
+              <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
             </div>
           </div>
           <div className="flex-1">
@@ -183,7 +183,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
                 {isActive && (
                   <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-2xl" />
                 )}
-                <span className="relative z-10">{type.emoji}</span>
+                <type.icon className={cn("w-5 h-5 relative z-10", isActive ? "text-primary-foreground" : "text-muted-foreground")} strokeWidth={2} />
                 <span className="relative z-10">{type.label}</span>
               </button>
             );
@@ -196,7 +196,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               <div className="relative">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-chart-5 flex items-center justify-center shadow-xl shadow-primary/30">
-                  <span className="text-3xl animate-pulse">🧠</span>
+                  <span className="text-3xl animate-pulse"><Brain className="w-8 h-8 text-primary-foreground" strokeWidth={2} /></span>
                 </div>
                 <Loader2 className="absolute -right-1.5 -bottom-1.5 w-6 h-6 text-primary animate-spin" />
               </div>
@@ -243,7 +243,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
           ) : (
             <div className="flex flex-col items-center justify-center gap-4 py-8">
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/10 to-chart-5/5 flex items-center justify-center shadow-inner border border-primary/10">
-                <span className="text-4xl">💡</span>
+                <Lightbulb className="w-10 h-10 text-primary/60" strokeWidth={1.5} />
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground mb-1">آماده تحلیل هوشمند</p>

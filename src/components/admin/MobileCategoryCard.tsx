@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Wallet } from 'lucide-react';
 import { AdminCategory } from '@/hooks/useAdmin';
 import { formatCurrency } from '@/utils/persianDate';
 
@@ -41,8 +41,8 @@ export function MobileCategoryCard({ category, onDelete }: MobileCategoryCardPro
               </Badge>
             </div>
             {category.budget && (
-              <p className="font-mono text-xs text-primary bg-primary/10 px-2 py-1 rounded-lg inline-block">
-                💰 بودجه: {formatCurrency(category.budget)}
+              <p className="font-mono text-xs text-primary bg-primary/10 px-2 py-1 rounded-lg inline-flex items-center gap-1">
+                <Wallet className="w-3 h-3" strokeWidth={2} /> بودجه: {formatCurrency(category.budget)}
               </p>
             )}
           </div>

@@ -183,7 +183,7 @@ export function DebtManagement({
               <Progress value={stats.progress} className="h-3 [&>div]:bg-success" />
               <p className="text-xs text-muted-foreground text-center">
                 {stats.progress >= 100 
-                  ? '🎉 تبریک! تمام بدهی‌ها تسویه شده‌اند' 
+                  ? 'تبریک! تمام بدهی‌ها تسویه شده‌اند' 
                   : `${formatCurrency(stats.totalRemaining)} تا تسویه کامل`}
               </p>
             </div>
@@ -245,7 +245,7 @@ export function DebtManagement({
                         <h3 className="font-bold text-foreground truncate">{debt.name}</h3>
                         {isComplete && (
                           <Badge className="bg-success text-success-foreground text-xs">
-                            ✓ تسویه شد
+                            تسویه شد
                           </Badge>
                         )}
                         {isOverdue && (

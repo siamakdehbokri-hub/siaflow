@@ -873,7 +873,7 @@ export function AdminPanel() {
               آیا مطمئن هستید که می‌خواهید کاربر <strong className="text-foreground">{deleteConfirmUser?.displayName}</strong> را حذف کنید؟
               <br /><br />
               <span className="text-destructive">
-                ⚠️ این عمل تمام داده‌های کاربر را به‌صورت دائمی حذف می‌کند.
+                این عمل تمام داده‌های کاربر را به‌صورت دائمی حذف می‌کند.
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>

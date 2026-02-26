@@ -70,17 +70,17 @@ export function useDebtReminders(debts: Debt[]) {
   const showNotifications = useCallback(() => {
     reminders.forEach(reminder => {
       if (reminder.isOverdue) {
-        toast.error(`⚠️ بدهی عقب‌افتاده: ${reminder.name}`, {
+        toast.error(`بدهی عقب‌افتاده: ${reminder.name}`, {
           description: `مبلغ باقی‌مانده: ${reminder.remainingAmount.toLocaleString('fa-IR')} تومان`,
           duration: 8000,
         });
       } else if (reminder.daysUntilDue === 0) {
-        toast.warning(`🔔 سررسید امروز: ${reminder.name}`, {
+        toast.warning(`سررسید امروز: ${reminder.name}`, {
           description: `مبلغ باقی‌مانده: ${reminder.remainingAmount.toLocaleString('fa-IR')} تومان`,
           duration: 6000,
         });
       } else if (reminder.daysUntilDue <= 3) {
-        toast.info(`📅 یادآور بدهی: ${reminder.name}`, {
+        toast.info(`یادآور بدهی: ${reminder.name}`, {
           description: `${reminder.daysUntilDue} روز تا سررسید - مبلغ: ${reminder.remainingAmount.toLocaleString('fa-IR')} تومان`,
           duration: 5000,
         });

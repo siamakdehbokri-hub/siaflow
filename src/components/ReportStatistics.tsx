@@ -139,7 +139,7 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
     {
       label: 'موجودی خالص',
       value: formatCurrency(Math.abs(stats.balance)),
-      subtext: stats.balance >= 0 ? 'مثبت ✓' : 'منفی ✗',
+      subtext: stats.balance >= 0 ? 'مثبت' : 'منفی',
       icon: Wallet,
       color: stats.balance >= 0 ? 'text-success' : 'text-destructive',
       bgColor: stats.balance >= 0 ? 'bg-success/10' : 'bg-destructive/10',

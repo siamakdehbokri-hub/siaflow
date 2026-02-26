@@ -82,7 +82,7 @@ export function AutoSavingsSheet({
             </p>
             {suggestion.isNewMonth ? (
               <p className="text-xs text-muted-foreground mt-1">
-                برای آینده‌ای بهتر، همین الان پس‌انداز کن! 💪
+                برای آینده‌ای بهتر، همین الان پس‌انداز کن!
               </p>
             ) : suggestion.daysUntilMonthEnd > 0 ? (
               <p className="text-xs text-muted-foreground mt-1">

@@ -315,9 +315,9 @@ export function Settings({ onOpenCategories }: SettingsProps) {
               </SheetHeader>
               <div className="space-y-3 pb-4">
                 {[
-                  { value: 'IRT' as CurrencyCode, label: 'تومان', symbol: 'تومان', flag: '🇮🇷' },
-                  { value: 'IRR' as CurrencyCode, label: 'ریال', symbol: 'ریال', flag: '🇮🇷' },
-                  { value: 'USD' as CurrencyCode, label: 'دلار آمریکا', symbol: '$', flag: '🇺🇸' },
+                  { value: 'IRT' as CurrencyCode, label: 'تومان', symbol: 'تومان', flag: 'IR' },
+                  { value: 'IRR' as CurrencyCode, label: 'ریال', symbol: 'ریال', flag: 'IR' },
+                  { value: 'USD' as CurrencyCode, label: 'دلار آمریکا', symbol: '$', flag: 'US' },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -332,7 +332,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                         : "bg-muted/30 border-transparent hover:border-border"
                     )}
                   >
-                    <div className="text-2xl">{option.flag}</div>
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-sm font-bold text-foreground">{option.flag}</div>
                     <div className="flex-1 text-right">
                       <p className="font-semibold text-foreground leading-relaxed">{option.label}</p>
                       <p className="text-sm text-muted-foreground">{option.symbol}</p>
@@ -357,7 +357,7 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                     {ratesLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                     بروزرسانی نرخ
                   </button>
-                  <p className="text-xs font-medium text-muted-foreground">💱 نرخ لحظه‌ای ارز</p>
+                  <p className="text-xs font-medium text-muted-foreground">نرخ لحظه‌ای ارز</p>
                 </div>
                 {exchangeRates ? (
                   <div className="space-y-2">
@@ -365,13 +365,13 @@ export function Settings({ onOpenCategories }: SettingsProps) {
                       <span className="text-sm font-bold text-foreground">
                         {new Intl.NumberFormat('fa-IR').format(exchangeRates.usd_to_irt)} تومان
                       </span>
-                      <span className="text-sm text-muted-foreground">🇺🇸 دلار</span>
+                       <span className="text-sm text-muted-foreground">دلار</span>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
                       <span className="text-sm font-bold text-foreground">
                         {new Intl.NumberFormat('fa-IR').format(exchangeRates.usd_to_irr)} ریال
                       </span>
-                      <span className="text-sm text-muted-foreground">🇺🇸 دلار</span>
+                      <span className="text-sm text-muted-foreground">دلار</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground text-center mt-2">
                       آخرین بروزرسانی: {new Date(exchangeRates.updated_at).toLocaleTimeString('fa-IR')}
