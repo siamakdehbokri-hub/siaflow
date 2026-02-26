@@ -1,5 +1,5 @@
 import { useState, useMemo, lazy, Suspense } from 'react';
-import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2, PieChart, TrendingUp, BarChart3 } from 'lucide-react';
+import { Search, X, ArrowUpRight, ArrowDownRight, Brain, Sparkles, ChevronLeft, ChevronRight, CalendarDays, Loader2, PieChart, TrendingUp, BarChart3, PiggyBank } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { Debt } from '@/hooks/useDebts';
@@ -217,38 +217,40 @@ export function ReportsHub({
         </div>
       </div>
 
-      {/* Net Balance + Savings Rate Row */}
-      <div className="glass rounded-2xl p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", monthlySummary.balance >= 0 ? "bg-success/12" : "bg-destructive/12")}>
-              <TrendingUp className={cn("w-5 h-5", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">مانده خالص</p>
-              <p className={cn("text-base font-black tabular-nums", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")}>
-                {monthlySummary.balance >= 0 ? '+' : ''}{formatAmountCompact(monthlySummary.balance)}
-              </p>
-            </div>
+      {/* Financial Indicators Grid */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <div className="glass rounded-2xl p-3.5 text-center">
+          <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2", monthlySummary.balance >= 0 ? "bg-success/12" : "bg-destructive/12")}>
+            <TrendingUp className={cn("w-4.5 h-4.5", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")} strokeWidth={2} />
           </div>
-          <div className="text-left">
-            <p className="text-xs text-muted-foreground">نرخ پس‌انداز</p>
-            <p className={cn(
-              "text-base font-black tabular-nums",
-              monthlySummary.savingsRate >= 20 ? "text-success" : monthlySummary.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"
-            )}>
-              {toPersianNum(monthlySummary.savingsRate)}٪
-            </p>
+          <p className="text-[10px] text-muted-foreground mb-1">مانده خالص</p>
+          <p className={cn("text-sm font-black tabular-nums", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")}>
+            {monthlySummary.balance >= 0 ? '+' : ''}{formatAmountCompact(monthlySummary.balance)}
+          </p>
+        </div>
+        <div className="glass rounded-2xl p-3.5 text-center">
+          <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2", monthlySummary.savingsRate >= 20 ? "bg-success/12" : "bg-warning/12")}>
+            <PiggyBank className={cn("w-4.5 h-4.5", monthlySummary.savingsRate >= 20 ? "text-success" : "text-warning")} strokeWidth={2} />
           </div>
-          <div className="text-left">
-            <p className="text-xs text-muted-foreground">نسبت هزینه</p>
-            <p className={cn(
-              "text-base font-black tabular-nums",
-              monthlySummary.expenseToIncomeRatio <= 70 ? "text-success" : monthlySummary.expenseToIncomeRatio <= 90 ? "text-warning" : "text-destructive"
-            )}>
-              {toPersianNum(monthlySummary.expenseToIncomeRatio)}٪
-            </p>
+          <p className="text-[10px] text-muted-foreground mb-1">نرخ پس‌انداز</p>
+          <p className={cn(
+            "text-sm font-black tabular-nums",
+            monthlySummary.savingsRate >= 20 ? "text-success" : monthlySummary.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"
+          )}>
+            {toPersianNum(monthlySummary.savingsRate)}٪
+          </p>
+        </div>
+        <div className="glass rounded-2xl p-3.5 text-center">
+          <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2", monthlySummary.expenseToIncomeRatio <= 70 ? "bg-success/12" : "bg-destructive/12")}>
+            <BarChart3 className={cn("w-4.5 h-4.5", monthlySummary.expenseToIncomeRatio <= 70 ? "text-success" : "text-destructive")} strokeWidth={2} />
           </div>
+          <p className="text-[10px] text-muted-foreground mb-1">نسبت هزینه</p>
+          <p className={cn(
+            "text-sm font-black tabular-nums",
+            monthlySummary.expenseToIncomeRatio <= 70 ? "text-success" : monthlySummary.expenseToIncomeRatio <= 90 ? "text-warning" : "text-destructive"
+          )}>
+            {toPersianNum(monthlySummary.expenseToIncomeRatio)}٪
+          </p>
         </div>
       </div>
 
