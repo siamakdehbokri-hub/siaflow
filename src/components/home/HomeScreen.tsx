@@ -116,18 +116,21 @@ export function HomeScreen({
             label="تراکنش‌ها"
             color="primary"
             onClick={onViewAllTransactions}
+            ariaLabel="مشاهده تراکنش‌ها"
           />
           <QuickActionButton 
             icon={PieChart} 
             label="بودجه‌بندی"
             color="success"
             onClick={onViewAllTransactions}
+            ariaLabel="مشاهده بودجه‌بندی"
           />
           <QuickActionButton 
             icon={Landmark} 
             label="بدهی‌ها"
             color="destructive"
             onClick={() => onOpenDebts?.()}
+            ariaLabel="مدیریت بدهی‌ها"
           />
         </div>
       </div>
@@ -372,9 +375,10 @@ interface QuickActionButtonProps {
   color: 'primary' | 'success' | 'destructive';
   onClick: () => void;
   disabled?: boolean;
+  ariaLabel?: string;
 }
 
-function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: QuickActionButtonProps) {
+function QuickActionButton({ icon: Icon, label, color, onClick, disabled, ariaLabel }: QuickActionButtonProps) {
   const colorClass = {
     primary: 'text-primary',
     success: 'text-success',
@@ -385,6 +389,7 @@ function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: Quic
     <button 
       onClick={onClick} 
       disabled={disabled}
+      aria-label={ariaLabel || label}
       className={cn(
         "flex flex-col items-center gap-2.5 min-w-0 py-2 px-3 rounded-2xl transition-all",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

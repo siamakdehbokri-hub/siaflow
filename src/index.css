@@ -255,27 +255,27 @@
 
   /* Gradients */
   .gradient-primary {
-    background: #7C3AED;
+    @apply bg-primary;
   }
 
   .gradient-primary-soft {
-    background: rgba(124, 58, 237, 0.1);
+    @apply bg-primary/10;
   }
 
   .gradient-expense {
-    background: #EF4444;
+    @apply bg-destructive;
   }
 
   .gradient-income {
-    background: #10B981;
+    @apply bg-success;
   }
 
   .gradient-mesh {
-    background: #09090F;
+    @apply bg-background;
   }
 
   .gradient-aurora {
-    background: #09090F;
+    @apply bg-background;
   }
 
   .gradient-shine {
@@ -290,25 +290,25 @@
     @apply text-primary;
   }
 
-  /* Subtle shadows */
+  /* Subtle shadows - theme-aware */
   .shadow-glow,
   .shadow-glow-sm {
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 24px hsl(var(--glass-shadow-color));
   }
   .shadow-glow-lg {
-    box-shadow: 0 4px 36px rgba(0,0,0,0.34);
+    box-shadow: 0 4px 36px hsl(var(--glass-shadow-color));
   }
   .shadow-card {
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+    box-shadow: 0 2px 24px hsl(var(--glass-shadow-color)), inset 0 1px 0 hsl(var(--glass-inset));
   }
   .shadow-card-hover {
-    box-shadow: 0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09);
+    box-shadow: 0 4px 36px hsl(var(--glass-shadow-color)), inset 0 1px 0 hsl(var(--glass-inset));
   }
   .shadow-float,
   .shadow-elevation-1,
   .shadow-elevation-2,
   .shadow-elevation-3 {
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 24px hsl(var(--glass-shadow-color));
   }
 
   /* Animations */
