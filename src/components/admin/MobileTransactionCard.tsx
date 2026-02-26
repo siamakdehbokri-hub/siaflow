@@ -20,39 +20,36 @@ export function MobileTransactionCard({ transaction, onDelete }: MobileTransacti
   const isIncome = transaction.type === 'income';
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-800 p-3 transition-all">
+    <div className="glass rounded-xl p-3 transition-all active:scale-[0.99]">
       <div className="flex items-center justify-between gap-2">
-        {/* Left: Amount (Primary) */}
         <div className="shrink-0">
           <span className={cn(
             "font-mono font-bold text-lg tabular-nums",
-            isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+            isIncome ? 'text-success' : 'text-destructive'
           )} dir="ltr">
             {isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
           </span>
         </div>
 
-        {/* Center: Details */}
         <div className="flex-1 min-w-0 mx-2">
           <div className="flex items-center gap-1.5">
-            <span className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate">
+            <span className="font-medium text-sm text-foreground truncate">
               {transaction.category}
             </span>
             <Badge 
               variant="outline" 
               className={cn(
-                "rounded-md text-[9px] h-5 px-1.5 font-medium border shrink-0",
+                "rounded-md text-[9px] h-5 px-1.5 font-medium shrink-0",
                 isIncome 
-                  ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" 
-                  : "bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
+                  ? "bg-success/10 text-success border-success/20" 
+                  : "bg-destructive/10 text-destructive border-destructive/20"
               )}
             >
               {isIncome ? 'درآمد' : 'هزینه'}
             </Badge>
           </div>
           
-          {/* Metadata Row */}
-          <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
             <span className="flex items-center gap-0.5">
               <User className="w-3 h-3" strokeWidth={2} />
               {transaction.userName}
@@ -63,22 +60,20 @@ export function MobileTransactionCard({ transaction, onDelete }: MobileTransacti
             </span>
           </div>
           
-          {/* Description */}
           {transaction.description && (
-            <div className="flex items-center gap-1 mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1 mt-1.5 text-[10px] text-muted-foreground">
               <FileText className="w-3 h-3 shrink-0" strokeWidth={2} />
               <span className="truncate">{transaction.description}</span>
             </div>
           )}
         </div>
 
-        {/* Right: Actions (Secondary) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 rounded-lg shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              className="h-8 w-8 rounded-lg shrink-0 text-muted-foreground hover:text-foreground"
             >
               <MoreVertical className="w-4 h-4" strokeWidth={2} />
             </Button>
@@ -86,7 +81,7 @@ export function MobileTransactionCard({ transaction, onDelete }: MobileTransacti
           <DropdownMenuContent align="end" className="w-36 rounded-xl">
             <DropdownMenuItem 
               onClick={() => onDelete(transaction)}
-              className="text-red-600 focus:text-red-600 py-2.5 rounded-lg"
+              className="text-destructive focus:text-destructive py-2.5 rounded-lg"
             >
               <Trash2 className="w-4 h-4 ml-2" strokeWidth={2} />
               حذف تراکنش

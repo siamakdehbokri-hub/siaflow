@@ -37,57 +37,52 @@ export function MobileUserCard({
 }: MobileUserCardProps) {
   const isCurrentUser = adminUser.id === currentUserId;
   const isAdmin = adminUser.roles.includes('admin');
-  
-  // Risk indicators
   const isInactive = !adminUser.isActive;
   const hasNoTransactions = adminUser.transactionCount === 0;
   const lastLoginText = formatLastLogin(adminUser.lastLogin);
 
   return (
     <div className={cn(
-      "bg-white dark:bg-slate-900 rounded-xl border-2 p-3 space-y-2.5 transition-all",
-      isInactive 
-        ? "border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20" 
-        : "border-slate-200 dark:border-slate-800"
+      "glass rounded-xl p-3 space-y-2.5 transition-all active:scale-[0.99]",
+      isInactive && "border border-destructive/20 bg-destructive/5"
     )}>
       {/* Row 1: User Info + Actions */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <Avatar className="w-10 h-10 border-2 border-slate-200 dark:border-slate-700 shrink-0">
+          <Avatar className="w-10 h-10 border border-border shrink-0">
             <AvatarImage src={adminUser.avatarUrl || undefined} />
-            <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm">
+            <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
               {adminUser.displayName?.charAt(0)?.toUpperCase() || '?'}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <p className="font-semibold text-sm truncate text-slate-900 dark:text-slate-100">
+              <p className="font-semibold text-sm truncate text-foreground">
                 {adminUser.displayName || 'بدون نام'}
               </p>
               {isAdmin && (
-                <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" strokeWidth={2} />
+                <Crown className="w-3.5 h-3.5 text-warning shrink-0" strokeWidth={2} />
               )}
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate" dir="ltr">
+            <p className="text-[11px] text-muted-foreground truncate" dir="ltr">
               {adminUser.email}
             </p>
           </div>
         </div>
 
-        {/* Actions */}
         {!isCurrentUser ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-9 w-9 rounded-lg shrink-0 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                className="h-9 w-9 rounded-lg shrink-0 text-muted-foreground hover:text-foreground"
               >
                 <MoreVertical className="w-4 h-4" strokeWidth={2} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl">
-              <DropdownMenuLabel className="text-xs text-slate-500">عملیات</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">عملیات</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onViewDetails(adminUser)} className="py-2.5 rounded-lg">
                 <Eye className="w-4 h-4 ml-2" strokeWidth={2} />
@@ -96,12 +91,12 @@ export function MobileUserCard({
               <DropdownMenuItem onClick={() => onToggleStatus(adminUser.id)} className="py-2.5 rounded-lg">
                 {adminUser.isActive ? (
                   <>
-                    <UserX className="w-4 h-4 ml-2 text-orange-500" strokeWidth={2} />
+                    <UserX className="w-4 h-4 ml-2 text-warning" strokeWidth={2} />
                     غیرفعال کردن
                   </>
                 ) : (
                   <>
-                    <UserCheck className="w-4 h-4 ml-2 text-emerald-500" strokeWidth={2} />
+                    <UserCheck className="w-4 h-4 ml-2 text-success" strokeWidth={2} />
                     فعال کردن
                   </>
                 )}
@@ -109,14 +104,14 @@ export function MobileUserCard({
               <DropdownMenuItem onClick={() => onToggleAdmin(adminUser)} className="py-2.5 rounded-lg">
                 <Crown className={cn(
                   "w-4 h-4 ml-2",
-                  isAdmin ? "text-amber-500" : "text-slate-400"
+                  isAdmin ? "text-warning" : "text-muted-foreground"
                 )} strokeWidth={2} />
                 {isAdmin ? 'حذف ادمین' : 'ادمین کردن'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => onDelete(adminUser)}
-                className="text-red-600 focus:text-red-600 py-2.5 rounded-lg"
+                className="text-destructive focus:text-destructive py-2.5 rounded-lg"
               >
                 <Trash2 className="w-4 h-4 ml-2" strokeWidth={2} />
                 حذف کاربر
@@ -124,7 +119,7 @@ export function MobileUserCard({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Badge variant="outline" className="text-[10px] rounded-lg h-6 px-2 border-slate-300 dark:border-slate-600 text-slate-500 shrink-0">
+          <Badge variant="outline" className="text-[10px] rounded-lg h-6 px-2 text-muted-foreground shrink-0">
             شما
           </Badge>
         )}
@@ -132,39 +127,35 @@ export function MobileUserCard({
 
       {/* Row 2: Status Badges */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        {/* Status */}
         <Badge 
           variant="outline"
           className={cn(
-            "rounded-lg text-[10px] h-6 px-2 font-medium border",
+            "rounded-lg text-[10px] h-6 px-2 font-medium",
             adminUser.isActive 
-              ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" 
-              : "bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800"
+              ? "bg-success/10 text-success border-success/20" 
+              : "bg-destructive/10 text-destructive border-destructive/20"
           )}
         >
           <span className={cn(
             "w-1.5 h-1.5 rounded-full ml-1.5",
-            adminUser.isActive ? "bg-emerald-500" : "bg-red-500"
+            adminUser.isActive ? "bg-success" : "bg-destructive"
           )} />
           {adminUser.isActive ? 'فعال' : 'غیرفعال'}
         </Badge>
 
-        {/* Role */}
         {isAdmin && (
-          <Badge className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-lg text-[10px] h-6 px-2 font-medium">
+          <Badge className="bg-warning/10 text-warning border border-warning/20 rounded-lg text-[10px] h-6 px-2 font-medium">
             ادمین
           </Badge>
         )}
 
-        {/* Transaction Count */}
-        <Badge variant="outline" className="rounded-lg text-[10px] h-6 px-2 font-mono border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+        <Badge variant="outline" className="rounded-lg text-[10px] h-6 px-2 font-mono text-muted-foreground">
           <Activity className="w-3 h-3 ml-1" strokeWidth={2} />
           {adminUser.transactionCount}
         </Badge>
 
-        {/* Warning indicators */}
         {hasNoTransactions && (
-          <Badge variant="outline" className="rounded-lg text-[10px] h-6 px-2 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50">
+          <Badge variant="outline" className="rounded-lg text-[10px] h-6 px-2 border-warning/20 text-warning bg-warning/10">
             <AlertTriangle className="w-3 h-3 ml-1" strokeWidth={2} />
             بدون فعالیت
           </Badge>
@@ -172,7 +163,7 @@ export function MobileUserCard({
       </div>
 
       {/* Row 3: Last Login */}
-      <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <Clock className="w-3.5 h-3.5" strokeWidth={2} />
         <span>آخرین ورود: {lastLoginText}</span>
       </div>

@@ -15,7 +15,7 @@ export function MobileDebtCard({ debt, onDelete }: MobileDebtCardProps) {
     : 0;
 
   return (
-    <div className="bg-card rounded-2xl border-2 border-border p-4 space-y-3 hover:border-primary/30 transition-all active:scale-[0.99]">
+    <div className="glass rounded-2xl p-4 space-y-3 hover:border-primary/30 transition-all active:scale-[0.99]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="font-bold text-base truncate text-foreground">{debt.name}</p>
@@ -31,7 +31,7 @@ export function MobileDebtCard({ debt, onDelete }: MobileDebtCardProps) {
           variant="outline"
           size="icon"
           onClick={() => onDelete(debt)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-2 border-destructive/30"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-destructive/30"
         >
           <Trash2 className="w-4 h-4" strokeWidth={2} />
         </Button>
@@ -39,11 +39,11 @@ export function MobileDebtCard({ debt, onDelete }: MobileDebtCardProps) {
 
       {/* Amount Info */}
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="bg-muted/50 rounded-xl p-3 border-2 border-border/50">
+        <div className="bg-muted/30 rounded-xl p-3 border border-border">
           <p className="text-muted-foreground mb-1">کل مبلغ</p>
           <p className="font-mono font-bold text-sm text-foreground">{formatCurrency(debt.total_amount)}</p>
         </div>
-        <div className="bg-success/10 rounded-xl p-3 border-2 border-success/20">
+        <div className="bg-success/5 rounded-xl p-3 border border-success/15">
           <p className="text-muted-foreground mb-1">پرداخت شده</p>
           <p className="font-mono font-bold text-sm text-success">{formatCurrency(debt.paid_amount)}</p>
         </div>
@@ -58,9 +58,8 @@ export function MobileDebtCard({ debt, onDelete }: MobileDebtCardProps) {
         <Progress value={progress} className="h-2.5" />
       </div>
 
-      {/* Due Date */}
       {debt.due_date && (
-        <div className="text-xs text-muted-foreground flex items-center gap-1.5 bg-warning/10 rounded-xl px-3 py-2 border-2 border-warning/20">
+        <div className="text-xs text-muted-foreground flex items-center gap-1.5 bg-warning/10 rounded-xl px-3 py-2 border border-warning/15">
           <Calendar className="w-4 h-4 text-warning" strokeWidth={2} />
           <span>سررسید: <strong className="text-foreground">{debt.due_date}</strong></span>
         </div>
