@@ -6,6 +6,7 @@ import { Debt } from '@/hooks/useDebts';
 import { SwipeableTransaction } from '@/components/SwipeableTransaction';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, getJalaliMonthName, toPersianNum } from '@/utils/persianDate';
+import { useCurrency } from '@/hooks/useCurrency';
 import { subMonths, addMonths } from 'date-fns-jalali';
 import { cn } from '@/lib/utils';
 import { PlanningCard, FinancialHealthCard } from '@/components/reports/PlanningCards';
@@ -50,6 +51,7 @@ export function ReportsHub({
   onOpenDebts,
   onOpenBudget,
 }: ReportsHubProps) {
+  const { formatAmountCompact } = useCurrency();
   const [activeTab, setActiveTab] = useState<ReportsTab>('transactions');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense' | 'saving'>('all');
@@ -198,7 +200,7 @@ export function ReportsHub({
             <p className="text-xs font-medium text-muted-foreground">درآمد</p>
           </div>
           <p className="text-xl font-black text-success tabular-nums">
-            {formatCurrency(monthlySummary.income)}
+            {formatAmountCompact(monthlySummary.income)}
           </p>
         </div>
         
@@ -210,7 +212,7 @@ export function ReportsHub({
             <p className="text-xs font-medium text-muted-foreground">هزینه</p>
           </div>
           <p className="text-xl font-black text-destructive tabular-nums">
-            {formatCurrency(monthlySummary.expense)}
+            {formatAmountCompact(monthlySummary.expense)}
           </p>
         </div>
       </div>
@@ -225,7 +227,7 @@ export function ReportsHub({
             <div>
               <p className="text-xs text-muted-foreground">مانده خالص</p>
               <p className={cn("text-base font-black tabular-nums", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")}>
-                {monthlySummary.balance >= 0 ? '+' : ''}{formatCurrency(monthlySummary.balance)}
+                {monthlySummary.balance >= 0 ? '+' : ''}{formatAmountCompact(monthlySummary.balance)}
               </p>
             </div>
           </div>
@@ -452,7 +454,7 @@ export function ReportsHub({
               </div>
               <p className="text-[10px] text-muted-foreground mb-0.5">درآمد ماه</p>
               <p className="text-sm font-black text-success tabular-nums">
-                {formatCurrency(monthlySummary.income).replace(' تومان', '')}
+                {formatAmountCompact(monthlySummary.income)}
               </p>
             </div>
             
@@ -462,7 +464,7 @@ export function ReportsHub({
               </div>
               <p className="text-[10px] text-muted-foreground mb-0.5">هزینه ماه</p>
               <p className="text-sm font-black text-destructive tabular-nums">
-                {formatCurrency(monthlySummary.expense).replace(' تومان', '')}
+                {formatAmountCompact(monthlySummary.expense)}
               </p>
             </div>
             
