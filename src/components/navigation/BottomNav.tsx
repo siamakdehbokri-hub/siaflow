@@ -10,9 +10,9 @@ interface BottomNavProps {
 }
 
 const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
-  { id: 'home', icon: Home, label: 'داشبورد' },
-  { id: 'reports', icon: BarChart2, label: 'گزارش‌ها' },
   { id: 'settings', icon: Settings2, label: 'تنظیمات' },
+  { id: 'reports', icon: BarChart2, label: 'گزارش‌ها' },
+  { id: 'home', icon: Home, label: 'داشبورد' },
 ];
 
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
