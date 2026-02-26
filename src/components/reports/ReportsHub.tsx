@@ -6,10 +6,11 @@ import { Debt } from '@/hooks/useDebts';
 import { SwipeableTransaction } from '@/components/SwipeableTransaction';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, getJalaliMonthName, toPersianNum } from '@/utils/persianDate';
-import { startOfMonth, endOfMonth, subMonths, addMonths, isWithinInterval, parseISO } from 'date-fns-jalali';
+import { subMonths, addMonths } from 'date-fns-jalali';
 import { cn } from '@/lib/utils';
 import { PlanningCard, FinancialHealthCard } from '@/components/reports/PlanningCards';
 import { SegmentedControl, FilterPill } from '@/components/ui/segmented-control';
+import { getJalaliMonthBounds, filterTransactionsByDateRange } from '@/utils/financialEngine';
 
 // Lazy load heavy chart components
 const AIReport = lazy(() => import('@/components/AIReport').then(m => ({ default: m.AIReport })));
@@ -55,19 +56,15 @@ export function ReportsHub({
   const [showAIReport, setShowAIReport] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
 
-  // Get month boundaries
-  const monthStart = startOfMonth(selectedMonth);
-  const monthEnd = endOfMonth(selectedMonth);
+  // Get month boundaries using the financial engine (same as dashboard)
+  const monthBounds = useMemo(() => getJalaliMonthBounds(selectedMonth), [selectedMonth]);
 
-  // Filter transactions by selected month
+  // Filter transactions by selected month using the SAME method as the financial engine
   const monthlyTransactions = useMemo(() => {
-    return transactions.filter((t) => {
-      const date = parseISO(t.date);
-      return isWithinInterval(date, { start: monthStart, end: monthEnd });
-    });
-  }, [transactions, monthStart, monthEnd]);
+    return filterTransactionsByDateRange(transactions, monthBounds.start, monthBounds.end);
+  }, [transactions, monthBounds.start, monthBounds.end]);
 
-  // Monthly summary
+  // Monthly summary — single source of truth using same formulas as financial engine
   const monthlySummary = useMemo(() => {
     const income = monthlyTransactions
       .filter(t => t.type === 'income')
@@ -80,8 +77,12 @@ export function ReportsHub({
     const saving = monthlyTransactions
       .filter(t => t.type === 'saving')
       .reduce((sum, t) => sum + t.amount, 0);
+
+    const netBalance = income - expense - saving;
+    const savingsRate = income > 0 ? Math.round((saving / income) * 100) : 0;
+    const expenseToIncomeRatio = income > 0 ? Math.round((expense / income) * 100) : 0;
     
-    return { income, expense, saving, balance: income - expense - saving };
+    return { income, expense, saving, balance: netBalance, savingsRate, expenseToIncomeRatio };
   }, [monthlyTransactions]);
 
   // Simple filtered transactions
@@ -197,47 +198,62 @@ export function ReportsHub({
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="relative overflow-hidden rounded-2xl p-5"
-          style={{
-            background: 'hsl(var(--card) / 0.6)',
-            border: '1px solid hsl(var(--success) / 0.15)',
-            backdropFilter: 'blur(20px)',
-          }}
-        >
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'hsl(var(--success) / 0.12)', border: '1px solid hsl(var(--success) / 0.2)' }}
-              >
-                <ArrowUpRight className="w-6 h-6 text-success" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed">درآمد</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="glass rounded-2xl p-4">
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-success/12">
+              <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
             </div>
-            <p className="text-2xl font-black text-success tabular-nums">
-              {formatCurrency(monthlySummary.income)}
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">درآمد</p>
           </div>
+          <p className="text-xl font-black text-success tabular-nums">
+            {formatCurrency(monthlySummary.income)}
+          </p>
         </div>
         
-        <div className="relative overflow-hidden rounded-2xl p-5"
-          style={{
-            background: 'hsl(var(--card) / 0.6)',
-            border: '1px solid hsl(var(--destructive) / 0.15)',
-            backdropFilter: 'blur(20px)',
-          }}
-        >
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'hsl(var(--destructive) / 0.12)', border: '1px solid hsl(var(--destructive) / 0.2)' }}
-              >
-                <ArrowDownRight className="w-6 h-6 text-destructive" strokeWidth={2.5} />
-              </div>
-              <p className="text-sm font-medium text-muted-foreground leading-relaxed">هزینه</p>
+        <div className="glass rounded-2xl p-4">
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-destructive/12">
+              <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
             </div>
-            <p className="text-2xl font-black text-destructive tabular-nums">
-              {formatCurrency(monthlySummary.expense)}
+            <p className="text-xs font-medium text-muted-foreground">هزینه</p>
+          </div>
+          <p className="text-xl font-black text-destructive tabular-nums">
+            {formatCurrency(monthlySummary.expense)}
+          </p>
+        </div>
+      </div>
+
+      {/* Net Balance + Savings Rate Row */}
+      <div className="glass rounded-2xl p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", monthlySummary.balance >= 0 ? "bg-success/12" : "bg-destructive/12")}>
+              <TrendingUp className={cn("w-5 h-5", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">مانده خالص</p>
+              <p className={cn("text-base font-black tabular-nums", monthlySummary.balance >= 0 ? "text-success" : "text-destructive")}>
+                {monthlySummary.balance >= 0 ? '+' : ''}{formatCurrency(monthlySummary.balance)}
+              </p>
+            </div>
+          </div>
+          <div className="text-left">
+            <p className="text-xs text-muted-foreground">نرخ پس‌انداز</p>
+            <p className={cn(
+              "text-base font-black tabular-nums",
+              monthlySummary.savingsRate >= 20 ? "text-success" : monthlySummary.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"
+            )}>
+              {toPersianNum(monthlySummary.savingsRate)}٪
+            </p>
+          </div>
+          <div className="text-left">
+            <p className="text-xs text-muted-foreground">نسبت هزینه</p>
+            <p className={cn(
+              "text-base font-black tabular-nums",
+              monthlySummary.expenseToIncomeRatio <= 70 ? "text-success" : monthlySummary.expenseToIncomeRatio <= 90 ? "text-warning" : "text-destructive"
+            )}>
+              {toPersianNum(monthlySummary.expenseToIncomeRatio)}٪
             </p>
           </div>
         </div>
@@ -439,43 +455,37 @@ export function ReportsHub({
 
           {/* Quick Stats Row */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="relative overflow-hidden p-4 rounded-2xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
-              <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-success/8 blur-lg" />
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mb-2 shadow-sm">
-                  <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2.5} />
-                </div>
-                <p className="text-[10px] text-muted-foreground mb-0.5">درآمد ماه</p>
-                <p className="text-sm font-black text-success tabular-nums">
-                  {formatCurrency(monthlySummary.income).replace(' تومان', '')}
-                </p>
+            <div className="glass rounded-2xl p-3.5">
+              <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center mb-2">
+                <ArrowUpRight className="w-4.5 h-4.5 text-success" strokeWidth={2} />
               </div>
+              <p className="text-[10px] text-muted-foreground mb-0.5">درآمد ماه</p>
+              <p className="text-sm font-black text-success tabular-nums">
+                {formatCurrency(monthlySummary.income).replace(' تومان', '')}
+              </p>
             </div>
             
-            <div className="relative overflow-hidden p-4 rounded-2xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
-              <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-destructive/8 blur-lg" />
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mb-2 shadow-sm">
-                  <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2.5} />
-                </div>
-                <p className="text-[10px] text-muted-foreground mb-0.5">هزینه ماه</p>
-                <p className="text-sm font-black text-destructive tabular-nums">
-                  {formatCurrency(monthlySummary.expense).replace(' تومان', '')}
-                </p>
+            <div className="glass rounded-2xl p-3.5">
+              <div className="w-9 h-9 rounded-xl bg-destructive/10 flex items-center justify-center mb-2">
+                <ArrowDownRight className="w-4.5 h-4.5 text-destructive" strokeWidth={2} />
               </div>
+              <p className="text-[10px] text-muted-foreground mb-0.5">هزینه ماه</p>
+              <p className="text-sm font-black text-destructive tabular-nums">
+                {formatCurrency(monthlySummary.expense).replace(' تومان', '')}
+              </p>
             </div>
             
-            <div className="relative overflow-hidden p-4 rounded-2xl" style={{ background: 'hsl(var(--card) / 0.6)', border: '1px solid hsl(var(--border) / 0.4)' }}>
-              <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-primary/8 blur-lg" />
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-2 shadow-sm">
-                  <CalendarDays className="w-5 h-5 text-primary" strokeWidth={2.5} />
-                </div>
-                <p className="text-[10px] text-muted-foreground mb-0.5">تراکنش</p>
-                <p className="text-sm font-black text-foreground tabular-nums">
-                  {toPersianNum(monthlyTransactions.length)}
-                </p>
+            <div className="glass rounded-2xl p-3.5">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-2">
+                <CalendarDays className="w-4.5 h-4.5 text-primary" strokeWidth={2} />
               </div>
+              <p className="text-[10px] text-muted-foreground mb-0.5">نرخ پس‌انداز</p>
+              <p className={cn(
+                "text-sm font-black tabular-nums",
+                monthlySummary.savingsRate >= 20 ? "text-success" : monthlySummary.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"
+              )}>
+                {toPersianNum(monthlySummary.savingsRate)}٪
+              </p>
             </div>
           </div>
 
