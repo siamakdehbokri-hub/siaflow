@@ -234,7 +234,7 @@ export function HomeScreen({
                 icon={<BarChart3 className="w-4 h-4 text-warning" strokeWidth={2} />}
                 iconBg="bg-warning/10"
                 label="نرخ پس‌انداز"
-                value={`${financialData.savingsRate}% ${currencyInfo.symbol}`}
+                value={`٪${financialData.savingsRate}`}
                 valueClassName={financialData.savingsRate >= 20 ? "text-success" : financialData.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"}
               />
             )}
