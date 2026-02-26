@@ -283,45 +283,54 @@ export function HomeScreen({
           <div className="glass-card rounded-2xl overflow-hidden">
             {financialData.recentTransactions.map((transaction, idx) => {
               const isIncome = transaction.type === 'income';
+              const prevDate = idx > 0 ? formatPersianDateShort(financialData.recentTransactions[idx - 1].date) : null;
+              const currentDate = formatPersianDateShort(transaction.date);
+              const showDateHeader = idx === 0 || currentDate !== prevDate;
               
               return (
-                <div 
-                  key={transaction.id} 
-                  className={cn(
-                    "flex items-center gap-3 p-4 active:bg-accent/30 transition-colors",
-                    idx > 0 && "border-t border-border"
-                  )}
-                >
-                  <div className={cn(
-                    "w-11 h-11 rounded-full flex items-center justify-center shrink-0",
-                    isIncome ? "bg-success/10" : "bg-destructive/10"
-                  )}>
-                    {isIncome ? (
-                      <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
-                    ) : (
-                      <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-foreground truncate">
-                      {transaction.category}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                      {transaction.description || '—'}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums">
-                      {formatPersianDateShort(transaction.date)}
-                    </p>
-                  </div>
-                  
-                  <div className="text-left shrink-0">
-                    <p className={cn(
-                      "text-sm font-black tabular-nums",
-                      isIncome ? "text-success" : "text-destructive"
+                <div key={transaction.id}>
+                  {showDateHeader && (
+                    <div className={cn(
+                      "px-4 py-2 text-[11px] font-bold text-muted-foreground bg-muted/40",
+                      idx > 0 && "border-t border-border"
                     )}>
-                      {isIncome ? '+' : '-'}{formatNumberFull(transaction.amount)}
-                    </p>
+                      {currentDate}
+                    </div>
+                  )}
+                  <div 
+                    className={cn(
+                      "flex items-center gap-3 p-4 active:bg-accent/30 transition-colors",
+                      !showDateHeader && idx > 0 && "border-t border-border/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-11 h-11 rounded-full flex items-center justify-center shrink-0",
+                      isIncome ? "bg-success/10" : "bg-destructive/10"
+                    )}>
+                      {isIncome ? (
+                        <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
+                      ) : (
+                        <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">
+                        {transaction.category}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                        {transaction.description || '—'}
+                      </p>
+                    </div>
+                    
+                    <div className="text-left shrink-0">
+                      <p className={cn(
+                        "text-sm font-black tabular-nums",
+                        isIncome ? "text-success" : "text-destructive"
+                      )}>
+                        {isIncome ? '+' : '-'}{formatNumberFull(transaction.amount)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
@@ -359,7 +368,7 @@ function SummaryCard({ icon: Icon, label, value, currencyLabel, type }: SummaryC
       <div className="pt-12">
         <p className="text-xs font-medium mb-2 text-muted-foreground">{label}</p>
         <p className={cn(
-          "text-[17px] font-bold tabular-nums truncate",
+          "text-[15px] font-bold tabular-nums leading-snug break-words",
           isIncome ? "text-success" : "text-destructive"
         )} dir="ltr">
           {value} {currencyLabel}
