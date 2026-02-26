@@ -111,7 +111,22 @@ export function Settings({ onOpenCategories }: SettingsProps) {
         .eq('id', user.id)
         .maybeSingle();
       if (data?.avatar_url) {
-        setAvatarUrl(`${data.avatar_url}?t=${Date.now()}`);
+        // avatar_url may be a relative path in the 'avatars' bucket — generate a signed URL
+        const rawPath = data.avatar_url;
+        // Strip any leading supabase storage URL to get just the path
+        const pathMatch = rawPath.match(/avatars\/(.+)/);
+        const storagePath = pathMatch ? pathMatch[1] : rawPath;
+        
+        const { data: signedData } = await supabase.storage
+          .from('avatars')
+          .createSignedUrl(storagePath, 3600); // 1 hour
+        
+        if (signedData?.signedUrl) {
+          setAvatarUrl(signedData.signedUrl);
+        } else {
+          // Fallback: try using the raw URL directly
+          setAvatarUrl(`${rawPath}?t=${Date.now()}`);
+        }
       }
     };
     fetchAvatar();
