@@ -40,12 +40,12 @@ export default function Admin() {
       {/* Ambient blobs for glassmorphic depth */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div
-          className="absolute top-[-15%] right-[-10%] w-[55vw] h-[55vw] rounded-full blur-[80px] opacity-60"
-          style={{ background: 'var(--blob-purple)' }}
+          className="absolute rounded-full"
+          style={{ top: '-80px', right: '-60px', width: '340px', height: '340px', background: 'rgba(90,68,200,0.24)', filter: 'blur(80px)' }}
         />
         <div
-          className="absolute bottom-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full blur-[80px] opacity-60"
-          style={{ background: 'var(--blob-teal)' }}
+          className="absolute rounded-full"
+          style={{ bottom: '-60px', left: '-50px', width: '280px', height: '280px', background: 'rgba(18,108,92,0.18)', filter: 'blur(80px)' }}
         />
       </div>
 
