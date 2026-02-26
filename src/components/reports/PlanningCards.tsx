@@ -274,7 +274,7 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
                 style={{ width: `${goalsBarValue}%` }}
               />
             </div>
-            <p className="text-[10px] font-medium text-muted-foreground">پس‌انداز</p>
+            <p className="text-[10px] font-medium text-muted-foreground">اهداف</p>
             <p className="text-[9px] font-bold text-muted-foreground/70">{Math.round(goalsBarValue)}٪ تکمیل</p>
           </div>
           <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>

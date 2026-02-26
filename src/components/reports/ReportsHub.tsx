@@ -162,18 +162,11 @@ export function ReportsHub({
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Month Picker */}
-      <div className="rounded-2xl p-4"
-        style={{
-          background: 'hsl(var(--card) / 0.6)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid hsl(var(--border) / 0.4)',
-        }}
-      >
+      <div className="glass rounded-2xl p-4">
         <div className="flex items-center justify-between">
           <button
             onClick={goToNextMonth}
-            className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            style={{ background: 'hsl(var(--muted) / 0.5)' }}
+            className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-muted/50"
             aria-label="ماه بعد"
           >
             <ChevronRight className="w-6 h-6" strokeWidth={2} />
@@ -188,9 +181,7 @@ export function ReportsHub({
           
           <button
             onClick={goToPrevMonth}
-            className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            style={{ background: 'hsl(var(--muted) / 0.5)' }}
-            aria-label="ماه قبل"
+            className="w-12 h-12 rounded-xl flex items-center justify-center active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-muted/50"
           >
             <ChevronLeft className="w-6 h-6" strokeWidth={2} />
           </button>
