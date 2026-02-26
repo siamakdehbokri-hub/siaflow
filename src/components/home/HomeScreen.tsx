@@ -363,8 +363,8 @@ function SummaryCard({ icon: Icon, label, value, type }: SummaryCardProps) {
         <Icon className="w-5 h-5 text-white" strokeWidth={2} />
       </div>
       
-      <div className="pt-1">
-        <p className="text-xs font-medium mb-8" style={{ color: '#9CA3AF' }}>{label}</p>
+      <div className="pt-12">
+        <p className="text-xs font-medium mb-2" style={{ color: '#9CA3AF' }}>{label}</p>
         <p className="text-[17px] font-bold tabular-nums truncate" style={{ color }}>
           {value}
         </p>
