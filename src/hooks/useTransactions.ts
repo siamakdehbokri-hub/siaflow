@@ -13,7 +13,7 @@ function mapRow(t: Record<string, unknown>): Transaction {
     type: t.type as 'income' | 'expense' | 'saving',
     category: t.category as string,
     subcategory: (t.subcategory as string) || undefined,
-    description: (t.description as string) || '',
+    description: (t.description as string) || undefined,
     date: t.date as string,
     isRecurring: (t.is_recurring as boolean) || false,
     tags: (t.tags as string[]) || [],

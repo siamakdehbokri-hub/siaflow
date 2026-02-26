@@ -4,7 +4,7 @@ export interface Transaction {
   type: 'income' | 'expense' | 'saving';
   category: string;
   subcategory?: string;
-  description: string;
+  description?: string;
   date: string;
   isRecurring?: boolean;
   reminderDays?: number; // Days before to remind

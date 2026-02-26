@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -15,61 +15,45 @@ export interface Debt {
   updatedAt: string;
 }
 
+const DEBTS_KEY = 'debts';
+
+function mapDebt(d: Record<string, unknown>): Debt {
+  return {
+    id: d.id as string,
+    name: d.name as string,
+    totalAmount: Number(d.total_amount),
+    paidAmount: Number(d.paid_amount),
+    creditor: d.creditor as string,
+    reason: (d.reason as string) || undefined,
+    dueDate: (d.due_date as string) || undefined,
+    createdAt: d.created_at as string,
+    updatedAt: d.updated_at as string,
+  };
+}
+
 export function useDebts() {
   const { user } = useAuth();
-  const [debts, setDebts] = useState<Debt[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchDebts = async () => {
-    if (!user) {
-      setDebts([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
+  const { data: debts = [], isLoading: loading } = useQuery({
+    queryKey: [DEBTS_KEY, user?.id],
+    queryFn: async () => {
+      if (!user) return [];
       const { data, error } = await supabase
         .from('debts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
+      return (data || []).map(mapDebt);
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+  });
 
-      const mappedData: Debt[] = (data || []).map(d => ({
-        id: d.id,
-        name: d.name,
-        totalAmount: Number(d.total_amount),
-        paidAmount: Number(d.paid_amount),
-        creditor: d.creditor,
-        reason: d.reason || undefined,
-        dueDate: d.due_date || undefined,
-        createdAt: d.created_at,
-        updatedAt: d.updated_at,
-      }));
-
-      setDebts(mappedData);
-    } catch (error: unknown) {
-      console.error('Error fetching debts:', error);
-      toast.error('خطا در بارگذاری بدهی‌ها');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchDebts();
-    } else {
-      setDebts([]);
-      setLoading(false);
-    }
-  }, [user?.id]);
-
-  const addDebt = async (debt: Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!user) return;
-
-    try {
+  const addMutation = useMutation({
+    mutationFn: async (debt: Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>) => {
+      if (!user) throw new Error('Not authenticated');
       const { data, error } = await supabase
         .from('debts')
         .insert({
@@ -83,33 +67,22 @@ export function useDebts() {
         })
         .select()
         .single();
-
       if (error) throw error;
-
-      const newDebt: Debt = {
-        id: data.id,
-        name: data.name,
-        totalAmount: Number(data.total_amount),
-        paidAmount: Number(data.paid_amount),
-        creditor: data.creditor,
-        reason: data.reason || undefined,
-        dueDate: data.due_date || undefined,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
-
-      setDebts(prev => [newDebt, ...prev]);
+      return mapDebt(data);
+    },
+    onSuccess: (newDebt) => {
+      queryClient.setQueryData<Debt[]>(
+        [DEBTS_KEY, user?.id],
+        (old = []) => [newDebt, ...old]
+      );
       toast.success('بدهی با موفقیت ثبت شد');
-    } catch (error: unknown) {
-      console.error('Error adding debt:', error);
-      toast.error('خطا در ثبت بدهی');
-    }
-  };
+    },
+    onError: () => toast.error('خطا در ثبت بدهی'),
+  });
 
-  const updateDebt = async (id: string, updates: Partial<Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>>) => {
-    if (!user) return;
-
-    try {
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>> }) => {
+      if (!user) throw new Error('Not authenticated');
       const updateData: Record<string, string | number | null | undefined> = {};
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.totalAmount !== undefined) updateData.total_amount = updates.totalAmount;
@@ -123,53 +96,50 @@ export function useDebts() {
         .update(updateData)
         .eq('id', id)
         .eq('user_id', user.id);
-
       if (error) throw error;
-
-      setDebts(prev => prev.map(d => 
-        d.id === id ? { ...d, ...updates } : d
-      ));
+      return { id, updates };
+    },
+    onSuccess: ({ id, updates }) => {
+      queryClient.setQueryData<Debt[]>(
+        [DEBTS_KEY, user?.id],
+        (old = []) => old.map(d => d.id === id ? { ...d, ...updates } : d)
+      );
       toast.success('بدهی با موفقیت بروزرسانی شد');
-    } catch (error: unknown) {
-      console.error('Error updating debt:', error);
-      toast.error('خطا در بروزرسانی بدهی');
-    }
-  };
+    },
+    onError: () => toast.error('خطا در بروزرسانی بدهی'),
+  });
 
-  const deleteDebt = async (id: string) => {
-    if (!user) return;
-
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error('Not authenticated');
       const { error } = await supabase
         .from('debts')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id);
-
       if (error) throw error;
-
-      setDebts(prev => prev.filter(d => d.id !== id));
+      return id;
+    },
+    onSuccess: (id) => {
+      queryClient.setQueryData<Debt[]>(
+        [DEBTS_KEY, user?.id],
+        (old = []) => old.filter(d => d.id !== id)
+      );
       toast.success('بدهی با موفقیت حذف شد');
-    } catch (error: unknown) {
-      console.error('Error deleting debt:', error);
-      toast.error('خطا در حذف بدهی');
-    }
-  };
+    },
+    onError: () => toast.error('خطا در حذف بدهی'),
+  });
 
   const addPayment = async (id: string, amount: number) => {
     const debt = debts.find(d => d.id === id);
     if (!debt) return;
-
     const newPaidAmount = Math.min(debt.paidAmount + amount, debt.totalAmount);
-    await updateDebt(id, { paidAmount: newPaidAmount });
-
-    // Check if fully paid
+    await updateMutation.mutateAsync({ id, updates: { paidAmount: newPaidAmount } });
     if (newPaidAmount >= debt.totalAmount) {
       toast.success('تبریک! بدهی به طور کامل پرداخت شد!');
     }
   };
 
-  // Calculate statistics
   const totalDebt = debts.reduce((sum, d) => sum + d.totalAmount, 0);
   const totalPaid = debts.reduce((sum, d) => sum + d.paidAmount, 0);
   const totalRemaining = totalDebt - totalPaid;
@@ -177,11 +147,12 @@ export function useDebts() {
   return {
     debts,
     loading,
-    addDebt,
-    updateDebt,
-    deleteDebt,
+    addDebt: (d: Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>) => addMutation.mutateAsync(d),
+    updateDebt: (id: string, updates: Partial<Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>>) =>
+      updateMutation.mutateAsync({ id, updates }),
+    deleteDebt: (id: string) => deleteMutation.mutateAsync(id),
     addPayment,
-    refetch: fetchDebts,
+    refetch: () => queryClient.invalidateQueries({ queryKey: [DEBTS_KEY, user?.id] }),
     stats: {
       totalDebt,
       totalPaid,

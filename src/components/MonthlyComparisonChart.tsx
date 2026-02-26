@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Transaction } from '@/types/expense';
 import { formatCurrency, getJalaliMonthName, getJalaliMonthKey } from '@/utils/persianDate';
@@ -7,7 +7,7 @@ interface MonthlyComparisonChartProps {
   transactions: Transaction[];
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = forwardRef<HTMLDivElement, any>(({ active, payload, label }, ref) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
@@ -30,7 +30,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
   }
   return null;
-};
+});
+CustomTooltip.displayName = 'CustomTooltip';
 
 export function MonthlyComparisonChart({ transactions }: MonthlyComparisonChartProps) {
   const { data, hasSavings } = useMemo(() => {

@@ -182,7 +182,7 @@ const Index = () => {
           ) : subView === 'transfers' ? (
             <TransferManagement 
               goals={goals} 
-              onTransferToGoal={async (goalId, amount) => await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب')} 
+              onTransferToGoal={async (goalId, amount) => { await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب'); }} 
             />
           ) : subView === 'help' ? (
             <HelpGuide onBack={() => setSubView('main')} />

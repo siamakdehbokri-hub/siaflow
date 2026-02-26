@@ -27,8 +27,8 @@ import { Account, Transfer, useAccounts } from '@/hooks/useAccounts';
 import { SavingGoal } from '@/hooks/useSavingGoals';
 import { formatCurrency } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { faIR } from 'date-fns/locale';
+import { format } from 'date-fns-jalali';
+import { faIR } from 'date-fns-jalali/locale';
 
 interface TransferManagementProps {
   goals: SavingGoal[];
