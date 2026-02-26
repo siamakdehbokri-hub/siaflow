@@ -60,11 +60,13 @@ function SettingRow({ icon: Icon, iconBg, iconColor, title, subtitle, trailing, 
     <Comp
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3.5 px-4 py-3.5 transition-colors text-right",
-        onClick && "active:bg-accent/40",
-        !isLast && "border-b border-border/40"
+        "w-full flex items-center gap-3.5 px-4 py-3.5 transition-colors text-right relative",
+        onClick && "active:bg-accent/40"
       )}
     >
+      {!isLast && (
+        <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/60 to-transparent" />
+      )}
       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", iconBg)}>
         <Icon className={cn("w-5 h-5", iconColor)} strokeWidth={2} />
       </div>
