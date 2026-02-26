@@ -11,12 +11,11 @@ interface MobileCategoryCardProps {
 
 export function MobileCategoryCard({ category, onDelete }: MobileCategoryCardProps) {
   return (
-    <div className="bg-card rounded-2xl border-2 border-border p-4 hover:border-primary/30 transition-all active:scale-[0.99]">
+    <div className="glass rounded-2xl p-4 hover:border-primary/30 transition-all active:scale-[0.99]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* Color Icon */}
           <div 
-            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
             style={{ backgroundColor: category.color + '15' }}
           >
             <div 
@@ -31,10 +30,10 @@ export function MobileCategoryCard({ category, onDelete }: MobileCategoryCardPro
               <span className="text-xs text-muted-foreground">{category.userName}</span>
               <Badge 
                 variant="outline" 
-                className={`rounded-xl text-xs h-6 px-2 font-medium border-2 ${
+                className={`rounded-xl text-xs h-6 px-2 font-medium ${
                   category.type === 'income' 
-                    ? 'bg-success/10 text-success border-success/30' 
-                    : 'bg-destructive/10 text-destructive border-destructive/30'
+                    ? 'bg-success/10 text-success border-success/20' 
+                    : 'bg-destructive/10 text-destructive border-destructive/20'
                 }`}
               >
                 {category.type === 'income' ? 'درآمد' : 'هزینه'}
@@ -52,7 +51,7 @@ export function MobileCategoryCard({ category, onDelete }: MobileCategoryCardPro
           variant="outline"
           size="icon"
           onClick={() => onDelete(category)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-2 border-destructive/30"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-destructive/30"
         >
           <Trash2 className="w-4 h-4" strokeWidth={2} />
         </Button>

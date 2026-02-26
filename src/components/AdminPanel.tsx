@@ -416,7 +416,7 @@ export function AdminPanel() {
         {/* Users Tab */}
         <TabsContent value="users" className="mt-4 space-y-3">
           {/* Search & Filters */}
-          <div className="bg-card rounded-xl border-2 border-border p-3">
+          <div className="glass rounded-xl p-3">
             <div className="space-y-3">
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -480,7 +480,7 @@ export function AdminPanel() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+            <div className="text-center py-12 glass rounded-xl">
               <Users className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">کاربری یافت نشد</p>
             </div>
@@ -505,7 +505,7 @@ export function AdminPanel() {
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="mt-4 space-y-3">
           {/* Search & Filters */}
-          <div className="bg-card rounded-xl border-2 border-border p-3">
+          <div className="glass rounded-xl p-3">
             <div className="space-y-3">
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -570,7 +570,7 @@ export function AdminPanel() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : filteredTransactions.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+            <div className="text-center py-12 glass rounded-xl">
               <CreditCard className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">تراکنشی یافت نشد</p>
             </div>
@@ -604,7 +604,7 @@ export function AdminPanel() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : categories.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+            <div className="text-center py-12 glass rounded-xl">
               <Tag className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">دسته‌بندی‌ای یافت نشد</p>
             </div>
@@ -638,7 +638,7 @@ export function AdminPanel() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : debts.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+            <div className="text-center py-12 glass rounded-xl">
               <Banknote className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">بدهی‌ای یافت نشد</p>
             </div>
@@ -672,7 +672,7 @@ export function AdminPanel() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : goals.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+            <div className="text-center py-12 glass rounded-xl">
               <Target className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">هدفی یافت نشد</p>
             </div>
@@ -706,7 +706,7 @@ export function AdminPanel() {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : accounts.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-xl border-2 border-border">
+            <div className="text-center py-12 glass rounded-xl">
               <Wallet className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">حسابی یافت نشد</p>
             </div>
@@ -725,43 +725,43 @@ export function AdminPanel() {
         {/* Settings Tab */}
         <TabsContent value="settings" className="mt-4 space-y-3">
           {/* System Settings */}
-          <div className="bg-card rounded-xl border-2 border-border p-4 space-y-3">
+          <div className="glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold mb-2">
               <Settings className="w-4 h-4 text-primary" />
               تنظیمات سیستم
             </div>
 
-            <div className="p-3 rounded-xl border border-border bg-muted/30">
+            <div className="p-3 rounded-xl bg-muted/20 border border-border">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                   <Shield className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-sm">احراز هویت</p>
+                  <p className="font-medium text-sm text-foreground">احراز هویت</p>
                   <p className="text-xs text-muted-foreground">تأیید ایمیل خودکار فعال است</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-border bg-muted/30">
+            <div className="p-3 rounded-xl bg-muted/20 border border-border">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-                  <Database className="w-4 h-4 text-green-500" />
+                <div className="p-2 rounded-lg bg-success/10 shrink-0">
+                  <Database className="w-4 h-4 text-success" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-sm">پایگاه داده</p>
+                  <p className="font-medium text-sm text-foreground">پایگاه داده</p>
                   <p className="text-xs text-muted-foreground">متصل و فعال</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-border bg-muted/30">
+            <div className="p-3 rounded-xl bg-muted/20 border border-border">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10 shrink-0">
-                  <Activity className="w-4 h-4 text-blue-500" />
+                <div className="p-2 rounded-lg bg-info/10 shrink-0">
+                  <Activity className="w-4 h-4 text-info" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-medium text-sm">نسخه سیستم</p>
+                  <p className="font-medium text-sm text-foreground">نسخه سیستم</p>
                   <p className="text-xs text-muted-foreground">SiaFlow v2.0</p>
                 </div>
               </div>
@@ -769,7 +769,7 @@ export function AdminPanel() {
           </div>
 
           {/* Export Reports */}
-          <div className="bg-card rounded-xl border-2 border-border p-4 space-y-3">
+          <div className="glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold mb-2">
               <FileText className="w-4 h-4 text-primary" />
               خروجی گزارشات

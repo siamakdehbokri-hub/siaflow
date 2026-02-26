@@ -15,12 +15,11 @@ export function MobileGoalCard({ goal, onDelete }: MobileGoalCardProps) {
     : 0;
 
   return (
-    <div className="bg-card rounded-2xl border-2 border-border p-4 space-y-3 hover:border-primary/30 transition-all active:scale-[0.99]">
+    <div className="glass rounded-2xl p-4 space-y-3 hover:border-primary/30 transition-all active:scale-[0.99]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* Color Icon */}
           <div 
-            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
             style={{ backgroundColor: goal.color + '15' }}
           >
             <div 
@@ -42,7 +41,7 @@ export function MobileGoalCard({ goal, onDelete }: MobileGoalCardProps) {
           variant="outline"
           size="icon"
           onClick={() => onDelete(goal)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-2 border-destructive/30"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl h-11 w-11 shrink-0 border-destructive/30"
         >
           <Trash2 className="w-4 h-4" strokeWidth={2} />
         </Button>
@@ -50,11 +49,11 @@ export function MobileGoalCard({ goal, onDelete }: MobileGoalCardProps) {
 
       {/* Amount Info */}
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="bg-muted/50 rounded-xl p-3 border-2 border-border/50">
+        <div className="bg-muted/30 rounded-xl p-3 border border-border">
           <p className="text-muted-foreground mb-1 flex items-center gap-1"><Target className="w-3.5 h-3.5" strokeWidth={2} /> هدف</p>
           <p className="font-mono font-bold text-sm text-foreground">{formatCurrency(goal.target_amount)}</p>
         </div>
-        <div className="bg-success/10 rounded-xl p-3 border-2 border-success/20">
+        <div className="bg-success/5 rounded-xl p-3 border border-success/15">
           <p className="text-muted-foreground mb-1 flex items-center gap-1"><PiggyBank className="w-3.5 h-3.5" strokeWidth={2} /> پس‌انداز</p>
           <p className="font-mono font-bold text-sm text-success">{formatCurrency(goal.current_amount)}</p>
         </div>
