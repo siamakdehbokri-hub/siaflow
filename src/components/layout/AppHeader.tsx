@@ -25,11 +25,11 @@ export function AppHeader({
   onEnableNotifications,
 }: AppHeaderProps) {
   return (
-    <header className="bg-primary text-primary-foreground">
+    <header style={{ background: 'linear-gradient(135deg, #6D28D9, #7C3AED)' }}>
       {/* Safe area padding */}
       <div className="pt-safe" />
       
-      {/* Header content - 56px height for consistency */}
+      {/* Header content - 56px height */}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-4">
         {/* Notifications (right side in RTL) */}
         <div className="flex items-center gap-0.5 justify-self-start min-w-0">
@@ -44,21 +44,22 @@ export function AppHeader({
           />
         </div>
         
-        {/* Title - truly centered */}
-        <h1 className="text-lg font-bold justify-self-center text-center truncate max-w-[60vw]">
+        {/* Title - centered */}
+        <h1 className="justify-self-center text-center truncate max-w-[60vw]" style={{ fontSize: '18px', fontWeight: 700, color: 'white' }}>
           {title}
         </h1>
         
-        {/* Menu icon (left side in RTL) - 44px touch target */}
+        {/* Menu icon (left side in RTL) */}
         <div className="justify-self-end">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onMenuClick}
-            className="text-primary-foreground hover:bg-white/15 rounded-xl h-11 w-11"
+            className="hover:bg-white/15 rounded-xl h-11 w-11"
+            style={{ color: 'white' }}
             aria-label="منو"
           >
-            <Menu className="w-6 h-6" strokeWidth={2} />
+            <Menu style={{ width: 22, height: 22, color: 'white' }} strokeWidth={2} />
           </Button>
         </div>
       </div>

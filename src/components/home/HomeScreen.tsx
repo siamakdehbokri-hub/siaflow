@@ -81,111 +81,83 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* Hero Card - Deep Glass */}
-      <div className="relative overflow-hidden rounded-3xl p-6"
-        style={{
-          background: 'linear-gradient(145deg, hsl(var(--card) / 0.8) 0%, hsl(var(--card) / 0.5) 100%)',
-          backdropFilter: 'blur(30px) saturate(180%)',
-          border: '1px solid hsl(var(--border) / 0.6)',
-          boxShadow: '0 12px 40px hsl(var(--primary) / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.06)',
-        }}
-      >
-        {/* Decorative gradient orbs */}
-        <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none" style={{ background: 'hsl(var(--primary) / 0.15)' }} />
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-3xl pointer-events-none" style={{ background: 'hsl(var(--chart-5) / 0.1)' }} />
-        
-        <div className="relative z-10">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
-                امروز چقدر خرج کردی؟
-              </p>
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-4xl font-black tabular-nums tracking-tight text-foreground">
-                  {formatAmountCompact(financialData.todayExpense)}
-                </span>
-                <span className="text-base text-muted-foreground">{currencyInfo.symbol}</span>
-              </div>
+      {/* Hero Card - Flat */}
+      <div className="rounded-2xl p-6" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
+              امروز چقدر خرج کردی؟
+            </p>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-base text-muted-foreground">{currencyInfo.symbol}</span>
+              <span className="text-4xl font-black tabular-nums tracking-tight" style={{ color: '#10B981' }}>
+                {formatAmountCompact(financialData.todayExpense)}
+              </span>
             </div>
-            
-            {/* Add button */}
-            <button
-              onClick={() => onAddTransaction()}
-              className="relative w-14 h-14 rounded-2xl flex items-center justify-center active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              style={{
-                background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%)',
-                boxShadow: '0 8px 24px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.2)',
-              }}
-              aria-label="افزودن تراکنش"
-            >
-              <Plus className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
-            </button>
           </div>
           
-          {/* Quick actions */}
-          <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/20">
-            <QuickActionButton 
-              icon={Receipt} 
-              label="تراکنش‌ها"
-              color="primary"
-              onClick={onViewAllTransactions}
-            />
-            <QuickActionButton 
-              icon={PieChart} 
-              label="بودجه‌بندی"
-              color="success"
-              onClick={onViewAllTransactions}
-            />
-            <QuickActionButton 
-              icon={Landmark} 
-              label="بدهی‌ها"
-              color="destructive"
-              onClick={() => onOpenDebts?.()}
-            />
-          </div>
+          {/* Add button - solid circle */}
+          <button
+            onClick={() => onAddTransaction()}
+            className="flex items-center justify-center active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              background: '#7C3AED',
+              color: 'white',
+            }}
+            aria-label="افزودن تراکنش"
+          >
+            <Plus className="w-7 h-7" strokeWidth={2.5} />
+          </button>
+        </div>
+        
+        {/* Quick actions - no background boxes */}
+        <div className="flex items-center justify-around mt-6 pt-5" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <QuickActionButton 
+            icon={Receipt} 
+            label="تراکنش‌ها"
+            color="primary"
+            onClick={onViewAllTransactions}
+          />
+          <QuickActionButton 
+            icon={PieChart} 
+            label="بودجه‌بندی"
+            color="success"
+            onClick={onViewAllTransactions}
+          />
+          <QuickActionButton 
+            icon={Landmark} 
+            label="بدهی‌ها"
+            color="destructive"
+            onClick={() => onOpenDebts?.()}
+          />
         </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
         <SummaryCard
-          icon={ArrowUpRight}
-          label="درآمد ماه"
-          value={formatAmountCompact(financialData.income)}
-          valueColor="text-success"
-          iconColor="text-success"
-          glowColor="var(--success)"
-        />
-        <SummaryCard
           icon={ArrowDownRight}
           label="هزینه ماه"
           value={formatAmountCompact(financialData.expense)}
-          valueColor="text-destructive"
-          iconColor="text-destructive"
-          glowColor="var(--destructive)"
+          type="expense"
+        />
+        <SummaryCard
+          icon={ArrowUpRight}
+          label="درآمد ماه"
+          value={formatAmountCompact(financialData.income)}
+          type="income"
         />
       </div>
 
       {/* Balance Detail Card */}
-      <div className="relative overflow-hidden rounded-3xl"
-        style={{
-          background: 'linear-gradient(160deg, hsl(var(--card) / 0.8) 0%, hsl(var(--card) / 0.5) 100%)',
-          backdropFilter: 'blur(30px) saturate(180%)',
-          border: '1px solid hsl(var(--border) / 0.5)',
-          boxShadow: '0 12px 40px hsl(var(--primary) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.05)',
-        }}
-      >
-        <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: 'hsl(var(--primary) / 0.1)' }} />
-        
-        <div className="relative z-10 p-5">
+      <div className="rounded-2xl" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center"
-              style={{
-                background: 'hsl(var(--primary) / 0.12)',
-                border: '1px solid hsl(var(--primary) / 0.2)',
-              }}
-            >
-              <Wallet className="w-5 h-5 text-primary" strokeWidth={2} />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.12)' }}>
+              <Wallet className="w-5 h-5" style={{ color: '#7C3AED' }} strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground">مانده دارایی</p>
@@ -194,17 +166,9 @@ export function HomeScreen({
           </div>
 
           {/* Balance Amount */}
-          <div className="text-center mb-4 py-3.5 rounded-2xl"
-            style={{
-              background: 'linear-gradient(135deg, hsl(var(--card) / 0.6) 0%, hsl(var(--card) / 0.3) 100%)',
-              border: '1px solid hsl(var(--border) / 0.3)',
-            }}
-          >
+          <div className="text-center mb-4 py-3.5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
             <p className="text-xs text-muted-foreground mb-1">موجودی فعلی</p>
-            <p className={cn(
-              "text-3xl font-black tabular-nums tracking-tight",
-              financialData.balance >= 0 ? "text-success" : "text-destructive"
-            )}>
+            <p className="text-3xl font-black tabular-nums tracking-tight" style={{ color: financialData.balance >= 0 ? '#10B981' : '#EF4444' }}>
               {financialData.balance >= 0 ? '+' : ''}{formatAmountCompact(financialData.balance)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">{currencyInfo.symbol}</p>
@@ -213,37 +177,42 @@ export function HomeScreen({
           {/* Detail Rows */}
           <div className="space-y-2">
             <DetailRow
-              icon={<ArrowUpRight className="w-4 h-4 text-success" strokeWidth={2} />}
+              icon={<ArrowUpRight className="w-4 h-4" style={{ color: '#10B981' }} strokeWidth={2} />}
+              iconBg="#10B981"
               label="کل درآمد"
               value={formatAmountCompact(financialData.income)}
-              valueColor="text-success"
+              valueColor="#10B981"
             />
             <DetailRow
-              icon={<ArrowDownRight className="w-4 h-4 text-destructive" strokeWidth={2} />}
+              icon={<ArrowDownRight className="w-4 h-4" style={{ color: '#EF4444' }} strokeWidth={2} />}
+              iconBg="#EF4444"
               label="کل هزینه"
               value={formatAmountCompact(financialData.expense)}
-              valueColor="text-destructive"
+              valueColor="#EF4444"
             />
             {financialData.saving > 0 && (
               <DetailRow
-                icon={<PiggyBank className="w-4 h-4 text-chart-4" strokeWidth={2} />}
+                icon={<PiggyBank className="w-4 h-4" style={{ color: '#7C3AED' }} strokeWidth={2} />}
+                iconBg="#7C3AED"
                 label="پس‌انداز"
                 value={formatAmountCompact(financialData.saving)}
-                valueColor="text-chart-4"
+                valueColor="#7C3AED"
               />
             )}
             <DetailRow
-              icon={<Wallet className="w-4 h-4 text-primary" strokeWidth={2} />}
+              icon={<Wallet className="w-4 h-4" style={{ color: '#10B981' }} strokeWidth={2} />}
+              iconBg="#10B981"
               label="مانده خالص"
               value={formatAmountCompact(Math.abs(financialData.balance))}
-              valueColor={financialData.balance >= 0 ? "text-primary" : "text-destructive"}
+              valueColor={financialData.balance >= 0 ? '#10B981' : '#EF4444'}
             />
             {financialData.income > 0 && (
               <DetailRow
-                icon={<BarChart3 className="w-4 h-4 text-chart-3" strokeWidth={2} />}
+                icon={<BarChart3 className="w-4 h-4" style={{ color: '#F59E0B' }} strokeWidth={2} />}
+                iconBg="#F59E0B"
                 label="نرخ پس‌انداز"
                 value={`${Math.round((financialData.saving / financialData.income) * 100)}%`}
-                valueColor="text-chart-3"
+                valueColor="#F59E0B"
               />
             )}
           </div>
@@ -254,23 +223,17 @@ export function HomeScreen({
       {showAutoSavings && onOpenAutoSavings && (
         <button
           onClick={onOpenAutoSavings}
-          className="w-full relative overflow-hidden flex items-center gap-3 rounded-2xl p-4 active:opacity-80 transition-opacity text-right"
-          style={{
-            background: 'linear-gradient(135deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid hsl(var(--primary) / 0.2)',
-          }}
+          className="w-full flex items-center gap-3 rounded-2xl p-4 active:opacity-80 transition-opacity text-right"
+          style={{ background: '#111118', border: '1px solid rgba(124,58,237,0.2)' }}
         >
-          <div className="relative z-10 w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'hsl(var(--primary) / 0.15)', border: '1px solid hsl(var(--primary) / 0.2)' }}
-          >
-            <PiggyBank className="w-5 h-5 text-primary" strokeWidth={2} />
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(124,58,237,0.15)' }}>
+            <PiggyBank className="w-5 h-5" style={{ color: '#7C3AED' }} strokeWidth={2} />
           </div>
-          <div className="flex-1 min-w-0 relative z-10">
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-foreground">پس‌انداز کن برای آینده‌ای بهتر!</p>
             <p className="text-xs text-muted-foreground mt-0.5">از مانده ماه قبل پس‌انداز کن</p>
           </div>
-          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0 relative z-10" strokeWidth={2} />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={2} />
         </button>
       )}
 
@@ -280,7 +243,8 @@ export function HomeScreen({
           <h3 className="text-sm font-bold text-foreground">فعالیت اخیر</h3>
           <button 
             onClick={onViewAllTransactions}
-            className="flex items-center gap-1 text-xs font-medium text-primary py-2 px-1 -ml-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex items-center gap-1 text-xs font-medium py-2 px-1 -ml-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ color: '#7C3AED' }}
           >
             همه
             <ChevronLeft className="w-4 h-4" strokeWidth={2} />
@@ -288,44 +252,30 @@ export function HomeScreen({
         </div>
         
         {financialData.recentTransactions.length === 0 ? (
-          <div className="rounded-2xl p-6 text-center"
-            style={{
-              background: 'hsl(var(--card) / 0.5)',
-              border: '1px solid hsl(var(--border) / 0.4)',
-            }}
-          >
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
-              style={{ background: 'hsl(var(--muted) / 0.3)' }}
-            >
+          <div className="rounded-2xl p-6 text-center" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <Receipt className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
             </div>
             <p className="text-xs font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
           </div>
         ) : (
-          <div className="rounded-2xl divide-y divide-border/20 overflow-hidden"
-            style={{
-              background: 'hsl(var(--card) / 0.5)',
-              border: '1px solid hsl(var(--border) / 0.4)',
-            }}
-          >
-            {financialData.recentTransactions.map((transaction) => {
+          <div className="rounded-2xl overflow-hidden" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+            {financialData.recentTransactions.map((transaction, idx) => {
               const isIncome = transaction.type === 'income';
               
               return (
                 <div 
                   key={transaction.id} 
-                  className="flex items-center gap-3 p-4 active:bg-muted/10 transition-colors"
+                  className="flex items-center gap-3 p-4 active:bg-white/[0.02] transition-colors"
+                  style={{ borderTop: idx > 0 ? '1px solid rgba(255,255,255,0.05)' : undefined }}
                 >
-                  <div className={cn(
-                    "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
-                    isIncome 
-                      ? "bg-success/12 border border-success/20" 
-                      : "bg-destructive/12 border border-destructive/20"
-                  )}>
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: isIncome ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)' }}
+                  >
                     {isIncome ? (
-                      <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
+                      <ArrowUpRight className="w-5 h-5" style={{ color: '#10B981' }} strokeWidth={2} />
                     ) : (
-                      <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
+                      <ArrowDownRight className="w-5 h-5" style={{ color: '#EF4444' }} strokeWidth={2} />
                     )}
                   </div>
                   
@@ -339,10 +289,7 @@ export function HomeScreen({
                   </div>
                   
                   <div className="text-left shrink-0">
-                    <p className={cn(
-                      "text-sm font-black tabular-nums",
-                      isIncome ? "text-success" : "text-destructive"
-                    )}>
+                    <p className="text-sm font-black tabular-nums" style={{ color: isIncome ? '#10B981' : '#EF4444' }}>
                       {isIncome ? '+' : '-'}{formatAmountCompact(transaction.amount)}
                     </p>
                   </div>
@@ -362,33 +309,23 @@ interface SummaryCardProps {
   icon: LucideIcon;
   label: string;
   value: string;
-  valueColor: string;
-  iconColor: string;
-  glowColor: string;
+  type: 'income' | 'expense';
 }
 
-function SummaryCard({ icon: Icon, label, value, valueColor, iconColor, glowColor }: SummaryCardProps) {
+function SummaryCard({ icon: Icon, label, value, type }: SummaryCardProps) {
+  const isIncome = type === 'income';
+  const color = isIncome ? '#10B981' : '#EF4444';
+  
   return (
-    <div className="relative overflow-hidden rounded-2xl p-4"
-      style={{
-        background: 'linear-gradient(145deg, hsl(var(--card) / 0.7) 0%, hsl(var(--card) / 0.4) 100%)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid hsl(var(--border) / 0.4)',
-      }}
-    >
-      <div className="relative z-10">
-        <div className="flex items-center gap-2.5 mb-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{
-              background: `hsl(${glowColor} / 0.12)`,
-              border: `1px solid hsl(${glowColor} / 0.2)`,
-            }}
-          >
-            <Icon className={cn("w-5 h-5", iconColor)} strokeWidth={2} />
-          </div>
-          <p className="text-xs font-medium text-muted-foreground leading-relaxed">{label}</p>
-        </div>
-        <p className={cn("text-lg font-black tabular-nums truncate", valueColor)}>
+    <div className="relative rounded-2xl p-4" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+      {/* Icon circle - top right */}
+      <div className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: color }}>
+        <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+      </div>
+      
+      <div className="pt-1">
+        <p className="text-xs font-medium mb-8" style={{ color: '#9CA3AF' }}>{label}</p>
+        <p className="text-[17px] font-bold tabular-nums truncate" style={{ color }}>
           {value}
         </p>
       </div>
@@ -398,24 +335,22 @@ function SummaryCard({ icon: Icon, label, value, valueColor, iconColor, glowColo
 
 interface DetailRowProps {
   icon: React.ReactNode;
+  iconBg: string;
   label: string;
   value: string;
   valueColor: string;
 }
 
-function DetailRow({ icon, label, value, valueColor }: DetailRowProps) {
+function DetailRow({ icon, iconBg, label, value, valueColor }: DetailRowProps) {
   return (
-    <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl"
-      style={{
-        background: 'hsl(var(--card) / 0.4)',
-        border: '1px solid hsl(var(--border) / 0.25)',
-      }}
-    >
+    <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="flex items-center gap-2">
-        {icon}
-        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${iconBg}20` }}>
+          {icon}
+        </div>
+        <span className="text-xs font-medium" style={{ color: '#9CA3AF' }}>{label}</span>
       </div>
-      <span className={cn("text-sm font-bold tabular-nums", valueColor)}>{value}</span>
+      <span className="text-sm font-bold tabular-nums" style={{ color: valueColor }}>{value}</span>
     </div>
   );
 }
@@ -430,11 +365,11 @@ interface QuickActionButtonProps {
 
 function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: QuickActionButtonProps) {
   const colorMap = {
-    primary: { bg: 'hsl(var(--primary) / 0.12)', border: 'hsl(var(--primary) / 0.25)', text: 'text-primary' },
-    success: { bg: 'hsl(var(--success) / 0.12)', border: 'hsl(var(--success) / 0.25)', text: 'text-success' },
-    destructive: { bg: 'hsl(var(--destructive) / 0.12)', border: 'hsl(var(--destructive) / 0.25)', text: 'text-destructive' },
+    primary: '#7C3AED',
+    success: '#10B981',
+    destructive: '#EF4444',
   };
-  const c = colorMap[color];
+  const iconColor = colorMap[color];
 
   return (
     <button 
@@ -446,12 +381,9 @@ function QuickActionButton({ icon: Icon, label, color, onClick, disabled }: Quic
         disabled ? "opacity-50 cursor-not-allowed" : "active:scale-95"
       )}
     >
-      <div className="relative w-13 h-13 rounded-2xl flex items-center justify-center"
-        style={{ background: c.bg, border: `1px solid ${c.border}` }}
-      >
-        <Icon className={cn("w-6 h-6", c.text)} strokeWidth={2} />
-      </div>
-      <span className="text-xs font-bold text-foreground truncate max-w-[80px] leading-relaxed">{label}</span>
+      {/* No background container - direct icon */}
+      <Icon style={{ width: 28, height: 28, color: iconColor }} strokeWidth={2} />
+      <span className="text-xs font-bold truncate max-w-[80px] leading-relaxed" style={{ color: '#9CA3AF' }}>{label}</span>
     </button>
   );
 }
