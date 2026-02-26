@@ -436,7 +436,8 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           subtitle="آموزش کار با اپلیکیشن"
           onClick={() => setCurrentView('help')}
         />
-        <div className="px-4 py-3.5 border-b border-border/40">
+        <div className="px-4 py-3.5 relative">
+          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/60 to-transparent" />
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
               <Info className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
