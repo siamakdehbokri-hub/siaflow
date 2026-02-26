@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Plus, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Plus, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, Layers, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
-import { isTodayJalali, formatPersianDateFull } from '@/utils/persianDate';
+import { isTodayJalali, formatPersianDateFull, formatPersianDateShort } from '@/utils/persianDate';
 import { getCurrentMonthSummary } from '@/utils/financialEngine';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -27,9 +27,39 @@ export function HomeScreen({
   showAutoSavings,
   onOpenAutoSavings,
 }: HomeScreenProps) {
-  const { formatAmountCompact } = useCurrency();
+  const { formatAmountCompact, currencyInfo, convertAmount, currency } = useCurrency();
+
+  // Format number without currency symbol
+  const formatNumberFull = (amount: number) => {
+    const converted = convertAmount(amount);
+    if (currency === 'USD') {
+      return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(converted);
+    }
+    return new Intl.NumberFormat('fa-IR').format(Math.round(converted));
+  };
+
+  // Format compact without currency symbol
+  const formatCompactOnly = (amount: number) => {
+    const converted = convertAmount(amount);
+    if (currency === 'USD') {
+      if (converted >= 1000000) return (converted / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (converted >= 1000) return (converted / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return converted.toFixed(0);
+    }
+    const rounded = Math.round(converted);
+    if (rounded >= 1000000000) {
+      return new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 1 }).format(rounded / 1000000000) + ' میلیارد';
+    }
+    if (rounded >= 1000000) {
+      return new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 1 }).format(rounded / 1000000) + ' میلیون';
+    }
+    if (rounded >= 1000) {
+      return new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(rounded / 1000) + ' هزار';
+    }
+    return new Intl.NumberFormat('fa-IR').format(rounded);
+  };
+
   const financialData = useMemo(() => {
-    // Use the centralized financial engine for ALL calculations
     const summary = getCurrentMonthSummary(transactions, categories);
     
     const todayExpense = transactions
@@ -50,7 +80,7 @@ export function HomeScreen({
           if (dateCompare !== 0) return dateCompare;
           return b.id.localeCompare(a.id);
         })
-        .slice(0, 3),
+        .slice(0, 4),
     };
   }, [transactions, categories]);
 
@@ -81,17 +111,18 @@ export function HomeScreen({
             <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
               امروز چقدر خرج کردی؟
             </p>
-            <div className="flex items-baseline gap-2 flex-wrap">
+            <div className="flex flex-col">
               <span className="text-4xl font-black tabular-nums tracking-tight text-success">
-                {formatAmountCompact(financialData.todayExpense)}
+                {formatCompactOnly(financialData.todayExpense)}
               </span>
+              <span className="text-sm text-muted-foreground mt-1">{currencyInfo.symbol}</span>
             </div>
           </div>
           
-          {/* Add button - solid circle */}
+          {/* Add button - solid circle - matching design teal/green */}
           <button
             onClick={() => onAddTransaction()}
-            className="flex items-center justify-center active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-[52px] h-[52px] rounded-full bg-primary text-primary-foreground"
+            className="flex items-center justify-center active:scale-95 transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-[52px] h-[52px] rounded-full bg-success text-success-foreground"
             aria-label="افزودن تراکنش"
           >
             <Plus className="w-7 h-7" strokeWidth={2.5} />
@@ -101,14 +132,14 @@ export function HomeScreen({
         {/* Quick actions - no background boxes */}
         <div className="flex items-center justify-around mt-6 pt-5 border-t border-border">
           <QuickActionButton 
-            icon={Receipt} 
+            icon={Layers} 
             label="تراکنش‌ها"
             color="primary"
             onClick={onViewAllTransactions}
             ariaLabel="مشاهده تراکنش‌ها"
           />
           <QuickActionButton 
-            icon={PieChart} 
+            icon={BarChart3} 
             label="بودجه‌بندی"
             color="success"
             onClick={onViewAllTransactions}
@@ -117,25 +148,27 @@ export function HomeScreen({
           <QuickActionButton 
             icon={Landmark} 
             label="بدهی‌ها"
-            color="destructive"
+            color="warning"
             onClick={() => onOpenDebts?.()}
             ariaLabel="مدیریت بدهی‌ها"
           />
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Cards - Full amounts with separate تومان */}
       <div className="grid grid-cols-2 gap-3">
         <SummaryCard
           icon={ArrowDownRight}
           label="هزینه ماه"
-          value={formatAmountCompact(financialData.expense)}
+          value={formatNumberFull(financialData.expense)}
+          currencyLabel={currencyInfo.symbol}
           type="expense"
         />
         <SummaryCard
           icon={ArrowUpRight}
           label="درآمد ماه"
-          value={formatAmountCompact(financialData.income)}
+          value={formatNumberFull(financialData.income)}
+          currencyLabel={currencyInfo.symbol}
           type="income"
         />
       </div>
@@ -147,8 +180,8 @@ export function HomeScreen({
         
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/10">
-              <Wallet className="w-5 h-5 text-primary" strokeWidth={2} />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-success/10">
+              <Layers className="w-5 h-5 text-success" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-foreground">مانده دارایی</p>
@@ -156,16 +189,16 @@ export function HomeScreen({
             </div>
           </div>
 
-          {/* Balance Amount */}
+          {/* Balance Amount - with separate تومان */}
           <div className="text-center mb-4 py-3.5 rounded-2xl bg-muted/50 border border-border">
             <p className="text-xs text-muted-foreground mb-1">موجودی فعلی</p>
             <p className={cn(
               "text-3xl font-black tabular-nums tracking-tight",
               financialData.balance >= 0 ? "text-success" : "text-destructive"
             )}>
-              {financialData.balance >= 0 ? '+' : ''}{formatAmountCompact(financialData.balance)}
+              {financialData.balance >= 0 ? '+' : ''}{formatCompactOnly(financialData.balance)}
             </p>
-            
+            <p className="text-sm text-muted-foreground mt-1">{currencyInfo.symbol}</p>
           </div>
 
           {/* Detail Rows */}
@@ -174,14 +207,14 @@ export function HomeScreen({
               icon={<ArrowUpRight className="w-4 h-4 text-success" strokeWidth={2} />}
               iconBg="bg-success/10"
               label="کل درآمد"
-              value={formatAmountCompact(financialData.income)}
+              value={formatCompactOnly(financialData.income) + ' ' + currencyInfo.symbol}
               valueClassName="text-success"
             />
             <DetailRow
               icon={<ArrowDownRight className="w-4 h-4 text-destructive" strokeWidth={2} />}
               iconBg="bg-destructive/10"
               label="کل هزینه"
-              value={formatAmountCompact(financialData.expense)}
+              value={formatCompactOnly(financialData.expense) + ' ' + currencyInfo.symbol}
               valueClassName="text-destructive"
             />
             {financialData.saving > 0 && (
@@ -189,7 +222,7 @@ export function HomeScreen({
                 icon={<PiggyBank className="w-4 h-4 text-primary" strokeWidth={2} />}
                 iconBg="bg-primary/10"
                 label="پس‌انداز"
-                value={formatAmountCompact(financialData.saving)}
+                value={formatCompactOnly(financialData.saving) + ' ' + currencyInfo.symbol}
                 valueClassName="text-primary"
               />
             )}
@@ -197,7 +230,7 @@ export function HomeScreen({
               icon={<Wallet className="w-4 h-4 text-success" strokeWidth={2} />}
               iconBg="bg-success/10"
               label="مانده خالص"
-              value={formatAmountCompact(Math.abs(financialData.balance))}
+              value={formatCompactOnly(Math.abs(financialData.balance)) + ' ' + currencyInfo.symbol}
               valueClassName={financialData.balance >= 0 ? "text-success" : "text-destructive"}
             />
             {financialData.income > 0 && (
@@ -205,7 +238,7 @@ export function HomeScreen({
                 icon={<BarChart3 className="w-4 h-4 text-warning" strokeWidth={2} />}
                 iconBg="bg-warning/10"
                 label="نرخ پس‌انداز"
-                value={`${financialData.savingsRate}%`}
+                value={`${financialData.savingsRate}% ${currencyInfo.symbol}`}
                 valueClassName={financialData.savingsRate >= 20 ? "text-success" : financialData.savingsRate >= 10 ? "text-warning" : "text-muted-foreground"}
               />
             )}
@@ -230,7 +263,7 @@ export function HomeScreen({
         </button>
       )}
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions - 4 items with dates */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-foreground">فعالیت اخیر</h3>
@@ -281,6 +314,9 @@ export function HomeScreen({
                     <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                       {transaction.description || '—'}
                     </p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5 tabular-nums">
+                      {formatPersianDateShort(transaction.date)}
+                    </p>
                   </div>
                   
                   <div className="text-left shrink-0">
@@ -288,7 +324,7 @@ export function HomeScreen({
                       "text-sm font-black tabular-nums",
                       isIncome ? "text-success" : "text-destructive"
                     )}>
-                      {isIncome ? '+' : '-'}{formatAmountCompact(transaction.amount)}
+                      {isIncome ? '+' : '-'}{formatNumberFull(transaction.amount)}
                     </p>
                   </div>
                 </div>
@@ -307,10 +343,11 @@ interface SummaryCardProps {
   icon: LucideIcon;
   label: string;
   value: string;
+  currencyLabel: string;
   type: 'income' | 'expense';
 }
 
-function SummaryCard({ icon: Icon, label, value, type }: SummaryCardProps) {
+function SummaryCard({ icon: Icon, label, value, currencyLabel, type }: SummaryCardProps) {
   const isIncome = type === 'income';
   
   return (
@@ -328,9 +365,10 @@ function SummaryCard({ icon: Icon, label, value, type }: SummaryCardProps) {
         <p className={cn(
           "text-[17px] font-bold tabular-nums truncate",
           isIncome ? "text-success" : "text-destructive"
-        )}>
+        )} dir="ltr">
           {value}
         </p>
+        <p className="text-xs text-muted-foreground mt-1">{currencyLabel}</p>
       </div>
     </div>
   );
@@ -361,7 +399,7 @@ function DetailRow({ icon, iconBg, label, value, valueClassName }: DetailRowProp
 interface QuickActionButtonProps {
   icon: LucideIcon;
   label: string;
-  color: 'primary' | 'success' | 'destructive';
+  color: 'primary' | 'success' | 'destructive' | 'warning';
   onClick: () => void;
   disabled?: boolean;
   ariaLabel?: string;
@@ -372,6 +410,7 @@ function QuickActionButton({ icon: Icon, label, color, onClick, disabled, ariaLa
     primary: 'text-primary',
     success: 'text-success',
     destructive: 'text-destructive',
+    warning: 'text-warning',
   }[color];
 
   return (
