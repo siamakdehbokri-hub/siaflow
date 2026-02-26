@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Transaction, Category, defaultExpenseCategories } from '@/types/expense';
 import { formatCurrency } from '@/utils/persianDate';
-import { cn } from '@/lib/utils';
 
 interface CategoryBreakdownProps {
   transactions: Transaction[];
@@ -20,45 +19,22 @@ const COLORS = [
   'hsl(142, 71%, 45%)',
 ];
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="rounded-xl p-3 shadow-lg" style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border) / 0.5)' }}>
-        <p className="text-sm font-bold text-foreground mb-1">{data.name}</p>
-        <p className="text-sm text-muted-foreground tabular-nums">{formatCurrency(data.value)}</p>
-        <p className="text-xs text-primary font-medium">{data.percentage.toFixed(1)}٪</p>
-      </div>
-    );
-  }
-  return null;
-};
-
 export function CategoryBreakdown({ transactions, categories }: CategoryBreakdownProps) {
-  // Calculate expense breakdown by category
   const { chartData, totalExpense, categoryList } = useMemo(() => {
     const expenseTransactions = transactions.filter(t => t.type === 'expense' || t.type === 'saving');
     const total = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
     
-    // Group by category
     const categoryTotals: Record<string, number> = {};
     expenseTransactions.forEach(t => {
       categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
     });
     
-    // Convert to array and sort
     const sortedCategories = Object.entries(categoryTotals)
       .map(([name, value], index) => {
         const cat = categories.find(c => c.name === name);
         const defaultCat = defaultExpenseCategories.find(c => c.name === name);
         const color = cat?.color || defaultCat?.color || COLORS[index % COLORS.length];
-        
-        return {
-          name,
-          value,
-          percentage: total > 0 ? (value / total) * 100 : 0,
-          color,
-        };
+        return { name, value, percentage: total > 0 ? (value / total) * 100 : 0, color };
       })
       .sort((a, b) => b.value - a.value);
     
@@ -78,17 +54,17 @@ export function CategoryBreakdown({ transactions, categories }: CategoryBreakdow
   }
 
   return (
-    <div className="space-y-4">
-      {/* Chart + Total */}
-      <div className="flex items-center gap-4">
-        <div className="w-36 h-36 shrink-0">
+    <div className="space-y-5">
+      {/* Donut Chart with center label */}
+      <div className="flex justify-center">
+        <div className="relative w-44 h-44">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <defs>
                 {chartData.map((entry, index) => (
-                  <linearGradient key={`gradient-${index}`} id={`catGradient-${index}`} x1="0" y1="0" x2="1" y2="1">
+                  <linearGradient key={`g-${index}`} id={`cbGrad-${index}`} x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor={entry.color} stopOpacity={1} />
-                    <stop offset="100%" stopColor={entry.color} stopOpacity={0.7} />
+                    <stop offset="100%" stopColor={entry.color} stopOpacity={0.65} />
                   </linearGradient>
                 ))}
               </defs>
@@ -96,63 +72,71 @@ export function CategoryBreakdown({ transactions, categories }: CategoryBreakdow
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={35}
-                outerRadius={55}
+                innerRadius={48}
+                outerRadius={68}
                 paddingAngle={3}
                 dataKey="value"
                 strokeWidth={0}
+                cornerRadius={4}
               >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`url(#catGradient-${index})`} />
+                {chartData.map((_, index) => (
+                  <Cell key={index} fill={`url(#cbGrad-${index})`} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-        
-        <div className="flex-1 space-y-1">
-          <p className="text-xs text-muted-foreground">کل هزینه‌ها</p>
-          <p className="text-2xl font-bold text-destructive tabular-nums">
-            {formatCurrency(totalExpense)}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {categoryList.length} دسته‌بندی
-          </p>
+          {/* Center label */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-[10px] text-muted-foreground">مجموع</span>
+            <span className="text-sm font-black text-foreground tabular-nums leading-tight">
+              {formatCurrency(totalExpense)}
+            </span>
+          </div>
         </div>
       </div>
-      
-      {/* Category List */}
-      <div className="space-y-2">
-        {categoryList.slice(0, 6).map((item, index) => (
-          <div key={item.name} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'hsl(var(--muted) / 0.3)' }}>
-            <div 
-              className="w-3 h-10 rounded-full shrink-0"
-              style={{ backgroundColor: item.color }}
+
+      {/* Category rows */}
+      <div className="space-y-1.5">
+        {categoryList.slice(0, 6).map((item) => (
+          <div
+            key={item.name}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl glass"
+          >
+            {/* Color dot */}
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: item.color, boxShadow: `0 0 8px ${item.color}55` }}
             />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-              <p className="text-xs text-muted-foreground tabular-nums">
-                {formatCurrency(item.value)}
-              </p>
-            </div>
-            <div className={cn(
-              "px-2.5 py-1 rounded-lg text-xs font-bold",
-              item.percentage > 30 ? "bg-destructive/10 text-destructive" :
-              item.percentage > 15 ? "bg-warning/10 text-warning" :
-              "bg-muted text-muted-foreground"
-            )}>
+
+            {/* Name */}
+            <span className="flex-1 text-[13px] font-medium text-foreground truncate">
+              {item.name}
+            </span>
+
+            {/* Amount */}
+            <span className="text-[12px] text-muted-foreground tabular-nums shrink-0">
+              {formatCurrency(item.value)}
+            </span>
+
+            {/* Percentage badge */}
+            <span
+              className="min-w-[38px] text-center text-[11px] font-bold tabular-nums py-0.5 px-1.5 rounded-lg shrink-0"
+              style={{
+                backgroundColor: `${item.color}18`,
+                color: item.color,
+              }}
+            >
               {item.percentage.toFixed(0)}٪
-            </div>
+            </span>
           </div>
         ))}
-        
-        {categoryList.length > 6 && (
-          <p className="text-xs text-muted-foreground text-center pt-2">
-            و {categoryList.length - 6} دسته‌بندی دیگر
-          </p>
-        )}
       </div>
+
+      {categoryList.length > 6 && (
+        <p className="text-[11px] text-muted-foreground text-center">
+          و {categoryList.length - 6} دسته‌بندی دیگر
+        </p>
+      )}
     </div>
   );
 }
