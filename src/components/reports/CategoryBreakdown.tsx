@@ -85,10 +85,19 @@ export function CategoryBreakdown({ transactions, categories }: CategoryBreakdow
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-          {/* Center label */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-[10px] text-muted-foreground">مجموع</span>
-            <span className="text-sm font-black text-foreground tabular-nums leading-tight">
+          {/* Center label - positioned manually to sit inside donut hole */}
+          <div
+            className="absolute pointer-events-none flex flex-col items-center justify-center"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 80,
+              height: 80,
+            }}
+          >
+            <span className="text-[9px] text-muted-foreground leading-none mb-0.5">مجموع</span>
+            <span className="text-[11px] font-black text-foreground tabular-nums leading-none text-center">
               {formatCurrency(totalExpense)}
             </span>
           </div>
