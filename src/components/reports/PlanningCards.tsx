@@ -162,12 +162,32 @@ interface HealthSummaryProps {
 }
 
 export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, hasData }: HealthSummaryProps) {
-  // Calculate overall health score (simplified)
-  const healthScore = hasData 
-    ? Math.round((100 - Math.min(budgetPercent, 100) + goalsPercent + debtPercent) / 3)
-    : 0;
+  // Calculate overall health score using weighted average of ACTIVE dimensions only
+  // budgetPercent = % used (lower is better) → score = 100 - used
+  // goalsPercent = % saved toward target (higher is better)
+  // debtPercent = % paid off (higher is better)
   
-  const healthStatus = healthScore >= 70 ? 'excellent' : healthScore >= 50 ? 'good' : healthScore >= 30 ? 'fair' : 'needs-attention';
+  const dimensions: { score: number; weight: number }[] = [];
+  
+  // Only include dimensions the user actually has data for
+  if (budgetPercent > 0 || budgetPercent === 0) {
+    // Budget: if user has budgets, score = how much is remaining
+    // But we only add this if there's actual budget data (passed via hasData context)
+    dimensions.push({ score: Math.max(0, 100 - Math.min(budgetPercent, 150)), weight: 1 });
+  }
+  if (goalsPercent > 0) {
+    dimensions.push({ score: Math.min(goalsPercent, 100), weight: 1 });
+  }
+  if (debtPercent > 0) {
+    dimensions.push({ score: Math.min(debtPercent, 100), weight: 1 });
+  }
+  
+  // If no active dimensions, use a neutral score
+  const healthScore = dimensions.length > 0
+    ? Math.round(dimensions.reduce((sum, d) => sum + d.score * d.weight, 0) / dimensions.reduce((sum, d) => sum + d.weight, 0))
+    : 50;
+  
+  const healthStatus = healthScore >= 75 ? 'excellent' : healthScore >= 55 ? 'good' : healthScore >= 35 ? 'fair' : 'needs-attention';
   
   const statusConfig = {
     'excellent': { label: 'عالی', color: 'text-success', bg: 'bg-success/10' },
@@ -177,6 +197,11 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
   };
   
   const status = statusConfig[healthStatus];
+
+  // Compute display values for each bar
+  const budgetBarValue = Math.max(0, Math.min(100 - budgetPercent, 100)); // remaining budget (higher = better)
+  const goalsBarValue = Math.min(goalsPercent, 100);
+  const debtBarValue = Math.min(debtPercent, 100);
 
   if (!hasData) {
     return (
@@ -235,29 +260,32 @@ export function FinancialHealthCard({ budgetPercent, goalsPercent, debtPercent, 
           <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
-                className="h-full bg-chart-1 rounded-full transition-all"
-                style={{ width: `${Math.min(100 - budgetPercent, 100)}%` }}
+                className={cn("h-full rounded-full transition-all", budgetPercent > 100 ? "bg-destructive" : "bg-chart-1")}
+                style={{ width: `${budgetBarValue}%` }}
               />
             </div>
             <p className="text-[10px] font-medium text-muted-foreground">بودجه</p>
+            <p className="text-[9px] font-bold text-muted-foreground/70">{Math.round(budgetBarValue)}٪ باقی</p>
           </div>
           <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
                 className="h-full bg-success rounded-full transition-all"
-                style={{ width: `${goalsPercent}%` }}
+                style={{ width: `${goalsBarValue}%` }}
               />
             </div>
             <p className="text-[10px] font-medium text-muted-foreground">پس‌انداز</p>
+            <p className="text-[9px] font-bold text-muted-foreground/70">{Math.round(goalsBarValue)}٪ تکمیل</p>
           </div>
           <div className="text-center p-2 rounded-xl" style={{ background: 'hsl(var(--card) / 0.5)', border: '1px solid hsl(var(--border) / 0.3)' }}>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
               <div 
                 className="h-full bg-warning rounded-full transition-all"
-                style={{ width: `${debtPercent}%` }}
+                style={{ width: `${debtBarValue}%` }}
               />
             </div>
             <p className="text-[10px] font-medium text-muted-foreground">بدهی</p>
+            <p className="text-[9px] font-bold text-muted-foreground/70">{Math.round(debtBarValue)}٪ پرداخت</p>
           </div>
         </div>
       </div>
