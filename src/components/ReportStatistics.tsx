@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Wallet, AlertTriangle, Award, Calculator, Percent, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Transaction, Category } from '@/types/expense';
-import { formatCurrency, toPersianNum, isInCurrentJalaliMonth, isInPreviousJalaliMonth } from '@/utils/persianDate';
+import { formatCurrency, toPersianNum } from '@/utils/persianDate';
+import { getCurrentMonthSummary, filterTransactionsByDateRange } from '@/utils/financialEngine';
 import { cn } from '@/lib/utils';
 
 interface ReportStatisticsProps {
@@ -16,106 +17,105 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
       return {
         totalIncome: 0,
         totalExpense: 0,
+        totalSaving: 0,
         balance: 0,
-        avgTransaction: 0,
         avgDailyExpense: 0,
         topCategory: { name: '-', amount: 0 },
         overBudgetCount: 0,
         incomeCount: 0,
         expenseCount: 0,
+        savingCount: 0,
         totalCount: 0,
         savingsRate: 0,
         growthRate: 0,
         medianExpense: 0,
+        expenseToIncomeRatio: 0,
       };
     }
 
-    // Total income, expense, and saving with validation
+    // Use financial engine for FILTERED transactions (respects user's date range)
+    // The filtered transactions come from ReportingFilters, so we calculate directly on them
     const incomeTransactions = transactions.filter(t => t.type === 'income' && t.amount > 0);
     const expenseTransactions = transactions.filter(t => t.type === 'expense' && t.amount > 0);
     const savingTransactions = transactions.filter(t => t.type === 'saving' && t.amount > 0);
-    
+
     const totalIncome = incomeTransactions.reduce((sum, t) => sum + t.amount, 0);
     const totalExpense = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
     const totalSaving = savingTransactions.reduce((sum, t) => sum + t.amount, 0);
     // Net balance = Income - Expense - Saving
     const balance = totalIncome - totalExpense - totalSaving;
-    
-    // Calculate savings rate (percentage of income saved via saving transactions)
-    // Formula: Saving / Income * 100
-    const savingsRate = totalIncome > 0 
-      ? Math.round((totalSaving / totalIncome) * 100) 
-      : 0;
 
-    // Calculate average transaction amount
-    const avgTransaction = transactions.length > 0 
-      ? Math.round(transactions.reduce((sum, t) => sum + t.amount, 0) / transactions.length)
-      : 0;
+    // Savings rate: (Saving / Income) * 100
+    const savingsRate = totalIncome > 0 ? Math.round((totalSaving / totalIncome) * 100) : 0;
+    const expenseToIncomeRatio = totalIncome > 0 ? Math.round((totalExpense / totalIncome) * 100) : 0;
 
-    // Calculate median expense (more robust than average for outliers)
-    const sortedExpenses = expenseTransactions
-      .map(t => t.amount)
-      .sort((a, b) => a - b);
+    // Median expense (more robust than average)
+    const sortedExpenses = expenseTransactions.map(t => t.amount).sort((a, b) => a - b);
     const medianExpense = sortedExpenses.length > 0
       ? sortedExpenses[Math.floor(sortedExpenses.length / 2)]
       : 0;
 
-    // Calculate average daily expense
-    const dates = transactions.map(t => new Date(t.date).toDateString());
-    const uniqueDays = [...new Set(dates)].length;
-    const avgDailyExpense = uniqueDays > 0 
-      ? Math.round(totalExpense / uniqueDays)
-      : 0;
+    // Average daily expense (unique days in filtered range)
+    const expenseDays = new Set(expenseTransactions.map(t => t.date));
+    const uniqueDays = expenseDays.size || 1;
+    const avgDailyExpense = Math.round(totalExpense / uniqueDays);
 
-    // Category spending analysis
-    const categorySpending: Record<string, number> = {};
+    // Category spending with integrity check
+    const categorySpending = new Map<string, number>();
     expenseTransactions.forEach(t => {
-      categorySpending[t.category] = (categorySpending[t.category] || 0) + t.amount;
+      categorySpending.set(t.category, (categorySpending.get(t.category) || 0) + t.amount);
     });
+
+    // INTEGRITY: Verify category sum equals total
+    const categorySum = Array.from(categorySpending.values()).reduce((s, v) => s + v, 0);
+    if (categorySum !== totalExpense) {
+      console.warn(`[ReportStatistics] Integrity: categorySum=${categorySum} != totalExpense=${totalExpense}`);
+    }
 
     // Top spending category
     let topCategory = { name: '-', amount: 0 };
-    Object.entries(categorySpending).forEach(([name, amount]) => {
+    categorySpending.forEach((amount, name) => {
       if (amount > topCategory.amount) {
         topCategory = { name, amount };
       }
     });
 
-    // Over budget categories with accurate calculation
-    const overBudgetCategories = categories.filter(c => {
+    // Over budget categories
+    const overBudgetCount = categories.filter(c => {
       if (!c.budget || c.budget <= 0) return false;
-      const spent = categorySpending[c.name] || 0;
+      const spent = categorySpending.get(c.name) || 0;
       return spent > c.budget;
-    });
+    }).length;
 
-    // Calculate month-over-month growth rate using Jalali months
-    const currentMonthExpense = expenseTransactions
-      .filter(t => isInCurrentJalaliMonth(t.date))
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    const lastMonthExpense = expenseTransactions
-      .filter(t => isInPreviousJalaliMonth(t.date))
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    // Growth rate formula: ((Current - Previous) / Previous) * 100
-    const growthRate = lastMonthExpense > 0 
-      ? Math.round(((currentMonthExpense - lastMonthExpense) / lastMonthExpense) * 100)
-      : 0;
+    // Growth rate: compare first half vs second half of filtered data to detect trend
+    // This works regardless of date range selected
+    const sortedByDate = [...expenseTransactions].sort((a, b) => a.date.localeCompare(b.date));
+    let growthRate = 0;
+    if (sortedByDate.length >= 4) {
+      const mid = Math.floor(sortedByDate.length / 2);
+      const firstHalf = sortedByDate.slice(0, mid).reduce((s, t) => s + t.amount, 0);
+      const secondHalf = sortedByDate.slice(mid).reduce((s, t) => s + t.amount, 0);
+      if (firstHalf > 0) {
+        growthRate = Math.round(((secondHalf - firstHalf) / firstHalf) * 100);
+      }
+    }
 
     return {
       totalIncome,
       totalExpense,
+      totalSaving,
       balance,
-      avgTransaction,
       avgDailyExpense,
       topCategory,
-      overBudgetCount: overBudgetCategories.length,
+      overBudgetCount,
       incomeCount: incomeTransactions.length,
       expenseCount: expenseTransactions.length,
+      savingCount: savingTransactions.length,
       totalCount: transactions.length,
       savingsRate,
       growthRate,
       medianExpense,
+      expenseToIncomeRatio,
     };
   }, [transactions, categories]);
 
@@ -131,13 +131,13 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
     {
       label: 'کل هزینه',
       value: formatCurrency(stats.totalExpense),
-      subtext: `${toPersianNum(stats.expenseCount)} تراکنش`,
+      subtext: `${toPersianNum(stats.expenseCount)} تراکنش | ${toPersianNum(stats.expenseToIncomeRatio)}٪ از درآمد`,
       icon: TrendingDown,
       color: 'text-destructive',
       bgColor: 'bg-destructive/10',
     },
     {
-      label: 'موجودی خالص',
+      label: 'مانده خالص',
       value: formatCurrency(Math.abs(stats.balance)),
       subtext: stats.balance >= 0 ? 'مثبت' : 'منفی',
       icon: Wallet,
@@ -147,15 +147,15 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
     {
       label: 'نرخ پس‌انداز',
       value: `${toPersianNum(Math.max(0, stats.savingsRate))}٪`,
-      subtext: stats.savingsRate > 20 ? 'عالی' : stats.savingsRate > 10 ? 'خوب' : 'نیاز به بهبود',
+      subtext: stats.savingsRate >= 20 ? 'عالی (≥۲۰٪)' : stats.savingsRate >= 10 ? 'خوب' : 'نیاز به بهبود (<۱۰٪)',
       icon: Percent,
-      color: stats.savingsRate > 20 ? 'text-success' : stats.savingsRate > 10 ? 'text-warning' : 'text-destructive',
-      bgColor: stats.savingsRate > 20 ? 'bg-success/10' : stats.savingsRate > 10 ? 'bg-warning/10' : 'bg-destructive/10',
+      color: stats.savingsRate >= 20 ? 'text-success' : stats.savingsRate >= 10 ? 'text-warning' : 'text-destructive',
+      bgColor: stats.savingsRate >= 20 ? 'bg-success/10' : stats.savingsRate >= 10 ? 'bg-warning/10' : 'bg-destructive/10',
     },
     {
       label: 'میانگین روزانه',
       value: formatCurrency(stats.avgDailyExpense),
-      subtext: 'هزینه روزانه',
+      subtext: `میانه: ${formatCurrency(stats.medianExpense)}`,
       icon: Calendar,
       color: 'text-primary',
       bgColor: 'bg-primary/10',
@@ -169,9 +169,9 @@ export function ReportStatistics({ transactions, categories }: ReportStatisticsP
       bgColor: 'bg-warning/10',
     },
     {
-      label: 'رشد ماهانه',
+      label: 'روند هزینه',
       value: `${stats.growthRate >= 0 ? '+' : ''}${toPersianNum(stats.growthRate)}٪`,
-      subtext: stats.growthRate > 0 ? 'افزایش هزینه' : stats.growthRate < 0 ? 'کاهش هزینه' : 'بدون تغییر',
+      subtext: stats.growthRate > 0 ? 'افزایشی' : stats.growthRate < 0 ? 'کاهشی' : 'ثابت',
       icon: Calculator,
       color: stats.growthRate <= 0 ? 'text-success' : 'text-destructive',
       bgColor: stats.growthRate <= 0 ? 'bg-success/10' : 'bg-destructive/10',

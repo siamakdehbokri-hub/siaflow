@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Transaction, Category } from '@/types/expense';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { prepareAIMonthlyData } from '@/utils/financialEngine';
 
 interface AIReportProps {
   transactions: Transaction[];
@@ -63,8 +64,12 @@ export function AIReport({ transactions, categories }: AIReportProps) {
     }
 
     try {
+      // Prepare month-isolated data using financial engine
+      const monthlyData = prepareAIMonthlyData(transactions, categories, 3);
+
       const { data, error: invokeError } = await supabase.functions.invoke('ai-report', {
         body: { 
+          // Send both raw transactions (for backward compat) AND structured monthly data
           transactions: transactions.slice(0, 150).map(t => ({
             amount: t.amount,
             type: t.type,
@@ -75,7 +80,9 @@ export function AIReport({ transactions, categories }: AIReportProps) {
             tags: t.tags || [],
           })),
           categories,
-          type 
+          type,
+          // NEW: month-isolated structured data
+          monthlyData,
         }
       });
 
@@ -104,7 +111,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
       }
 
       setReport(data.report);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('AI report error:', err);
       setError('خطا در دریافت گزارش. لطفاً دوباره تلاش کنید.');
     } finally {
@@ -143,12 +150,10 @@ export function AIReport({ transactions, categories }: AIReportProps) {
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-card border-2 border-border shadow-sm">
-      {/* Background decoration */}
       <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/5 blur-3xl" />
       <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-chart-5/5 blur-2xl" />
       
       <div className="relative p-5">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <div className="relative">
             <div className="w-13 h-13 rounded-xl bg-gradient-to-br from-primary/20 to-chart-5/10 flex items-center justify-center shadow-sm border border-primary/10">
@@ -160,11 +165,10 @@ export function AIReport({ transactions, categories }: AIReportProps) {
           </div>
           <div className="flex-1">
             <h3 className="text-base font-bold text-foreground">مشاور هوشمند مالی</h3>
-            <p className="text-[11px] text-muted-foreground">تحلیل دقیق تک‌تک تراکنش‌ها</p>
+            <p className="text-[11px] text-muted-foreground">تحلیل ماه‌به‌ماه • بدون هم‌پوشانی داده</p>
           </div>
         </div>
 
-        {/* Report Type Selector */}
         <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
           {reportTypes.map((type) => {
             const isActive = activeType === type.id;
@@ -190,7 +194,6 @@ export function AIReport({ transactions, categories }: AIReportProps) {
           })}
         </div>
 
-        {/* Report Content */}
         <div className="min-h-[220px] relative">
           {loading ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
@@ -201,8 +204,8 @@ export function AIReport({ transactions, categories }: AIReportProps) {
                 <Loader2 className="absolute -right-1.5 -bottom-1.5 w-6 h-6 text-primary animate-spin" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-foreground mb-1">در حال تحلیل عمیق...</p>
-                <p className="text-xs text-muted-foreground">بررسی تک‌تک تراکنش‌ها</p>
+                <p className="text-sm font-medium text-foreground mb-1">در حال تحلیل ماه‌به‌ماه...</p>
+                <p className="text-xs text-muted-foreground">بررسی تفکیکی هر ماه</p>
               </div>
             </div>
           ) : error ? (
@@ -247,7 +250,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-foreground mb-1">آماده تحلیل هوشمند</p>
-                <p className="text-xs text-muted-foreground mb-3">یکی از بخش‌های بالا را انتخاب کنید</p>
+                <p className="text-xs text-muted-foreground mb-3">تحلیل ماه‌به‌ماه بدون اختلاط داده</p>
                 <Button onClick={() => generateReport('summary')} className="gap-2 rounded-xl shadow-lg shadow-primary/20">
                   <Sparkles className="w-4 h-4" />
                   شروع تحلیل
