@@ -33,7 +33,14 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(cardVariants({ variant, className }))}
-      style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)', ...style }}
+      style={{
+        background: 'rgba(255,255,255,0.046)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+        border: '1px solid rgba(255,255,255,0.09)',
+        boxShadow: '0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+        ...style,
+      }}
       {...props}
     />
   )

@@ -82,7 +82,15 @@ export function HomeScreen({
       </div>
 
       {/* Hero Card - Flat */}
-      <div className="rounded-2xl p-6" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className="relative rounded-2xl p-6" style={{
+        background: 'rgba(255,255,255,0.062)',
+        backdropFilter: 'blur(22px)',
+        WebkitBackdropFilter: 'blur(22px)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: '0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09)',
+      }}>
+        {/* Top shine line */}
+        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.24), transparent)' }} />
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
@@ -153,7 +161,15 @@ export function HomeScreen({
       </div>
 
       {/* Balance Detail Card */}
-      <div className="rounded-2xl" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className="relative rounded-2xl" style={{
+        background: 'rgba(255,255,255,0.062)',
+        backdropFilter: 'blur(22px)',
+        WebkitBackdropFilter: 'blur(22px)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: '0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09)',
+      }}>
+        {/* Top shine line */}
+        <div className="absolute top-0 left-0 right-0 h-px rounded-t-2xl overflow-hidden" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.24), transparent)' }} />
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(124,58,237,0.12)' }}>
@@ -224,7 +240,13 @@ export function HomeScreen({
         <button
           onClick={onOpenAutoSavings}
           className="w-full flex items-center gap-3 rounded-2xl p-4 active:opacity-80 transition-opacity text-right"
-          style={{ background: '#111118', border: '1px solid rgba(124,58,237,0.2)' }}
+          style={{
+            background: 'rgba(255,255,255,0.046)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            border: '1px solid rgba(124,58,237,0.2)',
+            boxShadow: '0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}
         >
           <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(124,58,237,0.15)' }}>
             <PiggyBank className="w-5 h-5" style={{ color: '#7C3AED' }} strokeWidth={2} />
@@ -252,14 +274,26 @@ export function HomeScreen({
         </div>
         
         {financialData.recentTransactions.length === 0 ? (
-          <div className="rounded-2xl p-6 text-center" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="rounded-2xl p-6 text-center" style={{
+            background: 'rgba(255,255,255,0.046)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            border: '1px solid rgba(255,255,255,0.09)',
+            boxShadow: '0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}>
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <Receipt className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
             </div>
             <p className="text-xs font-medium text-muted-foreground">هنوز تراکنشی ثبت نشده</p>
           </div>
         ) : (
-          <div className="rounded-2xl overflow-hidden" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="rounded-2xl overflow-hidden" style={{
+            background: 'rgba(255,255,255,0.046)',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            border: '1px solid rgba(255,255,255,0.09)',
+            boxShadow: '0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}>
             {financialData.recentTransactions.map((transaction, idx) => {
               const isIncome = transaction.type === 'income';
               
@@ -317,7 +351,13 @@ function SummaryCard({ icon: Icon, label, value, type }: SummaryCardProps) {
   const color = isIncome ? '#10B981' : '#EF4444';
   
   return (
-    <div className="relative rounded-2xl p-4" style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.07)' }}>
+    <div className="relative rounded-2xl p-4" style={{
+      background: 'rgba(255,255,255,0.046)',
+      backdropFilter: 'blur(14px)',
+      WebkitBackdropFilter: 'blur(14px)',
+      border: '1px solid rgba(255,255,255,0.09)',
+      boxShadow: '0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+    }}>
       {/* Icon circle - top right */}
       <div className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: color }}>
         <Icon className="w-5 h-5 text-white" strokeWidth={2} />

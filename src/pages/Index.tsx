@@ -111,9 +111,26 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Ambient background blobs for glassmorphism */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div style={{
+          position: 'absolute', top: -120, right: -90,
+          width: 340, height: 340,
+          background: 'rgba(90,68,200,0.24)',
+          filter: 'blur(80px)',
+          borderRadius: '50%',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: -80, left: -70,
+          width: 280, height: 280,
+          background: 'rgba(18,108,92,0.18)',
+          filter: 'blur(80px)',
+          borderRadius: '50%',
+        }} />
+      </div>
       {/* Header */}
-      <AppHeader 
+      <AppHeader
         title={getPageTitle()} 
         onMenuClick={() => setIsMenuOpen(true)}
         debtReminders={debtReminders}
