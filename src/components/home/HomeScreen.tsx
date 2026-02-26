@@ -111,12 +111,9 @@ export function HomeScreen({
             <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
               امروز چقدر خرج کردی؟
             </p>
-            <div className="flex flex-col">
-              <span className="text-4xl font-black tabular-nums tracking-tight text-success">
-                {formatCompactOnly(financialData.todayExpense)}
-              </span>
-              <span className="text-sm text-muted-foreground mt-1">{currencyInfo.symbol}</span>
-            </div>
+            <span className="text-4xl font-black tabular-nums tracking-tight text-success">
+              {formatCompactOnly(financialData.todayExpense)} {currencyInfo.symbol}
+            </span>
           </div>
           
           {/* Add button - solid circle - matching design teal/green */}
@@ -189,16 +186,15 @@ export function HomeScreen({
             </div>
           </div>
 
-          {/* Balance Amount - with separate تومان */}
+          {/* Balance Amount */}
           <div className="text-center mb-4 py-3.5 rounded-2xl bg-muted/50 border border-border">
             <p className="text-xs text-muted-foreground mb-1">موجودی فعلی</p>
             <p className={cn(
               "text-3xl font-black tabular-nums tracking-tight",
               financialData.balance >= 0 ? "text-success" : "text-destructive"
             )}>
-              {financialData.balance >= 0 ? '+' : ''}{formatCompactOnly(financialData.balance)}
+              {financialData.balance >= 0 ? '+' : ''}{formatCompactOnly(financialData.balance)} {currencyInfo.symbol}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">{currencyInfo.symbol}</p>
           </div>
 
           {/* Detail Rows */}
@@ -366,9 +362,8 @@ function SummaryCard({ icon: Icon, label, value, currencyLabel, type }: SummaryC
           "text-[17px] font-bold tabular-nums truncate",
           isIncome ? "text-success" : "text-destructive"
         )} dir="ltr">
-          {value}
+          {value} {currencyLabel}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">{currencyLabel}</p>
       </div>
     </div>
   );
