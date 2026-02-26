@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Transaction } from '@/types/expense';
 import { formatCurrency, getJalaliMonthName, getJalaliMonthKey } from '@/utils/persianDate';
@@ -7,7 +7,7 @@ interface TrendChartProps {
   transactions?: Transaction[];
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = forwardRef<HTMLDivElement, any>(({ active, payload, label }, ref) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
@@ -21,7 +21,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
   }
   return null;
-};
+});
+CustomTooltip.displayName = 'CustomTooltip';
 
 export function TrendChart({ transactions = [] }: TrendChartProps) {
   const data = useMemo(() => {

@@ -39,7 +39,10 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  });
   const [isRecurring, setIsRecurring] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,7 +94,10 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       setCategory('');
       setSubcategory('');
       setDescription('');
-      setDate(new Date().toISOString().split('T')[0]);
+      setDate(() => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      });
       setIsRecurring(false);
       onClose();
     } catch (error) {
@@ -374,7 +380,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
         {/* Footer - Submit Button */}
         <div className="p-5 border-t border-border/30" style={{ background: 'hsl(var(--card) / 0.8)' }}>
           <Button 
-            type="submit"
+            type="button"
             onClick={handleSubmit}
             className={cn(
               "w-full h-14 rounded-xl font-bold text-base",
