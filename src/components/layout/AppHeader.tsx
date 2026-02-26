@@ -25,7 +25,7 @@ export function AppHeader({
   onEnableNotifications,
 }: AppHeaderProps) {
   return (
-    <header style={{ background: 'linear-gradient(135deg, #6D28D9, #7C3AED)' }}>
+    <header className="relative z-10 bg-gradient-to-br from-primary to-primary/85">
       {/* Safe area padding */}
       <div className="pt-safe" />
       
@@ -45,7 +45,7 @@ export function AppHeader({
         </div>
         
         {/* Title - centered */}
-        <h1 className="justify-self-center text-center truncate max-w-[60vw]" style={{ fontSize: '18px', fontWeight: 700, color: 'white' }}>
+        <h1 className="justify-self-center text-center truncate max-w-[60vw] text-lg font-bold text-primary-foreground">
           {title}
         </h1>
         
@@ -55,11 +55,10 @@ export function AppHeader({
             variant="ghost" 
             size="icon" 
             onClick={onMenuClick}
-            className="hover:bg-white/15 rounded-xl h-11 w-11"
-            style={{ color: 'white' }}
+            className="hover:bg-primary-foreground/15 rounded-xl h-11 w-11 text-primary-foreground"
             aria-label="منو"
           >
-            <Menu style={{ width: 22, height: 22, color: 'white' }} strokeWidth={2} />
+            <Menu className="w-[22px] h-[22px]" strokeWidth={2} />
           </Button>
         </div>
       </div>

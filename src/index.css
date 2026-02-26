@@ -29,27 +29,27 @@
 
 @layer base {
   :root {
-    --background: 240 12% 4%;
-    --foreground: 0 0% 92%;
+    --background: 210 20% 98%;
+    --foreground: 224 12% 12%;
 
-    --card: 240 10% 7%;
-    --card-foreground: 0 0% 92%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 12% 12%;
 
-    --popover: 240 10% 7%;
-    --popover-foreground: 0 0% 92%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 12% 12%;
 
     --primary: 263 70% 50%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 263 70% 50%;
 
-    --secondary: 240 10% 10%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 12% 28%;
 
-    --muted: 240 8% 12%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 42%;
 
-    --accent: 263 30% 14%;
-    --accent-foreground: 263 70% 70%;
+    --accent: 263 30% 96%;
+    --accent-foreground: 263 70% 45%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -63,8 +63,8 @@
     --info: 200 90% 55%;
     --info-foreground: 0 0% 100%;
 
-    --border: 0 0% 100% / 0.07;
-    --input: 240 8% 12%;
+    --border: 220 13% 91%;
+    --input: 220 14% 96%;
     --ring: 263 70% 50%;
 
     --radius: 0.75rem;
@@ -75,14 +75,30 @@
     --chart-4: 160 84% 39%;
     --chart-5: 290 70% 60%;
 
-    --sidebar-background: 240 12% 5%;
-    --sidebar-foreground: 0 0% 92%;
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 224 12% 12%;
     --sidebar-primary: 263 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 263 30% 14%;
-    --sidebar-accent-foreground: 263 70% 70%;
-    --sidebar-border: 0 0% 100% / 0.07;
+    --sidebar-accent: 263 30% 96%;
+    --sidebar-accent-foreground: 263 70% 45%;
+    --sidebar-border: 220 13% 91%;
     --sidebar-ring: 263 70% 50%;
+
+    /* Custom tokens for glass & nav */
+    --glass-bg: 0 0% 100% / 0.65;
+    --glass-border: 0 0% 0% / 0.08;
+    --glass-shadow-color: 0 0% 0% / 0.08;
+    --glass-hero-bg: 0 0% 100% / 0.72;
+    --glass-hero-border: 0 0% 0% / 0.10;
+    --glass-inset: 0 0% 100% / 0.5;
+    --nav-bg: 0 0% 100%;
+    --nav-border: 220 13% 91%;
+    --header-from: #7C3AED;
+    --header-to: #8B5CF6;
+    --blob-purple: rgba(124,58,237,0.10);
+    --blob-teal: rgba(16,185,129,0.08);
+    --subtle-bg: 220 14% 96%;
+    --inactive-color: 220 10% 55%;
   }
 
   .dark {
@@ -125,6 +141,22 @@
     --sidebar-accent-foreground: 263 70% 70%;
     --sidebar-border: 0 0% 100% / 0.07;
     --sidebar-ring: 263 70% 50%;
+
+    /* Custom tokens for glass & nav - dark */
+    --glass-bg: 0 0% 100% / 0.046;
+    --glass-border: 0 0% 100% / 0.09;
+    --glass-shadow-color: 0 0% 0% / 0.3;
+    --glass-hero-bg: 0 0% 100% / 0.062;
+    --glass-hero-border: 0 0% 100% / 0.12;
+    --glass-inset: 0 0% 100% / 0.06;
+    --nav-bg: 240 14% 5%;
+    --nav-border: 0 0% 100% / 0.06;
+    --header-from: #6D28D9;
+    --header-to: #7C3AED;
+    --blob-purple: rgba(90,68,200,0.24);
+    --blob-teal: rgba(18,108,92,0.18);
+    --subtle-bg: 0 0% 100% / 0.03;
+    --inactive-color: 220 10% 45%;
   }
 }
 
@@ -196,23 +228,23 @@
   .glass,
   .glass-subtle,
   .glass-card {
-    background: rgba(255,255,255,0.046);
+    background: hsl(var(--glass-bg));
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.09);
+    border: 1px solid hsl(var(--glass-border));
     border-radius: 16px;
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+    box-shadow: 0 2px 24px hsl(var(--glass-shadow-color)), inset 0 1px 0 hsl(var(--glass-inset));
   }
 
   /* Heavy / hero glass cards */
   .glass-heavy,
   .glass-glow {
-    background: rgba(255,255,255,0.062);
+    background: hsl(var(--glass-hero-bg));
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid hsl(var(--glass-hero-border));
     border-radius: 16px;
-    box-shadow: 0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09);
+    box-shadow: 0 4px 36px hsl(var(--glass-shadow-color)), inset 0 1px 0 hsl(var(--glass-inset));
   }
 
   .glass::before,
