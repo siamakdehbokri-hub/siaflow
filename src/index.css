@@ -85,18 +85,18 @@
     --sidebar-ring: 263 70% 50%;
 
     /* Custom tokens for glass & nav */
-    --glass-bg: 0 0% 100% / 0.72;
-    --glass-border: 220 13% 50% / 0.12;
-    --glass-shadow-color: 220 20% 20% / 0.06;
-    --glass-hero-bg: 0 0% 100% / 0.80;
-    --glass-hero-border: 220 13% 50% / 0.14;
-    --glass-inset: 0 0% 100% / 0.6;
-    --nav-bg: 0 0% 100%;
-    --nav-border: 220 13% 91%;
+    --glass-bg: 210 20% 98% / 0.60;
+    --glass-border: 220 20% 80% / 0.35;
+    --glass-shadow-color: 220 30% 50% / 0.08;
+    --glass-hero-bg: 210 20% 98% / 0.68;
+    --glass-hero-border: 220 20% 75% / 0.40;
+    --glass-inset: 0 0% 100% / 0.65;
+    --nav-bg: 210 20% 98% / 0.75;
+    --nav-border: 220 13% 85%;
     --header-from: #7C3AED;
     --header-to: #8B5CF6;
-    --blob-purple: rgba(124,58,237,0.10);
-    --blob-teal: rgba(16,185,129,0.08);
+    --blob-purple: rgba(124,58,237,0.12);
+    --blob-teal: rgba(16,185,129,0.10);
     --subtle-bg: 220 14% 96%;
     --inactive-color: 220 10% 55%;
   }
@@ -143,19 +143,19 @@
     --sidebar-ring: 263 70% 50%;
 
     /* Custom tokens for glass & nav - dark */
-    --glass-bg: 0 0% 100% / 0.055;
-    --glass-border: 0 0% 100% / 0.10;
-    --glass-shadow-color: 0 0% 0% / 0.25;
-    --glass-hero-bg: 0 0% 100% / 0.075;
-    --glass-hero-border: 0 0% 100% / 0.13;
-    --glass-inset: 0 0% 100% / 0.07;
-    --nav-bg: 240 14% 5%;
-    --nav-border: 0 0% 100% / 0.06;
+    --glass-bg: 240 10% 14% / 0.50;
+    --glass-border: 263 30% 60% / 0.12;
+    --glass-shadow-color: 240 20% 5% / 0.35;
+    --glass-hero-bg: 240 10% 16% / 0.58;
+    --glass-hero-border: 263 30% 60% / 0.16;
+    --glass-inset: 0 0% 100% / 0.08;
+    --nav-bg: 240 12% 6% / 0.80;
+    --nav-border: 0 0% 100% / 0.07;
     --header-from: #6D28D9;
     --header-to: #7C3AED;
-    --blob-purple: rgba(90,68,200,0.20);
-    --blob-teal: rgba(18,108,92,0.14);
-    --subtle-bg: 0 0% 100% / 0.04;
+    --blob-purple: rgba(124,58,237,0.22);
+    --blob-teal: rgba(16,185,129,0.16);
+    --subtle-bg: 0 0% 100% / 0.05;
     --inactive-color: 220 10% 45%;
   }
 }
@@ -229,22 +229,28 @@
   .glass-subtle,
   .glass-card {
     background: hsl(var(--glass-bg));
-    backdrop-filter: blur(16px) saturate(1.2);
-    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
     border: 1px solid hsl(var(--glass-border));
     border-radius: 16px;
-    box-shadow: 0 1px 20px hsl(var(--glass-shadow-color)), inset 0 1px 0 hsl(var(--glass-inset));
+    box-shadow: 
+      0 4px 24px hsl(var(--glass-shadow-color)),
+      inset 0 1px 0 hsl(var(--glass-inset)),
+      inset 0 -1px 0 hsl(var(--glass-shadow-color));
   }
 
   /* Heavy / hero glass cards */
   .glass-heavy,
   .glass-glow {
     background: hsl(var(--glass-hero-bg));
-    backdrop-filter: blur(24px) saturate(1.3);
-    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    backdrop-filter: blur(28px) saturate(1.5);
+    -webkit-backdrop-filter: blur(28px) saturate(1.5);
     border: 1px solid hsl(var(--glass-hero-border));
     border-radius: 16px;
-    box-shadow: 0 2px 32px hsl(var(--glass-shadow-color)), inset 0 1px 0 hsl(var(--glass-inset));
+    box-shadow: 
+      0 8px 40px hsl(var(--glass-shadow-color)),
+      inset 0 1px 0 hsl(var(--glass-inset)),
+      inset 0 -1px 0 hsl(var(--glass-shadow-color));
   }
 
   .glass::before,
