@@ -103,9 +103,6 @@ export function HomeScreen({
 
       {/* Hero Card - Glass Heavy */}
       <div className="relative glass-heavy rounded-2xl p-6">
-        {/* Top shine line */}
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.24), transparent)' }} />
-        
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-muted-foreground mb-2 leading-relaxed">
@@ -172,9 +169,6 @@ export function HomeScreen({
 
       {/* Balance Detail Card - Glass Heavy */}
       <div className="relative glass-heavy rounded-2xl">
-        {/* Top shine line */}
-        <div className="absolute top-0 left-0 right-0 h-px rounded-t-2xl overflow-hidden" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.24), transparent)' }} />
-        
         <div className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-success/10">

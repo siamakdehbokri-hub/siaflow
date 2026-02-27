@@ -102,61 +102,82 @@
   }
 
   .dark {
-    --background: 240 12% 4%;
-    --foreground: 0 0% 92%;
-    --card: 240 10% 9%;
-    --card-foreground: 0 0% 92%;
-    --popover: 240 10% 9%;
-    --popover-foreground: 0 0% 92%;
-    --primary: 263 70% 50%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 263 70% 50%;
-    --secondary: 240 10% 12%;
-    --secondary-foreground: 0 0% 85%;
-    --muted: 240 8% 14%;
-    --muted-foreground: 220 10% 58%;
-    --accent: 263 30% 14%;
-    --accent-foreground: 263 70% 70%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 160 84% 39%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 15%;
-    --info: 200 90% 55%;
-    --info-foreground: 0 0% 100%;
-    --border: 0 0% 100% / 0.10;
-    --input: 240 8% 14%;
-    --ring: 263 70% 50%;
-    --chart-1: 263 70% 50%;
-    --chart-2: 0 72% 51%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 160 84% 39%;
-    --chart-5: 290 70% 60%;
-    --sidebar-background: 240 12% 5%;
-    --sidebar-foreground: 0 0% 92%;
-    --sidebar-primary: 263 70% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 263 30% 14%;
-    --sidebar-accent-foreground: 263 70% 70%;
-    --sidebar-border: 0 0% 100% / 0.07;
-    --sidebar-ring: 263 70% 50%;
+    /* === Surface System === */
+    /* Background: #121218 → hsl(240 14% 8%) */
+    --background: 240 14% 8%;
+    /* Surface Primary (cards): #1E1E28 → hsl(240 12% 14%) */
+    --card: 240 12% 14%;
+    --popover: 240 12% 14%;
+    /* Surface Elevated: #262637 → hsl(240 14% 18%) */
 
-    /* Custom tokens for glass & nav - dark */
+    /* === Typography (WCAG AA) === */
+    /* Primary text: #E5E7EB → hsl(216 12% 91%) */
+    --foreground: 216 12% 91%;
+    --card-foreground: 216 12% 91%;
+    --popover-foreground: 216 12% 91%;
+
+    /* === Primary - controlled saturation === */
+    --primary: 255 60% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 255 60% 55%;
+
+    /* === Secondary / Muted / Accent === */
+    --secondary: 240 12% 17%;
+    /* Secondary text: #A1A1AA → hsl(240 4% 65%) */
+    --secondary-foreground: 240 4% 65%;
+    --muted: 240 10% 18%;
+    /* Muted text: #71717A → hsl(240 4% 46%) */
+    --muted-foreground: 240 4% 46%;
+    --accent: 255 20% 18%;
+    --accent-foreground: 255 50% 72%;
+
+    /* === Financial Colors - controlled saturation === */
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 70% 50%;
+    --warning-foreground: 38 70% 15%;
+    --info: 200 70% 55%;
+    --info-foreground: 0 0% 100%;
+
+    /* === Borders & Input === */
+    --border: 240 10% 22%;
+    --input: 240 10% 18%;
+    --ring: 255 60% 55%;
+
+    /* === Charts === */
+    --chart-1: 255 60% 55%;
+    --chart-2: 0 60% 50%;
+    --chart-3: 38 70% 50%;
+    --chart-4: 142 60% 45%;
+    --chart-5: 280 50% 58%;
+
+    /* === Sidebar === */
+    --sidebar-background: 240 14% 9%;
+    --sidebar-foreground: 216 12% 91%;
+    --sidebar-primary: 255 60% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 255 20% 18%;
+    --sidebar-accent-foreground: 255 50% 72%;
+    --sidebar-border: 240 10% 22%;
+    --sidebar-ring: 255 60% 55%;
+
+    /* === Glass & Nav tokens (dark) === */
     --glass-bg: none;
     --glass-border: none;
     --glass-shadow-color: none;
     --glass-hero-bg: none;
     --glass-hero-border: none;
     --glass-inset: none;
-    --nav-bg: 240 12% 6% / 0.80;
-    --nav-border: 0 0% 100% / 0.07;
-    --header-from: #6D28D9;
-    --header-to: #7C3AED;
-    --blob-purple: rgba(90,68,200,0.24);
-    --blob-teal: rgba(18,108,92,0.18);
-    --subtle-bg: 0 0% 100% / 0.05;
-    --inactive-color: 220 10% 45%;
+    --nav-bg: 240 14% 9%;
+    --nav-border: 240 10% 22%;
+    --header-from: #5B3DC7;
+    --header-to: #4C1FB8;
+    --blob-purple: rgba(91,61,199,0.14);
+    --blob-teal: rgba(18,108,92,0.10);
+    --subtle-bg: 240 10% 18%;
+    --inactive-color: 240 4% 46%;
   }
 }
 
@@ -224,39 +245,29 @@
 }
 
 @layer utilities {
-  /* Regular glass cards */
+  /* Regular glass cards - dark uses surface elevation, not transparency */
   .glass,
   .glass-subtle,
   .glass-card {
-    background: rgba(255,255,255,0.055);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: hsl(240 12% 14%);
+    border: 1px solid hsl(240 10% 22%);
     border-radius: 16px;
-    box-shadow: 
-      0 2px 24px rgba(0,0,0,0.35),
-      0 0 0 0.5px rgba(255,255,255,0.06),
-      inset 0 1px 0 rgba(255,255,255,0.08);
+    box-shadow: none;
   }
 
-  /* Heavy / hero glass cards */
+  /* Heavy / hero glass cards - elevated surface */
   .glass-heavy,
   .glass-glow {
-    background: rgba(255,255,255,0.075);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: hsl(240 14% 18%);
+    border: 1px solid hsl(240 10% 24%);
     border-radius: 16px;
-    box-shadow: 
-      0 4px 36px rgba(0,0,0,0.4),
-      0 0 0 0.5px rgba(255,255,255,0.08),
-      inset 0 1px 0 rgba(255,255,255,0.12);
+    box-shadow: none;
   }
 
   /* Light theme overrides */
-  :root .glass,
-  :root .glass-subtle,
-  :root .glass-card {
+  :root:not(.dark) .glass,
+  :root:not(.dark) .glass-subtle,
+  :root:not(.dark) .glass-card {
     background: hsl(var(--glass-bg));
     backdrop-filter: blur(20px) saturate(1.4);
     -webkit-backdrop-filter: blur(20px) saturate(1.4);
@@ -266,8 +277,8 @@
       inset 0 1px 0 hsl(var(--glass-inset));
   }
 
-  :root .glass-heavy,
-  :root .glass-glow {
+  :root:not(.dark) .glass-heavy,
+  :root:not(.dark) .glass-glow {
     background: hsl(var(--glass-hero-bg));
     backdrop-filter: blur(28px) saturate(1.5);
     -webkit-backdrop-filter: blur(28px) saturate(1.5);
@@ -320,25 +331,17 @@
     @apply text-primary;
   }
 
-  /* Subtle shadows - dark uses rgba, light uses tokens */
+  /* Subtle shadows - dark: no glow, light: tokens */
   .shadow-glow,
-  .shadow-glow-sm {
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
-  }
-  .shadow-glow-lg {
-    box-shadow: 0 4px 36px rgba(0,0,0,0.34);
-  }
-  .shadow-card {
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-  .shadow-card-hover {
-    box-shadow: 0 4px 36px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.09);
-  }
+  .shadow-glow-sm,
+  .shadow-glow-lg,
+  .shadow-card,
+  .shadow-card-hover,
   .shadow-float,
   .shadow-elevation-1,
   .shadow-elevation-2,
   .shadow-elevation-3 {
-    box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+    box-shadow: none;
   }
 
   /* Animations */
