@@ -25,7 +25,7 @@ export function AppHeader({
   onEnableNotifications,
 }: AppHeaderProps) {
   return (
-    <header className="relative z-10 bg-gradient-to-br from-primary to-primary/85">
+    <header className="relative z-10" style={{ background: 'linear-gradient(135deg, var(--header-from), var(--header-to))' }}>
       {/* Safe area padding */}
       <div className="pt-safe" />
       

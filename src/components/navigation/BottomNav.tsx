@@ -21,7 +21,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
       {/* Floating Add Button */}
       <button
         onClick={onAddClick}
-        className="fixed z-50 flex items-center justify-center active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-[58px] h-[58px] rounded-full bg-primary text-primary-foreground"
+        className="fixed z-50 flex items-center justify-center active:scale-90 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-[56px] h-[56px] rounded-full bg-primary text-primary-foreground shadow-lg"
         style={{ 
           bottom: 'calc(100px + env(safe-area-inset-bottom, 0px))',
           right: 'max(20px, env(safe-area-inset-right, 20px))',
@@ -33,7 +33,7 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
 
       {/* Bottom Navigation Bar */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-border"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border"
       >
         <div className="pb-safe">
           <div className="flex items-stretch h-[72px]">
