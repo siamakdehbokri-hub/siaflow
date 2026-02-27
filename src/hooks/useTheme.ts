@@ -35,7 +35,7 @@ export function useTheme() {
       // Update theme-color meta tag
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', resolved === 'dark' ? '#121218' : '#f7f9fb');
+        themeColorMeta.setAttribute('content', resolved === 'dark' ? '#0F0F17' : '#f7f9fb');
       }
     };
 
