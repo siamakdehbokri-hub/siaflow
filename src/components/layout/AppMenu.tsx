@@ -11,8 +11,6 @@ import {
   ArrowRightLeft, 
   ShieldCheck, 
   LifeBuoy,
-  Sparkles,
-  Wallet,
   LayoutDashboard,
   BarChart2,
   Settings2,
@@ -196,24 +194,7 @@ export function AppMenu({
             variant="primary"
           />
 
-          {/* Tools Section */}
-          <p className="text-xs font-semibold text-muted-foreground px-1 pt-4 pb-1">
-            ابزارها
-          </p>
-          
-          <MenuItem
-            icon={Sparkles}
-            label="تحلیل هوشمند AI"
-            description="گزارش‌های هوش مصنوعی از وضعیت مالی"
-            onClick={() => handleTabNavigation('reports')}
-          />
-          
-          <MenuItem
-            icon={Wallet}
-            label="بودجه‌بندی"
-            description="تنظیم سقف هزینه ماهانه"
-            onClick={() => handleNavigation('categories')}
-          />
+          {/* Tools Section - removed misleading items (AI & Budget were just redirects) */}
 
           {/* Admin Section - Only for admins */}
           {!adminLoading && isAdmin && (
