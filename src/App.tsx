@@ -12,6 +12,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
+const Terms = lazy(() => import("./pages/Terms"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -136,6 +138,8 @@ const App = () => (
                       </ProtectedRoute>
                     } 
                   />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

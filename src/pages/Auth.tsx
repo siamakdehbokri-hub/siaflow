@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Phone, Lock, User, Eye, EyeOff, Loader2, CheckCircle, ArrowLeft, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -317,6 +318,42 @@ const Auth = () => {
               )}
             </div>
 
+            {/* Forgot Password - Login only */}
+            {isLogin && (
+              <div className="text-left">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const authEmail = authMethod === 'email' 
+                      ? email.trim().toLowerCase()
+                      : phoneDigits ? `${phoneDigits}@siaflow.app` : '';
+                    if (!authEmail || !isInputValid) {
+                      toast.error(authMethod === 'phone' 
+                        ? 'ابتدا شماره موبایل خود را وارد کنید'
+                        : 'ابتدا ایمیل خود را وارد کنید'
+                      );
+                      return;
+                    }
+                    try {
+                      const { error } = await supabase.auth.resetPasswordForEmail(authEmail, {
+                        redirectTo: `${window.location.origin}/reset-password`,
+                      });
+                      if (error) {
+                        toast.error('خطا در ارسال لینک بازیابی');
+                      } else {
+                        toast.success('لینک بازیابی رمز عبور ارسال شد');
+                      }
+                    } catch {
+                      toast.error('خطای غیرمنتظره رخ داد');
+                    }
+                  }}
+                  className="text-xs text-primary hover:underline"
+                >
+                  رمز عبور را فراموش کردید؟
+                </button>
+              </div>
+            )}
+
             {/* Submit Button */}
             <Button
               type="submit"
@@ -362,7 +399,7 @@ const Auth = () => {
       {/* Footer */}
       <div className="bg-card text-center py-4 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          با ورود یا ثبت‌نام، قوانین و شرایط استفاده را می‌پذیرید
+          با ورود یا ثبت‌نام، <Link to="/terms" className="text-primary hover:underline">قوانین و شرایط استفاده</Link> را می‌پذیرید
         </p>
       </div>
     </div>
