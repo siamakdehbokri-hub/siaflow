@@ -95,6 +95,8 @@ export async function processQueue(): Promise<void> {
 
   // Auto-clear 'done' status after 3s
   if (remaining === 0) {
+    // Notify all complete callbacks to refresh data
+    completeCallbacks.forEach((fn) => fn());
     setTimeout(() => {
       if (currentStatus === 'done') emit('idle', 0);
     }, 3000);
