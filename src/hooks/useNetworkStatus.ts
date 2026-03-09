@@ -32,7 +32,7 @@ export function useNetworkStatus() {
 
   // Listen to sync status changes
   useEffect(() => {
-    return onSyncStatusChange((status, pending) => {
+    const unsub = onSyncStatusChange((status, pending) => {
       setSyncStatus(status);
       setPendingCount(pending);
     });
