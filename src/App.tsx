@@ -9,6 +9,7 @@ import { CurrencyProvider } from "@/hooks/useCurrency";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
 import { processQueue } from "@/lib/syncManager";
+import { persistQueryCache, restoreQueryCache } from "@/lib/queryPersist";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -21,13 +22,25 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 1,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 24 * 60 * 60 * 1000, // 24h – keep cached data longer for offline
+      retry: (failureCount) => {
+        // Don't retry when offline
+        if (!navigator.onLine) return false;
+        return failureCount < 2;
+      },
       refetchOnWindowFocus: false,
+      networkMode: 'offlineFirst', // Use cache when offline
+    },
+    mutations: {
+      networkMode: 'offlineFirst',
     },
   },
 });
+
+// Restore persisted cache & start persisting
+restoreQueryCache(queryClient);
+persistQueryCache(queryClient);
 
 // Minimal loading fallback
 const PageLoader = () => (
