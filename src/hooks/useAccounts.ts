@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { enqueueRequest } from '@/lib/offlineDb';
 
 export interface Account {
   id: string;
@@ -26,132 +27,140 @@ export interface Transfer {
   createdAt: string;
 }
 
+const ACCOUNTS_KEY = 'accounts';
+const TRANSFERS_KEY = 'transfers-list';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+function mapAccount(a: Record<string, unknown>): Account {
+  return {
+    id: a.id as string,
+    name: a.name as string,
+    type: a.type as Account['type'],
+    balance: Number(a.balance),
+    color: a.color as string,
+    icon: a.icon as string,
+    isDefault: a.is_default as boolean,
+    createdAt: a.created_at as string,
+    updatedAt: a.updated_at as string,
+  };
+}
+
+function mapTransfer(t: Record<string, unknown>): Transfer {
+  return {
+    id: t.id as string,
+    fromAccountId: t.from_account_id as string | null,
+    toAccountId: t.to_account_id as string | null,
+    toGoalId: t.to_goal_id as string | null,
+    amount: Number(t.amount),
+    description: t.description as string | null,
+    transferType: t.transfer_type as Transfer['transferType'],
+    createdAt: t.created_at as string,
+  };
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+
 export function useAccounts() {
   const { user } = useAuth();
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [transfers, setTransfers] = useState<Transfer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchAccounts = async () => {
-    if (!user) {
-      setAccounts([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
+  const { data: accounts = [], isLoading: loading } = useQuery({
+    queryKey: [ACCOUNTS_KEY, user?.id],
+    queryFn: async () => {
+      if (!user) return [];
       const { data, error } = await supabase
         .from('accounts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
-
       if (error) throw error;
+      return (data || []).map(mapAccount);
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+  });
 
-      const mappedData: Account[] = (data || []).map(a => ({
-        id: a.id,
-        name: a.name,
-        type: a.type as Account['type'],
-        balance: Number(a.balance),
-        color: a.color,
-        icon: a.icon,
-        isDefault: a.is_default,
-        createdAt: a.created_at,
-        updatedAt: a.updated_at,
-      }));
-
-      setAccounts(mappedData);
-    } catch (error: unknown) {
-      console.error('Error fetching accounts:', error);
-      toast.error('خطا در بارگذاری حساب‌ها');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTransfers = async () => {
-    if (!user) {
-      setTransfers([]);
-      return;
-    }
-
-    try {
+  const { data: transfers = [] } = useQuery({
+    queryKey: [TRANSFERS_KEY, user?.id],
+    queryFn: async () => {
+      if (!user) return [];
       const { data, error } = await supabase
         .from('transfers')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (error) throw error;
+      return (data || []).map(mapTransfer);
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+  });
 
-      const mappedData: Transfer[] = (data || []).map(t => ({
-        id: t.id,
-        fromAccountId: t.from_account_id,
-        toAccountId: t.to_account_id,
-        toGoalId: t.to_goal_id,
-        amount: Number(t.amount),
-        description: t.description,
-        transferType: t.transfer_type as Transfer['transferType'],
-        createdAt: t.created_at,
-      }));
-
-      setTransfers(mappedData);
-    } catch (error: unknown) {
-      console.error('Error fetching transfers:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAccounts();
-    fetchTransfers();
-  }, [user]);
-
-  const addAccount = async (account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('accounts')
-        .insert({
-          user_id: user.id,
-          name: account.name,
-          type: account.type,
-          balance: account.balance,
-          color: account.color,
-          icon: account.icon,
-          is_default: account.isDefault,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const newAccount: Account = {
-        id: data.id,
-        name: data.name,
-        type: data.type as Account['type'],
-        balance: Number(data.balance),
-        color: data.color,
-        icon: data.icon,
-        isDefault: data.is_default,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
+  const addAccountMutation = useMutation({
+    mutationFn: async (account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>) => {
+      if (!user) throw new Error('Not authenticated');
+      const dbRow = {
+        user_id: user.id,
+        name: account.name,
+        type: account.type,
+        balance: account.balance,
+        color: account.color,
+        icon: account.icon,
+        is_default: account.isDefault,
       };
 
-      setAccounts(prev => [...prev, newAccount]);
-      toast.success('حساب با موفقیت ایجاد شد');
-      return newAccount;
-    } catch (error: unknown) {
-      console.error('Error adding account:', error);
-      toast.error('خطا در ایجاد حساب');
-    }
-  };
+      try {
+        const { data, error } = await supabase
+          .from('accounts')
+          .insert(dbRow)
+          .select()
+          .single();
+        if (error) throw error;
+        return { account: mapAccount(data), queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/accounts?select=*`,
+            method: 'POST',
+            payload: dbRow,
+            headers: { ...headers, 'Prefer': 'return=representation' },
+          });
+          const optimistic: Account = {
+            ...account,
+            id: `offline-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          return { account: optimistic, queued: true };
+        }
+        throw err;
+      }
+    },
+    onSuccess: ({ account: newAccount, queued }) => {
+      queryClient.setQueryData<Account[]>(
+        [ACCOUNTS_KEY, user?.id],
+        (old = []) => [...old, newAccount]
+      );
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'حساب با موفقیت ایجاد شد');
+    },
+    onError: () => toast.error('خطا در ایجاد حساب'),
+  });
 
-  const updateAccount = async (id: string, updates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>>) => {
-    if (!user) return;
-
-    try {
+  const updateAccountMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>> }) => {
+      if (!user) throw new Error('Not authenticated');
       const updateData: Record<string, string | number | boolean | undefined> = {};
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.type !== undefined) updateData.type = updates.type;
@@ -160,43 +169,72 @@ export function useAccounts() {
       if (updates.icon !== undefined) updateData.icon = updates.icon;
       if (updates.isDefault !== undefined) updateData.is_default = updates.isDefault;
 
-      const { error } = await supabase
-        .from('accounts')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id);
+      try {
+        const { error } = await supabase
+          .from('accounts')
+          .update(updateData)
+          .eq('id', id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { id, updates, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/accounts?id=eq.${id}&user_id=eq.${user.id}`,
+            method: 'PATCH',
+            payload: updateData,
+            headers,
+          });
+          return { id, updates, queued: true };
+        }
+        throw err;
+      }
+    },
+    onSuccess: ({ id, updates, queued }) => {
+      queryClient.setQueryData<Account[]>(
+        [ACCOUNTS_KEY, user?.id],
+        (old = []) => old.map(a => a.id === id ? { ...a, ...updates } : a)
+      );
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'حساب با موفقیت بروزرسانی شد');
+    },
+    onError: () => toast.error('خطا در بروزرسانی حساب'),
+  });
 
-      if (error) throw error;
-
-      setAccounts(prev => prev.map(a => 
-        a.id === id ? { ...a, ...updates } : a
-      ));
-      toast.success('حساب با موفقیت بروزرسانی شد');
-    } catch (error: unknown) {
-      console.error('Error updating account:', error);
-      toast.error('خطا در بروزرسانی حساب');
-    }
-  };
-
-  const deleteAccount = async (id: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('accounts')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setAccounts(prev => prev.filter(a => a.id !== id));
-      toast.success('حساب با موفقیت حذف شد');
-    } catch (error: unknown) {
-      console.error('Error deleting account:', error);
-      toast.error('خطا در حذف حساب');
-    }
-  };
+  const deleteAccountMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error('Not authenticated');
+      try {
+        const { error } = await supabase
+          .from('accounts')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { id, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/accounts?id=eq.${id}&user_id=eq.${user.id}`,
+            method: 'DELETE',
+            payload: null,
+            headers,
+          });
+          return { id, queued: true };
+        }
+        throw err;
+      }
+    },
+    onSuccess: ({ id, queued }) => {
+      queryClient.setQueryData<Account[]>(
+        [ACCOUNTS_KEY, user?.id],
+        (old = []) => old.filter(a => a.id !== id)
+      );
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'حساب با موفقیت حذف شد');
+    },
+    onError: () => toast.error('خطا در حذف حساب'),
+  });
 
   const transferBetweenAccounts = async (
     fromAccountId: string,
@@ -205,7 +243,6 @@ export function useAccounts() {
     description?: string
   ) => {
     if (!user) return;
-
     try {
       const { error } = await supabase.rpc('transfer_between_accounts', {
         _user_id: user.id,
@@ -214,24 +251,46 @@ export function useAccounts() {
         _amount: amount,
         _description: description || null,
       });
-
       if (error) throw error;
 
-      setAccounts(prev => prev.map(a => {
-        if (a.id === fromAccountId) return { ...a, balance: a.balance - amount };
-        if (a.id === toAccountId) return { ...a, balance: a.balance + amount };
-        return a;
-      }));
-
-      await fetchTransfers();
+      queryClient.setQueryData<Account[]>(
+        [ACCOUNTS_KEY, user?.id],
+        (old = []) => old.map(a => {
+          if (a.id === fromAccountId) return { ...a, balance: a.balance - amount };
+          if (a.id === toAccountId) return { ...a, balance: a.balance + amount };
+          return a;
+        })
+      );
+      queryClient.invalidateQueries({ queryKey: [TRANSFERS_KEY, user?.id] });
       toast.success('انتقال با موفقیت انجام شد');
-    } catch (error: unknown) {
-      console.error('Error transferring:', error);
-      const errorMsg = error instanceof Error ? error.message : '';
-      const msg = errorMsg.includes('Insufficient balance')
-        ? 'موجودی حساب مبدا کافی نیست'
-        : 'خطا در انتقال';
-      toast.error(msg);
+    } catch (err) {
+      if (!navigator.onLine || (err instanceof TypeError)) {
+        const headers = await getAuthHeaders();
+        await enqueueRequest({
+          endpoint: `${SUPABASE_URL}/rest/v1/rpc/transfer_between_accounts`,
+          method: 'POST',
+          payload: {
+            _user_id: user.id,
+            _from_account_id: fromAccountId,
+            _to_account_id: toAccountId,
+            _amount: amount,
+            _description: description || null,
+          },
+          headers,
+        });
+        queryClient.setQueryData<Account[]>(
+          [ACCOUNTS_KEY, user?.id],
+          (old = []) => old.map(a => {
+            if (a.id === fromAccountId) return { ...a, balance: a.balance - amount };
+            if (a.id === toAccountId) return { ...a, balance: a.balance + amount };
+            return a;
+          })
+        );
+        toast.success('ذخیره آفلاین شد.');
+        return;
+      }
+      const errorMsg = err instanceof Error ? err.message : '';
+      toast.error(errorMsg.includes('Insufficient balance') ? 'موجودی حساب مبدا کافی نیست' : 'خطا در انتقال');
     }
   };
 
@@ -240,9 +299,8 @@ export function useAccounts() {
     toGoalId: string,
     amount: number,
     description?: string
-  ) => {
+  ): Promise<boolean> => {
     if (!user) return false;
-
     try {
       const { error } = await supabase.rpc('transfer_to_goal', {
         _user_id: user.id,
@@ -251,23 +309,43 @@ export function useAccounts() {
         _amount: amount,
         _description: description || null,
       });
-
       if (error) throw error;
 
-      setAccounts(prev => prev.map(a => 
-        a.id === fromAccountId ? { ...a, balance: a.balance - amount } : a
-      ));
-
-      await fetchTransfers();
+      queryClient.setQueryData<Account[]>(
+        [ACCOUNTS_KEY, user?.id],
+        (old = []) => old.map(a =>
+          a.id === fromAccountId ? { ...a, balance: a.balance - amount } : a
+        )
+      );
+      queryClient.invalidateQueries({ queryKey: [TRANSFERS_KEY, user?.id] });
       toast.success('انتقال به هدف پس‌انداز انجام شد');
       return true;
-    } catch (error: unknown) {
-      console.error('Error transferring to goal:', error);
-      const errorMsg = error instanceof Error ? error.message : '';
-      const msg = errorMsg.includes('Insufficient balance')
-        ? 'موجودی حساب مبدا کافی نیست'
-        : 'خطا در انتقال';
-      toast.error(msg);
+    } catch (err) {
+      if (!navigator.onLine || (err instanceof TypeError)) {
+        const headers = await getAuthHeaders();
+        await enqueueRequest({
+          endpoint: `${SUPABASE_URL}/rest/v1/rpc/transfer_to_goal`,
+          method: 'POST',
+          payload: {
+            _user_id: user.id,
+            _from_account_id: fromAccountId,
+            _to_goal_id: toGoalId,
+            _amount: amount,
+            _description: description || null,
+          },
+          headers,
+        });
+        queryClient.setQueryData<Account[]>(
+          [ACCOUNTS_KEY, user?.id],
+          (old = []) => old.map(a =>
+            a.id === fromAccountId ? { ...a, balance: a.balance - amount } : a
+          )
+        );
+        toast.success('ذخیره آفلاین شد.');
+        return true;
+      }
+      const errorMsg = err instanceof Error ? err.message : '';
+      toast.error(errorMsg.includes('Insufficient balance') ? 'موجودی حساب مبدا کافی نیست' : 'خطا در انتقال');
       return false;
     }
   };
@@ -278,12 +356,16 @@ export function useAccounts() {
     accounts,
     transfers,
     loading,
-    addAccount,
-    updateAccount,
-    deleteAccount,
+    addAccount: (a: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>) => addAccountMutation.mutateAsync(a),
+    updateAccount: (id: string, updates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>>) =>
+      updateAccountMutation.mutateAsync({ id, updates }),
+    deleteAccount: (id: string) => deleteAccountMutation.mutateAsync(id),
     transferBetweenAccounts,
     transferToGoal,
     totalBalance,
-    refetch: fetchAccounts,
+    refetch: () => {
+      queryClient.invalidateQueries({ queryKey: [ACCOUNTS_KEY, user?.id] });
+      queryClient.invalidateQueries({ queryKey: [TRANSFERS_KEY, user?.id] });
+    },
   };
 }

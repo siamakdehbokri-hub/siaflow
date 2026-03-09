@@ -11,13 +11,15 @@ import {
 } from './offlineDb';
 
 const MAX_RETRIES = 5;
-const BASE_DELAY_MS = 1000; // 1s, doubles each retry
+const BASE_DELAY_MS = 1000;
 
 export type SyncStatus = 'idle' | 'syncing' | 'done' | 'error';
 
 type SyncListener = (status: SyncStatus, pending: number) => void;
+type SyncCompleteCallback = () => void;
 
 const listeners = new Set<SyncListener>();
+const completeCallbacks = new Set<SyncCompleteCallback>();
 let currentStatus: SyncStatus = 'idle';
 let isSyncing = false;
 
@@ -33,6 +35,12 @@ function emit(status: SyncStatus, pending: number) {
 
 export function getSyncStatus() {
   return currentStatus;
+}
+
+/** Register a callback that fires when sync completes successfully */
+export function onSyncComplete(fn: SyncCompleteCallback) {
+  completeCallbacks.add(fn);
+  return () => completeCallbacks.delete(fn);
 }
 
 /** Process the offline queue sequentially */
@@ -87,6 +95,8 @@ export async function processQueue(): Promise<void> {
 
   // Auto-clear 'done' status after 3s
   if (remaining === 0) {
+    // Notify all complete callbacks to refresh data
+    completeCallbacks.forEach((fn) => fn());
     setTimeout(() => {
       if (currentStatus === 'done') emit('idle', 0);
     }, 3000);
