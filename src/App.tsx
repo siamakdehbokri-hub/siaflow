@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
+import { processQueue } from "@/lib/syncManager";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
