@@ -61,7 +61,6 @@ function ThemeInitializer() {
 
     applyTheme();
 
-    // Listen for OS theme changes (relevant when theme is 'system')
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
       const stored = localStorage.getItem('app-theme');
@@ -70,7 +69,19 @@ function ThemeInitializer() {
       }
     };
     mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
+
+    // Listen for SW background-sync messages
+    const onSwMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_REQUESTED') {
+        processQueue();
+      }
+    };
+    navigator.serviceWorker?.addEventListener('message', onSwMessage);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handler);
+      navigator.serviceWorker?.removeEventListener('message', onSwMessage);
+    };
   }, []);
 
   return null;
