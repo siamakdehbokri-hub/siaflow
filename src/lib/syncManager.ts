@@ -37,6 +37,12 @@ export function getSyncStatus() {
   return currentStatus;
 }
 
+/** Register a callback that fires when sync completes successfully */
+export function onSyncComplete(fn: SyncCompleteCallback) {
+  completeCallbacks.add(fn);
+  return () => completeCallbacks.delete(fn);
+}
+
 /** Process the offline queue sequentially */
 export async function processQueue(): Promise<void> {
   if (isSyncing) return; // prevent concurrent runs
