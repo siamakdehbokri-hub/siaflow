@@ -120,6 +120,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeInitializer />
+        <NetworkStatusIndicator />
         <Toaster />
         <Sonner />
         <BrowserRouter>
