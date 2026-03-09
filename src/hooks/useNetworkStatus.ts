@@ -36,6 +36,7 @@ export function useNetworkStatus() {
       setSyncStatus(status);
       setPendingCount(pending);
     });
+    return () => { unsub(); };
   }, []);
 
   // Initial pending count
