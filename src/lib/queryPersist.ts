@@ -13,7 +13,7 @@ export function persistQueryCache(queryClient: QueryClient) {
   const unsubscribe = queryClient.getQueryCache().subscribe(() => {
     try {
       const queries = queryClient.getQueryCache().getAll();
-      const serializable: Array<{ key: unknown[]; data: unknown; updatedAt: number }> = [];
+      const serializable: Array<{ key: readonly unknown[]; data: unknown; updatedAt: number }> = [];
 
       for (const query of queries) {
         // Only persist successful queries with data
