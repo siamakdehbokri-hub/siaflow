@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { enqueueRequest } from '@/lib/offlineDb';
 
 export interface SavingGoal {
   id: string;
@@ -25,6 +26,8 @@ export interface GoalTransaction {
 }
 
 const GOALS_KEY = 'saving-goals';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 function mapGoal(g: Record<string, unknown>): SavingGoal {
   return {
@@ -38,6 +41,17 @@ function mapGoal(g: Record<string, unknown>): SavingGoal {
     createdAt: g.created_at as string,
     updatedAt: g.updated_at as string,
   };
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
 }
 
 export function useSavingGoals() {
@@ -63,28 +77,51 @@ export function useSavingGoals() {
   const addMutation = useMutation({
     mutationFn: async (goal: Omit<SavingGoal, 'id' | 'createdAt' | 'updatedAt' | 'currentAmount'>) => {
       if (!user) throw new Error('Not authenticated');
-      const { data, error } = await supabase
-        .from('saving_goals')
-        .insert({
-          user_id: user.id,
-          name: goal.name,
-          target_amount: goal.targetAmount,
-          current_amount: 0,
-          color: goal.color,
-          icon: goal.icon,
-          deadline: goal.deadline || null,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      return mapGoal(data);
+      const dbRow = {
+        user_id: user.id,
+        name: goal.name,
+        target_amount: goal.targetAmount,
+        current_amount: 0,
+        color: goal.color,
+        icon: goal.icon,
+        deadline: goal.deadline || null,
+      };
+
+      try {
+        const { data, error } = await supabase
+          .from('saving_goals')
+          .insert(dbRow)
+          .select()
+          .single();
+        if (error) throw error;
+        return { goal: mapGoal(data), queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?select=*`,
+            method: 'POST',
+            payload: dbRow,
+            headers: { ...headers, 'Prefer': 'return=representation' },
+          });
+          const optimistic: SavingGoal = {
+            ...goal,
+            id: `offline-${Date.now()}`,
+            currentAmount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          return { goal: optimistic, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (newGoal) => {
+    onSuccess: ({ goal: newGoal, queued }) => {
       queryClient.setQueryData<SavingGoal[]>(
         [GOALS_KEY, user?.id],
         (old = []) => [newGoal, ...old]
       );
-      toast.success('هدف پس‌انداز با موفقیت ایجاد شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'هدف پس‌انداز با موفقیت ایجاد شد');
     },
     onError: () => toast.error('خطا در ایجاد هدف'),
   });
@@ -92,33 +129,62 @@ export function useSavingGoals() {
   const updateAmountMutation = useMutation({
     mutationFn: async ({ goalId, amount, type, note }: { goalId: string; amount: number; type: 'deposit' | 'withdraw'; note?: string }) => {
       if (!user) throw new Error('Not authenticated');
-      const { data, error } = await supabase.rpc('update_goal_amount', {
-        _user_id: user.id,
-        _goal_id: goalId,
-        _amount: amount,
-        _type: type,
-        _note: note || null,
-      });
-      if (error) throw error;
-      const result = data as { new_amount?: number } | null;
-      const goal = goals.find(g => g.id === goalId);
-      const newAmount = result?.new_amount ?? (type === 'deposit'
-        ? (goal?.currentAmount || 0) + amount
-        : Math.max(0, (goal?.currentAmount || 0) - amount));
-      return { goalId, newAmount: Number(newAmount), type, targetAmount: goal?.targetAmount || 0 };
+
+      try {
+        const { data, error } = await supabase.rpc('update_goal_amount', {
+          _user_id: user.id,
+          _goal_id: goalId,
+          _amount: amount,
+          _type: type,
+          _note: note || null,
+        });
+        if (error) throw error;
+        const result = data as { new_amount?: number } | null;
+        const goal = goals.find(g => g.id === goalId);
+        const newAmount = result?.new_amount ?? (type === 'deposit'
+          ? (goal?.currentAmount || 0) + amount
+          : Math.max(0, (goal?.currentAmount || 0) - amount));
+        return { goalId, newAmount: Number(newAmount), type, targetAmount: goal?.targetAmount || 0, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/rpc/update_goal_amount`,
+            method: 'POST',
+            payload: {
+              _user_id: user.id,
+              _goal_id: goalId,
+              _amount: amount,
+              _type: type,
+              _note: note || null,
+            },
+            headers,
+          });
+          const goal = goals.find(g => g.id === goalId);
+          const newAmount = type === 'deposit'
+            ? (goal?.currentAmount || 0) + amount
+            : Math.max(0, (goal?.currentAmount || 0) - amount);
+          return { goalId, newAmount, type, targetAmount: goal?.targetAmount || 0, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: ({ goalId, newAmount, type, targetAmount }) => {
+    onSuccess: ({ goalId, newAmount, type, targetAmount, queued }) => {
       queryClient.setQueryData<SavingGoal[]>(
         [GOALS_KEY, user?.id],
         (old = []) => old.map(g => g.id === goalId ? { ...g, currentAmount: newAmount } : g)
       );
-      const progress = (newAmount / targetAmount) * 100;
-      if (progress >= 100) {
-        toast.success('تبریک! به هدف پس‌انداز خود رسیدید!');
-      } else if (progress >= 90) {
-        toast.success('تبریک! شما به هدفتان نزدیک شدید!');
+      if (queued) {
+        toast.success('ذخیره آفلاین شد.');
       } else {
-        toast.success(type === 'deposit' ? 'واریز با موفقیت ثبت شد' : 'برداشت با موفقیت ثبت شد');
+        const progress = (newAmount / targetAmount) * 100;
+        if (progress >= 100) {
+          toast.success('تبریک! به هدف پس‌انداز خود رسیدید!');
+        } else if (progress >= 90) {
+          toast.success('تبریک! شما به هدفتان نزدیک شدید!');
+        } else {
+          toast.success(type === 'deposit' ? 'واریز با موفقیت ثبت شد' : 'برداشت با موفقیت ثبت شد');
+        }
       }
     },
     onError: () => toast.error('خطا در ثبت تراکنش'),
@@ -127,20 +193,34 @@ export function useSavingGoals() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase
-        .from('saving_goals')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      return id;
+      try {
+        const { error } = await supabase
+          .from('saving_goals')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { id, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?id=eq.${id}&user_id=eq.${user.id}`,
+            method: 'DELETE',
+            payload: null,
+            headers,
+          });
+          return { id, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (id) => {
+    onSuccess: ({ id, queued }) => {
       queryClient.setQueryData<SavingGoal[]>(
         [GOALS_KEY, user?.id],
         (old = []) => old.filter(g => g.id !== id)
       );
-      toast.success('هدف پس‌انداز با موفقیت حذف شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'هدف پس‌انداز با موفقیت حذف شد');
     },
     onError: () => toast.error('خطا در حذف هدف'),
   });

@@ -3,8 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/types/expense';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { enqueueRequest } from '@/lib/offlineDb';
 
 const CATEGORIES_KEY = 'categories';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 function mapRow(c: Record<string, unknown>): Category {
   return {
@@ -17,6 +20,17 @@ function mapRow(c: Record<string, unknown>): Category {
     type: (c.type as 'expense' | 'income' | 'saving') || 'expense',
     subcategories: (c.subcategories as string[]) || [],
   };
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
 }
 
 export function useCategories() {
@@ -45,28 +59,50 @@ export function useCategories() {
       const subcats = category.subcategories
         ? category.subcategories.map(s => typeof s === 'string' ? s : (s as { name: string }).name)
         : [];
-      const { data, error } = await supabase
-        .from('categories')
-        .insert({
-          user_id: user.id,
-          name: category.name,
-          icon: category.icon,
-          color: category.color,
-          budget: category.budget || null,
-          subcategories: subcats,
-          type: category.type || (category.budget ? 'expense' : 'income'),
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      return mapRow(data);
+      const dbRow = {
+        user_id: user.id,
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+        budget: category.budget || null,
+        subcategories: subcats,
+        type: category.type || (category.budget ? 'expense' : 'income'),
+      };
+
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .insert(dbRow)
+          .select()
+          .single();
+        if (error) throw error;
+        return { cat: mapRow(data), queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/categories?select=*`,
+            method: 'POST',
+            payload: dbRow,
+            headers: { ...headers, 'Prefer': 'return=representation' },
+          });
+          const optimistic: Category = {
+            ...category,
+            id: `offline-${Date.now()}`,
+            subcategories: subcats,
+            spent: 0,
+          };
+          return { cat: optimistic, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (newCat) => {
+    onSuccess: ({ cat, queued }) => {
       queryClient.setQueryData<Category[]>(
         [CATEGORIES_KEY, user?.id],
-        (old = []) => [...old, newCat]
+        (old = []) => [...old, cat]
       );
-      toast.success('دسته‌بندی با موفقیت اضافه شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'دسته‌بندی با موفقیت اضافه شد');
     },
     onError: (error: Error) => {
       console.error('Error adding category:', error);
@@ -80,27 +116,43 @@ export function useCategories() {
       const subcats = category.subcategories
         ? category.subcategories.map(s => typeof s === 'string' ? s : (s as { name: string }).name)
         : [];
-      const { error } = await supabase
-        .from('categories')
-        .update({
-          name: category.name,
-          icon: category.icon,
-          color: category.color,
-          budget: category.budget || null,
-          subcategories: subcats,
-          type: category.type || (category.budget ? 'expense' : 'income'),
-        })
-        .eq('id', category.id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      return { ...category, subcategories: subcats };
+      const dbRow = {
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+        budget: category.budget || null,
+        subcategories: subcats,
+        type: category.type || (category.budget ? 'expense' : 'income'),
+      };
+
+      try {
+        const { error } = await supabase
+          .from('categories')
+          .update(dbRow)
+          .eq('id', category.id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { cat: { ...category, subcategories: subcats }, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/categories?id=eq.${category.id}&user_id=eq.${user.id}`,
+            method: 'PATCH',
+            payload: dbRow,
+            headers,
+          });
+          return { cat: { ...category, subcategories: subcats }, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (updated) => {
+    onSuccess: ({ cat, queued }) => {
       queryClient.setQueryData<Category[]>(
         [CATEGORIES_KEY, user?.id],
-        (old = []) => old.map(c => c.id === updated.id ? updated : c)
+        (old = []) => old.map(c => c.id === cat.id ? cat : c)
       );
-      toast.success('دسته‌بندی با موفقیت ویرایش شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'دسته‌بندی با موفقیت ویرایش شد');
     },
     onError: (error: Error) => {
       console.error('Error updating category:', error);
@@ -111,20 +163,35 @@ export function useCategories() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      return id;
+
+      try {
+        const { error } = await supabase
+          .from('categories')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { id, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&user_id=eq.${user.id}`,
+            method: 'DELETE',
+            payload: null,
+            headers,
+          });
+          return { id, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (id) => {
+    onSuccess: ({ id, queued }) => {
       queryClient.setQueryData<Category[]>(
         [CATEGORIES_KEY, user?.id],
         (old = []) => old.filter(c => c.id !== id)
       );
-      toast.success('دسته‌بندی با موفقیت حذف شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'دسته‌بندی با موفقیت حذف شد');
     },
     onError: (error: Error) => {
       console.error('Error deleting category:', error);

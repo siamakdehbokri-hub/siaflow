@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { enqueueRequest } from '@/lib/offlineDb';
 
 export interface Debt {
   id: string;
@@ -16,6 +17,8 @@ export interface Debt {
 }
 
 const DEBTS_KEY = 'debts';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 function mapDebt(d: Record<string, unknown>): Debt {
   return {
@@ -29,6 +32,17 @@ function mapDebt(d: Record<string, unknown>): Debt {
     createdAt: d.created_at as string,
     updatedAt: d.updated_at as string,
   };
+}
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
 }
 
 export function useDebts() {
@@ -54,28 +68,50 @@ export function useDebts() {
   const addMutation = useMutation({
     mutationFn: async (debt: Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>) => {
       if (!user) throw new Error('Not authenticated');
-      const { data, error } = await supabase
-        .from('debts')
-        .insert({
-          user_id: user.id,
-          name: debt.name,
-          total_amount: debt.totalAmount,
-          paid_amount: debt.paidAmount,
-          creditor: debt.creditor,
-          reason: debt.reason || null,
-          due_date: debt.dueDate || null,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      return mapDebt(data);
+      const dbRow = {
+        user_id: user.id,
+        name: debt.name,
+        total_amount: debt.totalAmount,
+        paid_amount: debt.paidAmount,
+        creditor: debt.creditor,
+        reason: debt.reason || null,
+        due_date: debt.dueDate || null,
+      };
+
+      try {
+        const { data, error } = await supabase
+          .from('debts')
+          .insert(dbRow)
+          .select()
+          .single();
+        if (error) throw error;
+        return { debt: mapDebt(data), queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/debts?select=*`,
+            method: 'POST',
+            payload: dbRow,
+            headers: { ...headers, 'Prefer': 'return=representation' },
+          });
+          const optimistic: Debt = {
+            ...debt,
+            id: `offline-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          return { debt: optimistic, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (newDebt) => {
+    onSuccess: ({ debt: newDebt, queued }) => {
       queryClient.setQueryData<Debt[]>(
         [DEBTS_KEY, user?.id],
         (old = []) => [newDebt, ...old]
       );
-      toast.success('بدهی با موفقیت ثبت شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'بدهی با موفقیت ثبت شد');
     },
     onError: () => toast.error('خطا در ثبت بدهی'),
   });
@@ -91,20 +127,34 @@ export function useDebts() {
       if (updates.reason !== undefined) updateData.reason = updates.reason || null;
       if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate || null;
 
-      const { error } = await supabase
-        .from('debts')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      return { id, updates };
+      try {
+        const { error } = await supabase
+          .from('debts')
+          .update(updateData)
+          .eq('id', id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { id, updates, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,
+            method: 'PATCH',
+            payload: updateData,
+            headers,
+          });
+          return { id, updates, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: ({ id, updates }) => {
+    onSuccess: ({ id, updates, queued }) => {
       queryClient.setQueryData<Debt[]>(
         [DEBTS_KEY, user?.id],
         (old = []) => old.map(d => d.id === id ? { ...d, ...updates } : d)
       );
-      toast.success('بدهی با موفقیت بروزرسانی شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'بدهی با موفقیت بروزرسانی شد');
     },
     onError: () => toast.error('خطا در بروزرسانی بدهی'),
   });
@@ -112,20 +162,34 @@ export function useDebts() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase
-        .from('debts')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-      if (error) throw error;
-      return id;
+      try {
+        const { error } = await supabase
+          .from('debts')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+        return { id, queued: false };
+      } catch (err) {
+        if (!navigator.onLine || (err instanceof TypeError)) {
+          const headers = await getAuthHeaders();
+          await enqueueRequest({
+            endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,
+            method: 'DELETE',
+            payload: null,
+            headers,
+          });
+          return { id, queued: true };
+        }
+        throw err;
+      }
     },
-    onSuccess: (id) => {
+    onSuccess: ({ id, queued }) => {
       queryClient.setQueryData<Debt[]>(
         [DEBTS_KEY, user?.id],
         (old = []) => old.filter(d => d.id !== id)
       );
-      toast.success('بدهی با موفقیت حذف شد');
+      toast.success(queued ? 'ذخیره آفلاین شد.' : 'بدهی با موفقیت حذف شد');
     },
     onError: () => toast.error('خطا در حذف بدهی'),
   });
