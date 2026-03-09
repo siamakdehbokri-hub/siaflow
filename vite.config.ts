@@ -15,35 +15,17 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "script-defer", // Defer SW registration to avoid render-blocking
-      includeAssets: ["favicon.ico", "robots.txt"],
-      manifest: false, // Using external manifest.json
-      workbox: {
+      injectRegister: false, // We register our custom SW manually
+      includeAssets: ["favicon.ico", "robots.txt", "favicon.png"],
+      manifest: false,
+      strategies: "injectManifest",
+      srcDir: "public",
+      filename: "sw.js",
+      injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.cdnfonts\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "font-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "api-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutes
-              },
-            },
-          },
-        ],
+      },
+      workbox: {
+        navigateFallbackDenylist: [/^\/~oauth/],
       },
     }),
   ].filter(Boolean),

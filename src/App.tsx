@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
+import { processQueue } from "@/lib/syncManager";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -59,7 +61,6 @@ function ThemeInitializer() {
 
     applyTheme();
 
-    // Listen for OS theme changes (relevant when theme is 'system')
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
       const stored = localStorage.getItem('app-theme');
@@ -68,7 +69,19 @@ function ThemeInitializer() {
       }
     };
     mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
+
+    // Listen for SW background-sync messages
+    const onSwMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_REQUESTED') {
+        processQueue();
+      }
+    };
+    navigator.serviceWorker?.addEventListener('message', onSwMessage);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handler);
+      navigator.serviceWorker?.removeEventListener('message', onSwMessage);
+    };
   }, []);
 
   return null;
@@ -107,6 +120,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeInitializer />
+        <NetworkStatusIndicator />
         <Toaster />
         <Sonner />
         <BrowserRouter>
