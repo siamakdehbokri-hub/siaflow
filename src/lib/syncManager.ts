@@ -11,13 +11,15 @@ import {
 } from './offlineDb';
 
 const MAX_RETRIES = 5;
-const BASE_DELAY_MS = 1000; // 1s, doubles each retry
+const BASE_DELAY_MS = 1000;
 
 export type SyncStatus = 'idle' | 'syncing' | 'done' | 'error';
 
 type SyncListener = (status: SyncStatus, pending: number) => void;
+type SyncCompleteCallback = () => void;
 
 const listeners = new Set<SyncListener>();
+const completeCallbacks = new Set<SyncCompleteCallback>();
 let currentStatus: SyncStatus = 'idle';
 let isSyncing = false;
 
