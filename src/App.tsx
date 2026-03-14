@@ -83,9 +83,9 @@ function ThemeInitializer() {
     };
     mediaQuery.addEventListener('change', handler);
 
-    // Listen for SW background-sync messages
+    // Listen for SW sync-complete messages to process queue
     const onSwMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'SYNC_REQUESTED') {
+      if (event.data?.type === 'SYNC_COMPLETE') {
         processQueue();
       }
     };
