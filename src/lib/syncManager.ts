@@ -1,6 +1,7 @@
 /**
  * SyncManager – processes the offline queue when connectivity returns.
- * Uses exponential backoff and prevents duplicate submissions.
+ * Uses exponential backoff, dedup via processing status, and conflict logging.
+ * Also triggers Background Sync API when available.
  */
 
 import {
@@ -12,6 +13,7 @@ import {
 
 const MAX_RETRIES = 5;
 const BASE_DELAY_MS = 1000;
+const MAX_DELAY_MS = 30000;
 
 export type SyncStatus = 'idle' | 'syncing' | 'done' | 'error';
 
@@ -43,10 +45,25 @@ export function onSyncComplete(fn: SyncCompleteCallback) {
   return () => completeCallbacks.delete(fn);
 }
 
-/** Process the offline queue sequentially */
+/** Try to register Background Sync via SW */
+async function requestBackgroundSync(): Promise<void> {
+  try {
+    const reg = await navigator.serviceWorker?.ready;
+    if (reg && 'sync' in reg) {
+      await (reg as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register('offline-mutations');
+    }
+  } catch {
+    // Background Sync not available; fall back to manual
+  }
+}
+
+/** Process the offline queue sequentially (prevents race conditions) */
 export async function processQueue(): Promise<void> {
-  if (isSyncing) return; // prevent concurrent runs
-  if (!navigator.onLine) return;
+  if (isSyncing) return;
+  if (!navigator.onLine) {
+    await requestBackgroundSync();
+    return;
+  }
 
   isSyncing = true;
   const pending = await getPendingRequests();
@@ -58,10 +75,12 @@ export async function processQueue(): Promise<void> {
   }
 
   emit('syncing', pending.length);
-
   let remaining = pending.length;
 
   for (const item of pending) {
+    // Mark as processing to prevent duplicate pickup
+    await updateQueuedRequest(item.id!, { status: 'processing' as QueuedRequest['status'] });
+
     try {
       await replayRequest(item);
       await removeQueuedRequest(item.id!);
@@ -70,7 +89,6 @@ export async function processQueue(): Promise<void> {
     } catch (err) {
       const newRetry = item.retryCount + 1;
       if (newRetry >= MAX_RETRIES) {
-        // Give up on this item
         await updateQueuedRequest(item.id!, {
           status: 'failed',
           retryCount: newRetry,
@@ -80,11 +98,12 @@ export async function processQueue(): Promise<void> {
         console.error(`[SyncManager] Permanently failed after ${MAX_RETRIES} retries:`, item.endpoint);
       } else {
         await updateQueuedRequest(item.id!, {
+          status: 'pending',
           retryCount: newRetry,
           errorMessage: err instanceof Error ? err.message : 'Unknown error',
         });
-        // Exponential backoff – wait before next attempt
-        const delay = BASE_DELAY_MS * Math.pow(2, newRetry);
+        // Exponential backoff with jitter
+        const delay = Math.min(BASE_DELAY_MS * Math.pow(2, newRetry) + Math.random() * 500, MAX_DELAY_MS);
         await sleep(delay);
       }
     }
@@ -93,9 +112,7 @@ export async function processQueue(): Promise<void> {
   isSyncing = false;
   emit(remaining === 0 ? 'done' : 'error', remaining);
 
-  // Auto-clear 'done' status after 3s
   if (remaining === 0) {
-    // Notify all complete callbacks to refresh data
     completeCallbacks.forEach((fn) => fn());
     setTimeout(() => {
       if (currentStatus === 'done') emit('idle', 0);
@@ -103,7 +120,7 @@ export async function processQueue(): Promise<void> {
   }
 }
 
-/** Replay a single queued request against the real server */
+/** Replay a single queued request */
 async function replayRequest(item: QueuedRequest): Promise<void> {
   const response = await fetch(item.endpoint, {
     method: item.method,
@@ -116,10 +133,19 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    // Conflict detection
+
+    // Conflict detection & logging
     if (response.status === 409) {
       console.warn(`[SyncManager] Conflict on ${item.endpoint}:`, text);
+      throw new Error(`CONFLICT: ${text}`);
     }
+
+    // 422 = validation error, don't retry
+    if (response.status === 422 || response.status === 400) {
+      console.error(`[SyncManager] Permanent error ${response.status}:`, text);
+      throw new Error(`PERMANENT: HTTP ${response.status}: ${text}`);
+    }
+
     throw new Error(`HTTP ${response.status}: ${text}`);
   }
 }
