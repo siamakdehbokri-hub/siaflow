@@ -39,7 +39,7 @@ export function useNetworkStatus() {
       setSyncStatus(status);
       setPendingCount(pending);
     });
-    return unsub;
+    return () => { unsub(); };
   }, []);
 
   // Invalidate all queries when sync completes
@@ -47,7 +47,7 @@ export function useNetworkStatus() {
     const unsub = onSyncComplete(() => {
       queryClient.invalidateQueries();
     });
-    return unsub;
+    return () => { unsub(); };
   }, [queryClient]);
 
   // Listen for SW Background Sync completion messages
