@@ -2,6 +2,7 @@
  * Offline-aware mutation helper for Supabase operations.
  * When offline: performs optimistic update + queues for later sync.
  * When online: executes normally, with fallback to queue on network error.
+ * Includes deduplication via IndexedDB idempotency keys.
  */
 
 import { enqueueRequest } from './offlineDb';
@@ -14,34 +15,22 @@ interface OfflineMutationOptions {
   table: string;
   method: 'POST' | 'PATCH' | 'DELETE';
   body?: Record<string, unknown>;
-  /** For PATCH/DELETE: query params like eq filters */
   filters?: Record<string, string>;
-  /** If true, uses .select() to get data back (for inserts) */
   returning?: boolean;
 }
 
-/**
- * Try to execute a Supabase REST mutation.
- * If offline or network fails, queue it and return null.
- * Returns the response data on success, or null if queued.
- */
 export async function offlineMutation<T = unknown>(
   options: OfflineMutationOptions,
   accessToken?: string
 ): Promise<{ data: T | null; queued: boolean }> {
   const { table, method, body, filters, returning } = options;
 
-  // Build URL
   let url = `${SUPABASE_URL}/rest/v1/${table}`;
   const params = new URLSearchParams();
   if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      params.append(key, value);
-    });
+    Object.entries(filters).forEach(([key, value]) => params.append(key, value));
   }
-  if (returning !== false) {
-    params.append('select', '*');
-  }
+  if (returning !== false) params.append('select', '*');
   const paramStr = params.toString();
   if (paramStr) url += `?${paramStr}`;
 
@@ -50,11 +39,8 @@ export async function offlineMutation<T = unknown>(
     'apikey': SUPABASE_KEY,
     'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal',
   };
-  if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`;
-  }
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
-  // Try online first
   if (navigator.onLine) {
     try {
       const res = await fetch(url, {
@@ -72,11 +58,10 @@ export async function offlineMutation<T = unknown>(
       }
       return { data: null, queued: false };
     } catch (err) {
-      // If it's a network error (not server error), queue it
       if (err instanceof TypeError && err.message.includes('fetch')) {
         // Fall through to queue
       } else {
-        throw err; // Re-throw server errors
+        throw err;
       }
     }
   }
@@ -89,13 +74,20 @@ export async function offlineMutation<T = unknown>(
     headers,
   });
 
+  // Try Background Sync registration
+  try {
+    const reg = await navigator.serviceWorker?.ready;
+    if (reg && 'sync' in reg) {
+      await (reg as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register('offline-mutations');
+    }
+  } catch {
+    // Not supported
+  }
+
   toast.info('ذخیره آفلاین شد. پس از اتصال همگام‌سازی می‌شود.');
   return { data: null, queued: true };
 }
 
-/**
- * Get current auth token for offline queue headers.
- */
 export async function getAccessToken(): Promise<string | undefined> {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
