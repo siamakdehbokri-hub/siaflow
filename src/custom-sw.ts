@@ -1,4 +1,21 @@
 /// <reference lib="webworker" />
+
+// Background Sync API types (not yet in lib.webworker)
+interface SyncEvent extends ExtendableEvent {
+  readonly tag: string;
+}
+interface SyncManager {
+  register(tag: string): Promise<void>;
+}
+declare global {
+  interface ServiceWorkerRegistration {
+    readonly sync: SyncManager;
+  }
+  interface ServiceWorkerGlobalScopeEventMap {
+    sync: SyncEvent;
+  }
+}
+
 /**
  * Custom Service Worker with:
  * - Precaching via Workbox (injected manifest)
