@@ -1,6 +1,7 @@
 /**
  * Hook: global network & sync status for UI indicators.
  * Invalidates React Query cache after successful sync.
+ * Listens to both app-level sync and SW Background Sync messages.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -38,15 +39,27 @@ export function useNetworkStatus() {
       setSyncStatus(status);
       setPendingCount(pending);
     });
-    return () => { unsub(); };
+    return unsub;
   }, []);
 
-  // Invalidate all queries when sync completes to get fresh server data
+  // Invalidate all queries when sync completes
   useEffect(() => {
     const unsub = onSyncComplete(() => {
       queryClient.invalidateQueries();
     });
-    return () => { unsub(); };
+    return unsub;
+  }, [queryClient]);
+
+  // Listen for SW Background Sync completion messages
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_COMPLETE') {
+        queryClient.invalidateQueries();
+        getPendingCount().then(setPendingCount);
+      }
+    };
+    navigator.serviceWorker?.addEventListener('message', handler);
+    return () => navigator.serviceWorker?.removeEventListener('message', handler);
   }, [queryClient]);
 
   // Initial pending count
