@@ -59,33 +59,33 @@ export function NetworkStatusIndicator() {
   return (
     <button
       onClick={() => setExpanded(e => !e)}
-      className={`fixed top-[calc(env(safe-area-inset-top,0px)+8px)] left-1/2 -translate-x-1/2 z-50
-        flex items-center gap-2 rounded-full border backdrop-blur-xl
-        text-[11px] font-medium shadow-lg cursor-pointer
+      className={`fixed bottom-[calc(env(safe-area-inset-bottom,0px)+70px)] left-4 z-40
+        flex items-center gap-1.5 rounded-full border backdrop-blur-xl
+        text-[10px] font-medium shadow-md cursor-pointer
         transition-all duration-500 ease-out
         ${bgClass}
-        ${showLabel ? 'px-3.5 py-1.5' : 'px-2 py-1.5'}`}
+        ${showLabel ? 'px-3 py-1' : 'px-1.5 py-1'}`}
     >
       {/* Pulsing dot */}
-      <span className="relative flex h-2 w-2 shrink-0">
+      <span className="relative flex h-1.5 w-1.5 shrink-0">
         <span className={`absolute inline-flex h-full w-full rounded-full opacity-75
-          ${networkState === 'offline' ? 'animate-ping' : networkState === 'syncing' ? 'animate-ping' : ''}
+          ${networkState !== 'online' ? 'animate-ping' : ''}
           ${dotColor}`}
         />
-        <span className={`relative inline-flex rounded-full h-2 w-2 ${dotColor}`} />
+        <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${dotColor}`} />
       </span>
 
       {/* Icon */}
-      <Icon className={`w-3 h-3 shrink-0 ${networkState === 'syncing' ? 'animate-spin' : ''}`} />
+      <Icon className={`w-2.5 h-2.5 shrink-0 ${networkState === 'syncing' ? 'animate-spin' : ''}`} />
 
-      {/* Label (always shown when offline/syncing, toggle on click when online) */}
+      {/* Label */}
       {showLabel && (
         <span className="whitespace-nowrap">{label}</span>
       )}
 
       {/* Pending count badge */}
       {pendingCount > 0 && (
-        <span className="bg-foreground/10 rounded-full px-1.5 py-0.5 text-[9px] tabular-nums">
+        <span className="bg-foreground/10 rounded-full px-1 py-0.5 text-[8px] tabular-nums">
           {pendingCount}
         </span>
       )}
