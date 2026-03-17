@@ -14,7 +14,7 @@ export function BalanceHero({ balance, income, expense, savingsRate = 0 }: Balan
   const { formatAmount, currencyInfo } = useCurrency();
   
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-card border-2 border-border/40 p-5 animate-fade-in shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl glass-heavy p-5 animate-fade-in">
       {/* Ambient glow */}
       <div className={cn(
         "absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-15 pointer-events-none",

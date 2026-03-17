@@ -90,8 +90,8 @@ export function HomeScreen({
   return (
     <div className="relative space-y-5 animate-fade-in">
       {/* Ambient Glows */}
-      <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl" style={{ background: 'rgba(76,31,184,0.12)' }} />
-      <div className="pointer-events-none absolute top-96 -left-20 w-60 h-60 rounded-full blur-3xl" style={{ background: 'rgba(34,197,94,0.07)' }} />
+      <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl" style={{ background: 'var(--blob-purple)' }} />
+      <div className="pointer-events-none absolute top-96 -left-20 w-60 h-60 rounded-full blur-3xl" style={{ background: 'var(--blob-teal)' }} />
       {/* Welcome & Date */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -359,7 +359,7 @@ function SummaryCard({ icon: Icon, label, value, currencyLabel, type }: SummaryC
         "absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center",
         isIncome ? "bg-success" : "bg-destructive"
       )}>
-        <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+        <Icon className={cn("w-5 h-5", isIncome ? "text-success-foreground" : "text-destructive-foreground")} strokeWidth={2} />
       </div>
       
       <div className="pt-12">
