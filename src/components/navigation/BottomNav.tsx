@@ -33,7 +33,8 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
 
       {/* Bottom Navigation Bar */}
       <nav 
-        className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border"
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border backdrop-blur-xl"
+        style={{ background: 'hsl(var(--nav-bg))' }}
       >
         <div className="pb-safe">
           <div className="flex items-stretch h-[72px]">
