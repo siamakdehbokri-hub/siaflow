@@ -359,7 +359,7 @@ function SummaryCard({ icon: Icon, label, value, currencyLabel, type }: SummaryC
         "absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center",
         isIncome ? "bg-success" : "bg-destructive"
       )}>
-        <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+        <Icon className={cn("w-5 h-5", isIncome ? "text-success-foreground" : "text-destructive-foreground")} strokeWidth={2} />
       </div>
       
       <div className="pt-12">
