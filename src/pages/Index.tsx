@@ -219,6 +219,7 @@ const Index = () => {
                   onAddTransaction={openAddModal}
                   onViewAllTransactions={() => setActiveTab('reports')}
                   onOpenDebts={() => setSubView('debts')}
+                  onOpenBudget={() => setSubView('categories')}
                   showAutoSavings={showAutoSavings}
                   onOpenAutoSavings={() => setAutoSavingsOpen(true)}
                 />
