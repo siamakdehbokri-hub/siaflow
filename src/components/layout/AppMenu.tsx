@@ -11,9 +11,6 @@ import {
   ArrowRightLeft, 
   ShieldCheck, 
   LifeBuoy,
-  LayoutDashboard,
-  BarChart2,
-  Settings2,
   type LucideIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -92,11 +89,6 @@ export function AppMenu({
     onClose();
   };
 
-  const handleTabNavigation = (tab: NavTab) => {
-    onTabChange(tab);
-    onClose();
-  };
-
   const handleAdminClick = () => {
     if (onOpenAdmin) {
       onOpenAdmin();
@@ -130,35 +122,9 @@ export function AppMenu({
           </div>
         </SheetHeader>
 
-        <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-180px)] pb-20">
-          {/* Quick Navigation */}
-          <p className="text-xs font-semibold text-muted-foreground px-1 pt-2 pb-1">
-            دسترسی سریع
-          </p>
-          
-          <MenuItem
-            icon={LayoutDashboard}
-            label="داشبورد"
-            description="صفحه اصلی و خلاصه وضعیت"
-            onClick={() => handleTabNavigation('home')}
-          />
-          
-          <MenuItem
-            icon={BarChart2}
-            label="گزارش‌ها"
-            description="مشاهده تاریخچه و آمار تراکنش‌ها"
-            onClick={() => handleTabNavigation('reports')}
-          />
-          
-          <MenuItem
-            icon={Settings2}
-            label="تنظیمات"
-            description="شخصی‌سازی اپلیکیشن"
-            onClick={() => handleTabNavigation('settings')}
-          />
-
+        <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-180px)] pb-24">
           {/* Main Features */}
-          <p className="text-xs font-semibold text-muted-foreground px-1 pt-4 pb-1">
+          <p className="text-xs font-semibold text-muted-foreground px-1 pt-2 pb-1">
             امکانات اصلی
           </p>
           
@@ -193,8 +159,6 @@ export function AppMenu({
             onClick={() => handleNavigation('transfers')}
             variant="primary"
           />
-
-          {/* Tools Section - removed misleading items (AI & Budget were just redirects) */}
 
           {/* Admin Section - Only for admins */}
           {!adminLoading && isAdmin && (

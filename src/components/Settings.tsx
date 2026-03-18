@@ -402,15 +402,19 @@ export function Settings({ onOpenCategories }: SettingsProps) {
           subtitle="مدیریت دسته‌های هزینه و درآمد"
           onClick={() => onOpenCategories?.()}
         />
-        <SettingRow
-          icon={Download}
-          iconBg="bg-success/10"
-          iconColor="text-success"
-          title="پشتیبان‌گیری و خروجی"
-          subtitle="دانلود داده‌های شما"
-          onClick={() => toast.info('این قابلیت به زودی فعال خواهد شد')}
-          isLast={true}
-        />
+        <div className="px-4 py-3.5 relative opacity-50 cursor-not-allowed">
+          {/* isLast separator */}
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+              <Download className="w-5 h-5 text-success" strokeWidth={2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground leading-relaxed">پشتیبان‌گیری و خروجی</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">به‌زودی فعال می‌شود</p>
+            </div>
+            <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">به‌زودی</span>
+          </div>
+        </div>
       </SettingsSection>
 
       {/* ─── Security ─── */}
