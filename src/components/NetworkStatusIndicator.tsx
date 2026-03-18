@@ -2,12 +2,7 @@ import { useNetworkStatus, type NetworkState } from '@/hooks/useNetworkStatus';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-
-const stateConfig: Record<NetworkState, { icon: typeof Wifi; label: string; color: string }> = {
-  online: { icon: Wifi, label: 'آنلاین', color: 'emerald' },
-  offline: { icon: WifiOff, label: 'آفلاین', color: 'red' },
-  syncing: { icon: RefreshCw, label: 'همگام‌سازی...', color: 'amber' },
-};
+import { cn } from '@/lib/utils';
 
 export function NetworkStatusIndicator() {
   const { networkState, pendingCount } = useNetworkStatus();
@@ -40,33 +35,55 @@ export function NetworkStatusIndicator() {
   const shouldShow = visible || networkState !== 'online';
   if (!shouldShow && pendingCount === 0) return null;
 
-  const { icon: Icon, label, color } = stateConfig[networkState];
+  const Icon = networkState === 'online' ? Wifi : networkState === 'offline' ? WifiOff : RefreshCw;
+  const label = networkState === 'online' ? 'آنلاین' : networkState === 'offline' ? 'آفلاین' : 'همگام‌سازی...';
 
   return (
     <div
-      className={`fixed top-[env(safe-area-inset-top,0px)] inset-x-0 z-50
-        flex items-center justify-center transition-all duration-300 ease-out
-        ${shouldShow ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}
-        pointer-events-none`}
+      className={cn(
+        "fixed top-[env(safe-area-inset-top,0px)] inset-x-0 z-50",
+        "flex items-center justify-center transition-all duration-300 ease-out",
+        "pointer-events-none",
+        shouldShow ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      )}
     >
       <div
-        className={`mt-2 flex items-center gap-1.5 rounded-full px-3 py-1
-          text-[11px] font-medium shadow-lg pointer-events-auto
-          backdrop-blur-xl border transition-colors duration-300
-          bg-${color}-500/15 text-${color}-400 border-${color}-500/20`}
+        className={cn(
+          "mt-2 flex items-center gap-1.5 rounded-full px-3 py-1",
+          "text-[11px] font-medium shadow-lg pointer-events-auto",
+          "backdrop-blur-xl border transition-colors duration-300",
+          networkState === 'online' && "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+          networkState === 'offline' && "bg-red-500/15 text-red-400 border-red-500/20",
+          networkState === 'syncing' && "bg-amber-500/15 text-amber-400 border-amber-500/20"
+        )}
       >
         {/* Status dot */}
         <span className="relative flex h-2 w-2 shrink-0">
-          <span className={`absolute inline-flex h-full w-full rounded-full opacity-60
-            ${networkState !== 'online' ? 'animate-ping' : ''} bg-${color}-400`} />
-          <span className={`relative inline-flex rounded-full h-2 w-2 bg-${color}-400`} />
+          <span className={cn(
+            "absolute inline-flex h-full w-full rounded-full opacity-60",
+            networkState !== 'online' && 'animate-ping',
+            networkState === 'online' && "bg-emerald-400",
+            networkState === 'offline' && "bg-red-400",
+            networkState === 'syncing' && "bg-amber-400"
+          )} />
+          <span className={cn(
+            "relative inline-flex rounded-full h-2 w-2",
+            networkState === 'online' && "bg-emerald-400",
+            networkState === 'offline' && "bg-red-400",
+            networkState === 'syncing' && "bg-amber-400"
+          )} />
         </span>
 
-        <Icon className={`w-3 h-3 shrink-0 ${networkState === 'syncing' ? 'animate-spin' : ''}`} />
+        <Icon className={cn("w-3 h-3 shrink-0", networkState === 'syncing' && 'animate-spin')} />
         <span className="whitespace-nowrap">{label}</span>
 
         {pendingCount > 0 && (
-          <span className={`bg-${color}-400/20 rounded-full px-1.5 py-0.5 text-[9px] tabular-nums font-bold`}>
+          <span className={cn(
+            "rounded-full px-1.5 py-0.5 text-[9px] tabular-nums font-bold",
+            networkState === 'online' && "bg-emerald-400/20",
+            networkState === 'offline' && "bg-red-400/20",
+            networkState === 'syncing' && "bg-amber-400/20"
+          )}>
             {pendingCount}
           </span>
         )}
