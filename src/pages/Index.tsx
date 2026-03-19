@@ -16,18 +16,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { isInCurrentJalaliMonth } from '@/utils/persianDate';
 import { Loader2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { lazyRetryNamed } from '@/lib/lazyRetry';
 
-// Lazy load heavy components
-const ReportsHub = lazy(() => import('@/components/reports/ReportsHub').then(m => ({ default: m.ReportsHub })));
-const Settings = lazy(() => import('@/components/Settings').then(m => ({ default: m.Settings })));
-const CategoryManagement = lazy(() => import('@/components/CategoryManagement').then(m => ({ default: m.CategoryManagement })));
-const AddTransactionModal = lazy(() => import('@/components/AddTransactionModal').then(m => ({ default: m.AddTransactionModal })));
-const EditTransactionModal = lazy(() => import('@/components/EditTransactionModal').then(m => ({ default: m.EditTransactionModal })));
-const SavingGoals = lazy(() => import('@/components/SavingGoals').then(m => ({ default: m.SavingGoals })));
-const DebtManagement = lazy(() => import('@/components/DebtManagement').then(m => ({ default: m.DebtManagement })));
-const TransferManagement = lazy(() => import('@/components/TransferManagement').then(m => ({ default: m.TransferManagement })));
-const AutoSavingsSheet = lazy(() => import('@/components/home/AutoSavingsSheet').then(m => ({ default: m.AutoSavingsSheet })));
-const HelpGuide = lazy(() => import('@/components/HelpGuide').then(m => ({ default: m.HelpGuide })));
+// Lazy load heavy components with retry logic
+const ReportsHub = lazy(() => lazyRetryNamed(() => import('@/components/reports/ReportsHub'), 'ReportsHub'));
+const Settings = lazy(() => lazyRetryNamed(() => import('@/components/Settings'), 'Settings'));
+const CategoryManagement = lazy(() => lazyRetryNamed(() => import('@/components/CategoryManagement'), 'CategoryManagement'));
+const AddTransactionModal = lazy(() => lazyRetryNamed(() => import('@/components/AddTransactionModal'), 'AddTransactionModal'));
+const EditTransactionModal = lazy(() => lazyRetryNamed(() => import('@/components/EditTransactionModal'), 'EditTransactionModal'));
+const SavingGoals = lazy(() => lazyRetryNamed(() => import('@/components/SavingGoals'), 'SavingGoals'));
+const DebtManagement = lazy(() => lazyRetryNamed(() => import('@/components/DebtManagement'), 'DebtManagement'));
+const TransferManagement = lazy(() => lazyRetryNamed(() => import('@/components/TransferManagement'), 'TransferManagement'));
+const AutoSavingsSheet = lazy(() => lazyRetryNamed(() => import('@/components/home/AutoSavingsSheet'), 'AutoSavingsSheet'));
+const HelpGuide = lazy(() => lazyRetryNamed(() => import('@/components/HelpGuide'), 'HelpGuide'));
 
 type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'help';
 
