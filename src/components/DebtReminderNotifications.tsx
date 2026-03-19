@@ -32,8 +32,8 @@ export function DebtReminderNotifications({
   const todayCount = reminders.filter(r => r.daysUntilDue === 0 && !r.isOverdue).length;
   return <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300 group">
-          
+        <Button variant="ghost" size="icon" className="relative w-9 h-9 rounded-xl hover:bg-primary/10 hover:shadow-glow-sm transition-all duration-300 group text-primary-foreground">
+          <CreditCard className="w-[18px] h-[18px]" strokeWidth={2} />
           {reminders.length > 0 && <span className={cn("absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg", overdueCount > 0 ? "bg-destructive text-destructive-foreground animate-pulse" : "bg-amber-500 text-white")}>
               {reminders.length}
             </span>}
