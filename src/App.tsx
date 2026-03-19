@@ -10,14 +10,15 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
 import { processQueue } from "@/lib/syncManager";
 import { persistQueryCache, restoreQueryCache } from "@/lib/queryPersist";
+import { lazyRetry } from "@/lib/lazyRetry";
 
-// Lazy load pages for code splitting
-const Index = lazy(() => import("./pages/Index"));
-const Auth = lazy(() => import("./pages/Auth"));
-const Admin = lazy(() => import("./pages/Admin"));
-const Terms = lazy(() => import("./pages/Terms"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+// Lazy load pages with retry logic for "Importing a module script failed"
+const Index = lazy(() => lazyRetry(() => import("./pages/Index")));
+const Auth = lazy(() => lazyRetry(() => import("./pages/Auth")));
+const Admin = lazy(() => lazyRetry(() => import("./pages/Admin")));
+const Terms = lazy(() => lazyRetry(() => import("./pages/Terms")));
+const ResetPassword = lazy(() => lazyRetry(() => import("./pages/ResetPassword")));
+const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
