@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, Receipt, PieChart, Landmark, TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, Layers, type LucideIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, Receipt, Landmark, Wallet, PiggyBank, BarChart3, Layers, type LucideIcon } from 'lucide-react';
 import { Transaction, Category } from '@/types/expense';
 import { isTodayJalali, formatPersianDateFull, formatPersianDateShort } from '@/utils/persianDate';
 import { getCurrentMonthSummary } from '@/utils/financialEngine';
@@ -31,7 +31,6 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const { formatAmountCompact, currencyInfo, convertAmount, currency } = useCurrency();
 
-  // Format number without currency symbol
   const formatNumberFull = (amount: number) => {
     const converted = convertAmount(amount);
     if (currency === 'USD') {
@@ -40,7 +39,6 @@ export function HomeScreen({
     return new Intl.NumberFormat('fa-IR').format(Math.round(converted));
   };
 
-  // Format compact without currency symbol
   const formatCompactOnly = (amount: number) => {
     const converted = convertAmount(amount);
     if (currency === 'USD') {
@@ -82,13 +80,28 @@ export function HomeScreen({
           if (dateCompare !== 0) return dateCompare;
           return b.id.localeCompare(a.id);
         })
-        .slice(0, 4),
+        .slice(0, 5),
     };
   }, [transactions, categories]);
 
   const today = new Date();
   const persianDate = formatPersianDateFull(today.toISOString());
   const hasNoData = transactions.length === 0;
+
+  // Group recent transactions by date
+  const groupedTransactions = useMemo(() => {
+    const groups: { date: string; items: Transaction[] }[] = [];
+    for (const t of financialData.recentTransactions) {
+      const dateStr = formatPersianDateShort(t.date);
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && lastGroup.date === dateStr) {
+        lastGroup.items.push(t);
+      } else {
+        groups.push({ date: dateStr, items: [t] });
+      }
+    }
+    return groups;
+  }, [financialData.recentTransactions]);
 
   return (
     <div className="relative space-y-5 animate-fade-in">
@@ -108,7 +121,7 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* Hero Card - Glass Heavy */}
+      {/* Hero Card */}
       <div className="relative glass-heavy rounded-2xl p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -176,7 +189,7 @@ export function HomeScreen({
         </div>
       )}
 
-      {/* Balance Detail Card - Only show when there's data */}
+      {/* Balance Detail Card */}
       {!hasNoData && (
         <div className="relative glass-heavy rounded-2xl">
           <div className="p-5">
@@ -190,7 +203,6 @@ export function HomeScreen({
               </div>
             </div>
 
-            {/* Balance Amount */}
             <div className="text-center mb-4 py-3.5 rounded-2xl bg-muted/50 border border-border">
               <p className="text-xs text-muted-foreground mb-1">مانده خالص</p>
               <p className={cn(
@@ -201,7 +213,6 @@ export function HomeScreen({
               </p>
             </div>
 
-            {/* Detail Rows - only non-duplicate info */}
             <div className="space-y-2">
               {financialData.saving > 0 && (
                 <DetailRow
@@ -243,7 +254,7 @@ export function HomeScreen({
         </button>
       )}
 
-      {/* Recent Transactions */}
+      {/* ====== REDESIGNED RECENT ACTIVITY ====== */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-foreground">فعالیت اخیر</h3>
@@ -269,61 +280,76 @@ export function HomeScreen({
             </p>
           </div>
         ) : (
-          <div className="glass-card rounded-2xl overflow-hidden">
-            {financialData.recentTransactions.map((transaction, idx) => {
-              const isIncome = transaction.type === 'income';
-              const prevDate = idx > 0 ? formatPersianDateShort(financialData.recentTransactions[idx - 1].date) : null;
-              const currentDate = formatPersianDateShort(transaction.date);
-              const showDateHeader = idx === 0 || currentDate !== prevDate;
-              
-              return (
-                <div key={transaction.id}>
-                  {showDateHeader && (
-                    <div className={cn(
-                      "px-4 py-2 text-[11px] font-bold text-muted-foreground bg-muted/40",
-                      idx > 0 && "border-t border-border"
-                    )}>
-                      {currentDate}
-                    </div>
-                  )}
-                  <div 
-                    className={cn(
-                      "flex items-center gap-3 p-4 active:bg-accent/30 transition-colors",
-                      !showDateHeader && idx > 0 && "border-t border-border/50"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-11 h-11 rounded-full flex items-center justify-center shrink-0",
-                      isIncome ? "bg-success/10" : "bg-destructive/10"
-                    )}>
-                      {isIncome ? (
-                        <ArrowUpRight className="w-5 h-5 text-success" strokeWidth={2} />
-                      ) : (
-                        <ArrowDownRight className="w-5 h-5 text-destructive" strokeWidth={2} />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">
-                        {transaction.category}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        {transaction.description || '—'}
-                      </p>
-                    </div>
-                    
-                    <div className="text-left shrink-0">
-                      <p className={cn(
-                        "text-sm font-black tabular-nums",
-                        isIncome ? "text-success" : "text-destructive"
-                      )}>
-                        {isIncome ? '+' : '-'}{formatNumberFull(transaction.amount)}
-                      </p>
-                    </div>
-                  </div>
+          <div className="space-y-2">
+            {groupedTransactions.map((group) => (
+              <div key={group.date} className="glass-card rounded-2xl overflow-hidden">
+                {/* Date Header */}
+                <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/50">
+                  <span className="text-[11px] font-bold text-muted-foreground">{group.date}</span>
+                  <span className="flex-1 h-px bg-border/30" />
+                  <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
+                    {group.items.length} تراکنش
+                  </span>
                 </div>
-              );
-            })}
+
+                {/* Transactions */}
+                {group.items.map((transaction, idx) => {
+                  const isIncome = transaction.type === 'income';
+                  const isSaving = transaction.type === 'saving';
+                  
+                  return (
+                    <div 
+                      key={transaction.id}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3.5 active:bg-accent/30 transition-colors",
+                        idx > 0 && "border-t border-border/30"
+                      )}
+                    >
+                      {/* Category Icon */}
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                        isSaving ? "bg-primary/10" :
+                        isIncome ? "bg-success/10" : "bg-destructive/10"
+                      )}>
+                        {isSaving ? (
+                          <PiggyBank className="w-[18px] h-[18px] text-primary" strokeWidth={2} />
+                        ) : isIncome ? (
+                          <ArrowUpRight className="w-[18px] h-[18px] text-success" strokeWidth={2} />
+                        ) : (
+                          <ArrowDownRight className="w-[18px] h-[18px] text-destructive" strokeWidth={2} />
+                        )}
+                      </div>
+                      
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-foreground truncate leading-snug">
+                          {transaction.category}
+                        </p>
+                        {transaction.description && (
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5 leading-snug">
+                            {transaction.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Amount */}
+                      <div className="text-left shrink-0">
+                        <p className={cn(
+                          "text-[13px] font-black tabular-nums leading-snug",
+                          isSaving ? "text-primary" :
+                          isIncome ? "text-success" : "text-destructive"
+                        )}>
+                          {isIncome ? '+' : isSaving ? '' : '-'}{formatNumberFull(transaction.amount)}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-0.5 tabular-nums text-left">
+                          {currencyInfo.symbol}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         )}
       </div>
