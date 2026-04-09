@@ -144,7 +144,7 @@ export function HomeScreen({
         </div>
         
         {/* Quick actions */}
-        <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/40">
+        <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/20">
           <QuickActionButton 
             icon={Layers} 
             label="تراکنش‌ها"
@@ -203,7 +203,7 @@ export function HomeScreen({
               </div>
             </div>
 
-            <div className="text-center mb-4 py-3.5 rounded-2xl bg-muted/50 border border-border">
+            <div className="text-center mb-4 py-3.5 rounded-2xl bg-muted/40">
               <p className="text-xs text-muted-foreground mb-1">مانده خالص</p>
               <p className={cn(
                 "text-3xl font-black tabular-nums tracking-tight",
@@ -284,7 +284,7 @@ export function HomeScreen({
             {groupedTransactions.map((group) => (
               <div key={group.date} className="glass-card rounded-2xl overflow-hidden">
                 {/* Date Header */}
-                <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/50">
+                <div className="px-4 py-2.5 flex items-center gap-2">
                   <span className="text-[11px] font-bold text-muted-foreground">{group.date}</span>
                   <span className="flex-1 h-px bg-border/30" />
                   <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
@@ -301,8 +301,8 @@ export function HomeScreen({
                     <div 
                       key={transaction.id}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-3.5 active:bg-accent/30 transition-colors",
-                        idx > 0 && "border-t border-border/30"
+                        "flex items-center gap-3 px-4 py-3.5 active:bg-accent/20 transition-colors",
+                        idx > 0 && "border-t border-border/20"
                       )}
                     >
                       {/* Category Icon */}
@@ -401,7 +401,7 @@ interface DetailRowProps {
 
 function DetailRow({ icon, iconBg, label, value, valueClassName }: DetailRowProps) {
   return (
-    <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/50 border border-border">
+    <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/30">
       <div className="flex items-center gap-2">
         <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", iconBg)}>
           {icon}

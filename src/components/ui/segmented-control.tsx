@@ -35,7 +35,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div 
       className={cn(
-        "relative flex p-1 rounded-2xl bg-muted border-2 border-border",
+        "relative flex p-1 rounded-2xl bg-muted/60 border border-border/30",
         fullWidth && "w-full"
       )}
       role="tablist"

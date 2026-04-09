@@ -65,7 +65,7 @@ function SettingRow({ icon: Icon, iconBg, iconColor, title, subtitle, trailing, 
       )}
     >
       {!isLast && (
-        <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/60 to-transparent" />
+        <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/30 to-transparent" />
       )}
       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", iconBg)}>
         <Icon className={cn("w-5 h-5", iconColor)} strokeWidth={2} />
