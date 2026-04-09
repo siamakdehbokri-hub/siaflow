@@ -137,8 +137,8 @@
     --info: 200 85% 58%;
     --info-foreground: 0 0% 100%;
 
-    /* === Borders & Input: slightly more visible === */
-    --border: 0 0% 100% / 0.10;
+    /* === Borders & Input: subtle, not white === */
+    --border: 255 10% 50% / 0.12;
     --input: 240 12% 13%;
     --ring: 255 100% 68%;
 
@@ -156,7 +156,7 @@
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 255 25% 16%;
     --sidebar-accent-foreground: 255 80% 78%;
-    --sidebar-border: 0 0% 100% / 0.10;
+    --sidebar-border: 255 10% 50% / 0.12;
     --sidebar-ring: 255 100% 68%;
 
     /* === Glass & Nav tokens === */
@@ -167,7 +167,7 @@
     --glass-hero-border: none;
     --glass-inset: none;
     --nav-bg: 240 22% 6% / 0.92;
-    --nav-border: 0 0% 100% / 0.10;
+    --nav-border: 255 10% 50% / 0.12;
     --header-from: #5B3DC7;
     --header-to: #4C1FB8;
     --blob-purple: rgba(76,31,184,0.14);
@@ -245,27 +245,27 @@
   .glass,
   .glass-subtle,
   .glass-card {
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(40px) saturate(1.5);
+    -webkit-backdrop-filter: blur(40px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 20px;
     box-shadow:
       0 4px 24px rgba(0,0,0,0.30),
-      inset 0 1px 0 rgba(255,255,255,0.07);
+      inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
   /* Heavy / hero glass cards */
   .glass-heavy,
   .glass-glow {
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(32px) saturate(1.5);
-    -webkit-backdrop-filter: blur(32px) saturate(1.5);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(48px) saturate(1.6);
+    -webkit-backdrop-filter: blur(48px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.10);
     border-radius: 20px;
     box-shadow:
       0 8px 40px rgba(0,0,0,0.35),
-      inset 0 1px 0 rgba(255,255,255,0.09);
+      inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   /* Light theme overrides */
