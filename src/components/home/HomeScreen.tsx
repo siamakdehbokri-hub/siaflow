@@ -144,7 +144,7 @@ export function HomeScreen({
         </div>
         
         {/* Quick actions */}
-        <div className="flex items-center justify-around mt-6 pt-5 border-t border-border">
+        <div className="flex items-center justify-around mt-6 pt-5 border-t border-border/40">
           <QuickActionButton 
             icon={Layers} 
             label="تراکنش‌ها"
