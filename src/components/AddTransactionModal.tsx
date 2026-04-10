@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote } from 'lucide-react';
+import { getCategoryIcon } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -233,6 +234,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               <div className="grid grid-cols-3 gap-1.5 max-h-[180px] overflow-y-auto scrollbar-hide">
                 {currentCategories.map((cat) => {
                   const isSelected = category === cat.name;
+                  const CatIcon = getCategoryIcon(cat.icon);
                   return (
                     <button
                       key={cat.id}
@@ -249,7 +251,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                         className="w-9 h-9 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: cat.color + '18' }}
                       >
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+                        <CatIcon className="w-4.5 h-4.5" style={{ color: cat.color }} strokeWidth={2} />
                       </div>
                       <span className={cn(
                         "text-[10px] font-medium text-center leading-tight line-clamp-2",
