@@ -1,18 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, Plus, Minus, Trash2, Calendar, RefreshCw, ChevronDown, Edit3 } from 'lucide-react';
+import { X, Plus, Minus, Trash2, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Drawer,
+  DrawerContent,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +23,7 @@ import { Transaction, Category } from '@/types/expense';
 import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
 import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -37,6 +34,27 @@ interface EditTransactionModalProps {
   categories: Category[];
 }
 
+const TYPE_CONFIG = {
+  expense: {
+    label: 'هزینه',
+    icon: Minus,
+    colorVar: '--destructive',
+    submitLabel: 'ذخیره تغییرات',
+  },
+  income: {
+    label: 'درآمد',
+    icon: Plus,
+    colorVar: '--success',
+    submitLabel: 'ذخیره تغییرات',
+  },
+  saving: {
+    label: 'پس‌انداز',
+    icon: PiggyBank,
+    colorVar: '--primary',
+    submitLabel: 'ذخیره تغییرات',
+  },
+} as const;
+
 export function EditTransactionModal({ 
   isOpen, 
   transaction, 
@@ -46,6 +64,7 @@ export function EditTransactionModal({
   categories 
 }: EditTransactionModalProps) {
   const [type, setType] = useState<'income' | 'expense' | 'saving'>('expense');
+  const { currencyInfo } = useCurrency();
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
@@ -54,13 +73,15 @@ export function EditTransactionModal({
   const [isRecurring, setIsRecurring] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // Get subcategories from actual category data (from database)
+  const currentCategories = useMemo(() => 
+    categories.filter(c => c.type === type), 
+    [categories, type]
+  );
+
   const subcategories = useMemo((): string[] => {
     if (!category) return [];
-    
     const found = categories.find(c => c.name === category);
     if (!found?.subcategories) return [];
-    
     return found.subcategories.map(s => {
       if (typeof s === 'string') return s;
       return (s as { name: string }).name;
@@ -76,13 +97,12 @@ export function EditTransactionModal({
       setDescription(transaction.description);
       setDate(transaction.date);
       setIsRecurring(transaction.isRecurring || false);
-      
     }
   }, [transaction]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!transaction) return;
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!transaction || !amount || !category) return;
     
     onSave({
       ...transaction,
@@ -106,8 +126,8 @@ export function EditTransactionModal({
     }
   };
 
-  const handleCategoryChange = (value: string) => {
-    setCategory(value);
+  const handleCategoryChange = (catName: string) => {
+    setCategory(catName);
     setSubcategory('');
   };
 
@@ -115,198 +135,186 @@ export function EditTransactionModal({
     setAmount(formatAmountInput(value));
   };
 
-  // Quick amount buttons
-  const quickAmounts = ['50,000', '100,000', '500,000', '1,000,000'];
+  const handleTypeChange = (newType: typeof type) => {
+    setType(newType);
+    setCategory('');
+    setSubcategory('');
+  };
 
-  if (!isOpen || !transaction) return null;
+  const quickAmounts = [
+    { value: '50,000', label: '۵۰ هزار' },
+    { value: '100,000', label: '۱۰۰ هزار' },
+    { value: '500,000', label: '۵۰۰ هزار' },
+    { value: '1,000,000', label: '۱ میلیون' },
+  ];
 
-  const expenseCategories = categories.filter(c => c.type === 'expense');
-  const incomeCategories = categories.filter(c => c.type === 'income');
-  const savingCategories = categories.filter(c => c.type === 'saving');
+  if (!transaction) return null;
+
+  const config = TYPE_CONFIG[type];
+  const accentColor = `hsl(var(${config.colorVar}))`;
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-background/80 backdrop-blur-md"
-          onClick={onClose}
-        />
-        
-        <div className="relative w-full max-w-lg bg-card border border-border rounded-t-3xl sm:rounded-2xl shadow-2xl animate-slide-up max-h-[92vh] overflow-y-auto">
-          {/* Header with gradient */}
-          <div className="sticky top-0 z-10 overflow-hidden">
-            <div className={cn(
-              "absolute inset-0",
-              type === 'expense' ? "gradient-expense" : type === 'saving' ? "bg-primary" : "gradient-income"
-            )} />
-            <div className="relative p-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-background/20 backdrop-blur-sm">
-                  <Edit3 className="w-5 h-5 text-background" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-background">ویرایش تراکنش</h2>
-                  <p className="text-xs text-background/80">اصلاح اطلاعات</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon-sm" 
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-background hover:bg-background/20"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon-sm" 
-                  onClick={onClose}
-                  className="text-background hover:bg-background/20"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
+      <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <DrawerContent className="max-h-[94vh] flex flex-col border-0 bg-background/95 backdrop-blur-2xl">
+          
+          {/* Accent bar */}
+          <div className="mx-auto mt-3 mb-1 w-10 h-1 rounded-full" style={{ background: accentColor, opacity: 0.5 }} />
+
+          {/* Header */}
+          <div className="px-5 pt-2 pb-4 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-foreground">ویرایش تراکنش</h2>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => setShowDeleteDialog(true)}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-destructive/10 active:bg-destructive/20 transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-destructive" />
+              </button>
+              <DrawerClose asChild>
+                <button className="w-8 h-8 rounded-full flex items-center justify-center bg-muted/40 active:bg-muted transition-colors">
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </DrawerClose>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-5 space-y-5">
-            {/* Type Toggle - 3 types */}
-            <div className="grid grid-cols-3 gap-2 p-1.5 bg-muted rounded-2xl overflow-hidden">
-              <button
-                type="button"
-                onClick={() => {
-                  setType('expense');
-                  setCategory('');
-                  setSubcategory('');
-                }}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all duration-300",
-                  type === 'expense' 
-                    ? "bg-destructive text-destructive-foreground shadow-lg" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                )}
-              >
-                <Minus className="w-4 h-4" />
-                <span className="text-xs">هزینه</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setType('income');
-                  setCategory('');
-                  setSubcategory('');
-                }}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all duration-300",
-                  type === 'income' 
-                    ? "bg-success text-success-foreground shadow-lg" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                )}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-xs">درآمد</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setType('saving');
-                  setCategory('');
-                  setSubcategory('');
-                }}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-3 rounded-xl font-semibold transition-all duration-300",
-                  type === 'saving' 
-                    ? "bg-primary text-primary-foreground shadow-lg" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                )}
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="text-xs">پس‌انداز</span>
-              </button>
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-5">
+            
+            {/* Type Segmented Control */}
+            <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-muted/40">
+              {(Object.keys(TYPE_CONFIG) as Array<keyof typeof TYPE_CONFIG>).map((t) => {
+                const cfg = TYPE_CONFIG[t];
+                const Icon = cfg.icon;
+                const isActive = type === t;
+                const btnColor = `hsl(var(${cfg.colorVar}))`;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => handleTypeChange(t)}
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold transition-all text-sm",
+                      isActive 
+                        ? "text-white shadow-lg" 
+                        : "text-muted-foreground active:text-foreground"
+                    )}
+                    style={isActive ? { background: btnColor } : undefined}
+                  >
+                    <Icon className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span className="text-xs font-bold">{cfg.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Amount */}
+            {/* Amount Section */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-sm font-medium">
-                <span>مبلغ</span>
-                <Badge variant="secondary" className="text-xs font-normal">تومان</Badge>
-              </Label>
               <div className="relative">
                 <Input
                   type="text"
                   inputMode="numeric"
-                  placeholder="0"
+                  placeholder="مبلغ"
                   value={amount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  className={cn(
-                    "text-3xl font-bold text-center h-16 rounded-2xl border-2 transition-all",
-                    type === 'expense' 
-                      ? "focus:border-destructive/50" 
-                      : "focus:border-success/50"
-                  )}
-                  required
+                  className="text-2xl font-bold text-center h-16 rounded-2xl bg-muted/20 border-border/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 placeholder:text-muted-foreground/40 placeholder:text-lg"
                 />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 font-medium">
+                  {currencyInfo.name}
+                </span>
               </div>
-              {/* Quick Amount Buttons */}
-              <div className="flex gap-2 flex-wrap">
-                {quickAmounts.map((qa) => (
-                  <button
-                    key={qa}
-                    type="button"
-                    onClick={() => setAmount(qa)}
-                    className="px-3 py-1.5 text-xs font-medium bg-muted hover:bg-accent rounded-lg transition-colors"
-                  >
-                    {qa}
-                  </button>
-                ))}
+              
+              {/* Quick Amounts */}
+              <div className="grid grid-cols-4 gap-1.5">
+                {quickAmounts.map((qa) => {
+                  const isSelected = amount === qa.value;
+                  return (
+                    <button
+                      key={qa.value}
+                      type="button"
+                      onClick={() => setAmount(qa.value)}
+                      className={cn(
+                        "h-9 text-[11px] font-semibold rounded-xl transition-all active:scale-95",
+                        isSelected
+                          ? "text-white shadow-sm"
+                          : "text-muted-foreground bg-muted/30 active:bg-muted/50"
+                      )}
+                      style={isSelected ? { background: accentColor } : undefined}
+                    >
+                      {qa.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Category - key forces clean remount when type changes */}
+            {/* Category Grid */}
             <div key={`category-${type}`} className="space-y-2">
-              <Label className="text-sm font-medium">دسته‌بندی</Label>
-              <Select value={category} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="h-12 rounded-xl text-base">
-                  <SelectValue placeholder="انتخاب دسته‌بندی" />
-                </SelectTrigger>
-                <SelectContent className="max-h-64">
-                  {(type === 'expense' ? expenseCategories : type === 'income' ? incomeCategories : savingCategories).map((cat) => (
-                    <SelectItem key={cat.id} value={cat.name} className="py-3">
-                      <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">دسته‌بندی</span>
+              {currentCategories.length > 0 ? (
+                <div className="grid grid-cols-3 gap-1.5 max-h-[180px] overflow-y-auto scrollbar-hide">
+                  {currentCategories.map((cat) => {
+                    const isSelected = category === cat.name;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handleCategoryChange(cat.name)}
+                        className={cn(
+                          "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all active:scale-95",
+                          isSelected
+                            ? "bg-primary/10 ring-1 ring-primary/30"
+                            : "bg-muted/20 active:bg-muted/40"
+                        )}
+                      >
                         <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: cat.color }}
-                        />
-                        {cat.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                          className="w-9 h-9 rounded-xl flex items-center justify-center"
+                          style={{ backgroundColor: cat.color + '18' }}
+                        >
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+                        </div>
+                        <span className={cn(
+                          "text-[10px] font-medium text-center leading-tight line-clamp-2",
+                          isSelected ? "text-foreground" : "text-muted-foreground"
+                        )}>
+                          {cat.name}
+                        </span>
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-6 text-center text-xs text-muted-foreground rounded-xl bg-muted/10">
+                  دسته‌بندی یافت نشد
+                </div>
+              )}
             </div>
 
-            {/* Subcategory */}
+            {/* Subcategory Chips */}
             {subcategories.length > 0 && (
               <div className="space-y-2 animate-fade-in">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <ChevronDown className="w-3 h-3" />
                   زیردسته
-                </Label>
-                <div className="flex flex-wrap gap-2">
+                </span>
+                <div className="flex flex-wrap gap-1.5">
                   {subcategories.map((sub) => (
                     <button
                       key={sub}
                       type="button"
                       onClick={() => setSubcategory(subcategory === sub ? '' : sub)}
                       className={cn(
-                        "px-3 py-2 text-sm rounded-xl border-2 transition-all duration-200",
+                        "px-3 py-1.5 text-[11px] rounded-full transition-all active:scale-95",
                         subcategory === sub
-                          ? type === 'expense'
-                            ? "border-destructive bg-destructive/10 text-destructive font-medium"
-                            : "border-success bg-success/10 text-success font-medium"
-                          : "border-border hover:border-muted-foreground/50 text-muted-foreground hover:text-foreground"
+                          ? "text-white font-semibold shadow-sm"
+                          : "bg-muted/30 text-muted-foreground active:bg-muted/50"
                       )}
+                      style={subcategory === sub ? { background: accentColor } : undefined}
                     >
                       {sub}
                     </button>
@@ -316,23 +324,23 @@ export function EditTransactionModal({
             )}
 
             {/* Description */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">توضیحات (اختیاری)</Label>
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold text-muted-foreground">توضیحات</span>
               <Textarea
                 placeholder="مثلا: خرید از فروشگاه..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                className="rounded-xl resize-none"
+                className="rounded-xl resize-none bg-muted/15 border-border/20 text-sm placeholder:text-muted-foreground/40"
               />
             </div>
 
             {/* Date */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="w-3 h-3" />
                 تاریخ
-              </Label>
+              </span>
               <PersianDatePicker 
                 value={date} 
                 onChange={setDate}
@@ -340,43 +348,44 @@ export function EditTransactionModal({
               />
             </div>
 
-            {/* Recurring Toggle */}
+            {/* Recurring */}
             <div className={cn(
-              "flex items-center justify-between p-4 rounded-2xl border-2 transition-all",
+              "flex items-center justify-between p-3.5 rounded-xl transition-all",
               isRecurring 
-                ? "border-primary/30 bg-primary/5" 
-                : "border-border bg-muted/30"
+                ? "bg-primary/5 ring-1 ring-primary/15" 
+                : "bg-muted/15"
             )}>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <div className={cn(
-                  "p-2 rounded-xl transition-colors",
-                  isRecurring ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  isRecurring ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground"
                 )}>
-                  <RefreshCw className={cn("w-5 h-5", isRecurring && "animate-spin")} style={{ animationDuration: '3s' }} />
+                  <RefreshCw className="w-4 h-4" />
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">تراکنش تکراری</p>
-                  <p className="text-xs text-muted-foreground">هر ماه تکرار شود</p>
-                </div>
+                <p className="font-medium text-foreground text-xs">تکرار ماهانه</p>
               </div>
               <Switch
                 checked={isRecurring}
                 onCheckedChange={setIsRecurring}
               />
             </div>
+          </div>
 
-            {/* Submit Button */}
+          {/* Footer — Submit */}
+          <div className="p-4 pt-3">
             <Button 
-              type="submit" 
-              size="xl" 
-              className="w-full rounded-2xl font-bold text-lg"
+              type="button"
+              onClick={() => handleSubmit()}
+              className="w-full h-13 rounded-2xl font-bold text-sm text-white shadow-xl active:scale-[0.98] transition-transform border-0"
+              style={{ background: accentColor }}
               disabled={!amount || !category}
             >
-              ذخیره تغییرات
+              <Check className="w-4 h-4 ml-2" />
+              {config.submitLabel}
             </Button>
-          </form>
-        </div>
-      </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

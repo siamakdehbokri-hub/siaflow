@@ -1,15 +1,12 @@
 import { useState, useMemo, useCallback } from 'react';
-import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check } from 'lucide-react';
+import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerClose,
 } from '@/components/ui/drawer';
 import { Category } from '@/types/expense';
@@ -59,6 +56,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   });
   const [isRecurring, setIsRecurring] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   const currentCategories = useMemo(() => 
     categories.filter(c => c.type === type), 
@@ -85,6 +83,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     });
     setIsRecurring(false);
+    setShowMore(false);
   }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -138,25 +137,30 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
   const config = TYPE_CONFIG[type];
   const SubmitIcon = config.icon;
+  const accentColor = `hsl(var(${config.colorVar}))`;
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DrawerContent className="max-h-[92vh] flex flex-col">
+    <Drawer open={isOpen} onOpenChange={(open) => { if (!open) { resetForm(); onClose(); } }}>
+      <DrawerContent className="max-h-[94vh] flex flex-col border-0 bg-background/95 backdrop-blur-2xl">
+        
+        {/* Accent bar */}
+        <div className="mx-auto mt-3 mb-1 w-10 h-1 rounded-full" style={{ background: accentColor, opacity: 0.5 }} />
+
         {/* Header */}
-        <DrawerHeader className="px-5 py-4 flex items-center justify-between border-b border-border/30">
-          <DrawerTitle className="text-lg font-bold text-foreground">ثبت تراکنش جدید</DrawerTitle>
+        <div className="px-5 pt-2 pb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-foreground">تراکنش جدید</h2>
           <DrawerClose asChild>
-            <button className="w-9 h-9 rounded-full flex items-center justify-center bg-muted/50 active:bg-muted transition-colors">
-              <X className="w-5 h-5 text-muted-foreground" />
+            <button className="w-8 h-8 rounded-full flex items-center justify-center bg-muted/40 active:bg-muted transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </DrawerClose>
-        </DrawerHeader>
+        </div>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-5">
           
-          {/* Type Toggle — Segmented Control */}
-          <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-muted/50 border border-border/30">
+          {/* Type Segmented Control */}
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-muted/40">
             {(Object.keys(TYPE_CONFIG) as Array<keyof typeof TYPE_CONFIG>).map((t) => {
               const cfg = TYPE_CONFIG[t];
               const Icon = cfg.icon;
@@ -167,37 +171,39 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                   type="button"
                   onClick={() => handleTypeChange(t)}
                   className={cn(
-                    "flex items-center justify-center gap-1.5 py-3 rounded-xl font-semibold transition-all text-sm",
+                    "flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold transition-all text-sm",
                     isActive 
-                      ? "text-white shadow-md" 
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "text-white shadow-lg" 
+                      : "text-muted-foreground active:text-foreground"
                   )}
-                  style={isActive ? {
-                    background: `hsl(var(${cfg.colorVar}))`,
-                  } : undefined}
+                  style={isActive ? { background: accentColor } : undefined}
                 >
-                  <Icon className="w-4 h-4" strokeWidth={2} />
+                  <Icon className="w-3.5 h-3.5" strokeWidth={2.5} />
                   <span className="text-xs font-bold">{cfg.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Amount — Large Input */}
+          {/* Amount Section */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium text-foreground">مبلغ ({currencyInfo.name})</Label>
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="۰"
-              value={amount}
-              onChange={(e) => handleAmountChange(e.target.value)}
-              className="text-2xl font-bold text-center h-14 rounded-xl bg-muted/30 border-border/40 focus:border-primary focus:ring-1 focus:ring-primary/30"
-              autoFocus
-            />
+            <div className="relative">
+              <Input
+                type="text"
+                inputMode="numeric"
+                placeholder="مبلغ"
+                value={amount}
+                onChange={(e) => handleAmountChange(e.target.value)}
+                className="text-2xl font-bold text-center h-16 rounded-2xl bg-muted/20 border-border/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 placeholder:text-muted-foreground/40 placeholder:text-lg"
+                autoFocus
+              />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 font-medium">
+                {currencyInfo.name}
+              </span>
+            </div>
             
             {/* Quick Amounts */}
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {quickAmounts.map((qa) => {
                 const isSelected = amount === qa.value;
                 return (
@@ -206,12 +212,12 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                     type="button"
                     onClick={() => setAmount(qa.value)}
                     className={cn(
-                      "h-11 text-xs font-semibold rounded-xl transition-all active:scale-95 border",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "h-9 text-[11px] font-semibold rounded-xl transition-all active:scale-95",
                       isSelected
-                        ? "text-primary bg-primary/10 border-primary/30"
-                        : "text-foreground bg-muted/30 border-border/30 active:bg-muted/50"
+                        ? "text-white shadow-sm"
+                        : "text-muted-foreground bg-muted/30 active:bg-muted/50"
                     )}
+                    style={isSelected ? { background: accentColor } : undefined}
                   >
                     {qa.label}
                   </button>
@@ -220,11 +226,11 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             </div>
           </div>
 
-          {/* Category — Visual Grid */}
-          <div key={`category-${type}`} className="space-y-2.5">
-            <Label className="text-sm font-medium text-foreground">دسته‌بندی</Label>
+          {/* Category Grid */}
+          <div key={`category-${type}`} className="space-y-2">
+            <span className="text-xs font-semibold text-muted-foreground">دسته‌بندی</span>
             {currentCategories.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto scrollbar-hide">
+              <div className="grid grid-cols-3 gap-1.5 max-h-[180px] overflow-y-auto scrollbar-hide">
                 {currentCategories.map((cat) => {
                   const isSelected = category === cat.name;
                   return (
@@ -233,58 +239,58 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                       type="button"
                       onClick={() => handleCategoryChange(cat.name)}
                       className={cn(
-                        "flex items-center gap-2.5 p-3 rounded-xl border transition-all text-right",
-                        "active:scale-[0.97]",
+                        "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all active:scale-95",
                         isSelected
-                          ? "border-primary/40 bg-primary/8"
-                          : "border-border/30 bg-muted/20 active:bg-muted/40"
+                          ? "bg-primary/10 ring-1 ring-primary/30"
+                          : "bg-muted/20 active:bg-muted/40"
                       )}
                     >
                       <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: cat.color + '20' }}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: cat.color + '18' }}
                       >
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
                       </div>
                       <span className={cn(
-                        "text-xs font-medium truncate flex-1",
+                        "text-[10px] font-medium text-center leading-tight line-clamp-2",
                         isSelected ? "text-foreground" : "text-muted-foreground"
                       )}>
                         {cat.name}
                       </span>
                       {isSelected && (
-                        <Check className="w-4 h-4 text-primary shrink-0" strokeWidth={2.5} />
+                        <Check className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
                       )}
                     </button>
                   );
                 })}
               </div>
             ) : (
-              <div className="py-4 text-center text-sm text-muted-foreground rounded-xl bg-muted/20 border border-border/30">
+              <div className="py-6 text-center text-xs text-muted-foreground rounded-xl bg-muted/10">
                 دسته‌بندی یافت نشد
               </div>
             )}
           </div>
 
-          {/* Subcategory — Chip Selection */}
+          {/* Subcategory Chips */}
           {subcategories.length > 0 && (
             <div className="space-y-2 animate-fade-in">
-              <Label className="text-sm font-medium text-foreground flex items-center gap-2">
-                <ChevronDown className="w-4 h-4" />
+              <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                <ChevronDown className="w-3 h-3" />
                 زیردسته
-              </Label>
-              <div className="flex flex-wrap gap-2">
+              </span>
+              <div className="flex flex-wrap gap-1.5">
                 {subcategories.map((sub) => (
                   <button
                     key={sub}
                     type="button"
                     onClick={() => setSubcategory(subcategory === sub ? '' : sub)}
                     className={cn(
-                      "px-3.5 py-2 text-xs rounded-full border transition-all active:scale-95",
+                      "px-3 py-1.5 text-[11px] rounded-full transition-all active:scale-95",
                       subcategory === sub
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border/40 bg-muted/20 text-foreground hover:border-primary/40"
+                        ? "text-white font-semibold shadow-sm"
+                        : "bg-muted/30 text-muted-foreground active:bg-muted/50"
                     )}
+                    style={subcategory === sub ? { background: accentColor } : undefined}
                   >
                     {sub}
                   </button>
@@ -293,74 +299,90 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
             </div>
           )}
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground">توضیحات (اختیاری)</Label>
-            <Textarea
-              placeholder="مثلا: خرید از فروشگاه..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              className="rounded-xl resize-none bg-muted/30 border-border/40"
-            />
-          </div>
+          {/* Optional fields toggle */}
+          {!showMore && (
+            <button
+              type="button"
+              onClick={() => setShowMore(true)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-medium text-muted-foreground rounded-xl bg-muted/15 active:bg-muted/30 transition-colors"
+            >
+              <StickyNote className="w-3.5 h-3.5" />
+              توضیحات، تاریخ و تکرار
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          )}
 
-          {/* Date */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              تاریخ
-            </Label>
-            <PersianDatePicker 
-              value={date} 
-              onChange={setDate}
-              placeholder="انتخاب تاریخ"
-            />
-          </div>
-
-          {/* Recurring Toggle */}
-          <div className={cn(
-            "flex items-center justify-between p-4 rounded-xl border transition-all",
-            isRecurring 
-              ? "bg-primary/5 border-primary/20" 
-              : "bg-muted/20 border-border/30"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-10 h-10 rounded-lg flex items-center justify-center",
-                isRecurring ? "bg-primary/15 text-primary" : "bg-muted/50 text-muted-foreground"
-              )}>
-                <RefreshCw className="w-5 h-5" />
+          {showMore && (
+            <div className="space-y-4 animate-fade-in">
+              {/* Description */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-muted-foreground">توضیحات</span>
+                <Textarea
+                  placeholder="مثلا: خرید از فروشگاه..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={2}
+                  className="rounded-xl resize-none bg-muted/15 border-border/20 text-sm placeholder:text-muted-foreground/40"
+                />
               </div>
-              <div>
-                <p className="font-medium text-foreground text-sm">تراکنش تکراری</p>
-                <p className="text-xs text-muted-foreground">هر ماه تکرار شود</p>
+
+              {/* Date */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="w-3 h-3" />
+                  تاریخ
+                </span>
+                <PersianDatePicker 
+                  value={date} 
+                  onChange={setDate}
+                  placeholder="انتخاب تاریخ"
+                />
+              </div>
+
+              {/* Recurring */}
+              <div className={cn(
+                "flex items-center justify-between p-3.5 rounded-xl transition-all",
+                isRecurring 
+                  ? "bg-primary/5 ring-1 ring-primary/15" 
+                  : "bg-muted/15"
+              )}>
+                <div className="flex items-center gap-2.5">
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center",
+                    isRecurring ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground"
+                  )}>
+                    <RefreshCw className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground text-xs">تکرار ماهانه</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={isRecurring}
+                  onCheckedChange={setIsRecurring}
+                />
               </div>
             </div>
-            <Switch
-              checked={isRecurring}
-              onCheckedChange={setIsRecurring}
-            />
-          </div>
-        </form>
+          )}
+        </div>
 
-        {/* Footer */}
-        <div className="p-5 border-t border-border/30">
+        {/* Footer — Submit */}
+        <div className="p-4 pt-3">
           <Button 
             type="button"
             onClick={() => handleSubmit()}
-            className="w-full h-14 rounded-xl font-bold text-base text-white shadow-lg active:scale-[0.98] transition-transform"
-            style={{ background: `hsl(var(${config.colorVar}))` }}
+            className="w-full h-13 rounded-2xl font-bold text-sm text-white shadow-xl active:scale-[0.98] transition-transform border-0"
+            style={{ background: accentColor }}
             disabled={!amount || !category || isSubmitting}
           >
             {isSubmitting ? (
               <>
-                <RefreshCw className="w-5 h-5 animate-spin ml-2" />
+                <RefreshCw className="w-4 h-4 animate-spin ml-2" />
                 در حال ثبت...
               </>
             ) : (
               <>
-                <SubmitIcon className="w-5 h-5 ml-2" />
+                <SubmitIcon className="w-4 h-4 ml-2" />
                 {config.submitLabel}
               </>
             )}
