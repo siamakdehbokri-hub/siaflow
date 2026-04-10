@@ -68,9 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clear persisted query cache and offline data before signing out
+    // Clear persisted query cache and offline queue before signing out
     try {
       localStorage.removeItem('siaflow-query-cache');
+      await clearAllRequests();
     } catch {}
     await supabase.auth.signOut();
   };
