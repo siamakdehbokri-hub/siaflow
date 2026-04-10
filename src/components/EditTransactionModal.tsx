@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { X, Plus, Minus, Trash2, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote } from 'lucide-react';
+import { getCategoryIcon } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
