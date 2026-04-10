@@ -1,0 +1,82 @@
+import {
+  ShoppingCart,
+  Home,
+  Car,
+  Heart,
+  ShoppingBag,
+  Gamepad2,
+  CreditCard,
+  Landmark,
+  Users,
+  GraduationCap,
+  MoreHorizontal,
+  Wallet,
+  Briefcase,
+  TrendingUp,
+  Gift,
+  PiggyBank,
+  Coins,
+  Target,
+  Utensils,
+  Fuel,
+  Stethoscope,
+  Pill,
+  Shirt,
+  Clapperboard,
+  Wifi,
+  Receipt,
+  HandCoins,
+  Baby,
+  BookOpen,
+  Plane,
+  Coffee,
+  Dumbbell,
+  Smartphone,
+  type LucideIcon,
+} from 'lucide-react';
+
+/** Map category icon string names (from DB) to Lucide components */
+const iconMap: Record<string, LucideIcon> = {
+  ShoppingCart,
+  Home,
+  Car,
+  Heart,
+  ShoppingBag,
+  Gamepad2,
+  CreditCard,
+  Landmark,
+  Users,
+  GraduationCap,
+  MoreHorizontal,
+  Wallet,
+  Briefcase,
+  TrendingUp,
+  Gift,
+  PiggyBank,
+  Coins,
+  Target,
+  Utensils,
+  Fuel,
+  Stethoscope,
+  Pill,
+  Shirt,
+  Clapperboard,
+  Wifi,
+  Receipt,
+  HandCoins,
+  Baby,
+  BookOpen,
+  Plane,
+  Coffee,
+  Dumbbell,
+  Smartphone,
+};
+
+/**
+ * Resolve a category icon name to a Lucide component.
+ * Falls back to MoreHorizontal if the name is not recognized.
+ */
+export function getCategoryIcon(name?: string | null): LucideIcon {
+  if (!name) return MoreHorizontal;
+  return iconMap[name] ?? MoreHorizontal;
+}
