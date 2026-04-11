@@ -1,11 +1,6 @@
 import { useState } from 'react';
-import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree, PiggyBank, Coins, Target } from 'lucide-react';
-import { 
-  UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
-  Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
-  Smartphone, Plane, Book, Music, MoreHorizontal,
-  ShoppingCart, GraduationCap, CreditCard, Landmark, Users
-} from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree } from 'lucide-react';
+import { getCategoryIcon, categoryIconOptions } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,30 +32,7 @@ import { formatCurrency } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const iconOptions = [
-  { name: 'Home', icon: Home, label: 'خانه' },
-  { name: 'ShoppingCart', icon: ShoppingCart, label: 'خرید' },
-  { name: 'Car', icon: Car, label: 'حمل و نقل' },
-  { name: 'UtensilsCrossed', icon: UtensilsCrossed, label: 'غذا' },
-  { name: 'Heart', icon: Heart, label: 'سلامت' },
-  { name: 'ShoppingBag', icon: ShoppingBag, label: 'پوشاک' },
-  { name: 'Gamepad2', icon: Gamepad2, label: 'تفریح' },
-  { name: 'CreditCard', icon: CreditCard, label: 'اشتراک' },
-  { name: 'Landmark', icon: Landmark, label: 'بانک' },
-  { name: 'Users', icon: Users, label: 'خانواده' },
-  { name: 'GraduationCap', icon: GraduationCap, label: 'آموزش' },
-  { name: 'Wallet', icon: Wallet, label: 'مالی' },
-  { name: 'Briefcase', icon: Briefcase, label: 'کار' },
-  { name: 'TrendingUp', icon: TrendingUp, label: 'سرمایه‌گذاری' },
-  { name: 'Gift', icon: Gift, label: 'هدیه' },
-  { name: 'Book', icon: Book, label: 'کتاب' },
-  { name: 'Plane', icon: Plane, label: 'سفر' },
-  { name: 'Receipt', icon: Receipt, label: 'قبوض' },
-  { name: 'MoreHorizontal', icon: MoreHorizontal, label: 'سایر' },
-  { name: 'PiggyBank', icon: PiggyBank, label: 'پس‌انداز' },
-  { name: 'Coins', icon: Coins, label: 'سکه' },
-  { name: 'Target', icon: Target, label: 'هدف' },
-];
+const iconOptions = categoryIconOptions;
 
 const colorOptions = [
   'hsl(211, 100%, 50%)',
@@ -73,13 +45,6 @@ const colorOptions = [
   'hsl(25, 95%, 53%)',
 ];
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
-  Gamepad2, Wallet, TrendingUp, Home, Gift, Briefcase,
-  Smartphone, Plane, Book, Music, MoreHorizontal,
-  ShoppingCart, GraduationCap, CreditCard, Landmark, Users,
-  PiggyBank, Coins, Target
-};
 
 interface CategoryManagementProps {
   categories: Category[];

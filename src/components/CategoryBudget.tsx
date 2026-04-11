@@ -1,34 +1,13 @@
-import { 
-  UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
-  Gamepad2, Wallet, TrendingUp, AlertTriangle, Home,
-  Gift, Book, MoreHorizontal
-} from 'lucide-react';
+import { AlertTriangle, Receipt } from 'lucide-react';
+import { getCategoryIcon } from '@/utils/categoryIcons';
 import { Category } from '@/types/expense';
-import { formatCurrency } from '@/utils/persianDate';
-import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  UtensilsCrossed,
-  Car,
-  ShoppingBag,
-  Receipt,
-  Heart,
-  Gamepad2,
-  Wallet,
-  TrendingUp,
-  Home,
-  Gift,
-  Book,
-  MoreHorizontal,
-};
 
 interface CategoryBudgetProps {
   category: Category;
 }
 
 export function CategoryBudget({ category }: CategoryBudgetProps) {
-  const Icon = iconMap[category.icon] || Receipt;
+  const Icon = getCategoryIcon(category.icon);
   const progress = category.budget && category.spent 
     ? (category.spent / category.budget) * 100 
     : 0;
