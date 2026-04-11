@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree } from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree, Receipt, Wallet, PiggyBank } from 'lucide-react';
 import { getCategoryIcon, categoryIconOptions } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -163,7 +163,7 @@ export function CategoryManagement({
   const savingCategories = categories.filter(c => c.type === 'saving');
 
   const renderCategoryItem = (category: Category) => {
-    const Icon = iconMap[category.icon] || Receipt;
+    const Icon = getCategoryIcon(category.icon);
     const progress = category.budget && category.spent 
       ? (category.spent / category.budget) * 100 
       : 0;

@@ -1,6 +1,9 @@
-import { AlertTriangle, Receipt } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { getCategoryIcon } from '@/utils/categoryIcons';
 import { Category } from '@/types/expense';
+import { formatCurrency } from '@/utils/persianDate';
+import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 interface CategoryBudgetProps {
   category: Category;
