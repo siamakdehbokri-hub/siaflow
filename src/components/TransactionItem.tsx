@@ -1,50 +1,10 @@
 import { memo } from 'react';
-import { 
-  UtensilsCrossed, Car, ShoppingBag, Receipt, Heart, 
-  Gamepad2, Wallet, TrendingUp, RefreshCw,
-  Home, Gift, Book, MoreHorizontal, ArrowUpRight, ArrowDownRight, ArrowRight,
-  ShoppingCart, GraduationCap, CreditCard, Landmark, Users, Briefcase,
-  PiggyBank, Coins, Target
-} from 'lucide-react';
+import { RefreshCw, ArrowUpRight, ArrowDownRight, ArrowRight, Receipt } from 'lucide-react';
+import { transactionCategoryIconMap } from '@/utils/categoryIcons';
 import { Transaction } from '@/types/expense';
 import { formatPersianDateShort } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  'خوراک و خرید روزمره': ShoppingCart,
-  'خانه و زندگی': Home,
-  'حمل و نقل': Car,
-  'سلامت و درمان': Heart,
-  'خرید شخصی و پوشاک': ShoppingBag,
-  'سرگرمی و تفریح': Gamepad2,
-  'اشتراک‌ها و پرداخت ماهانه': CreditCard,
-  'مالی و بانک': Landmark,
-  'خانواده و روابط': Users,
-  'آموزش و رشد فردی': GraduationCap,
-  'سایر هزینه‌ها': MoreHorizontal,
-  'حقوق و درآمد شغلی': Wallet,
-  'کار و پول‌سازی': Briefcase,
-  'سرمایه‌گذاری': TrendingUp,
-  'سایر درآمدها': Gift,
-  'خانه': Home,
-  'خوراک و نوشیدنی': UtensilsCrossed,
-  'پوشاک و مد': ShoppingBag,
-  'سلامت و بهداشت': Heart,
-  'آموزش و توسعه فردی': Book,
-  'بدهی و قسط': Receipt,
-  'حقوق و دستمزد': Wallet,
-  'سرمایه‌گذاری و پس‌انداز': TrendingUp,
-  'غذا و رستوران': UtensilsCrossed,
-  'خرید': ShoppingBag,
-  'قبوض': Receipt,
-  'سلامت': Heart,
-  'تفریح': Gamepad2,
-  'حقوق': Wallet,
-  'پس‌انداز و سرمایه‌گذاری': PiggyBank,
-  'خرید سرمایه‌ای': Coins,
-  'اهداف مالی': Target,
-};
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -52,7 +12,7 @@ interface TransactionItemProps {
 }
 
 function TransactionItemComponent({ transaction, onClick }: TransactionItemProps) {
-  const CategoryIcon = iconMap[transaction.category] || Receipt;
+  const CategoryIcon = transactionCategoryIconMap[transaction.category] || Receipt;
   const isIncome = transaction.type === 'income';
   const isSaving = transaction.type === 'saving';
   const DirectionIcon = isSaving ? ArrowRight : isIncome ? ArrowUpRight : ArrowDownRight;

@@ -32,10 +32,14 @@ import {
   Coffee,
   Dumbbell,
   Smartphone,
+  Laptop,
+  Music,
+  Sparkles,
+  ChartPie,
   type LucideIcon,
 } from 'lucide-react';
 
-/** Map category icon string names (from DB) to Lucide components */
+/** Master map: DB icon-name string → Lucide component */
 const iconMap: Record<string, LucideIcon> = {
   ShoppingCart,
   Home,
@@ -70,7 +74,13 @@ const iconMap: Record<string, LucideIcon> = {
   Coffee,
   Dumbbell,
   Smartphone,
+  Laptop,
+  Music,
+  Sparkles,
+  ChartPie,
 };
+
+export { iconMap };
 
 /**
  * Resolve a category icon name to a Lucide component.
@@ -80,3 +90,92 @@ export function getCategoryIcon(name?: string | null): LucideIcon {
   if (!name) return MoreHorizontal;
   return iconMap[name] ?? MoreHorizontal;
 }
+
+/** Persian-labelled icon options for the category management picker */
+export const categoryIconOptions: { name: string; icon: LucideIcon; label: string }[] = [
+  { name: 'Home', icon: Home, label: 'خانه' },
+  { name: 'ShoppingCart', icon: ShoppingCart, label: 'خرید' },
+  { name: 'Car', icon: Car, label: 'حمل و نقل' },
+  { name: 'Utensils', icon: Utensils, label: 'غذا' },
+  { name: 'Coffee', icon: Coffee, label: 'کافه' },
+  { name: 'Heart', icon: Heart, label: 'سلامت' },
+  { name: 'Stethoscope', icon: Stethoscope, label: 'درمان' },
+  { name: 'Pill', icon: Pill, label: 'دارو' },
+  { name: 'ShoppingBag', icon: ShoppingBag, label: 'پوشاک' },
+  { name: 'Shirt', icon: Shirt, label: 'لباس' },
+  { name: 'Gamepad2', icon: Gamepad2, label: 'تفریح' },
+  { name: 'Clapperboard', icon: Clapperboard, label: 'سینما' },
+  { name: 'CreditCard', icon: CreditCard, label: 'اشتراک' },
+  { name: 'Landmark', icon: Landmark, label: 'بانک' },
+  { name: 'Users', icon: Users, label: 'خانواده' },
+  { name: 'Baby', icon: Baby, label: 'کودک' },
+  { name: 'GraduationCap', icon: GraduationCap, label: 'آموزش' },
+  { name: 'BookOpen', icon: BookOpen, label: 'کتاب' },
+  { name: 'Wallet', icon: Wallet, label: 'مالی' },
+  { name: 'Briefcase', icon: Briefcase, label: 'کار' },
+  { name: 'TrendingUp', icon: TrendingUp, label: 'سرمایه‌گذاری' },
+  { name: 'Gift', icon: Gift, label: 'هدیه' },
+  { name: 'Plane', icon: Plane, label: 'سفر' },
+  { name: 'Receipt', icon: Receipt, label: 'قبوض' },
+  { name: 'Wifi', icon: Wifi, label: 'اینترنت' },
+  { name: 'Fuel', icon: Fuel, label: 'سوخت' },
+  { name: 'Dumbbell', icon: Dumbbell, label: 'ورزش' },
+  { name: 'Smartphone', icon: Smartphone, label: 'موبایل' },
+  { name: 'HandCoins', icon: HandCoins, label: 'وام' },
+  { name: 'PiggyBank', icon: PiggyBank, label: 'پس‌انداز' },
+  { name: 'Coins', icon: Coins, label: 'سکه' },
+  { name: 'Target', icon: Target, label: 'هدف' },
+  { name: 'MoreHorizontal', icon: MoreHorizontal, label: 'سایر' },
+];
+
+/** Persian-labelled icon options for saving goals picker */
+export const goalIconOptions: { name: string; icon: LucideIcon; label: string }[] = [
+  { name: 'Target', icon: Target, label: 'هدف' },
+  { name: 'PiggyBank', icon: PiggyBank, label: 'پس‌انداز' },
+  { name: 'Laptop', icon: Laptop, label: 'لپ‌تاپ' },
+  { name: 'Smartphone', icon: Smartphone, label: 'موبایل' },
+  { name: 'Car', icon: Car, label: 'خودرو' },
+  { name: 'Home', icon: Home, label: 'خانه' },
+  { name: 'Plane', icon: Plane, label: 'سفر' },
+  { name: 'Gift', icon: Gift, label: 'هدیه' },
+  { name: 'GraduationCap', icon: GraduationCap, label: 'تحصیل' },
+  { name: 'Heart', icon: Heart, label: 'سلامت' },
+  { name: 'Dumbbell', icon: Dumbbell, label: 'ورزش' },
+  { name: 'Coins', icon: Coins, label: 'سرمایه' },
+];
+
+/** Name-based icon map for TransactionItem (maps Persian category names) */
+export const transactionCategoryIconMap: Record<string, LucideIcon> = {
+  'خوراک و خرید روزمره': ShoppingCart,
+  'خانه و زندگی': Home,
+  'حمل و نقل': Car,
+  'سلامت و درمان': Heart,
+  'خرید شخصی و پوشاک': ShoppingBag,
+  'سرگرمی و تفریح': Gamepad2,
+  'اشتراک‌ها و پرداخت ماهانه': CreditCard,
+  'مالی و بانک': Landmark,
+  'خانواده و روابط': Users,
+  'آموزش و رشد فردی': GraduationCap,
+  'سایر هزینه‌ها': MoreHorizontal,
+  'حقوق و درآمد شغلی': Wallet,
+  'کار و پول‌سازی': Briefcase,
+  'سرمایه‌گذاری': TrendingUp,
+  'سایر درآمدها': Gift,
+  'خانه': Home,
+  'خوراک و نوشیدنی': Utensils,
+  'پوشاک و مد': ShoppingBag,
+  'سلامت و بهداشت': Heart,
+  'آموزش و توسعه فردی': BookOpen,
+  'بدهی و قسط': Receipt,
+  'حقوق و دستمزد': Wallet,
+  'سرمایه‌گذاری و پس‌انداز': TrendingUp,
+  'غذا و رستوران': Utensils,
+  'خرید': ShoppingBag,
+  'قبوض': Receipt,
+  'سلامت': Heart,
+  'تفریح': Gamepad2,
+  'حقوق': Wallet,
+  'پس‌انداز و سرمایه‌گذاری': PiggyBank,
+  'خرید سرمایه‌ای': Coins,
+  'اهداف مالی': Target,
+};
