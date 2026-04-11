@@ -1,9 +1,20 @@
 import { useState } from 'react';
 import { 
   Plus, ArrowUpCircle, ArrowDownCircle, 
-  Trash2, Sparkles
+  Trash2, Sparkles, PiggyBank
 } from 'lucide-react';
 import { getCategoryIcon, goalIconOptions } from '@/utils/categoryIcons';
+
+const colorOptions = [
+  'hsl(175, 85%, 42%)',
+  'hsl(38, 92%, 50%)',
+  'hsl(262, 83%, 58%)',
+  'hsl(199, 89%, 48%)',
+  'hsl(0, 72%, 51%)',
+  'hsl(145, 65%, 42%)',
+  'hsl(330, 80%, 60%)',
+  'hsl(25, 95%, 53%)',
+];
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
