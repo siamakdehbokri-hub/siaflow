@@ -60,8 +60,7 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
     ? stats.current // paid amount
     : stats.total - stats.current; // remaining
 
-  // Icon map for card types
-  const iconMap = { budget: ChartPie, goals: Target, debts: Landmark };
+  const planIconMap = { budget: ChartPie, goals: Target, debts: Landmark };
 
   return (
     <button
@@ -91,7 +90,7 @@ export function PlanningCard({ type, stats, onClick }: PlanningCardProps) {
               ? "bg-gradient-to-br from-destructive/15 to-destructive/5 border-destructive/10" 
               : `bg-gradient-to-br from-${config.color}/15 to-${config.color}/5 border-${config.color}/10`
           )}>
-            {(() => { const CardIcon = iconMap[type]; return <CardIcon className="w-7 h-7 text-foreground" strokeWidth={2} />; })()}
+            {(() => { const CardIcon = planIconMap[type]; return <CardIcon className="w-7 h-7 text-foreground" strokeWidth={2} />; })()}
           </div>
           
           <div className="flex-1 min-w-0">

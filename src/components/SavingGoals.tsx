@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { 
-  Plus, Target, Wallet, TrendingUp, ArrowUpCircle, ArrowDownCircle, 
-  Trash2, Sparkles, PiggyBank, Gift, Home, Car, Plane, Laptop, 
-  Smartphone, GraduationCap, Heart
+  Plus, ArrowUpCircle, ArrowDownCircle, 
+  Trash2, Sparkles
 } from 'lucide-react';
+import { getCategoryIcon, goalIconOptions } from '@/utils/categoryIcons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,33 +30,7 @@ import { SavingGoal } from '@/hooks/useSavingGoals';
 import { formatCurrency } from '@/utils/persianDate';
 import { cn } from '@/lib/utils';
 
-const iconOptions = [
-  { name: 'Target', icon: Target, label: 'هدف' },
-  { name: 'PiggyBank', icon: PiggyBank, label: 'پس‌انداز' },
-  { name: 'Laptop', icon: Laptop, label: 'لپ‌تاپ' },
-  { name: 'Smartphone', icon: Smartphone, label: 'موبایل' },
-  { name: 'Car', icon: Car, label: 'خودرو' },
-  { name: 'Home', icon: Home, label: 'خانه' },
-  { name: 'Plane', icon: Plane, label: 'سفر' },
-  { name: 'Gift', icon: Gift, label: 'هدیه' },
-  { name: 'GraduationCap', icon: GraduationCap, label: 'تحصیل' },
-  { name: 'Heart', icon: Heart, label: 'سلامت' },
-];
-
-const colorOptions = [
-  'hsl(175, 85%, 42%)',
-  'hsl(38, 92%, 50%)',
-  'hsl(262, 83%, 58%)',
-  'hsl(199, 89%, 48%)',
-  'hsl(0, 72%, 51%)',
-  'hsl(155, 80%, 40%)',
-  'hsl(330, 80%, 60%)',
-  'hsl(220, 70%, 50%)',
-];
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Target, PiggyBank, Laptop, Smartphone, Car, Home, Plane, Gift, GraduationCap, Heart
-};
+const iconOptions = goalIconOptions;
 
 interface SavingGoalsProps {
   goals: SavingGoal[];
@@ -207,7 +181,7 @@ export function SavingGoals({ goals, onAddGoal, onUpdateAmount, onDeleteGoal }: 
           </Card>
         ) : (
           goals.map((goal) => {
-            const Icon = iconMap[goal.icon] || Target;
+            const Icon = getCategoryIcon(goal.icon);
             const progress = (goal.currentAmount / goal.targetAmount) * 100;
             const remaining = goal.targetAmount - goal.currentAmount;
             const isComplete = progress >= 100;
