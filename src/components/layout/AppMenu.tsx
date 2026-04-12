@@ -11,8 +11,10 @@ import {
   ArrowRightLeft, 
   ShieldCheck, 
   LifeBuoy,
+  Download,
   type LucideIcon
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/hooks/useAdmin';
 import { NavTab } from '@/components/navigation/BottomNav';
@@ -176,6 +178,19 @@ export function AppMenu({
               />
             </>
           )}
+
+          {/* Tools */}
+          <p className="text-xs font-semibold text-muted-foreground px-1 pt-4 pb-1">
+            ابزارها
+          </p>
+
+          <MenuItem
+            icon={Download}
+            label="نصب اپلیکیشن"
+            description="نصب روی گوشی + حالت آفلاین"
+            onClick={() => { onClose(); window.location.href = '/install'; }}
+            variant="primary"
+          />
 
           {/* Help */}
           <p className="text-xs font-semibold text-muted-foreground px-1 pt-4 pb-1">

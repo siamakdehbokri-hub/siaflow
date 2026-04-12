@@ -37,7 +37,7 @@ export async function offlineMutation<T = unknown>(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
-    'Prefer': method === 'POST' ? 'return=representation' : 'return=minimal',
+    'Prefer': 'return=representation',
   };
   if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
