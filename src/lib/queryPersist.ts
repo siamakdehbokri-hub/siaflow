@@ -10,13 +10,14 @@ const MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
 
 /** Persist relevant query data to localStorage */
 export function persistQueryCache(queryClient: QueryClient) {
-  const unsubscribe = queryClient.getQueryCache().subscribe(() => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  const flush = () => {
     try {
       const queries = queryClient.getQueryCache().getAll();
       const serializable: Array<{ key: readonly unknown[]; data: unknown; updatedAt: number }> = [];
 
       for (const query of queries) {
-        // Only persist successful queries with data
         if (query.state.status === 'success' && query.state.data !== undefined) {
           serializable.push({
             key: query.queryKey,
@@ -28,8 +29,13 @@ export function persistQueryCache(queryClient: QueryClient) {
 
       localStorage.setItem(CACHE_KEY, JSON.stringify(serializable));
     } catch {
-      // localStorage full or other error – silently ignore
+      // localStorage full or other error
     }
+  };
+
+  const unsubscribe = queryClient.getQueryCache().subscribe(() => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(flush, 2000); // debounce 2s
   });
 
   return unsubscribe;
