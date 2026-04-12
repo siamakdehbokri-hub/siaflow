@@ -19,6 +19,7 @@ const Admin = lazy(() => lazyRetry(() => import("./pages/Admin")));
 const Terms = lazy(() => lazyRetry(() => import("./pages/Terms")));
 const ResetPassword = lazy(() => lazyRetry(() => import("./pages/ResetPassword")));
 const NotFound = lazy(() => lazyRetry(() => import("./pages/NotFound")));
+const Install = lazy(() => lazyRetry(() => import("./pages/Install")));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -167,6 +168,7 @@ const App = () => (
                     } 
                   />
                   <Route path="/terms" element={<Terms />} />
+                  <Route path="/install" element={<Install />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
