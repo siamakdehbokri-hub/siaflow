@@ -168,6 +168,7 @@ const App = () => (
                     } 
                   />
                   <Route path="/terms" element={<Terms />} />
+                  <Route path="/install" element={<Install />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
