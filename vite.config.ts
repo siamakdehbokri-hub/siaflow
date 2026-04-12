@@ -24,6 +24,9 @@ export default defineConfig(({ mode }) => ({
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       },
+      workbox: {
+        navigateFallbackDenylist: [/^\/~oauth/],
+      },
       devOptions: {
         enabled: false,
       },
