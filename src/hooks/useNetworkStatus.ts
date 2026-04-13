@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { processQueue, onSyncStatusChange, onSyncComplete, type SyncStatus } from '@/lib/syncManager';
-import { getPendingCount } from '@/lib/offlineDb';
+import { getPendingCount, subscribeToOfflineQueue } from '@/lib/offlineDb';
 
 export type NetworkState = 'online' | 'offline' | 'syncing';
 
@@ -17,13 +17,22 @@ export function useNetworkStatus() {
   const [pendingCount, setPendingCount] = useState(0);
   const queryClient = useQueryClient();
 
+  const refreshPendingCount = useCallback(async () => {
+    const count = await getPendingCount();
+    setPendingCount(count);
+    return count;
+  }, []);
+
   // Listen to browser online/offline events
   useEffect(() => {
     const goOnline = () => {
       setOnline(true);
       processQueue();
     };
-    const goOffline = () => setOnline(false);
+    const goOffline = () => {
+      setOnline(false);
+      refreshPendingCount();
+    };
 
     window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
@@ -31,7 +40,7 @@ export function useNetworkStatus() {
       window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };
-  }, []);
+  }, [refreshPendingCount]);
 
   // Listen to sync status changes
   useEffect(() => {
@@ -55,17 +64,40 @@ export function useNetworkStatus() {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'SYNC_COMPLETE') {
         queryClient.invalidateQueries();
-        getPendingCount().then(setPendingCount);
+        refreshPendingCount();
       }
     };
     navigator.serviceWorker?.addEventListener('message', handler);
     return () => navigator.serviceWorker?.removeEventListener('message', handler);
-  }, [queryClient]);
+  }, [queryClient, refreshPendingCount]);
 
-  // Initial pending count
+  // Initial pending count + resume sync when app opens online
   useEffect(() => {
-    getPendingCount().then(setPendingCount);
-  }, []);
+    refreshPendingCount().then((count) => {
+      if (navigator.onLine && count > 0) {
+        processQueue();
+      }
+    });
+
+    const unsubscribe = subscribeToOfflineQueue(() => {
+      refreshPendingCount();
+    });
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
+        refreshPendingCount().then((count) => {
+          if (count > 0) processQueue();
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshPendingCount]);
 
   const networkState: NetworkState = !online
     ? 'offline'

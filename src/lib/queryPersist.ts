@@ -38,7 +38,27 @@ export function persistQueryCache(queryClient: QueryClient) {
     timer = setTimeout(flush, 2000); // debounce 2s
   });
 
-  return unsubscribe;
+  const handlePageHide = () => {
+    if (timer) clearTimeout(timer);
+    flush();
+  };
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      handlePageHide();
+    }
+  };
+
+  window.addEventListener('pagehide', handlePageHide);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  return () => {
+    if (timer) clearTimeout(timer);
+    handlePageHide();
+    window.removeEventListener('pagehide', handlePageHide);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    unsubscribe();
+  };
 }
 
 /** Restore query cache from localStorage */
