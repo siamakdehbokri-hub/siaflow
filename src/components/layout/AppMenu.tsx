@@ -85,6 +85,7 @@ export function AppMenu({
   onOpenHelp 
 }: AppMenuProps) {
   const { isAdmin, loading: adminLoading } = useAdmin();
+  const navigate = useNavigate();
 
   const handleNavigation = (view: SubView) => {
     onNavigate(view);
