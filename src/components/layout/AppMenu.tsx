@@ -188,7 +188,7 @@ export function AppMenu({
             icon={Download}
             label="نصب اپلیکیشن"
             description="نصب روی گوشی + حالت آفلاین"
-            onClick={() => { onClose(); window.location.href = '/install'; }}
+            onClick={() => { onClose(); navigate('/install'); }}
             variant="primary"
           />
 
