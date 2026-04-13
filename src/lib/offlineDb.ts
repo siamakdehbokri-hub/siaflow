@@ -7,6 +7,7 @@
 const DB_NAME = 'siaflow-offline';
 const DB_VERSION = 1;
 const STORE_NAME = 'pending-requests';
+const QUEUE_EVENT = 'offline-queue-changed';
 
 export interface QueuedRequest {
   id?: number;
@@ -19,6 +20,18 @@ export interface QueuedRequest {
   status: 'pending' | 'processing' | 'failed';
   errorMessage?: string;
   idempotencyKey?: string;
+}
+
+function notifyQueueChanged() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(QUEUE_EVENT));
+  }
+}
+
+export function subscribeToOfflineQueue(fn: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener(QUEUE_EVENT, fn);
+  return () => window.removeEventListener(QUEUE_EVENT, fn);
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -98,7 +111,10 @@ export async function enqueueRequest(
     const request = store.add(item);
     request.onsuccess = () => resolve(request.result as number);
     request.onerror = () => reject(request.error);
-    tx.oncomplete = () => db.close();
+    tx.oncomplete = () => {
+      db.close();
+      notifyQueueChanged();
+    };
   });
 }
 
@@ -137,7 +153,11 @@ export async function updateQueuedRequest(
       store.put({ ...existing, ...updates });
     };
     getReq.onerror = () => reject(getReq.error);
-    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.oncomplete = () => {
+      db.close();
+      notifyQueueChanged();
+      resolve();
+    };
   });
 }
 
@@ -147,7 +167,11 @@ export async function removeQueuedRequest(id: number): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
     tx.objectStore(STORE_NAME).delete(id);
-    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.oncomplete = () => {
+      db.close();
+      notifyQueueChanged();
+      resolve();
+    };
     tx.onerror = () => reject(tx.error);
   });
 }
@@ -164,7 +188,11 @@ export async function clearAllRequests(): Promise<void> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
     tx.objectStore(STORE_NAME).clear();
-    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.oncomplete = () => {
+      db.close();
+      notifyQueueChanged();
+      resolve();
+    };
     tx.onerror = () => reject(tx.error);
   });
 }
