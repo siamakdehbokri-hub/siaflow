@@ -5,6 +5,7 @@ import { isTodayJalali, formatPersianDateFull, formatPersianDateShort } from '@/
 import { getCurrentMonthSummary } from '@/utils/financialEngine';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
+import { PWAInstallBanner } from '@/components/PWAInstallBanner';
 
 interface HomeScreenProps {
   transactions: Transaction[];
@@ -105,6 +106,9 @@ export function HomeScreen({
 
   return (
     <div className="relative space-y-5 animate-fade-in">
+      {/* PWA Install Banner */}
+      <PWAInstallBanner />
+
       {/* Ambient Glows */}
       <div className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl" style={{ background: 'var(--blob-purple)' }} />
       <div className="pointer-events-none absolute top-96 -left-20 w-60 h-60 rounded-full blur-3xl" style={{ background: 'var(--blob-teal)' }} />

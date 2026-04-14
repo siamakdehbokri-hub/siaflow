@@ -90,8 +90,14 @@ export default function Install() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [platform] = useState<Platform>(detectPlatform);
+  const [isPreview, setIsPreview] = useState(false);
 
   useEffect(() => {
+    // Detect preview/iframe environment
+    const inIframe = (() => { try { return window.self !== window.top; } catch { return true; } })();
+    const previewHost = window.location.hostname.includes('id-preview--') || window.location.hostname.includes('lovableproject.com');
+    setIsPreview(inIframe || previewHost);
+
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
@@ -139,6 +145,20 @@ export default function Install() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-md mx-auto w-full px-4 py-6 space-y-8 pb-safe pb-12">
+
+          {/* Preview Warning */}
+          {isPreview && (
+            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 space-y-2">
+              <p className="text-sm font-bold text-amber-500">⚠️ محیط پیش‌نمایش</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                قابلیت‌های PWA (نصب، آفلاین، Service Worker) فقط در{' '}
+                <a href="https://siaflow.lovable.app/install" target="_blank" rel="noopener" className="text-primary font-bold underline">
+                  نسخه منتشرشده
+                </a>{' '}
+                کار می‌کنند. لطفاً اپ را از آدرس اصلی روی مرورگر موبایل باز کنید.
+              </p>
+            </div>
+          )}
 
           {/* ═══════════════════════════════════════════
               SECTION 1: Hero + Install

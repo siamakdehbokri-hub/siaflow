@@ -310,3 +310,8 @@ async function handleMutation(request: Request): Promise<Response> {
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
+
+// ─── Skip waiting for immediate activation ──────────────────
+self.addEventListener('install', (event) => {
+  event.waitUntil(self.skipWaiting());
+});
