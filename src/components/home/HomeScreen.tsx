@@ -65,17 +65,21 @@ export function HomeScreen({
 
   const financialData = useMemo(() => {
     const summary = getCurrentMonthSummary(transactions, categories);
-    
+
     const todayExpense = transactions
       .filter(t => t.type === 'expense' && isTodayJalali(t.date))
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
+    // Net balance INCLUDES carry-over from previous month (if positive).
+    // Deficits are NOT carried — they only trigger a warning in CarryOverCard.
+    const balanceWithCarry = summary.netBalance + carryOver.carriedAmount;
+
     return {
       income: summary.totalIncome,
       expense: summary.totalExpense,
       saving: summary.totalSaving,
       todayExpense,
-      balance: summary.netBalance,
+      balance: balanceWithCarry,
       savingsRate: summary.savingsRate,
       expenseToIncomeRatio: summary.expenseToIncomeRatio,
       recentTransactions: [...transactions]
@@ -86,7 +90,7 @@ export function HomeScreen({
         })
         .slice(0, 5),
     };
-  }, [transactions, categories]);
+  }, [transactions, categories, carryOver.carriedAmount]);
 
   const today = new Date();
   const persianDate = formatPersianDateFull(today.toISOString());
