@@ -140,10 +140,7 @@ export function useAdmin() {
       }
 
       try {
-        const { data, error } = await supabase.rpc('has_role', {
-          _user_id: user.id,
-          _role: 'admin'
-        });
+        const { data, error } = await supabase.rpc('is_admin');
 
         if (error) {
           console.error('Error checking admin role:', error);

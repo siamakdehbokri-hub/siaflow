@@ -380,6 +380,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       transfer_between_accounts: {
         Args: {
           _amount: number
