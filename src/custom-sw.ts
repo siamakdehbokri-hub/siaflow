@@ -15,7 +15,7 @@ declare global {
     sync: SyncEvent;
   }
   interface ServiceWorkerGlobalScope {
-    __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
+    __WB_MANIFEST: Array<import('workbox-precaching').PrecacheEntry | string>;
   }
 }
 
