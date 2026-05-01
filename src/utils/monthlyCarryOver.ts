@@ -11,7 +11,7 @@
 
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
-import { Transaction } from '@/types/expense';
+import type { Transaction } from '@/types/expense';
 import { toLocalISODateString } from '@/utils/dateUtils';
 
 export interface MonthCarryOverData {
