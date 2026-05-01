@@ -221,6 +221,11 @@ export function HomeScreen({
               )}>
                 {financialData.balance >= 0 ? '+' : ''}{formatCompactOnly(financialData.balance)} {currencyInfo.symbol}
               </p>
+              {carryOver.carriedAmount > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  شامل +{formatCompactOnly(carryOver.carriedAmount)} مانده ماه قبل
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
