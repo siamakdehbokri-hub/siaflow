@@ -176,6 +176,9 @@ export function HomeScreen({
         </div>
       </div>
 
+      {/* Carry-over from previous month */}
+      <CarryOverCard data={carryOver} announce={showAnnouncement} onDismiss={acknowledge} />
+
       {/* Summary Cards */}
       {!hasNoData && (
         <div className="grid grid-cols-2 gap-3">
