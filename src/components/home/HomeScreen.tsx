@@ -6,6 +6,8 @@ import { getCurrentMonthSummary } from '@/utils/financialEngine';
 import { cn } from '@/lib/utils';
 import { useCurrency } from '@/hooks/useCurrency';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
+import { useMonthlyCarryOver } from '@/hooks/useMonthlyCarryOver';
+import { CarryOverCard } from '@/components/home/CarryOverCard';
 
 interface HomeScreenProps {
   transactions: Transaction[];
@@ -31,6 +33,7 @@ export function HomeScreen({
   onOpenAutoSavings,
 }: HomeScreenProps) {
   const { formatAmountCompact, currencyInfo, convertAmount, currency } = useCurrency();
+  const { data: carryOver, showAnnouncement, acknowledge } = useMonthlyCarryOver(transactions);
 
   const formatNumberFull = (amount: number) => {
     const converted = convertAmount(amount);
@@ -62,17 +65,21 @@ export function HomeScreen({
 
   const financialData = useMemo(() => {
     const summary = getCurrentMonthSummary(transactions, categories);
-    
+
     const todayExpense = transactions
       .filter(t => t.type === 'expense' && isTodayJalali(t.date))
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
+    // Net balance INCLUDES carry-over from previous month (if positive).
+    // Deficits are NOT carried — they only trigger a warning in CarryOverCard.
+    const balanceWithCarry = summary.netBalance + carryOver.carriedAmount;
+
     return {
       income: summary.totalIncome,
       expense: summary.totalExpense,
       saving: summary.totalSaving,
       todayExpense,
-      balance: summary.netBalance,
+      balance: balanceWithCarry,
       savingsRate: summary.savingsRate,
       expenseToIncomeRatio: summary.expenseToIncomeRatio,
       recentTransactions: [...transactions]
@@ -83,7 +90,7 @@ export function HomeScreen({
         })
         .slice(0, 5),
     };
-  }, [transactions, categories]);
+  }, [transactions, categories, carryOver.carriedAmount]);
 
   const today = new Date();
   const persianDate = formatPersianDateFull(today.toISOString());
@@ -173,6 +180,9 @@ export function HomeScreen({
         </div>
       </div>
 
+      {/* Carry-over from previous month */}
+      <CarryOverCard data={carryOver} announce={showAnnouncement} onDismiss={acknowledge} />
+
       {/* Summary Cards */}
       {!hasNoData && (
         <div className="grid grid-cols-2 gap-3">
@@ -215,6 +225,11 @@ export function HomeScreen({
               )}>
                 {financialData.balance >= 0 ? '+' : ''}{formatCompactOnly(financialData.balance)} {currencyInfo.symbol}
               </p>
+              {carryOver.carriedAmount > 0 && (
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  شامل +{formatCompactOnly(carryOver.carriedAmount)} مانده ماه قبل
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
