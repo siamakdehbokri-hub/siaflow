@@ -33,6 +33,7 @@ export function HomeScreen({
   onOpenAutoSavings,
 }: HomeScreenProps) {
   const { formatAmountCompact, currencyInfo, convertAmount, currency } = useCurrency();
+  const { data: carryOver, showAnnouncement, acknowledge } = useMonthlyCarryOver(transactions);
 
   const formatNumberFull = (amount: number) => {
     const converted = convertAmount(amount);
