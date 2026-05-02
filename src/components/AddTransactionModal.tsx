@@ -334,6 +334,9 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                   placeholder="مثلا: خرید از فروشگاه..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  onFocus={(e) => {
+                    setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
+                  }}
                   rows={2}
                   className="rounded-xl resize-none bg-muted/15 border-border/20 text-sm placeholder:text-muted-foreground/40"
                 />
@@ -379,8 +382,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
           )}
         </div>
 
-        {/* Footer — Submit */}
-        <div className="p-4 pt-3">
+        {/* Footer — Submit (sticky, keyboard & safe-area aware) */}
+        <div
+          className="flex-shrink-0 px-4 pt-3 border-t border-border/20 bg-background/80 backdrop-blur-xl"
+          style={{
+            paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 12px + ${keyboardInset}px)`,
+            transition: 'padding-bottom 0.2s ease-out',
+          }}
+        >
           <Button 
             type="button"
             onClick={() => handleSubmit()}
