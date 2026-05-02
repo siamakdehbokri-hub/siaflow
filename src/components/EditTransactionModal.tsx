@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { PersianDatePicker } from './PersianDatePicker';
 import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useKeyboardInset } from '@/hooks/useKeyboardInset';
 
 interface EditTransactionModalProps {
   isOpen: boolean;
@@ -153,11 +154,15 @@ export function EditTransactionModal({
 
   const config = TYPE_CONFIG[type];
   const accentColor = `hsl(var(${config.colorVar}))`;
+  const keyboardInset = useKeyboardInset();
 
   return (
     <>
       <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-        <DrawerContent className="max-h-[94vh] flex flex-col border-0 bg-background/95 backdrop-blur-2xl">
+        <DrawerContent
+          className="flex flex-col border-0 bg-background/95 backdrop-blur-2xl"
+          style={{ maxHeight: '94dvh', height: '94dvh' }}
+        >
           
           {/* Accent bar */}
           <div className="mx-auto mt-3 mb-1 w-10 h-1 rounded-full" style={{ background: accentColor, opacity: 0.5 }} />
@@ -182,7 +187,10 @@ export function EditTransactionModal({
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-5">
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain px-5 pb-4 space-y-5"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
             
             {/* Type Segmented Control */}
             <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-muted/40">
@@ -220,6 +228,9 @@ export function EditTransactionModal({
                   placeholder="مبلغ"
                   value={amount}
                   onChange={(e) => handleAmountChange(e.target.value)}
+                  onFocus={(e) => {
+                    setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
+                  }}
                   className="text-2xl font-bold text-center h-16 rounded-2xl bg-muted/20 border-border/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 placeholder:text-muted-foreground/40 placeholder:text-lg"
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 font-medium">
@@ -332,6 +343,9 @@ export function EditTransactionModal({
                 placeholder="مثلا: خرید از فروشگاه..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                onFocus={(e) => {
+                  setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
+                }}
                 rows={2}
                 className="rounded-xl resize-none bg-muted/15 border-border/20 text-sm placeholder:text-muted-foreground/40"
               />
@@ -373,8 +387,14 @@ export function EditTransactionModal({
             </div>
           </div>
 
-          {/* Footer — Submit */}
-          <div className="p-4 pt-3">
+          {/* Footer — Submit (sticky, keyboard & safe-area aware) */}
+          <div
+            className="flex-shrink-0 px-4 pt-3 border-t border-border/20 bg-background/80 backdrop-blur-xl"
+            style={{
+              paddingBottom: `calc(env(safe-area-inset-bottom, 0px) + 12px + ${keyboardInset}px)`,
+              transition: 'padding-bottom 0.2s ease-out',
+            }}
+          >
             <Button 
               type="button"
               onClick={() => handleSubmit()}
