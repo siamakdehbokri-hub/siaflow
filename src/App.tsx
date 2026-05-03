@@ -93,9 +93,16 @@ function ThemeInitializer() {
     };
     navigator.serviceWorker?.addEventListener('message', onSwMessage);
 
+    // After offline mutations replay, refetch all queries so optimistic
+    // offline IDs are reconciled with real database IDs returned by the server.
+    const offSyncDone = onSyncComplete(() => {
+      queryClient.invalidateQueries();
+    });
+
     return () => {
       mediaQuery.removeEventListener('change', handler);
       navigator.serviceWorker?.removeEventListener('message', onSwMessage);
+      offSyncDone();
     };
   }, []);
 
