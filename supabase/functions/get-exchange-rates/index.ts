@@ -33,11 +33,9 @@ async function fetchFromCurrencyApi(): Promise<{ usd_to_irr: number; usd_to_irt:
           if (ratio > 0.85 && ratio < 1.15) {
             return { usd_to_irr: rialRate, usd_to_irt: rialRate / 10 };
           }
-          console.log(`currency-api rate ${rialRate} too far from market rate ${MANUAL_MARKET_RATE_IRR}, using manual`);
         }
       }
     } catch (e) {
-      console.log(`currency-api error: ${e.message}`);
     }
   }
   throw new Error("currency-api: no accurate rate");
@@ -142,16 +140,13 @@ serve(async (req) => {
     try {
       rates = await fetchFromCurrencyApi();
       source = "currency-api";
-      console.log(`✅ Got rates from currency-api: ${rates.usd_to_irt} IRT`);
     } catch (err) {
-      console.log(`❌ currency-api failed: ${err.message}`);
     }
 
     // Use manual Iranian market rate as primary fallback
     if (!rates) {
       rates = { usd_to_irr: MANUAL_MARKET_RATE_IRR, usd_to_irt: MANUAL_MARKET_RATE_IRT };
       source = "بازار آزاد ایران";
-      console.log(`📌 Using manual market rate: ${MANUAL_MARKET_RATE_IRT} IRT`);
     }
 
     cachedRates = { ...rates, timestamp: Date.now(), source };

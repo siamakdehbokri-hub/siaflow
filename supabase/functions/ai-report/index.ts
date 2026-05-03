@@ -110,8 +110,6 @@ serve(async (req) => {
     }
 
     const userId = claimsData.user.id;
-    console.log("AI report request from user:", userId);
-
     // ========== INPUT VALIDATION ==========
     const body = await req.json();
     const { transactions: rawTransactions, categories: rawCategories, type, monthlyData } = body;
@@ -164,11 +162,7 @@ serve(async (req) => {
       : [];
 
     if (suspiciousCount > 0) {
-      console.warn("Suspicious prompt-injection input detected", { userId, reportType, suspiciousCount });
     }
-
-    console.log("Generating AI report:", reportType, "txCount:", hardenedTransactions.length, "user:", userId);
-
     // ========== BUILD MONTH-ISOLATED PROMPT ==========
     const totalIncome = hardenedTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const totalExpense = hardenedTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
@@ -388,9 +382,6 @@ ${budgetCategories.map(c => {
 - پس‌انداز: ${fmtNum(totalSaving)} (${savingRate}٪) | تراز: ${fmtNum(totalIncome - totalExpense - totalSaving)}
 تشخیص کوتاه و مهم‌ترین اقدام فوری.`;
     }
-
-    console.log("Calling AI gateway for user:", userId);
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -442,15 +433,11 @@ ${budgetCategories.map(c => {
 
     const aiMessage = sanitizeAIOutput(aiMessageRaw);
     if (!aiMessage || outputLooksUnsafe(aiMessage)) {
-      console.warn("Blocked unsafe AI output", { userId, reportType });
       return new Response(
         JSON.stringify({ error: "پاسخ نامعتبر دریافت شد. لطفاً دوباره تلاش کنید." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    console.log("AI report generated successfully for user:", userId);
-
     return new Response(
       JSON.stringify({ report: aiMessage }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

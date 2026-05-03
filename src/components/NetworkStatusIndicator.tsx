@@ -5,8 +5,9 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export function NetworkStatusIndicator() {
-  const { networkState, pendingCount } = useNetworkStatus();
+  const { networkState, pendingCount, failedCount } = useNetworkStatus();
   const prevState = useRef<NetworkState>(networkState);
+  const prevFailed = useRef(failedCount);
   const [visible, setVisible] = useState(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -29,11 +30,21 @@ export function NetworkStatusIndicator() {
     }
   }, [networkState]);
 
+  // Surface permanently failed items so they don't fail silently
+  useEffect(() => {
+    if (failedCount > prevFailed.current) {
+      toast.error(`${failedCount} تغییر آفلاین ذخیره نشد. لطفاً دوباره تلاش کنید.`, {
+        duration: 6000,
+      });
+    }
+    prevFailed.current = failedCount;
+  }, [failedCount]);
+
   useEffect(() => () => clearTimeout(hideTimer.current), []);
 
   // Only show when offline/syncing or briefly after reconnect
   const shouldShow = visible || networkState !== 'online';
-  if (!shouldShow && pendingCount === 0) return null;
+  if (!shouldShow && pendingCount === 0 && failedCount === 0) return null;
 
   const Icon = networkState === 'online' ? Wifi : networkState === 'offline' ? WifiOff : RefreshCw;
   const label = networkState === 'online' ? 'آنلاین' : networkState === 'offline' ? 'آفلاین' : 'همگام‌سازی...';

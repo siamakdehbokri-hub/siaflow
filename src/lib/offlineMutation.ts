@@ -2,7 +2,9 @@
  * Offline-aware mutation helper for Supabase operations.
  * When offline: performs optimistic update + queues for later sync.
  * When online: executes normally, with fallback to queue on network error.
- * Includes deduplication via IndexedDB idempotency keys.
+ *
+ * SECURITY: Bearer tokens are NEVER persisted to the offline queue.
+ * The current session token is attached at replay time by syncManager.
  */
 
 import { enqueueRequest } from './offlineDb';
@@ -34,18 +36,19 @@ export async function offlineMutation<T = unknown>(
   const paramStr = params.toString();
   if (paramStr) url += `?${paramStr}`;
 
-  const headers: Record<string, string> = {
+  // Headers used for the live request only — do NOT persist Authorization.
+  const liveHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
     'Prefer': 'return=representation',
   };
-  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+  if (accessToken) liveHeaders['Authorization'] = `Bearer ${accessToken}`;
 
   if (navigator.onLine) {
     try {
       const res = await fetch(url, {
         method,
-        headers,
+        headers: liveHeaders,
         body: body ? JSON.stringify(body) : undefined,
       });
       if (!res.ok) {
@@ -66,12 +69,18 @@ export async function offlineMutation<T = unknown>(
     }
   }
 
-  // Offline – queue the request
+  // Offline – queue WITHOUT bearer token. apikey is a public publishable key.
+  const queuedHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Prefer': 'return=representation',
+  };
+
   await enqueueRequest({
     endpoint: url,
     method,
     payload: body || null,
-    headers,
+    headers: queuedHeaders,
   });
 
   // Try Background Sync registration

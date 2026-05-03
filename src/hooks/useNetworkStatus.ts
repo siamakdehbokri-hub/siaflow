@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { processQueue, onSyncStatusChange, onSyncComplete, type SyncStatus } from '@/lib/syncManager';
-import { getPendingCount, subscribeToOfflineQueue } from '@/lib/offlineDb';
+import { getPendingCount, getFailedCount, subscribeToOfflineQueue } from '@/lib/offlineDb';
 
 export type NetworkState = 'online' | 'offline' | 'syncing';
 
@@ -15,11 +15,13 @@ export function useNetworkStatus() {
   const [online, setOnline] = useState(navigator.onLine);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [pendingCount, setPendingCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
   const queryClient = useQueryClient();
 
   const refreshPendingCount = useCallback(async () => {
-    const count = await getPendingCount();
+    const [count, failed] = await Promise.all([getPendingCount(), getFailedCount()]);
     setPendingCount(count);
+    setFailedCount(failed);
     return count;
   }, []);
 
@@ -114,6 +116,7 @@ export function useNetworkStatus() {
     networkState,
     syncStatus,
     pendingCount,
+    failedCount,
     manualSync,
   };
 }

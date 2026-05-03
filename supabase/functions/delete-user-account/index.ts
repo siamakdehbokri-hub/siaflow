@@ -45,9 +45,6 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
-
-    console.log('Starting full account deletion for user:', userId)
-
     // 1) Delete avatar files (best-effort)
     try {
       const { data: avatarFiles, error: avatarListError } = await adminClient.storage
@@ -55,7 +52,6 @@ Deno.serve(async (req) => {
         .list(userId)
 
       if (avatarListError) {
-        console.warn('Avatar list failed:', avatarListError)
       } else if (avatarFiles && avatarFiles.length > 0) {
         const filesToDelete = avatarFiles.map((f) => `${userId}/${f.name}`)
         const { error: avatarRemoveError } = await adminClient.storage
@@ -63,7 +59,6 @@ Deno.serve(async (req) => {
           .remove(filesToDelete)
 
         if (avatarRemoveError) {
-          console.warn('Avatar remove failed:', avatarRemoveError)
         }
       }
     } catch (e) {
@@ -112,9 +107,6 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-    console.log('Account deleted successfully for user:', userId)
-
     return new Response(
       JSON.stringify({ success: true, message: 'Account completely deleted' }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
