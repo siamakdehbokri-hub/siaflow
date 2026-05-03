@@ -116,6 +116,7 @@ export function useNetworkStatus() {
     networkState,
     syncStatus,
     pendingCount,
+    failedCount,
     manualSync,
   };
 }
