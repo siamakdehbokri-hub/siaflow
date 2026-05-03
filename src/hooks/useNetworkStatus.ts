@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { processQueue, onSyncStatusChange, onSyncComplete, type SyncStatus } from '@/lib/syncManager';
-import { getPendingCount, subscribeToOfflineQueue } from '@/lib/offlineDb';
+import { getPendingCount, getFailedCount, subscribeToOfflineQueue } from '@/lib/offlineDb';
 
 export type NetworkState = 'online' | 'offline' | 'syncing';
 

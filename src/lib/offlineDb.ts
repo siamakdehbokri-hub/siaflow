@@ -176,10 +176,24 @@ export async function removeQueuedRequest(id: number): Promise<void> {
   });
 }
 
-/** Get count of pending items */
+/** Get count of pending items (excludes terminal failures) */
 export async function getPendingCount(): Promise<number> {
   const items = await getPendingRequests();
-  return items.length;
+  return items.filter((r) => r.status !== 'failed').length;
+}
+
+/** Get count of permanently failed items needing user attention */
+export async function getFailedCount(): Promise<number> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const index = store.index('status');
+    const req = index.getAll('failed');
+    req.onsuccess = () => resolve((req.result as QueuedRequest[]).length);
+    req.onerror = () => reject(req.error);
+    tx.oncomplete = () => db.close();
+  });
 }
 
 /** Clear all requests */
