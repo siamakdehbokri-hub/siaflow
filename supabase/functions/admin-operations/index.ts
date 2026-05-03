@@ -46,9 +46,6 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('Request from user:', user.id);
-
     // Check if the user is an admin using the has_role function
     const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc('has_role', {
       _user_id: user.id,
@@ -72,8 +69,6 @@ serve(async (req) => {
     }
 
     const { action, userId, data: actionData } = await req.json();
-    console.log('Admin action:', action, 'for user:', userId);
-
     switch (action) {
       case 'get-users': {
         // Get all users from auth.users via admin API
@@ -577,9 +572,6 @@ serve(async (req) => {
           console.error('Error updating status:', updateError);
           throw updateError;
         }
-
-        console.log('User status toggled:', userId, 'to', newStatus);
-
         return new Response(
           JSON.stringify({ success: true, isActive: newStatus }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -593,9 +585,6 @@ serve(async (req) => {
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
-
-        console.log('Deleting user and all data:', userId);
-
         // Delete all user data from all tables
         const tablesToDelete = [
           'transfers',
@@ -626,9 +615,6 @@ serve(async (req) => {
           console.error('Error deleting auth user:', authError);
           throw authError;
         }
-
-        console.log('User deleted successfully:', userId);
-
         return new Response(
           JSON.stringify({ success: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -668,9 +654,6 @@ serve(async (req) => {
             throw error;
           }
         }
-
-        console.log('Admin role updated for user:', userId, 'isAdmin:', isAdmin);
-
         return new Response(
           JSON.stringify({ success: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
