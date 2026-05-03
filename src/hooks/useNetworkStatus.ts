@@ -15,11 +15,13 @@ export function useNetworkStatus() {
   const [online, setOnline] = useState(navigator.onLine);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [pendingCount, setPendingCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
   const queryClient = useQueryClient();
 
   const refreshPendingCount = useCallback(async () => {
-    const count = await getPendingCount();
+    const [count, failed] = await Promise.all([getPendingCount(), getFailedCount()]);
     setPendingCount(count);
+    setFailedCount(failed);
     return count;
   }, []);
 
