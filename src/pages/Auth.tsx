@@ -4,7 +4,7 @@ import { Phone, Lock, User, Eye, EyeOff, Loader2, CheckCircle, ArrowLeft, Mail }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -187,6 +187,8 @@ const Auth = () => {
                 ایمیل
               </TabsTrigger>
             </TabsList>
+            <TabsContent value="phone" className="sr-only" />
+            <TabsContent value="email" className="sr-only" />
           </Tabs>
 
           <form onSubmit={handleSubmit} className="space-y-5">
