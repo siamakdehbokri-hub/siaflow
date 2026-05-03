@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
-import { processQueue } from "@/lib/syncManager";
+import { processQueue, onSyncComplete } from "@/lib/syncManager";
 import { persistQueryCache, restoreQueryCache } from "@/lib/queryPersist";
 import { lazyRetry } from "@/lib/lazyRetry";
 
