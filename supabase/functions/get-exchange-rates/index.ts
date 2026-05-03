@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,12 +66,33 @@ serve(async (req) => {
         }
       }
 
-      // If body has usd_to_irt, it's a manual rate update
+      // If body has usd_to_irt, it's a manual rate update (admin only)
       if (body && body.usd_to_irt !== undefined) {
         const authHeader = req.headers.get('Authorization');
-        if (!authHeader?.startsWith('Bearer ')) {
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+        if (!token) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+        const adminClient = createClient(supabaseUrl, serviceKey);
+        const { data: userData, error: userErr } = await adminClient.auth.getUser(token);
+        if (userErr || !userData?.user) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const { data: isAdmin, error: roleErr } = await adminClient.rpc('has_role', {
+          _user_id: userData.user.id,
+          _role: 'admin',
+        });
+        if (roleErr || !isAdmin) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
