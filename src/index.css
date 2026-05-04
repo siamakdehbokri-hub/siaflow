@@ -609,6 +609,22 @@
     padding-top: env(safe-area-inset-top, 0);
   }
 
+  /* Reserve space for the fixed BottomNav + iOS safe area so content
+     and floating action buttons never hide behind it. */
+  .pb-nav-safe {
+    padding-bottom: calc(var(--bottom-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  /* Reliable mobile viewport height (handles iOS URL bar) */
+  .min-h-screen-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .h-screen-dvh {
+    height: 100vh;
+    height: 100dvh;
+  }
+
   .duration-400 {
     transition-duration: 400ms;
   }
