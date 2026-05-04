@@ -34,12 +34,14 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[20px] border border-border bg-background backdrop-blur-xl",
+        // Use dvh so the drawer shrinks when the on-screen keyboard opens,
+        // keeping the footer (action buttons) reachable.
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto max-h-[92dvh] flex-col rounded-t-[20px] border border-border bg-background backdrop-blur-xl overscroll-contain",
         className,
       )}
       {...props}
     >
-      <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+      <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-muted-foreground/30 shrink-0" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -47,12 +49,19 @@ const DrawerContent = React.forwardRef<
 DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)} {...props} />
+  <div className={cn("grid gap-1.5 p-4 text-center sm:text-left shrink-0", className)} {...props} />
 );
 DrawerHeader.displayName = "DrawerHeader";
 
 const DrawerFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />
+  <div
+    className={cn(
+      "mt-auto flex flex-col gap-2 p-4 shrink-0 bg-background border-t border-border",
+      className,
+    )}
+    style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
+    {...props}
+  />
 );
 DrawerFooter.displayName = "DrawerFooter";
 

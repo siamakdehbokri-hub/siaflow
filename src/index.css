@@ -2,12 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Vazirmatn Font */
+/* Vazirmatn Font — size-adjust tuned to Tahoma fallback to minimize CLS */
 @font-face {
   font-family: 'Vazirmatn';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
+  size-adjust: 96%;
+  ascent-override: 90%;
+  descent-override: 22%;
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
 }
 
@@ -16,6 +19,9 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
+  size-adjust: 96%;
+  ascent-override: 90%;
+  descent-override: 22%;
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Medium.woff2') format('woff2');
 }
 
@@ -24,6 +30,9 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
+  size-adjust: 96%;
+  ascent-override: 90%;
+  descent-override: 22%;
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
 }
 
@@ -104,6 +113,10 @@
     --surface-0: 0 0% 100%;
     --surface-1: 220 14% 97%;
     --surface-2: 220 13% 94%;
+
+    /* Layout heights */
+    --bottom-nav-height: 72px;
+    --header-height: 56px;
   }
 
   .dark {
@@ -169,13 +182,13 @@
     --sidebar-border: 240 10% 50% / 0.08;
     --sidebar-ring: 255 85% 65%;
 
-    /* === Glass & Nav tokens === */
-    --glass-bg: none;
-    --glass-border: none;
-    --glass-shadow-color: none;
-    --glass-hero-bg: none;
-    --glass-hero-border: none;
-    --glass-inset: none;
+    /* === Glass & Nav tokens (valid HSL/A values) === */
+    --glass-bg: 240 12% 8% / 0.55;
+    --glass-border: 240 10% 50% / 0.10;
+    --glass-shadow-color: 0 0% 0% / 0.40;
+    --glass-hero-bg: 240 12% 9% / 0.62;
+    --glass-hero-border: 240 10% 55% / 0.12;
+    --glass-inset: 0 0% 100% / 0.04;
     --nav-bg: 240 15% 7% / 0.94;
     --nav-border: 240 10% 50% / 0.06;
     --header-from: #4C2DA8;
@@ -209,9 +222,12 @@
     overflow-x: hidden;
     line-height: 1.7;
     letter-spacing: 0.01em;
-    padding-top: env(safe-area-inset-top);
+    /* Safe-area handled at component level (AppHeader pt-safe, BottomNav pb-safe)
+       to avoid double padding. Only horizontal insets here. */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -232,6 +248,7 @@
   #root {
     width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
   }
 
@@ -599,6 +616,22 @@
 
   .pt-safe {
     padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Reserve space for the fixed BottomNav + iOS safe area so content
+     and floating action buttons never hide behind it. */
+  .pb-nav-safe {
+    padding-bottom: calc(var(--bottom-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  /* Reliable mobile viewport height (handles iOS URL bar) */
+  .min-h-screen-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .h-screen-dvh {
+    height: 100vh;
+    height: 100dvh;
   }
 
   .duration-400 {

@@ -25,35 +25,35 @@ export function AppHeader({
   onEnableNotifications,
 }: AppHeaderProps) {
   return (
-    <header className="relative z-10" style={{ background: 'linear-gradient(135deg, var(--header-from), var(--header-to))' }}>
-      {/* Safe area padding */}
+    <header className="relative z-30" style={{ background: 'linear-gradient(135deg, var(--header-from), var(--header-to))' }}>
+      {/* Safe area padding (single source of truth — body no longer adds pt-safe) */}
       <div className="pt-safe" />
-      
-      {/* Header content - 56px height */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 px-4">
+
+      {/* Header content - 56px height, responsive RTL grid */}
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 h-14 px-3 sm:px-4">
         {/* Notifications (right side in RTL) */}
-        <div className="flex items-center gap-0.5 justify-self-start min-w-0">
-          <DebtReminderNotifications 
-            reminders={debtReminders} 
-            onDismiss={onDismissDebtReminder || (() => {})} 
-            onEnableNotifications={onEnableNotifications} 
+        <div className="flex items-center gap-0.5 min-w-0 shrink-0">
+          <DebtReminderNotifications
+            reminders={debtReminders}
+            onDismiss={onDismissDebtReminder || (() => {})}
+            onEnableNotifications={onEnableNotifications}
           />
-          <ReminderNotifications 
-            reminders={reminders} 
-            onDismiss={onDismissReminder || (() => {})} 
+          <ReminderNotifications
+            reminders={reminders}
+            onDismiss={onDismissReminder || (() => {})}
           />
         </div>
-        
-        {/* Title - centered */}
-        <h1 className="justify-self-center text-center truncate max-w-[60vw] text-lg font-bold text-primary-foreground">
+
+        {/* Title - flexes to take available space, truncates gracefully */}
+        <h1 className="min-w-0 text-center truncate text-base sm:text-lg font-bold text-primary-foreground">
           {title}
         </h1>
-        
+
         {/* Menu icon (left side in RTL) */}
-        <div className="justify-self-end">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+        <div className="shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onMenuClick}
             className="hover:bg-primary-foreground/15 rounded-xl h-11 w-11 text-primary-foreground"
             aria-label="منو"
