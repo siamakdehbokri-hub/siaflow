@@ -129,7 +129,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+    <div className="min-h-screen-dvh bg-background flex flex-col relative overflow-hidden">
       {/* Ambient background blobs for glassmorphism */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute rounded-full" style={{ top: '-80px', right: '-60px', width: '340px', height: '340px', background: 'rgba(90,68,200,0.24)', filter: 'blur(80px)' }} />
