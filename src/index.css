@@ -2,12 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Vazirmatn Font */
+/* Vazirmatn Font — size-adjust tuned to Tahoma fallback to minimize CLS */
 @font-face {
   font-family: 'Vazirmatn';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
+  size-adjust: 96%;
+  ascent-override: 90%;
+  descent-override: 22%;
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
 }
 
@@ -16,6 +19,9 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
+  size-adjust: 96%;
+  ascent-override: 90%;
+  descent-override: 22%;
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Medium.woff2') format('woff2');
 }
 
@@ -24,6 +30,9 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
+  size-adjust: 96%;
+  ascent-override: 90%;
+  descent-override: 22%;
   src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
 }
 
