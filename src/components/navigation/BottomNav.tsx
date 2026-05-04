@@ -18,13 +18,13 @@ const navItems: { id: NavTab; icon: LucideIcon; label: string }[] = [
 export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps) {
   return (
     <>
-      {/* Floating Add Button */}
+      {/* Floating Add Button — sits clearly above the bottom nav and away from page actions */}
       <button
         onClick={onAddClick}
-        className="fixed z-50 flex items-center justify-center active:scale-90 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-[56px] h-[56px] rounded-full bg-primary text-primary-foreground shadow-lg"
-        style={{ 
-          bottom: 'calc(100px + env(safe-area-inset-bottom, 0px))',
-          right: 'max(20px, env(safe-area-inset-right, 20px))',
+        className="fixed z-40 flex items-center justify-center active:scale-90 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 w-[56px] h-[56px] rounded-full bg-primary text-primary-foreground shadow-lg"
+        style={{
+          bottom: 'calc(var(--bottom-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 16px)',
+          insetInlineEnd: 'max(20px, env(safe-area-inset-right, 20px))',
         }}
         aria-label="افزودن تراکنش"
       >
@@ -32,11 +32,11 @@ export function BottomNav({ activeTab, onTabChange, onAddClick }: BottomNavProps
       </button>
 
       {/* Bottom Navigation Bar */}
-      <nav 
+      <nav
         className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-2xl"
-        style={{ 
+        style={{
           background: 'hsl(var(--nav-bg))',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
+          borderTop: '1px solid hsl(var(--nav-border))',
         }}
       >
         <div className="pb-safe">
