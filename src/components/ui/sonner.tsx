@@ -19,6 +19,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      position="bottom-center"
+      // Sit above the fixed BottomNav (72px) + iOS safe area, never under the header.
+      offset="calc(var(--bottom-nav-height, 72px) + env(safe-area-inset-bottom, 0px) + 16px)"
+      dir="rtl"
       toastOptions={{
         classNames: {
           toast:
