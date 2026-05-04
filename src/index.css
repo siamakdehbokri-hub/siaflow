@@ -104,6 +104,10 @@
     --surface-0: 0 0% 100%;
     --surface-1: 220 14% 97%;
     --surface-2: 220 13% 94%;
+
+    /* Layout heights */
+    --bottom-nav-height: 72px;
+    --header-height: 56px;
   }
 
   .dark {
