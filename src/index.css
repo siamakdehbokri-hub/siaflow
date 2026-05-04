@@ -169,13 +169,13 @@
     --sidebar-border: 240 10% 50% / 0.08;
     --sidebar-ring: 255 85% 65%;
 
-    /* === Glass & Nav tokens === */
-    --glass-bg: none;
-    --glass-border: none;
-    --glass-shadow-color: none;
-    --glass-hero-bg: none;
-    --glass-hero-border: none;
-    --glass-inset: none;
+    /* === Glass & Nav tokens (valid HSL/A values) === */
+    --glass-bg: 240 12% 8% / 0.55;
+    --glass-border: 240 10% 50% / 0.10;
+    --glass-shadow-color: 0 0% 0% / 0.40;
+    --glass-hero-bg: 240 12% 9% / 0.62;
+    --glass-hero-border: 240 10% 55% / 0.12;
+    --glass-inset: 0 0% 100% / 0.04;
     --nav-bg: 240 15% 7% / 0.94;
     --nav-border: 240 10% 50% / 0.06;
     --header-from: #4C2DA8;
