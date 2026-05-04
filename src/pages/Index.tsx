@@ -177,7 +177,7 @@ const Index = () => {
       {/* Notification badges - moved to header */}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className="flex-1 overflow-y-auto pb-nav-safe mobile-scroll">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
           {subView === 'categories' ? (
