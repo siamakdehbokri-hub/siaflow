@@ -7,7 +7,7 @@ import { enqueueRequest } from '@/lib/offlineDb';
 export interface Account {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'cash' | 'card';
+  type: 'checking' | 'savings' | 'cash' | 'credit' | 'investment';
   balance: number;
   color: string;
   icon: string;
