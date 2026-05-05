@@ -97,7 +97,7 @@ export function useSavingGoals() {
         if (error) throw error;
         return { goal: mapGoal(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?select=*`,
@@ -147,7 +147,7 @@ export function useSavingGoals() {
           : Math.max(0, (goal?.currentAmount || 0) - amount));
         return { goalId, newAmount: Number(newAmount), type, targetAmount: goal?.targetAmount || 0, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/rpc/update_goal_amount`,
@@ -203,7 +203,7 @@ export function useSavingGoals() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?id=eq.${id}&user_id=eq.${user.id}`,

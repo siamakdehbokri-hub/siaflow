@@ -79,7 +79,7 @@ export function useCategories() {
         if (error) throw error;
         return { cat: mapRow(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/categories?select=*`,
@@ -135,7 +135,7 @@ export function useCategories() {
         if (error) throw error;
         return { cat: { ...category, subcategories: subcats }, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/categories?id=eq.${category.id}&user_id=eq.${user.id}`,
@@ -174,7 +174,7 @@ export function useCategories() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&user_id=eq.${user.id}`,

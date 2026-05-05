@@ -80,7 +80,7 @@ export function useTransactions() {
         if (error) throw error;
         return { tx: mapRow(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?select=*`,
@@ -135,7 +135,7 @@ export function useTransactions() {
         if (error) throw error;
         return { tx: transaction, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}&user_id=eq.${user.id}`,
@@ -174,7 +174,7 @@ export function useTransactions() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?id=eq.${id}&user_id=eq.${user.id}`,

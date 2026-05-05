@@ -130,7 +130,7 @@ export function useAccounts() {
         if (error) throw error;
         return { account: mapAccount(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/accounts?select=*`,
@@ -179,7 +179,7 @@ export function useAccounts() {
         if (error) throw error;
         return { id, updates, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/accounts?id=eq.${id}&user_id=eq.${user.id}`,
@@ -214,7 +214,7 @@ export function useAccounts() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/accounts?id=eq.${id}&user_id=eq.${user.id}`,
@@ -265,7 +265,7 @@ export function useAccounts() {
       queryClient.invalidateQueries({ queryKey: [TRANSFERS_KEY, user?.id] });
       toast.success('انتقال با موفقیت انجام شد');
     } catch (err) {
-      if (!navigator.onLine || (err instanceof TypeError)) {
+      if (shouldQueueOffline(err)) {
         const headers = await getAuthHeaders();
         await enqueueRequest({
           endpoint: `${SUPABASE_URL}/rest/v1/rpc/transfer_between_accounts`,
@@ -322,7 +322,7 @@ export function useAccounts() {
       toast.success('انتقال به هدف پس‌انداز انجام شد');
       return true;
     } catch (err) {
-      if (!navigator.onLine || (err instanceof TypeError)) {
+      if (shouldQueueOffline(err)) {
         const headers = await getAuthHeaders();
         await enqueueRequest({
           endpoint: `${SUPABASE_URL}/rest/v1/rpc/transfer_to_goal`,

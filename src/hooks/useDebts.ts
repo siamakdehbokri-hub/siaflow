@@ -88,7 +88,7 @@ export function useDebts() {
         if (error) throw error;
         return { debt: mapDebt(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/debts?select=*`,
@@ -137,7 +137,7 @@ export function useDebts() {
         if (error) throw error;
         return { id, updates, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,
@@ -172,7 +172,7 @@ export function useDebts() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,
