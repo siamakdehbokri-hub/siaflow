@@ -12,6 +12,7 @@ interface SwipeableTransactionProps {
 }
 
 function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: SwipeableTransactionProps) {
+  const pending = isOfflineId(transaction.id);
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isSwipeIntent, setIsSwipeIntent] = useState(false);
