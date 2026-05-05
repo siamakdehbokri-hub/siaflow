@@ -1,4 +1,4 @@
-import { shouldQueueOffline } from '@/lib/networkUtils';
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -194,6 +194,10 @@ export function useSavingGoals() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       try {
         const { error } = await supabase
           .from('saving_goals')

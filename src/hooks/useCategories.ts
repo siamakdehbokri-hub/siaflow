@@ -1,4 +1,4 @@
-import { shouldQueueOffline } from '@/lib/networkUtils';
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/types/expense';
@@ -114,6 +114,10 @@ export function useCategories() {
   const updateMutation = useMutation({
     mutationFn: async (category: Category) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(category.id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       const subcats = category.subcategories
         ? category.subcategories.map(s => typeof s === 'string' ? s : (s as { name: string }).name)
         : [];
@@ -164,6 +168,10 @@ export function useCategories() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
 
       try {
         const { error } = await supabase
