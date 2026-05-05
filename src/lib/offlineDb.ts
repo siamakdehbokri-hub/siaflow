@@ -62,7 +62,11 @@ function generateIdempotencyKey(
   req: Omit<QueuedRequest, 'id' | 'timestamp' | 'retryCount' | 'status'>
 ): string {
   const payloadStr = req.payload ? JSON.stringify(req.payload) : '';
-  return `${req.method}:${req.endpoint}:${payloadStr}`;
+  // DELETE requests have no payload — add a per-call nonce so each delete is unique.
+  const nonce = req.method === 'DELETE'
+    ? `:${Date.now()}:${Math.random().toString(36).slice(2)}`
+    : '';
+  return `${req.method}:${req.endpoint}:${payloadStr}${nonce}`;
 }
 
 /** Check if an equivalent request is already queued */
@@ -128,7 +132,7 @@ export async function getPendingRequests(): Promise<QueuedRequest[]> {
     const request = index.getAll();
     request.onsuccess = () => {
       const all = (request.result as QueuedRequest[]).filter(
-        (r) => r.status === 'pending' || r.status === 'failed'
+        (r) => r.status === 'pending'
       );
       resolve(all);
     };
@@ -184,13 +188,18 @@ export async function getPendingCount(): Promise<number> {
 
 /** Get count of permanently failed items needing user attention */
 export async function getFailedCount(): Promise<number> {
+  const items = await getFailedRequests();
+  return items.length;
+}
+
+/** Get all permanently failed requests for user inspection */
+export async function getFailedRequests(): Promise<QueuedRequest[]> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const index = store.index('status');
+    const index = tx.objectStore(STORE_NAME).index('status');
     const req = index.getAll('failed');
-    req.onsuccess = () => resolve((req.result as QueuedRequest[]).length);
+    req.onsuccess = () => resolve((req.result as QueuedRequest[]) || []);
     req.onerror = () => reject(req.error);
     tx.oncomplete = () => db.close();
   });

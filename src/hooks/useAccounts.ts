@@ -1,3 +1,4 @@
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -7,7 +8,7 @@ import { enqueueRequest } from '@/lib/offlineDb';
 export interface Account {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'cash' | 'card';
+  type: 'checking' | 'savings' | 'cash' | 'credit' | 'investment';
   balance: number;
   color: string;
   icon: string;
@@ -129,7 +130,7 @@ export function useAccounts() {
         if (error) throw error;
         return { account: mapAccount(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/accounts?select=*`,
@@ -161,6 +162,10 @@ export function useAccounts() {
   const updateAccountMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>> }) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       const updateData: Record<string, string | number | boolean | undefined> = {};
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.type !== undefined) updateData.type = updates.type;
@@ -178,7 +183,7 @@ export function useAccounts() {
         if (error) throw error;
         return { id, updates, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/accounts?id=eq.${id}&user_id=eq.${user.id}`,
@@ -204,6 +209,10 @@ export function useAccounts() {
   const deleteAccountMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       try {
         const { error } = await supabase
           .from('accounts')
@@ -213,7 +222,7 @@ export function useAccounts() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/accounts?id=eq.${id}&user_id=eq.${user.id}`,
@@ -264,7 +273,7 @@ export function useAccounts() {
       queryClient.invalidateQueries({ queryKey: [TRANSFERS_KEY, user?.id] });
       toast.success('انتقال با موفقیت انجام شد');
     } catch (err) {
-      if (!navigator.onLine || (err instanceof TypeError)) {
+      if (shouldQueueOffline(err)) {
         const headers = await getAuthHeaders();
         await enqueueRequest({
           endpoint: `${SUPABASE_URL}/rest/v1/rpc/transfer_between_accounts`,
@@ -321,7 +330,7 @@ export function useAccounts() {
       toast.success('انتقال به هدف پس‌انداز انجام شد');
       return true;
     } catch (err) {
-      if (!navigator.onLine || (err instanceof TypeError)) {
+      if (shouldQueueOffline(err)) {
         const headers = await getAuthHeaders();
         await enqueueRequest({
           endpoint: `${SUPABASE_URL}/rest/v1/rpc/transfer_to_goal`,

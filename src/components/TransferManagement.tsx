@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   ArrowRightLeft, Wallet, Plus, Trash2, Send, PiggyBank,
-  CreditCard, Banknote, Building2, Loader2
+  CreditCard, Banknote, Building2, Loader2, TrendingUp
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,8 @@ const accountTypes = [
   { id: 'checking', label: 'حساب جاری', icon: Building2, iconName: 'Building2' },
   { id: 'savings', label: 'حساب پس‌انداز', icon: PiggyBank, iconName: 'PiggyBank' },
   { id: 'cash', label: 'نقدی', icon: Banknote, iconName: 'Banknote' },
-  { id: 'card', label: 'کارت بانکی', icon: CreditCard, iconName: 'CreditCard' },
+  { id: 'credit', label: 'کارت اعتباری', icon: CreditCard, iconName: 'CreditCard' },
+  { id: 'investment', label: 'سرمایه‌گذاری', icon: TrendingUp, iconName: 'TrendingUp' },
 ];
 
 const accountColors = [

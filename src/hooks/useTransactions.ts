@@ -1,3 +1,4 @@
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Transaction } from '@/types/expense';
@@ -79,7 +80,7 @@ export function useTransactions() {
         if (error) throw error;
         return { tx: mapRow(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?select=*`,
@@ -113,6 +114,10 @@ export function useTransactions() {
   const updateMutation = useMutation({
     mutationFn: async (transaction: Transaction) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(transaction.id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
 
       const dbRow = {
         amount: transaction.amount,
@@ -134,7 +139,7 @@ export function useTransactions() {
         if (error) throw error;
         return { tx: transaction, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?id=eq.${transaction.id}&user_id=eq.${user.id}`,
@@ -163,6 +168,10 @@ export function useTransactions() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
 
       try {
         const { error } = await supabase
@@ -173,7 +182,7 @@ export function useTransactions() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?id=eq.${id}&user_id=eq.${user.id}`,

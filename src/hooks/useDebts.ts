@@ -1,3 +1,4 @@
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -87,7 +88,7 @@ export function useDebts() {
         if (error) throw error;
         return { debt: mapDebt(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/debts?select=*`,
@@ -119,6 +120,10 @@ export function useDebts() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>> }) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       const updateData: Record<string, string | number | null | undefined> = {};
       if (updates.name !== undefined) updateData.name = updates.name;
       if (updates.totalAmount !== undefined) updateData.total_amount = updates.totalAmount;
@@ -136,7 +141,7 @@ export function useDebts() {
         if (error) throw error;
         return { id, updates, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,
@@ -162,6 +167,10 @@ export function useDebts() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       try {
         const { error } = await supabase
           .from('debts')
@@ -171,7 +180,7 @@ export function useDebts() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,

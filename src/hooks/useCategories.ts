@@ -1,3 +1,4 @@
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Category } from '@/types/expense';
@@ -78,7 +79,7 @@ export function useCategories() {
         if (error) throw error;
         return { cat: mapRow(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/categories?select=*`,
@@ -113,6 +114,10 @@ export function useCategories() {
   const updateMutation = useMutation({
     mutationFn: async (category: Category) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(category.id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       const subcats = category.subcategories
         ? category.subcategories.map(s => typeof s === 'string' ? s : (s as { name: string }).name)
         : [];
@@ -134,7 +139,7 @@ export function useCategories() {
         if (error) throw error;
         return { cat: { ...category, subcategories: subcats }, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/categories?id=eq.${category.id}&user_id=eq.${user.id}`,
@@ -163,6 +168,10 @@ export function useCategories() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
 
       try {
         const { error } = await supabase
@@ -173,7 +182,7 @@ export function useCategories() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&user_id=eq.${user.id}`,

@@ -166,7 +166,7 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
     // Conflict detection & logging
     if (response.status === 409) {
       console.warn(`[SyncManager] Conflict on ${item.endpoint}`);
-      throw new Error(`CONFLICT: ${text}`);
+      throw new Error(`PERMANENT: CONFLICT: ${text}`);
     }
 
     // 400/401/403/404/422 = permanent — do not retry forever

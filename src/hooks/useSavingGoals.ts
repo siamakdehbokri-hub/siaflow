@@ -1,3 +1,4 @@
+import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -96,7 +97,7 @@ export function useSavingGoals() {
         if (error) throw error;
         return { goal: mapGoal(data), queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?select=*`,
@@ -129,6 +130,10 @@ export function useSavingGoals() {
   const updateAmountMutation = useMutation({
     mutationFn: async ({ goalId, amount, type, note }: { goalId: string; amount: number; type: 'deposit' | 'withdraw'; note?: string }) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(goalId)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
 
       try {
         const { data, error } = await supabase.rpc('update_goal_amount', {
@@ -146,7 +151,7 @@ export function useSavingGoals() {
           : Math.max(0, (goal?.currentAmount || 0) - amount));
         return { goalId, newAmount: Number(newAmount), type, targetAmount: goal?.targetAmount || 0, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/rpc/update_goal_amount`,
@@ -193,6 +198,10 @@ export function useSavingGoals() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
       try {
         const { error } = await supabase
           .from('saving_goals')
@@ -202,7 +211,7 @@ export function useSavingGoals() {
         if (error) throw error;
         return { id, queued: false };
       } catch (err) {
-        if (!navigator.onLine || (err instanceof TypeError)) {
+        if (shouldQueueOffline(err)) {
           const headers = await getAuthHeaders();
           await enqueueRequest({
             endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?id=eq.${id}&user_id=eq.${user.id}`,
