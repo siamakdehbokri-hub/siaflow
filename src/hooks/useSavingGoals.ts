@@ -130,6 +130,10 @@ export function useSavingGoals() {
   const updateAmountMutation = useMutation({
     mutationFn: async ({ goalId, amount, type, note }: { goalId: string; amount: number; type: 'deposit' | 'withdraw'; note?: string }) => {
       if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(goalId)) {
+        toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
+        throw new Error('OFFLINE_PENDING');
+      }
 
       try {
         const { data, error } = await supabase.rpc('update_goal_amount', {
