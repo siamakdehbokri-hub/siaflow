@@ -8,6 +8,7 @@
  */
 
 import { enqueueRequest } from './offlineDb';
+import { isNetworkError } from './networkUtils';
 import { toast } from 'sonner';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
