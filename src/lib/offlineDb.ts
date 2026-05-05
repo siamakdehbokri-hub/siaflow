@@ -62,7 +62,11 @@ function generateIdempotencyKey(
   req: Omit<QueuedRequest, 'id' | 'timestamp' | 'retryCount' | 'status'>
 ): string {
   const payloadStr = req.payload ? JSON.stringify(req.payload) : '';
-  return `${req.method}:${req.endpoint}:${payloadStr}`;
+  // DELETE requests have no payload — add a per-call nonce so each delete is unique.
+  const nonce = req.method === 'DELETE'
+    ? `:${Date.now()}:${Math.random().toString(36).slice(2)}`
+    : '';
+  return `${req.method}:${req.endpoint}:${payloadStr}${nonce}`;
 }
 
 /** Check if an equivalent request is already queued */
