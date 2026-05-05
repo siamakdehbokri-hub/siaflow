@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   ArrowRightLeft, Wallet, Plus, Trash2, Send, PiggyBank,
-  CreditCard, Banknote, Building2, Loader2
+  CreditCard, Banknote, Building2, Loader2, TrendingUp
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
