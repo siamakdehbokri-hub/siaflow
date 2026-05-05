@@ -62,7 +62,7 @@ export async function offlineMutation<T = unknown>(
       }
       return { data: null, queued: false };
     } catch (err) {
-      if (err instanceof TypeError && err.message.includes('fetch')) {
+      if (isNetworkError(err)) {
         // Fall through to queue
       } else {
         throw err;
