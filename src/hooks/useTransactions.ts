@@ -1,3 +1,4 @@
+import { shouldQueueOffline } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Transaction } from '@/types/expense';
