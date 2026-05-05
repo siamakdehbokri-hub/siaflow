@@ -572,6 +572,24 @@ serve(async (req) => {
           console.error('Error updating status:', updateError);
           throw updateError;
         }
+
+        // Enforce ban at the auth layer so disabled users can't sign in or use existing JWTs
+        const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+          ban_duration: newStatus ? 'none' : '876600h',
+        });
+        if (banError) {
+          console.error('Error updating auth ban status:', banError);
+          throw banError;
+        }
+
+        // When disabling, sign out all active sessions immediately
+        if (!newStatus) {
+          const { error: signOutError } = await supabaseAdmin.auth.admin.signOut(userId, 'global');
+          if (signOutError) {
+            console.error('Error signing out user:', signOutError);
+          }
+        }
+
         return new Response(
           JSON.stringify({ success: true, isActive: newStatus }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
