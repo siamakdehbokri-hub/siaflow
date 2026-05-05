@@ -150,11 +150,12 @@ export function EditTransactionModal({
     { value: '1,000,000', label: '۱ میلیون' },
   ];
 
+  const keyboardInset = useKeyboardInset();
+
   if (!transaction) return null;
 
   const config = TYPE_CONFIG[type];
   const accentColor = `hsl(var(${config.colorVar}))`;
-  const keyboardInset = useKeyboardInset();
 
   return (
     <>
