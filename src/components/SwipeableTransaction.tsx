@@ -182,7 +182,7 @@ function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: Swipea
       >
         <TransactionItem 
           transaction={transaction} 
-          onClick={() => offset === 0 && onEdit(transaction)}
+          onClick={() => offset === 0 && !pending && onEdit(transaction)}
         />
       </div>
     </div>
