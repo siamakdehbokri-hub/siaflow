@@ -132,7 +132,7 @@ export async function getPendingRequests(): Promise<QueuedRequest[]> {
     const request = index.getAll();
     request.onsuccess = () => {
       const all = (request.result as QueuedRequest[]).filter(
-        (r) => r.status === 'pending' || r.status === 'failed'
+        (r) => r.status === 'pending'
       );
       resolve(all);
     };
