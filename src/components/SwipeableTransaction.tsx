@@ -1,8 +1,9 @@
 import { useState, useRef, memo, useCallback } from 'react';
-import { Trash2, Edit3 } from 'lucide-react';
+import { Trash2, Edit3, Clock } from 'lucide-react';
 import { Transaction } from '@/types/expense';
 import { TransactionItem } from './TransactionItem';
 import { cn } from '@/lib/utils';
+import { isOfflineId } from '@/lib/networkUtils';
 
 interface SwipeableTransactionProps {
   transaction: Transaction;
