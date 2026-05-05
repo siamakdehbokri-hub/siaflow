@@ -188,13 +188,18 @@ export async function getPendingCount(): Promise<number> {
 
 /** Get count of permanently failed items needing user attention */
 export async function getFailedCount(): Promise<number> {
+  const items = await getFailedRequests();
+  return items.length;
+}
+
+/** Get all permanently failed requests for user inspection */
+export async function getFailedRequests(): Promise<QueuedRequest[]> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
-    const store = tx.objectStore(STORE_NAME);
-    const index = store.index('status');
+    const index = tx.objectStore(STORE_NAME).index('status');
     const req = index.getAll('failed');
-    req.onsuccess = () => resolve((req.result as QueuedRequest[]).length);
+    req.onsuccess = () => resolve((req.result as QueuedRequest[]) || []);
     req.onerror = () => reject(req.error);
     tx.oncomplete = () => db.close();
   });
