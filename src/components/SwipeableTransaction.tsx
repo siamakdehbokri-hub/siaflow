@@ -136,24 +136,35 @@ function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: Swipea
         }}
       >
         <button
+          disabled={pending}
           onClick={() => {
+            if (pending) return;
             onEdit(transaction);
             resetSwipe();
           }}
-          className="w-[60px] sm:w-[70px] flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 transition-colors touch-target"
+          className="w-[60px] sm:w-[70px] flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 transition-colors touch-target disabled:opacity-50"
         >
           <Edit3 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
         </button>
         <button
+          disabled={pending}
           onClick={() => {
+            if (pending) return;
             onDelete(transaction.id);
             resetSwipe();
           }}
-          className="w-[60px] sm:w-[70px] flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 transition-colors touch-target"
+          className="w-[60px] sm:w-[70px] flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 transition-colors touch-target disabled:opacity-50"
         >
           <Trash2 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
         </button>
       </div>
+
+      {pending && (
+        <div className="absolute top-1.5 left-1.5 z-20 flex items-center gap-1 rounded-full bg-muted/80 px-2 py-0.5 text-[10px] text-muted-foreground backdrop-blur-sm">
+          <Clock className="w-3 h-3" strokeWidth={2} />
+          <span>در انتظار</span>
+        </div>
+      )}
 
       {/* Transaction item - moves RIGHT to reveal actions */}
       <div
