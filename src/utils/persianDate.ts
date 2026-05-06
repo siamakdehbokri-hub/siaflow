@@ -1,40 +1,43 @@
 import { format, formatDistance, getMonth, getYear, startOfMonth, endOfMonth, subMonths } from 'date-fns-jalali';
 import { faIR } from 'date-fns-jalali/locale';
-import { toLocalISODateString } from '@/utils/dateUtils';
+import { toLocalISODateString, parseLocalDate } from '@/utils/dateUtils';
+
+/** Safely parse YYYY-MM-DD or full ISO into a local-midnight Date (no UTC shift). */
+function safeParse(dateString: string): Date {
+  if (!dateString) return new Date(NaN);
+  // Pure YYYY-MM-DD → local midnight (avoids UTC-shift bug)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return parseLocalDate(dateString);
+  }
+  return new Date(dateString);
+}
 
 export const formatPersianDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'd MMMM yyyy', { locale: faIR });
+  return format(safeParse(dateString), 'd MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianDateFull = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'EEEE d MMMM yyyy', { locale: faIR });
+  return format(safeParse(dateString), 'EEEE d MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianDateShort = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'yyyy/MM/dd', { locale: faIR });
+  return format(safeParse(dateString), 'yyyy/MM/dd', { locale: faIR });
 };
 
 export const formatPersianMonth = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'MMMM yyyy', { locale: faIR });
+  return format(safeParse(dateString), 'MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianMonthOnly = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'MMMM', { locale: faIR });
+  return format(safeParse(dateString), 'MMMM', { locale: faIR });
 };
 
 export const formatPersianWeekday = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'EEEE', { locale: faIR });
+  return format(safeParse(dateString), 'EEEE', { locale: faIR });
 };
 
 export const formatPersianRelative = (dateString: string): string => {
-  const date = new Date(dateString);
-  return formatDistance(date, new Date(), { addSuffix: true, locale: faIR });
+  return formatDistance(safeParse(dateString), new Date(), { addSuffix: true, locale: faIR });
 };
 
 export const getPersianMonthName = (monthIndex: number): string => {
@@ -47,19 +50,17 @@ export const getPersianMonthName = (monthIndex: number): string => {
 
 // Get Jalali month index from a date string (0-11)
 export const getJalaliMonth = (dateString: string): number => {
-  const date = new Date(dateString);
-  return getMonth(date);
+  return getMonth(safeParse(dateString));
 };
 
 // Get Jalali year from a date string
 export const getJalaliYear = (dateString: string): number => {
-  const date = new Date(dateString);
-  return getYear(date);
+  return getYear(safeParse(dateString));
 };
 
 // Get Jalali month name from a date string or Date object
 export const getJalaliMonthName = (date: string | Date): string => {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dateObj = typeof date === 'string' ? safeParse(date) : date;
   return format(dateObj, 'MMMM yyyy', { locale: faIR });
 };
 
@@ -100,8 +101,7 @@ export const isInPreviousJalaliMonth = (dateString: string): boolean => {
 
 // Get Jalali month key for grouping (e.g., "1403-11")
 export const getJalaliMonthKey = (dateString: string): string => {
-  const date = new Date(dateString);
-  return format(date, 'yyyy-MM', { locale: faIR });
+  return format(safeParse(dateString), 'yyyy-MM', { locale: faIR });
 };
 
 export const getPersianWeekdays = (): string[] => {
