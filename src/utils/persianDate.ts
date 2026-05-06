@@ -108,8 +108,43 @@ export const getPersianWeekdays = (): string[] => {
   return ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 };
 
-export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('fa-IR').format(amount) + ' تومان';
+/**
+ * Format an amount stored in IRT (base) using the currency the user selected.
+ * Reads `siaflow-currency` (and cached exchange rates) from localStorage so
+ * non-React utility callers stay in sync with the CurrencyProvider.
+ *
+ * Prefer `useCurrency().formatAmount` inside React components.
+ */
+export const formatCurrency = (amountInIRT: number): string => {
+  if (typeof window === 'undefined') {
+    return new Intl.NumberFormat('fa-IR').format(Math.round(amountInIRT)) + ' تومان';
+  }
+
+  const currency = (localStorage.getItem('siaflow-currency') || 'IRT') as 'IRT' | 'IRR' | 'USD';
+
+  if (currency === 'IRR') {
+    return new Intl.NumberFormat('fa-IR').format(Math.round(amountInIRT * 10)) + ' ریال';
+  }
+
+  if (currency === 'USD') {
+    try {
+      const cached = localStorage.getItem('siaflow-exchange-rates');
+      if (cached) {
+        const rates = JSON.parse(cached);
+        if (rates?.usd_to_irt) {
+          const usd = amountInIRT / rates.usd_to_irt;
+          return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+          }).format(usd) + ' $';
+        }
+      }
+    } catch {
+      // fall through to IRT
+    }
+  }
+
+  return new Intl.NumberFormat('fa-IR').format(Math.round(amountInIRT)) + ' تومان';
 };
 
 export const toPersianNum = (num: number | string): string => {
