@@ -28,9 +28,9 @@ const persianWeekDays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
 
 export function PersianDatePicker({ value, onChange, placeholder = 'انتخاب تاریخ' }: PersianDatePickerProps) {
   const [open, setOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
-  
-  const selectedDate = value ? new Date(value) : null;
+  const [currentMonth, setCurrentMonth] = useState(value ? parseLocalDate(value) : new Date());
+
+  const selectedDate = value ? parseLocalDate(value) : null;
   
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
