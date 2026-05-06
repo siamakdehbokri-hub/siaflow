@@ -11,6 +11,7 @@ import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
 import { processQueue, onSyncComplete } from "@/lib/syncManager";
 import { persistQueryCache, restoreQueryCache } from "@/lib/queryPersist";
 import { lazyRetry } from "@/lib/lazyRetry";
+import { UpdateNotifier } from "@/components/UpdateNotifier";
 
 // Lazy load pages with retry logic for "Importing a module script failed"
 const Index = lazy(() => lazyRetry(() => import("./pages/Index")));
@@ -143,6 +144,7 @@ const App = () => (
       <TooltipProvider>
         <ThemeInitializer />
         <NetworkStatusIndicator />
+        <UpdateNotifier />
         <Toaster />
         <Sonner />
         <BrowserRouter>
