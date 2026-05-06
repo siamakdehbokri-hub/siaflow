@@ -14,12 +14,19 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       strategies: "injectManifest",
       srcDir: "src",
       filename: "custom-sw.ts",
       injectRegister: "script-defer",
-      includeAssets: ["favicon.ico", "robots.txt", "favicon.png"],
+      includeAssets: [
+        "favicon.ico",
+        "robots.txt",
+        "favicon.png",
+        "fonts/Vazirmatn-Regular.woff2",
+        "fonts/Vazirmatn-Medium.woff2",
+        "fonts/Vazirmatn-Bold.woff2",
+      ],
       manifest: false,
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
