@@ -172,67 +172,23 @@ async function removeItem(id: number): Promise<void> {
   });
 }
 
-// ─── Background Sync replay ────────────────────────────────
-const MAX_RETRIES = 5;
-
-async function replayQueue(): Promise<void> {
-  const items = await getPendingRequests();
-  if (items.length === 0) return;
-
-  let synced = 0;
-  for (const item of items) {
-    if (item.retryCount >= MAX_RETRIES) {
-      await updateItem(item.id!, { status: 'failed', errorMessage: 'Max retries exceeded' });
-      continue;
-    }
-
-    try {
-      const res = await fetch(item.endpoint, {
-        method: item.method,
-        headers: { 'Content-Type': 'application/json', ...(item.headers || {}) },
-        body: item.payload ? JSON.stringify(item.payload) : undefined,
-      });
-
-      if (res.ok) {
-        await removeItem(item.id!);
-        synced++;
-      } else if (res.status === 409) {
-        // Conflict – log and mark failed
-        const text = await res.text().catch(() => '');
-        console.warn(`[SW-Sync] Conflict on ${item.endpoint}:`, text);
-        await updateItem(item.id!, { status: 'failed', errorMessage: `Conflict: ${text}`, retryCount: MAX_RETRIES });
-      } else {
-        throw new Error(`HTTP ${res.status}`);
-      }
-    } catch (err) {
-      await updateItem(item.id!, {
-        retryCount: item.retryCount + 1,
-        errorMessage: err instanceof Error ? err.message : 'Unknown',
-      });
-      // Exponential backoff: re-register sync after delay
-      const delay = 1000 * Math.pow(2, item.retryCount + 1);
-      await new Promise(r => setTimeout(r, Math.min(delay, 30000)));
-    }
-  }
-
-  // Notify clients to refresh data
-  if (synced > 0) {
-    const clients = await self.clients.matchAll({ type: 'window' });
-    clients.forEach(client => client.postMessage({ type: 'SYNC_COMPLETE', synced }));
-  }
+// ─── Notify clients so syncManager (in window) handles the queue ───
+async function notifyClientsToSync(): Promise<void> {
+  const clients = await self.clients.matchAll({ type: 'window' });
+  clients.forEach(c => c.postMessage({ type: 'SYNC_COMPLETE' }));
 }
 
 // ─── Background Sync event ─────────────────────────────────
 self.addEventListener('sync', (event: SyncEvent) => {
   if (event.tag === 'offline-mutations') {
-    event.waitUntil(replayQueue());
+    event.waitUntil(notifyClientsToSync());
   }
 });
 
-// ─── Periodic Sync (fallback for browsers without Background Sync) ──
+// ─── Manual sync trigger from clients ──────────────────────
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'FORCE_SYNC') {
-    replayQueue().catch(console.error);
+    notifyClientsToSync().catch(console.error);
   }
 });
 
