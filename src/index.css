@@ -11,7 +11,7 @@
   size-adjust: 96%;
   ascent-override: 90%;
   descent-override: 22%;
-  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
 }
 
 @font-face {
@@ -22,7 +22,7 @@
   size-adjust: 96%;
   ascent-override: 90%;
   descent-override: 22%;
-  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Medium.woff2') format('woff2');
+  src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2');
 }
 
 @font-face {
@@ -33,7 +33,7 @@
   size-adjust: 96%;
   ascent-override: 90%;
   descent-override: 22%;
-  src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
+  src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2');
 }
 
 @layer base {
