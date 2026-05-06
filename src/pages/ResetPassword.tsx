@@ -17,15 +17,32 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
-    const hash = window.location.hash;
-    if (hash.includes('type=recovery')) {
+    // Robust recovery-token detection: check hash, query string, and active session.
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+    const searchParams = new URLSearchParams(search);
+
+    const isRecoveryUrl =
+      hashParams.get('type') === 'recovery' ||
+      searchParams.get('type') === 'recovery' ||
+      hashParams.has('access_token') ||
+      searchParams.has('code'); // PKCE flow
+
+    if (isRecoveryUrl) {
       setIsRecovery(true);
-    } else {
-      // No recovery token, redirect to auth
-      toast.error('لینک بازیابی نامعتبر است');
-      navigate('/auth');
+      return;
     }
+
+    // Fallback: also accept if Supabase already established a recovery session
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        setIsRecovery(true);
+      } else {
+        toast.error('لینک بازیابی نامعتبر یا منقضی شده است');
+        navigate('/auth');
+      }
+    });
   }, [navigate]);
 
   const validatePassword = (password: string): string[] => {
