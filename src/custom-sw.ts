@@ -216,8 +216,8 @@ async function handleMutation(request: Request): Promise<Response> {
     // Try online first
     const response = await fetch(request.clone());
     if (response.ok) {
-      // Also try to replay any queued items
-      replayQueue().catch(() => {});
+      // Notify clients to drain queue (handled in window by syncManager)
+      notifyClientsToSync().catch(() => {});
     }
     return response;
   } catch (err) {
@@ -226,9 +226,10 @@ async function handleMutation(request: Request): Promise<Response> {
     let payload: unknown = null;
     try { payload = JSON.parse(body); } catch { payload = body || null; }
 
+    // SECURITY: never persist Authorization. apikey is the public publishable key.
     const headers: Record<string, string> = {};
     request.headers.forEach((v, k) => {
-      if (['authorization', 'apikey', 'content-type', 'prefer'].includes(k.toLowerCase())) {
+      if (['apikey', 'content-type', 'prefer'].includes(k.toLowerCase())) {
         headers[k] = v;
       }
     });
