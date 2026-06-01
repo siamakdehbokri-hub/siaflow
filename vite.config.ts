@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "custom-sw.ts",
-      injectRegister: "script-defer",
+      injectRegister: false,
       includeAssets: [
         "favicon.ico",
         "robots.txt",
