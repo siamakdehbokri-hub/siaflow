@@ -168,39 +168,32 @@ serve(async (req) => {
       }
 
       case 'get-stats': {
-        // Get system statistics
-        const { count: userCount } = await supabaseAdmin
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
+        // Get system statistics (run all count queries in parallel)
+        const headCount = (table: string, filter?: (q: any) => any) => {
+          let q = supabaseAdmin.from(table).select('*', { count: 'exact', head: true });
+          if (filter) q = filter(q);
+          return q;
+        };
 
-        const { count: transactionCount } = await supabaseAdmin
-          .from('transactions')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: categoryCount } = await supabaseAdmin
-          .from('categories')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: debtCount } = await supabaseAdmin
-          .from('debts')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: goalCount } = await supabaseAdmin
-          .from('saving_goals')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: activeUserCount } = await supabaseAdmin
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_active', true);
-
-        const { count: accountCount } = await supabaseAdmin
-          .from('accounts')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: transferCount } = await supabaseAdmin
-          .from('transfers')
-          .select('*', { count: 'exact', head: true });
+        const [
+          { count: userCount },
+          { count: transactionCount },
+          { count: categoryCount },
+          { count: debtCount },
+          { count: goalCount },
+          { count: activeUserCount },
+          { count: accountCount },
+          { count: transferCount },
+        ] = await Promise.all([
+          headCount('profiles'),
+          headCount('transactions'),
+          headCount('categories'),
+          headCount('debts'),
+          headCount('saving_goals'),
+          headCount('profiles', (q) => q.eq('is_active', true)),
+          headCount('accounts'),
+          headCount('transfers'),
+        ]);
 
         return new Response(
           JSON.stringify({
