@@ -390,12 +390,23 @@ serve(async (req) => {
       }
 
       case 'get-financial-summary': {
-        // Get all transactions
-        const { data: transactions, error: txError } = await supabaseAdmin
-          .from('transactions')
-          .select('amount, type');
+        // Fetch transactions, debts, goals and accounts in parallel
+        const [
+          { data: transactions, error: txError },
+          { data: debts, error: debtError },
+          { data: goals, error: goalError },
+          { data: accounts, error: accountError },
+        ] = await Promise.all([
+          supabaseAdmin.from('transactions').select('amount, type'),
+          supabaseAdmin.from('debts').select('total_amount, paid_amount'),
+          supabaseAdmin.from('saving_goals').select('target_amount, current_amount'),
+          supabaseAdmin.from('accounts').select('balance'),
+        ]);
 
         if (txError) throw txError;
+        if (debtError) throw debtError;
+        if (goalError) throw goalError;
+        if (accountError) throw accountError;
 
         let totalIncome = 0;
         let totalExpense = 0;
@@ -410,26 +421,12 @@ serve(async (req) => {
           }
         });
 
-        // Get all debts
-        const { data: debts, error: debtError } = await supabaseAdmin
-          .from('debts')
-          .select('total_amount, paid_amount');
-
-        if (debtError) throw debtError;
-
         let totalDebtAmount = 0;
         let totalDebtPaid = 0;
         debts?.forEach(d => {
           totalDebtAmount += Number(d.total_amount);
           totalDebtPaid += Number(d.paid_amount);
         });
-
-        // Get all goals
-        const { data: goals, error: goalError } = await supabaseAdmin
-          .from('saving_goals')
-          .select('target_amount, current_amount');
-
-        if (goalError) throw goalError;
 
         let totalGoalTarget = 0;
         let totalGoalCurrent = 0;
@@ -438,17 +435,11 @@ serve(async (req) => {
           totalGoalCurrent += Number(g.current_amount);
         });
 
-        // Get all account balances
-        const { data: accounts, error: accountError } = await supabaseAdmin
-          .from('accounts')
-          .select('balance');
-
-        if (accountError) throw accountError;
-
         let totalAccountBalance = 0;
         accounts?.forEach(a => {
           totalAccountBalance += Number(a.balance);
         });
+
 
         return new Response(
           JSON.stringify({
