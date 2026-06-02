@@ -100,48 +100,44 @@ serve(async (req) => {
     const { action, userId, data: actionData } = await req.json();
     switch (action) {
       case 'get-users': {
-        // Get all users from auth.users via admin API
-        const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+        // Fetch auth users, profiles, roles and transaction list in parallel
+        const [
+          { data: authUsersData, error: authError },
+          { data: profiles, error: profilesError },
+          { data: roles, error: rolesError },
+          { data: transactionCounts, error: txError },
+        ] = await Promise.all([
+          supabaseAdmin.auth.admin.listUsers(),
+          supabaseAdmin.from('profiles').select('*'),
+          supabaseAdmin.from('user_roles').select('*'),
+          supabaseAdmin.from('transactions').select('user_id'),
+        ]);
+
         if (authError) {
           console.error('Error fetching auth users:', authError);
           throw authError;
         }
-
-        // Get profiles with additional data
-        const { data: profiles, error: profilesError } = await supabaseAdmin
-          .from('profiles')
-          .select('*');
-        
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError);
           throw profilesError;
         }
-
-        // Get user roles
-        const { data: roles, error: rolesError } = await supabaseAdmin
-          .from('user_roles')
-          .select('*');
-
         if (rolesError) {
           console.error('Error fetching roles:', rolesError);
           throw rolesError;
         }
-
-        // Get transaction counts per user
-        const { data: transactionCounts, error: txError } = await supabaseAdmin
-          .from('transactions')
-          .select('user_id');
-
         if (txError) {
           console.error('Error fetching transactions:', txError);
           throw txError;
         }
+
+        const authUsers = authUsersData;
 
         // Count transactions per user
         const txCountMap: Record<string, number> = {};
         transactionCounts?.forEach(tx => {
           txCountMap[tx.user_id] = (txCountMap[tx.user_id] || 0) + 1;
         });
+
 
         // Combine data
         const users = authUsers.users.map(authUser => {
