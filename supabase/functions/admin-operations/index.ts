@@ -100,48 +100,44 @@ serve(async (req) => {
     const { action, userId, data: actionData } = await req.json();
     switch (action) {
       case 'get-users': {
-        // Get all users from auth.users via admin API
-        const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers();
+        // Fetch auth users, profiles, roles and transaction list in parallel
+        const [
+          { data: authUsersData, error: authError },
+          { data: profiles, error: profilesError },
+          { data: roles, error: rolesError },
+          { data: transactionCounts, error: txError },
+        ] = await Promise.all([
+          supabaseAdmin.auth.admin.listUsers(),
+          supabaseAdmin.from('profiles').select('*'),
+          supabaseAdmin.from('user_roles').select('*'),
+          supabaseAdmin.from('transactions').select('user_id'),
+        ]);
+
         if (authError) {
           console.error('Error fetching auth users:', authError);
           throw authError;
         }
-
-        // Get profiles with additional data
-        const { data: profiles, error: profilesError } = await supabaseAdmin
-          .from('profiles')
-          .select('*');
-        
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError);
           throw profilesError;
         }
-
-        // Get user roles
-        const { data: roles, error: rolesError } = await supabaseAdmin
-          .from('user_roles')
-          .select('*');
-
         if (rolesError) {
           console.error('Error fetching roles:', rolesError);
           throw rolesError;
         }
-
-        // Get transaction counts per user
-        const { data: transactionCounts, error: txError } = await supabaseAdmin
-          .from('transactions')
-          .select('user_id');
-
         if (txError) {
           console.error('Error fetching transactions:', txError);
           throw txError;
         }
+
+        const authUsers = authUsersData;
 
         // Count transactions per user
         const txCountMap: Record<string, number> = {};
         transactionCounts?.forEach(tx => {
           txCountMap[tx.user_id] = (txCountMap[tx.user_id] || 0) + 1;
         });
+
 
         // Combine data
         const users = authUsers.users.map(authUser => {
@@ -168,39 +164,32 @@ serve(async (req) => {
       }
 
       case 'get-stats': {
-        // Get system statistics
-        const { count: userCount } = await supabaseAdmin
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
+        // Get system statistics (run all count queries in parallel)
+        const headCount = (table: string, filter?: (q: any) => any) => {
+          let q = supabaseAdmin.from(table).select('*', { count: 'exact', head: true });
+          if (filter) q = filter(q);
+          return q;
+        };
 
-        const { count: transactionCount } = await supabaseAdmin
-          .from('transactions')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: categoryCount } = await supabaseAdmin
-          .from('categories')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: debtCount } = await supabaseAdmin
-          .from('debts')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: goalCount } = await supabaseAdmin
-          .from('saving_goals')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: activeUserCount } = await supabaseAdmin
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_active', true);
-
-        const { count: accountCount } = await supabaseAdmin
-          .from('accounts')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: transferCount } = await supabaseAdmin
-          .from('transfers')
-          .select('*', { count: 'exact', head: true });
+        const [
+          { count: userCount },
+          { count: transactionCount },
+          { count: categoryCount },
+          { count: debtCount },
+          { count: goalCount },
+          { count: activeUserCount },
+          { count: accountCount },
+          { count: transferCount },
+        ] = await Promise.all([
+          headCount('profiles'),
+          headCount('transactions'),
+          headCount('categories'),
+          headCount('debts'),
+          headCount('saving_goals'),
+          headCount('profiles', (q) => q.eq('is_active', true)),
+          headCount('accounts'),
+          headCount('transfers'),
+        ]);
 
         return new Response(
           JSON.stringify({
@@ -401,12 +390,23 @@ serve(async (req) => {
       }
 
       case 'get-financial-summary': {
-        // Get all transactions
-        const { data: transactions, error: txError } = await supabaseAdmin
-          .from('transactions')
-          .select('amount, type');
+        // Fetch transactions, debts, goals and accounts in parallel
+        const [
+          { data: transactions, error: txError },
+          { data: debts, error: debtError },
+          { data: goals, error: goalError },
+          { data: accounts, error: accountError },
+        ] = await Promise.all([
+          supabaseAdmin.from('transactions').select('amount, type'),
+          supabaseAdmin.from('debts').select('total_amount, paid_amount'),
+          supabaseAdmin.from('saving_goals').select('target_amount, current_amount'),
+          supabaseAdmin.from('accounts').select('balance'),
+        ]);
 
         if (txError) throw txError;
+        if (debtError) throw debtError;
+        if (goalError) throw goalError;
+        if (accountError) throw accountError;
 
         let totalIncome = 0;
         let totalExpense = 0;
@@ -421,26 +421,12 @@ serve(async (req) => {
           }
         });
 
-        // Get all debts
-        const { data: debts, error: debtError } = await supabaseAdmin
-          .from('debts')
-          .select('total_amount, paid_amount');
-
-        if (debtError) throw debtError;
-
         let totalDebtAmount = 0;
         let totalDebtPaid = 0;
         debts?.forEach(d => {
           totalDebtAmount += Number(d.total_amount);
           totalDebtPaid += Number(d.paid_amount);
         });
-
-        // Get all goals
-        const { data: goals, error: goalError } = await supabaseAdmin
-          .from('saving_goals')
-          .select('target_amount, current_amount');
-
-        if (goalError) throw goalError;
 
         let totalGoalTarget = 0;
         let totalGoalCurrent = 0;
@@ -449,17 +435,11 @@ serve(async (req) => {
           totalGoalCurrent += Number(g.current_amount);
         });
 
-        // Get all account balances
-        const { data: accounts, error: accountError } = await supabaseAdmin
-          .from('accounts')
-          .select('balance');
-
-        if (accountError) throw accountError;
-
         let totalAccountBalance = 0;
         accounts?.forEach(a => {
           totalAccountBalance += Number(a.balance);
         });
+
 
         return new Response(
           JSON.stringify({
