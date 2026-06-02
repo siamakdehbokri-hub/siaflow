@@ -111,8 +111,6 @@ export interface FinancialSummary {
 
 export function useAdmin() {
   const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -132,34 +130,21 @@ export function useAdmin() {
   const [financialSummary, setFinancialSummary] = useState<FinancialSummary | null>(null);
   const [financialSummaryLoading, setFinancialSummaryLoading] = useState(false);
 
-  // Check if current user is admin
-  useEffect(() => {
-    const checkAdminRole = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
+  // Check if current user is admin — cached/shared across hook instances via React Query
+  const { data: isAdmin = false, isLoading: loading } = useQuery({
+    queryKey: ['is-admin', user?.id],
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('is_admin');
+      if (error) {
+        console.error('Error checking admin role:', error);
+        return false;
       }
+      return data === true;
+    },
+  });
 
-      try {
-        const { data, error } = await supabase.rpc('is_admin');
-
-        if (error) {
-          console.error('Error checking admin role:', error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(data === true);
-        }
-      } catch (err) {
-        console.error('Failed to check admin status:', err);
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAdminRole();
-  }, [user]);
 
   const callAdminFunction = async (action: string, userId?: string, data?: any) => {
     const { data: sessionData } = await supabase.auth.getSession();
