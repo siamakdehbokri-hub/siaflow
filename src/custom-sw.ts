@@ -190,6 +190,10 @@ self.addEventListener('message', (event) => {
   if (event.data?.type === 'FORCE_SYNC') {
     notifyClientsToSync().catch(console.error);
   }
+  // Prompt-based update: window calls updateServiceWorker(true) → posts SKIP_WAITING
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // ─── Mutation interception (POST/PUT/DELETE/PATCH to Supabase) ──────
