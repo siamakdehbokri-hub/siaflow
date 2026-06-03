@@ -110,14 +110,15 @@ export async function processQueue(): Promise<void> {
           console.error(`[SyncManager] Permanently failed after ${MAX_RETRIES} retries:`, item.endpoint);
         }
       } else {
+        // Transient failure — reset to pending and let the NEXT processQueue
+        // (online event / SW SYNC_COMPLETE / manual trigger) retry it.
+        // We intentionally do NOT sleep here: sleeping inside the loop would
+        // stall every following item in the queue for up to MAX_DELAY_MS.
         await updateQueuedRequest(item.id!, {
           status: 'pending',
           retryCount: newRetry,
           errorMessage: err instanceof Error ? err.message : 'Unknown error',
         });
-        // Exponential backoff with jitter
-        const delay = Math.min(BASE_DELAY_MS * Math.pow(2, newRetry) + Math.random() * 500, MAX_DELAY_MS);
-        await sleep(delay);
       }
     }
   }
