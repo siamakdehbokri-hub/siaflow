@@ -190,6 +190,10 @@ self.addEventListener('message', (event) => {
   if (event.data?.type === 'FORCE_SYNC') {
     notifyClientsToSync().catch(console.error);
   }
+  // Prompt-based update: window calls updateServiceWorker(true) → posts SKIP_WAITING
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // ─── Mutation interception (POST/PUT/DELETE/PATCH to Supabase) ──────
@@ -266,12 +270,13 @@ async function handleMutation(request: Request): Promise<Response> {
   }
 }
 
-// ─── Activate: claim clients immediately ────────────────────
+// ─── Activate: clean caches & claim clients ─────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// ─── Skip waiting for immediate activation ──────────────────
-self.addEventListener('install', (event) => {
-  event.waitUntil(self.skipWaiting());
-});
+// NOTE: We intentionally do NOT call self.skipWaiting() on install.
+// registerType is "prompt" — the new worker waits until the user accepts
+// the update (UpdateNotifier → updateServiceWorker(true) → SKIP_WAITING message).
+// Auto-activating mid-session swaps hashed assets out from under the running
+// page and can blank the screen.
