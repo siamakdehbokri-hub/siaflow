@@ -143,7 +143,16 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
     const { data } = await supabase.auth.getSession();
     accessToken = data.session?.access_token;
   } catch {
-    // No session — request will fail with 401 and be marked permanent
+    // Transient failure fetching the session (network/IndexedDB hiccup).
+    // Throw a NON-permanent error so the item stays queued and retries later,
+    // instead of being sent token-less → 401 → permanently dropped.
+    throw new Error('Session fetch failed — will retry');
+  }
+
+  // No active session yet (e.g. still restoring auth). Retry later rather than
+  // sending an unauthenticated request that 401s and is dropped permanently.
+  if (!accessToken) {
+    throw new Error('No active session — will retry');
   }
 
   const headers: Record<string, string> = {
@@ -153,7 +162,7 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
   // Strip any stale Authorization header that may have been persisted by older versions
   delete headers['Authorization'];
   delete headers['authorization'];
-  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+  headers['Authorization'] = `Bearer ${accessToken}`;
 
   const response = await fetch(item.endpoint, {
     method: item.method,
