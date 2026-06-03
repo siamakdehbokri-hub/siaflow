@@ -74,6 +74,7 @@ export const parseAmount = (value: string | number | null | undefined): number =
  * Format currency with Persian digits
  */
 export const formatCurrencyPersian = (amount: number): string => {
+  if (!Number.isFinite(amount)) return '—';
   const formatted = new Intl.NumberFormat('fa-IR').format(amount);
   return `${formatted} تومان`;
 };
