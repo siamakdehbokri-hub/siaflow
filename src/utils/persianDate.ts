@@ -12,32 +12,57 @@ function safeParse(dateString: string): Date {
   return new Date(dateString);
 }
 
+/**
+ * Format guard: never throw on an invalid Date. date-fns-jalali's `format`
+ * raises `RangeError: Invalid time value` for NaN dates, which can crash an
+ * entire screen. Return a neutral placeholder instead.
+ */
+function safeFormat(
+  date: Date,
+  pattern: string,
+  options?: Parameters<typeof format>[2],
+  fallback = '—'
+): string {
+  if (!date || Number.isNaN(date.getTime())) return fallback;
+  try {
+    return format(date, pattern, options);
+  } catch {
+    return fallback;
+  }
+}
+
 export const formatPersianDate = (dateString: string): string => {
-  return format(safeParse(dateString), 'd MMMM yyyy', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'd MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianDateFull = (dateString: string): string => {
-  return format(safeParse(dateString), 'EEEE d MMMM yyyy', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'EEEE d MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianDateShort = (dateString: string): string => {
-  return format(safeParse(dateString), 'yyyy/MM/dd', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'yyyy/MM/dd', { locale: faIR });
 };
 
 export const formatPersianMonth = (dateString: string): string => {
-  return format(safeParse(dateString), 'MMMM yyyy', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianMonthOnly = (dateString: string): string => {
-  return format(safeParse(dateString), 'MMMM', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'MMMM', { locale: faIR });
 };
 
 export const formatPersianWeekday = (dateString: string): string => {
-  return format(safeParse(dateString), 'EEEE', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'EEEE', { locale: faIR });
 };
 
 export const formatPersianRelative = (dateString: string): string => {
-  return formatDistance(safeParse(dateString), new Date(), { addSuffix: true, locale: faIR });
+  const d = safeParse(dateString);
+  if (Number.isNaN(d.getTime())) return '—';
+  try {
+    return formatDistance(d, new Date(), { addSuffix: true, locale: faIR });
+  } catch {
+    return '—';
+  }
 };
 
 export const getPersianMonthName = (monthIndex: number): string => {
