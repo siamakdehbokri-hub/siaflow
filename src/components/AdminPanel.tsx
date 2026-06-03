@@ -160,7 +160,7 @@ export function AdminPanel() {
         if (accounts.length === 0) fetchAllAccounts();
         break;
     }
-  }, [activeTab, isAdmin]);
+  }, [activeTab, isAdmin, transactions.length, categories.length, debts.length, goals.length, accounts.length, fetchAllTransactions, fetchAllCategories, fetchAllDebts, fetchAllGoals, fetchAllAccounts]);
 
   // Filtered users
   const filteredUsers = useMemo(() => {
