@@ -187,7 +187,3 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
     throw new Error(`HTTP ${response.status}: ${text}`);
   }
 }
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
