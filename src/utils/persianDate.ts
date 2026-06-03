@@ -143,6 +143,7 @@ export const getPersianWeekdays = (): string[] => {
  * Prefer `useCurrency().formatAmount` inside React components.
  */
 export const formatCurrency = (amountInIRT: number): string => {
+  if (!Number.isFinite(amountInIRT)) return '—';
   if (typeof window === 'undefined') {
     return new Intl.NumberFormat('fa-IR').format(Math.round(amountInIRT)) + ' تومان';
   }
