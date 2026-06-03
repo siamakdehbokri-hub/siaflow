@@ -198,6 +198,18 @@ export function AdminPanel() {
     });
   }, [transactions, txSearchQuery, txTypeFilter, txUserFilter]);
 
+  // Escape a CSV field: wrap in quotes and double any embedded quotes so that
+  // commas, quotes, and newlines inside values don't corrupt the columns.
+  const csvCell = (value: unknown): string => {
+    const s = value == null ? '' : String(value);
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const toCsv = (headers: string[], rows: unknown[][]): string =>
+    [headers, ...rows].map(row => row.map(csvCell).join(',')).join('\n');
+
+  const typeLabel = (type: string) =>
+    type === 'income' ? 'درآمد' : type === 'saving' ? 'پس‌انداز' : 'هزینه';
+
   // Export users to CSV
   const exportToCSV = () => {
     const headers = ['نام', 'ایمیل', 'وضعیت', 'نقش', 'تعداد تراکنش', 'آخرین ورود', 'تاریخ ثبت‌نام'];
@@ -210,11 +222,9 @@ export function AdminPanel() {
       u.lastLogin ? format(new Date(u.lastLogin), 'yyyy/MM/dd HH:mm') : 'هرگز',
       u.createdAt ? format(new Date(u.createdAt), 'yyyy/MM/dd') : '-'
     ]);
-    
-    const csvContent = [headers, ...rows]
-      .map(row => row.join(','))
-      .join('\n');
-    
+
+    const csvContent = toCsv(headers, rows);
+
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -230,16 +240,14 @@ export function AdminPanel() {
     const rows = filteredTransactions.map(t => [
       t.date,
       t.userName,
-      t.type === 'income' ? 'درآمد' : 'هزینه',
+      typeLabel(t.type),
       t.category,
       t.amount.toString(),
       t.description || '-'
     ]);
-    
-    const csvContent = [headers, ...rows]
-      .map(row => row.join(','))
-      .join('\n');
-    
+
+    const csvContent = toCsv(headers, rows);
+
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
