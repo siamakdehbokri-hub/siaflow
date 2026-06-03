@@ -124,9 +124,11 @@ export const isInPreviousJalaliMonth = (dateString: string): boolean => {
   return dateString >= start && dateString <= end;
 };
 
-// Get Jalali month key for grouping (e.g., "1403-11")
+// Get Jalali month key for grouping (e.g., "1403-11").
+// IMPORTANT: no faIR locale here — keys must use Latin digits so they sort and
+// compare lexicographically and work as stable object keys.
 export const getJalaliMonthKey = (dateString: string): string => {
-  return format(safeParse(dateString), 'yyyy-MM', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'yyyy-MM', undefined, '');
 };
 
 export const getPersianWeekdays = (): string[] => {
