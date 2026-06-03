@@ -110,14 +110,15 @@ export async function processQueue(): Promise<void> {
           console.error(`[SyncManager] Permanently failed after ${MAX_RETRIES} retries:`, item.endpoint);
         }
       } else {
+        // Transient failure — reset to pending and let the NEXT processQueue
+        // (online event / SW SYNC_COMPLETE / manual trigger) retry it.
+        // We intentionally do NOT sleep here: sleeping inside the loop would
+        // stall every following item in the queue for up to MAX_DELAY_MS.
         await updateQueuedRequest(item.id!, {
           status: 'pending',
           retryCount: newRetry,
           errorMessage: err instanceof Error ? err.message : 'Unknown error',
         });
-        // Exponential backoff with jitter
-        const delay = Math.min(BASE_DELAY_MS * Math.pow(2, newRetry) + Math.random() * 500, MAX_DELAY_MS);
-        await sleep(delay);
       }
     }
   }
@@ -142,7 +143,16 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
     const { data } = await supabase.auth.getSession();
     accessToken = data.session?.access_token;
   } catch {
-    // No session — request will fail with 401 and be marked permanent
+    // Transient failure fetching the session (network/IndexedDB hiccup).
+    // Throw a NON-permanent error so the item stays queued and retries later,
+    // instead of being sent token-less → 401 → permanently dropped.
+    throw new Error('Session fetch failed — will retry');
+  }
+
+  // No active session yet (e.g. still restoring auth). Retry later rather than
+  // sending an unauthenticated request that 401s and is dropped permanently.
+  if (!accessToken) {
+    throw new Error('No active session — will retry');
   }
 
   const headers: Record<string, string> = {
@@ -152,7 +162,7 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
   // Strip any stale Authorization header that may have been persisted by older versions
   delete headers['Authorization'];
   delete headers['authorization'];
-  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+  headers['Authorization'] = `Bearer ${accessToken}`;
 
   const response = await fetch(item.endpoint, {
     method: item.method,
@@ -176,8 +186,4 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
 
     throw new Error(`HTTP ${response.status}: ${text}`);
   }
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

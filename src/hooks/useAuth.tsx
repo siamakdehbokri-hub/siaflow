@@ -71,11 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clear persisted query cache and offline queue before signing out
+    // Clear persisted query cache and offline queue before signing out so a
+    // different user on the same device can't inherit the previous user's
+    // queued mutations (which would replay under the new session's token).
     try {
       localStorage.removeItem('siaflow-query-cache');
       await clearAllRequests();
-    } catch {}
+    } catch (err) {
+      console.error('[Auth] Failed to clear offline data on sign-out:', err);
+    }
     await supabase.auth.signOut();
   };
 

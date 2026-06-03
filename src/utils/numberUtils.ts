@@ -34,7 +34,7 @@ export const toEnglishDigits = (str: string): string => {
 export const toPersianDigits = (str: string | number): string => {
   if (str === null || str === undefined) return '';
 
-  return String(str).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+  return String(str).replace(/\d/g, (d) => persianDigits[parseInt(d, 10)]);
 };
 
 /**
@@ -74,6 +74,7 @@ export const parseAmount = (value: string | number | null | undefined): number =
  * Format currency with Persian digits
  */
 export const formatCurrencyPersian = (amount: number): string => {
+  if (!Number.isFinite(amount)) return '—';
   const formatted = new Intl.NumberFormat('fa-IR').format(amount);
   return `${formatted} تومان`;
 };

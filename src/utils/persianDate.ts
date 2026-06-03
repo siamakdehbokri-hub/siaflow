@@ -12,32 +12,57 @@ function safeParse(dateString: string): Date {
   return new Date(dateString);
 }
 
+/**
+ * Format guard: never throw on an invalid Date. date-fns-jalali's `format`
+ * raises `RangeError: Invalid time value` for NaN dates, which can crash an
+ * entire screen. Return a neutral placeholder instead.
+ */
+function safeFormat(
+  date: Date,
+  pattern: string,
+  options?: Parameters<typeof format>[2],
+  fallback = '—'
+): string {
+  if (!date || Number.isNaN(date.getTime())) return fallback;
+  try {
+    return format(date, pattern, options);
+  } catch {
+    return fallback;
+  }
+}
+
 export const formatPersianDate = (dateString: string): string => {
-  return format(safeParse(dateString), 'd MMMM yyyy', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'd MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianDateFull = (dateString: string): string => {
-  return format(safeParse(dateString), 'EEEE d MMMM yyyy', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'EEEE d MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianDateShort = (dateString: string): string => {
-  return format(safeParse(dateString), 'yyyy/MM/dd', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'yyyy/MM/dd', { locale: faIR });
 };
 
 export const formatPersianMonth = (dateString: string): string => {
-  return format(safeParse(dateString), 'MMMM yyyy', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'MMMM yyyy', { locale: faIR });
 };
 
 export const formatPersianMonthOnly = (dateString: string): string => {
-  return format(safeParse(dateString), 'MMMM', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'MMMM', { locale: faIR });
 };
 
 export const formatPersianWeekday = (dateString: string): string => {
-  return format(safeParse(dateString), 'EEEE', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'EEEE', { locale: faIR });
 };
 
 export const formatPersianRelative = (dateString: string): string => {
-  return formatDistance(safeParse(dateString), new Date(), { addSuffix: true, locale: faIR });
+  const d = safeParse(dateString);
+  if (Number.isNaN(d.getTime())) return '—';
+  try {
+    return formatDistance(d, new Date(), { addSuffix: true, locale: faIR });
+  } catch {
+    return '—';
+  }
 };
 
 export const getPersianMonthName = (monthIndex: number): string => {
@@ -99,9 +124,11 @@ export const isInPreviousJalaliMonth = (dateString: string): boolean => {
   return dateString >= start && dateString <= end;
 };
 
-// Get Jalali month key for grouping (e.g., "1403-11")
+// Get Jalali month key for grouping (e.g., "1403-11").
+// IMPORTANT: no faIR locale here — keys must use Latin digits so they sort and
+// compare lexicographically and work as stable object keys.
 export const getJalaliMonthKey = (dateString: string): string => {
-  return format(safeParse(dateString), 'yyyy-MM', { locale: faIR });
+  return safeFormat(safeParse(dateString), 'yyyy-MM', undefined, '');
 };
 
 export const getPersianWeekdays = (): string[] => {
@@ -116,6 +143,7 @@ export const getPersianWeekdays = (): string[] => {
  * Prefer `useCurrency().formatAmount` inside React components.
  */
 export const formatCurrency = (amountInIRT: number): string => {
+  if (!Number.isFinite(amountInIRT)) return '—';
   if (typeof window === 'undefined') {
     return new Intl.NumberFormat('fa-IR').format(Math.round(amountInIRT)) + ' تومان';
   }
@@ -149,7 +177,7 @@ export const formatCurrency = (amountInIRT: number): string => {
 
 export const toPersianNum = (num: number | string): string => {
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return num.toString().replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+  return num.toString().replace(/\d/g, (d) => persianDigits[parseInt(d, 10)]);
 };
 
 // Check if a date string is today in Jalali calendar
