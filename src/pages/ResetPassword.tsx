@@ -17,7 +17,10 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Robust recovery-token detection: check hash, query string, and active session.
+    // Robust recovery-token detection: check hash, query string, and the
+    // PASSWORD_RECOVERY auth event. We deliberately do NOT accept just any
+    // active session, otherwise a normally logged-in user landing on this
+    // route could change their password without a recovery link.
     const hash = window.location.hash || '';
     const search = window.location.search || '';
     const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
@@ -29,20 +32,34 @@ const ResetPassword = () => {
       hashParams.has('access_token') ||
       searchParams.has('code'); // PKCE flow
 
-    if (isRecoveryUrl) {
-      setIsRecovery(true);
-      return;
-    }
-
-    // Fallback: also accept if Supabase already established a recovery session
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
+    // Listen for the recovery event Supabase emits after consuming the link.
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
         setIsRecovery(true);
-      } else {
-        toast.error('لینک بازیابی نامعتبر یا منقضی شده است');
-        navigate('/auth');
       }
     });
+
+    if (isRecoveryUrl) {
+      setIsRecovery(true);
+      return () => sub.subscription.unsubscribe();
+    }
+
+    // No recovery signal in the URL: give the event a brief window to fire
+    // (it can arrive slightly after mount), then bail out to /auth.
+    const timer = setTimeout(() => {
+      setIsRecovery((current) => {
+        if (!current) {
+          toast.error('لینک بازیابی نامعتبر یا منقضی شده است');
+          navigate('/auth');
+        }
+        return current;
+      });
+    }, 1500);
+
+    return () => {
+      clearTimeout(timer);
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const validatePassword = (password: string): string[] => {
