@@ -177,7 +177,7 @@ export const formatCurrency = (amountInIRT: number): string => {
 
 export const toPersianNum = (num: number | string): string => {
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  return num.toString().replace(/\d/g, (d) => persianDigits[parseInt(d)]);
+  return num.toString().replace(/\d/g, (d) => persianDigits[parseInt(d, 10)]);
 };
 
 // Check if a date string is today in Jalali calendar
