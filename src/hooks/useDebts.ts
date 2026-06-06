@@ -20,6 +20,7 @@ export interface Debt {
 const DEBTS_KEY = 'debts';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const EMPTY_DEBTS: Debt[] = [];
 
 function mapDebt(d: Record<string, unknown>): Debt {
   return {
@@ -50,7 +51,7 @@ export function useDebts() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: debts = [], isLoading: loading } = useQuery({
+  const { data: debts = EMPTY_DEBTS, isLoading: loading } = useQuery({
     queryKey: [DEBTS_KEY, user?.id],
     queryFn: async () => {
       if (!user) return [];

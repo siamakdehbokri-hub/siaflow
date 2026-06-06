@@ -9,6 +9,7 @@ import { enqueueRequest } from '@/lib/offlineDb';
 const TRANSACTIONS_KEY = 'transactions';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const EMPTY_TRANSACTIONS: Transaction[] = [];
 
 function mapRow(t: Record<string, unknown>): Transaction {
   return {
@@ -39,7 +40,7 @@ export function useTransactions() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: transactions = [], isLoading: loading } = useQuery({
+  const { data: transactions = EMPTY_TRANSACTIONS, isLoading: loading } = useQuery({
     queryKey: [TRANSACTIONS_KEY, user?.id],
     queryFn: async () => {
       if (!user) return [];
