@@ -2,8 +2,15 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Prefer build-time env vars, but fall back to baked-in values so a build that
+// is missing env vars never crashes the whole app with "supabaseUrl is required"
+// (which renders a blank white screen). The publishable/anon key is public.
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL ||
+  'https://qlytnmelseururejffbf.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFseXRubWVsc2V1cnVyZWpmZmJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY2Mjg5MzAsImV4cCI6MjA4MjIwNDkzMH0.U3D3sdxEWs6Rsvmmzft4KEbIJN8-GMy4vU-_jlxzHMU';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
