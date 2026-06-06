@@ -29,6 +29,7 @@ export interface GoalTransaction {
 const GOALS_KEY = 'saving-goals';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const EMPTY_GOALS: SavingGoal[] = [];
 
 function mapGoal(g: Record<string, unknown>): SavingGoal {
   return {
@@ -59,7 +60,7 @@ export function useSavingGoals() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: goals = [], isLoading: loading } = useQuery({
+  const { data: goals = EMPTY_GOALS, isLoading: loading } = useQuery({
     queryKey: [GOALS_KEY, user?.id],
     queryFn: async () => {
       if (!user) return [];
