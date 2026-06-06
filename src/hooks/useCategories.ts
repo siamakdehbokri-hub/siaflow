@@ -9,6 +9,7 @@ import { enqueueRequest } from '@/lib/offlineDb';
 const CATEGORIES_KEY = 'categories';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const EMPTY_CATEGORIES: Category[] = [];
 
 function mapRow(c: Record<string, unknown>): Category {
   return {
@@ -38,7 +39,7 @@ export function useCategories() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: categories = [], isLoading: loading } = useQuery({
+  const { data: categories = EMPTY_CATEGORIES, isLoading: loading } = useQuery({
     queryKey: [CATEGORIES_KEY, user?.id],
     queryFn: async () => {
       if (!user) return [];

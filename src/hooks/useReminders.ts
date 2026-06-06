@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Transaction } from '@/types/expense';
 import { toast } from '@/hooks/use-toast';
 
+const EMPTY_REMINDERS: Reminder[] = [];
+
 export interface Reminder {
   id: string;
   transactionId: string;
@@ -13,7 +15,7 @@ export interface Reminder {
 }
 
 export function useReminders(transactions: Transaction[]) {
-  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>(EMPTY_REMINDERS);
   const [dismissed, setDismissed] = useState<string[]>(() => {
     const stored = localStorage.getItem('dismissed-reminders');
     return stored ? JSON.parse(stored) : [];
@@ -60,7 +62,23 @@ export function useReminders(transactions: Transaction[]) {
       .filter((r): r is Reminder => r !== null)
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
 
-    setReminders(upcomingReminders);
+    setReminders(prev => {
+      const next = upcomingReminders.length > 0 ? upcomingReminders : EMPTY_REMINDERS;
+      if (
+        prev.length === next.length &&
+        prev.every((item, index) => {
+          const candidate = next[index];
+          return candidate &&
+            item.id === candidate.id &&
+            item.daysUntilDue === candidate.daysUntilDue &&
+            item.dueDate === candidate.dueDate;
+        })
+      ) {
+        return prev;
+      }
+
+      return next;
+    });
   }, [transactions, dismissed]);
 
   const dismissReminder = useCallback((id: string) => {
@@ -90,7 +108,7 @@ export function useReminders(transactions: Transaction[]) {
       const timer = setTimeout(showNotifications, 1000);
       return () => clearTimeout(timer);
     }
-  }, [reminders.length > 0]);
+  }, [reminders.length, showNotifications]);
 
   return {
     reminders,
