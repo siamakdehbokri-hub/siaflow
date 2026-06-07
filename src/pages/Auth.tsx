@@ -143,22 +143,26 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Blue Header */}
-      <div className="bg-primary text-primary-foreground pt-safe">
-        <div className="px-6 py-8 text-center">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Ambient glow blobs — matches app aesthetic */}
+      <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl" style={{ background: 'var(--blob-purple)' }} />
+      <div className="pointer-events-none absolute top-1/3 -left-24 w-64 h-64 rounded-full blur-3xl" style={{ background: 'var(--blob-teal)' }} />
+
+      {/* Header */}
+      <div className="relative pt-safe">
+        <div className="px-6 pt-10 pb-6 text-center">
           {/* Logo */}
-          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/20 flex items-center justify-center">
-            <span className="text-3xl font-black">SF</span>
+          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
+            <span className="text-3xl font-black text-primary-foreground">SF</span>
           </div>
-          <h1 className="text-2xl font-bold">SiaFlow</h1>
-          <p className="text-primary-foreground/80 mt-1">مدیریت مالی هوشمند</p>
+          <h1 className="text-2xl font-bold text-foreground">SiaFlow</h1>
+          <p className="text-muted-foreground mt-1 text-sm">مدیریت مالی هوشمند</p>
         </div>
       </div>
 
       {/* Form Card */}
-      <div className="flex-1 -mt-4 bg-card rounded-t-3xl px-6 py-8">
-        <div className="max-w-sm mx-auto">
+      <div className="relative flex-1 px-5 pb-8">
+        <div className="max-w-sm mx-auto glass-card rounded-3xl p-6">
           {/* Title */}
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-foreground">
@@ -171,7 +175,7 @@ const Auth = () => {
 
           {/* Auth Method Tabs */}
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as AuthMethod)} className="mb-6">
-            <TabsList className="grid grid-cols-2 w-full h-12 bg-muted rounded-xl p-1">
+            <TabsList className="grid grid-cols-2 w-full h-12 bg-muted/60 rounded-xl p-1">
               <TabsTrigger 
                 value="phone" 
                 className="gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -203,7 +207,7 @@ const Auth = () => {
                     placeholder="نام شما"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="pr-11 h-12 rounded-xl border-2 border-border focus:border-primary"
+                    className="pr-11 h-12 rounded-xl bg-muted/40 border border-border focus:border-primary"
                     required={!isLogin}
                     autoComplete="name"
                   />
@@ -223,7 +227,7 @@ const Auth = () => {
                     value={formatPhoneDisplay(phone)}
                     onChange={handlePhoneChange}
                     className={cn(
-                      "pr-11 h-12 rounded-xl border-2 border-border focus:border-primary tracking-wide",
+                      "pr-11 h-12 rounded-xl bg-muted/40 border border-border focus:border-primary tracking-wide",
                       phone.length > 0 && isPhoneValid && "pl-11"
                     )}
                     required={authMethod === 'phone'}
@@ -249,7 +253,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={cn(
-                      "pr-11 h-12 rounded-xl border-2 border-border focus:border-primary",
+                      "pr-11 h-12 rounded-xl bg-muted/40 border border-border focus:border-primary",
                       email.length > 0 && isEmailValid && "pl-11"
                     )}
                     required={authMethod === 'email'}
@@ -273,7 +277,7 @@ const Auth = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pr-11 pl-11 h-12 rounded-xl border-2 border-border focus:border-primary"
+                  className="pr-11 pl-11 h-12 rounded-xl bg-muted/40 border border-border focus:border-primary"
                   required
                   minLength={isLogin ? 6 : 8}
                   dir="ltr"
@@ -304,14 +308,14 @@ const Auth = () => {
                         "flex items-center gap-1.5 text-xs py-1.5 px-2 rounded-lg",
                         req.valid 
                           ? "bg-success/10 text-success" 
-                          : "bg-muted text-muted-foreground"
+                          : "bg-muted/50 text-muted-foreground"
                       )}
                     >
                       <div className={cn(
                         "w-3 h-3 rounded-full flex items-center justify-center",
                         req.valid ? "bg-success" : "bg-muted-foreground/30"
                       )}>
-                        {req.valid && <CheckCircle className="w-2 h-2 text-white" />}
+                        {req.valid && <CheckCircle className="w-2 h-2 text-success-foreground" />}
                       </div>
                       {req.label}
                     </div>
@@ -359,7 +363,7 @@ const Auth = () => {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-14 rounded-xl font-bold text-base bg-primary hover:bg-primary/90"
+              className="w-full h-14 rounded-xl font-bold text-base shadow-lg shadow-primary/25"
               disabled={loading}
             >
               {loading ? (
@@ -380,7 +384,7 @@ const Auth = () => {
                 <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-card px-4 text-sm text-muted-foreground">
+                <span className="px-4 text-sm text-muted-foreground bg-transparent">
                   {isLogin ? 'حساب ندارید؟' : 'قبلاً ثبت‌نام کردید؟'}
                 </span>
               </div>
@@ -390,19 +394,19 @@ const Auth = () => {
               type="button"
               variant="outline"
               onClick={() => setIsLogin(!isLogin)}
-              className="w-full h-12 rounded-xl font-semibold border-2 border-primary text-primary hover:bg-primary/5"
+              className="w-full h-12 rounded-xl font-semibold border border-primary/40 text-primary hover:bg-primary/10"
             >
               {isLogin ? 'ایجاد حساب جدید' : 'ورود به حساب موجود'}
             </Button>
           </div>
         </div>
-      </div>
 
-      {/* Footer */}
-      <div className="bg-card text-center py-4 border-t border-border">
-        <p className="text-xs text-muted-foreground">
-          با ورود یا ثبت‌نام، <Link to="/terms" className="text-primary hover:underline">قوانین و شرایط استفاده</Link> را می‌پذیرید
-        </p>
+        {/* Footer */}
+        <div className="max-w-sm mx-auto text-center pt-5">
+          <p className="text-xs text-muted-foreground">
+            با ورود یا ثبت‌نام، <Link to="/terms" className="text-primary hover:underline">قوانین و شرایط استفاده</Link> را می‌پذیرید
+          </p>
+        </div>
       </div>
     </div>
   );
