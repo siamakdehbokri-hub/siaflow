@@ -556,6 +556,25 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
             </div>
           </div>
         </div>
+        <div className="px-4 py-3.5 relative">
+          <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/60 to-transparent" />
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+              <Smartphone className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground leading-relaxed">نسخه برنامه</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">SiaFlow • نسخه {appVersion}</p>
+            </div>
+            <span className={cn(
+              "flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg",
+              online ? "text-success bg-success/10" : "text-muted-foreground bg-muted"
+            )}>
+              {online ? <Wifi className="w-3.5 h-3.5" strokeWidth={2} /> : <WifiOff className="w-3.5 h-3.5" strokeWidth={2} />}
+              {online ? 'آنلاین' : 'آفلاین'}
+            </span>
+          </div>
+        </div>
       </SettingsSection>
 
       {/* ─── Logout ─── */}
