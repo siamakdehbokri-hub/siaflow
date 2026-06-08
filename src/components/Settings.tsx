@@ -2,9 +2,14 @@ import { useState, useEffect } from 'react';
 import { 
   UserCircle, Palette, Layers, LifeBuoy, LogOut, ChevronLeft, Moon, Sun, Monitor,
   Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Lock, Download, 
-  Calendar, Globe, Database, Bell
+  Calendar, Globe, Database, Bell, FileText, FileSpreadsheet, FileDown, Wifi, WifiOff, Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { exportToCSV, exportToExcel, exportToPDF } from '@/utils/exportUtils';
+import type { Transaction } from '@/types/expense';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useTheme } from '@/hooks/useTheme';
