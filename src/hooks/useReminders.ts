@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Transaction } from '@/types/expense';
 import { toast } from '@/hooks/use-toast';
+import { getNotificationsEnabled } from '@/hooks/useNotificationPrefs';
 
 const EMPTY_REMINDERS: Reminder[] = [];
 
@@ -86,6 +87,7 @@ export function useReminders(transactions: Transaction[]) {
   }, []);
 
   const showNotifications = useCallback(() => {
+    if (!getNotificationsEnabled()) return;
     reminders.forEach(reminder => {
       if (reminder.daysUntilDue === 0) {
         toast({
