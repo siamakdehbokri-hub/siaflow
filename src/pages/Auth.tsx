@@ -175,7 +175,7 @@ const Auth = () => {
 
           {/* Auth Method Tabs */}
           <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as AuthMethod)} className="mb-6">
-            <TabsList className="grid grid-cols-2 w-full h-12 bg-muted/60 rounded-xl p-1">
+            <TabsList className="grid grid-cols-2 w-full h-12 bg-muted/40 rounded-xl p-1">
               <TabsTrigger 
                 value="phone" 
                 className="gap-2 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
