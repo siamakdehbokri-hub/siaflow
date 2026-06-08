@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Transaction } from '@/types/expense';
 import { toast } from '@/hooks/use-toast';
+import { getNotificationsEnabled } from '@/hooks/useNotificationPrefs';
 
 const EMPTY_REMINDERS: Reminder[] = [];
 
