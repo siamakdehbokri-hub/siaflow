@@ -110,6 +110,35 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const { theme, setTheme } = useTheme();
   const { currency, setCurrency, currencyInfo, exchangeRates, ratesLoading, refreshRates } = useCurrency();
   const navigate = useNavigate();
+  const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, permission, requestPermission } = useNotificationPrefs();
+  const { online } = useNetworkStatus();
+  const appVersion = '۱.۰.۰';
+
+  const handleToggleNotifications = async (value: boolean) => {
+    if (value && permission === 'default') {
+      const result = await requestPermission();
+      if (result === 'denied') {
+        toast.error('اجازه نمایش اعلان‌ها داده نشد');
+      }
+    }
+    setNotificationsEnabled(value);
+    toast.success(value ? 'اعلان‌ها فعال شد' : 'اعلان‌ها غیرفعال شد');
+  };
+
+  const handleExport = (type: 'csv' | 'excel' | 'pdf') => {
+    if (!transactions.length) {
+      toast.error('تراکنشی برای خروجی وجود ندارد');
+      return;
+    }
+    try {
+      if (type === 'pdf') exportToPDF(transactions);
+      else if (type === 'excel') exportToExcel(transactions);
+      else exportToCSV(transactions);
+      toast.success('فایل خروجی با موفقیت ایجاد شد');
+    } catch {
+      toast.error('خطا در ایجاد فایل خروجی');
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
