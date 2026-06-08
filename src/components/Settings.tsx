@@ -42,6 +42,7 @@ import { useCurrency, currencies, CurrencyCode } from '@/hooks/useCurrency';
 
 interface SettingsProps {
   onOpenCategories?: () => void;
+  transactions?: Transaction[];
 }
 
 type SettingsView = 'main' | 'profile' | 'help' | 'security';
