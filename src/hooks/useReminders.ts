@@ -87,6 +87,7 @@ export function useReminders(transactions: Transaction[]) {
   }, []);
 
   const showNotifications = useCallback(() => {
+    if (!getNotificationsEnabled()) return;
     reminders.forEach(reminder => {
       if (reminder.daysUntilDue === 0) {
         toast({
