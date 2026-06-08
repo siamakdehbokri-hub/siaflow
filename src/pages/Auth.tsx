@@ -162,7 +162,7 @@ const Auth = () => {
 
       {/* Form Card */}
       <div className="relative flex-1 px-5 pb-8">
-        <div className="max-w-sm mx-auto glass-card rounded-3xl p-6">
+        <div className="max-w-sm mx-auto glass-heavy rounded-2xl p-6">
           {/* Title */}
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-foreground">
