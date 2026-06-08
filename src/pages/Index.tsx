@@ -239,7 +239,7 @@ const Index = () => {
                 />
               )}
               {activeTab === 'settings' && (
-                <Settings onOpenCategories={() => setSubView('categories')} />
+                <Settings onOpenCategories={() => setSubView('categories')} transactions={transactions} />
               )}
             </>
           )}
