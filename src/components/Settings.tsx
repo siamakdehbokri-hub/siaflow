@@ -98,7 +98,7 @@ function SettingsSection({ title, children }: { title: string; children: React.R
   );
 }
 
-export function Settings({ onOpenCategories }: SettingsProps) {
+export function Settings({ onOpenCategories, transactions = [] }: SettingsProps) {
   const [currentView, setCurrentView] = useState<SettingsView>('main');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
