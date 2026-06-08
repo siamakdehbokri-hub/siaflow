@@ -437,19 +437,77 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
           subtitle="مدیریت دسته‌های هزینه و درآمد"
           onClick={() => onOpenCategories?.()}
         />
-        <div className="px-4 py-3.5 relative opacity-50 cursor-not-allowed">
-          {/* isLast separator */}
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
-              <Download className="w-5 h-5 text-success" strokeWidth={2} />
+        <Sheet>
+          <SheetTrigger asChild>
+            <div>
+              <SettingRow
+                icon={Download}
+                iconBg="bg-success/10"
+                iconColor="text-success"
+                title="پشتیبان‌گیری و خروجی"
+                subtitle="دریافت خروجی تراکنش‌ها"
+                onClick={() => {}}
+                isLast={true}
+              />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground leading-relaxed">پشتیبان‌گیری و خروجی</p>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">به‌زودی فعال می‌شود</p>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-auto rounded-t-3xl">
+            <SheetHeader className="text-right pb-4">
+              <SheetTitle className="text-xl flex items-center gap-2">
+                <Download className="w-6 h-6 text-success" strokeWidth={2} />
+                خروجی تراکنش‌ها
+              </SheetTitle>
+              <SheetDescription className="leading-relaxed">
+                {transactions.length > 0
+                  ? `${new Intl.NumberFormat('fa-IR').format(transactions.length)} تراکنش آماده خروجی است`
+                  : 'هنوز تراکنشی ثبت نشده است'}
+              </SheetDescription>
+            </SheetHeader>
+            <div className="space-y-3 pb-8">
+              {[
+                { type: 'pdf' as const, label: 'PDF', desc: 'مناسب چاپ و اشتراک‌گذاری', icon: FileText, bg: 'bg-destructive/10', color: 'text-destructive' },
+                { type: 'excel' as const, label: 'Excel', desc: 'فایل قابل ویرایش جدولی', icon: FileSpreadsheet, bg: 'bg-success/10', color: 'text-success' },
+                { type: 'csv' as const, label: 'CSV', desc: 'سازگار با همه برنامه‌ها', icon: FileDown, bg: 'bg-primary/10', color: 'text-primary' },
+              ].map((opt) => (
+                <button
+                  key={opt.type}
+                  onClick={() => handleExport(opt.type)}
+                  disabled={transactions.length === 0}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl transition-all border-2 border-transparent bg-muted/30 hover:border-border min-h-[60px] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <div className={cn("p-2.5 rounded-xl", opt.bg)}>
+                    <opt.icon className={cn("w-5 h-5", opt.color)} strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 text-right">
+                    <p className="font-semibold text-foreground leading-relaxed text-sm">{opt.label}</p>
+                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                  </div>
+                  <Download className="w-4.5 h-4.5 text-muted-foreground/60" strokeWidth={2} />
+                </button>
+              ))}
             </div>
-            <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md">به‌زودی</span>
-          </div>
-        </div>
+          </SheetContent>
+        </Sheet>
+      </SettingsSection>
+
+      {/* ─── Notifications ─── */}
+      <SettingsSection title="اعلان‌ها">
+        <SettingRow
+          icon={Bell}
+          iconBg="bg-primary/10"
+          iconColor="text-primary"
+          title="اعلان‌های یادآوری"
+          subtitle="یادآور سررسید بدهی‌ها و اقساط"
+          showChevron={false}
+          isLast={true}
+          trailing={
+            <Switch
+              checked={notificationsEnabled}
+              onCheckedChange={handleToggleNotifications}
+              aria-label="فعال‌سازی اعلان‌ها"
+            />
+          }
+        />
       </SettingsSection>
 
       {/* ─── Security ─── */}
