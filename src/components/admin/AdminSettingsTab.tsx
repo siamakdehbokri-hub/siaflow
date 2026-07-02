@@ -1,4 +1,5 @@
 import { Shield, Database, Activity, Settings, FileText, Download } from 'lucide-react';
+import { APP_VERSION } from '@/lib/version';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -52,7 +53,7 @@ export function AdminSettingsTab({
               </div>
               <div>
                 <p className="font-medium">نسخه سیستم</p>
-                <p className="text-xs text-muted-foreground">SiaFlow v2.0</p>
+                <p className="text-xs text-muted-foreground">SiaFlow v{APP_VERSION}</p>
               </div>
             </div>
           </div>

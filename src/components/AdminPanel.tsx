@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { APP_VERSION } from '@/lib/version';
 import { 
   Users, BarChart3, Shield, Trash2, UserX, UserCheck,
   RefreshCw, Crown, Activity, Database, CreditCard, Target,
@@ -770,7 +771,7 @@ export function AdminPanel() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-medium text-sm text-foreground">نسخه سیستم</p>
-                  <p className="text-xs text-muted-foreground">SiaFlow v2.0</p>
+                  <p className="text-xs text-muted-foreground">SiaFlow v{APP_VERSION}</p>
                 </div>
               </div>
             </div>
