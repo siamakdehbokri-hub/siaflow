@@ -136,7 +136,7 @@ export function useDebts() {
       try {
         const { error } = await supabase
           .from('debts')
-          .update(updateData)
+          .update(updateData as never)
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;

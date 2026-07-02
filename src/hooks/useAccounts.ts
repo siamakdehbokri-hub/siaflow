@@ -177,7 +177,7 @@ export function useAccounts() {
       try {
         const { error } = await supabase
           .from('accounts')
-          .update(updateData)
+          .update(updateData as never)
           .eq('id', id)
           .eq('user_id', user.id);
         if (error) throw error;
