@@ -59,11 +59,20 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [isRecurring, setIsRecurring] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
 
-  const currentCategories = useMemo(() => 
-    categories.filter(c => c.type === type), 
-    [categories, type]
-  );
+  const currentCategories = useMemo(() => {
+    const list = categories.filter(c => c.type === type);
+    const q = categorySearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(c => {
+      if (c.name.toLowerCase().includes(q)) return true;
+      const subs = (c.subcategories || []).map(s =>
+        (typeof s === 'string' ? s : (s as { name: string }).name).toLowerCase()
+      );
+      return subs.some(s => s.includes(q));
+    });
+  }, [categories, type, categorySearch]);
 
   const subcategories = useMemo((): string[] => {
     if (!category) return [];
