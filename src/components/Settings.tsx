@@ -112,7 +112,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const navigate = useNavigate();
   const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, permission, requestPermission } = useNotificationPrefs();
   const { online } = useNetworkStatus();
-  const appVersion = '۱.۰.۰';
+  const appVersion = '۱.۱.۰';
 
   const handleToggleNotifications = async (value: boolean) => {
     if (value && permission === 'default') {
