@@ -95,6 +95,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     });
     setIsRecurring(false);
     setShowMore(false);
+    setCategorySearch('');
   }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
