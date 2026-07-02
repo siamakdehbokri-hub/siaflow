@@ -210,7 +210,7 @@ export function AppMenu({
         {/* Version Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
           <p className="text-[11px] text-center text-muted-foreground">
-            نسخه ۲.۰.۳
+            نسخه {APP_VERSION_FA}
           </p>
         </div>
       </SheetContent>
