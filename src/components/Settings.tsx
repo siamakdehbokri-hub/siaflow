@@ -11,6 +11,7 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportToCSV, exportToExcel, exportToPDF } from '@/utils/exportUtils';
 import type { Transaction } from '@/types/expense';
 import { useAuth } from '@/hooks/useAuth';
+import { APP_VERSION_FA } from '@/lib/version';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
@@ -112,7 +113,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const navigate = useNavigate();
   const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, permission, requestPermission } = useNotificationPrefs();
   const { online } = useNetworkStatus();
-  const appVersion = '۱.۱.۰';
+  const appVersion = APP_VERSION_FA;
 
   const handleToggleNotifications = async (value: boolean) => {
     if (value && permission === 'default') {
@@ -605,7 +606,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
 
       {/* Version */}
       <p className="text-center text-[11px] text-muted-foreground/50 pb-2">
-        SiaFlow نسخه ۲.۰.۳
+        SiaFlow نسخه {APP_VERSION_FA}
       </p>
 
       {/* Delete Account Dialog */}

@@ -1,4 +1,5 @@
 import { ArrowRight, Plus, Pencil, Trash2, PieChart, Download, Layers, Moon, Wallet, Sparkles, CalendarDays } from 'lucide-react';
+import { APP_VERSION_FA } from '@/lib/version';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -180,7 +181,7 @@ export function HelpGuide({ onBack }: HelpGuideProps) {
 
       {/* Version Info */}
       <p className="text-center text-xs text-muted-foreground">
-        نسخه ۲.۰.۳ - تقویم شمسی کامل
+        نسخه {APP_VERSION_FA} - تقویم شمسی کامل
       </p>
     </div>
   );
