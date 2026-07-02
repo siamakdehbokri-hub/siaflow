@@ -138,6 +138,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     setType(newType);
     setCategory('');
     setSubcategory('');
+    setCategorySearch('');
   };
 
   const quickAmounts = [
