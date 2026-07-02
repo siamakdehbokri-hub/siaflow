@@ -15,6 +15,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { APP_VERSION_FA } from '@/lib/version';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/hooks/useAdmin';
 import { NavTab } from '@/components/navigation/BottomNav';
