@@ -606,7 +606,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
 
       {/* Version */}
       <p className="text-center text-[11px] text-muted-foreground/50 pb-2">
-        SiaFlow نسخه ۲.۰.۳
+        SiaFlow نسخه {APP_VERSION_FA}
       </p>
 
       {/* Delete Account Dialog */}
