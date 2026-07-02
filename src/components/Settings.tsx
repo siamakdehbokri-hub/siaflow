@@ -11,6 +11,7 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportToCSV, exportToExcel, exportToPDF } from '@/utils/exportUtils';
 import type { Transaction } from '@/types/expense';
 import { useAuth } from '@/hooks/useAuth';
+import { APP_VERSION_FA } from '@/lib/version';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
