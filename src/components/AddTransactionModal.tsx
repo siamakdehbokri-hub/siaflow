@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote } from 'lucide-react';
+import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote, Search } from 'lucide-react';
 import { getCategoryIcon } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,11 +59,20 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [isRecurring, setIsRecurring] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
 
-  const currentCategories = useMemo(() => 
-    categories.filter(c => c.type === type), 
-    [categories, type]
-  );
+  const currentCategories = useMemo(() => {
+    const list = categories.filter(c => c.type === type);
+    const q = categorySearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(c => {
+      if (c.name.toLowerCase().includes(q)) return true;
+      const subs = (c.subcategories || []).map(s =>
+        (typeof s === 'string' ? s : (s as { name: string }).name).toLowerCase()
+      );
+      return subs.some(s => s.includes(q));
+    });
+  }, [categories, type, categorySearch]);
 
   const subcategories = useMemo((): string[] => {
     if (!category) return [];
@@ -86,6 +95,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     });
     setIsRecurring(false);
     setShowMore(false);
+    setCategorySearch('');
   }, []);
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -128,6 +138,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
     setType(newType);
     setCategory('');
     setSubcategory('');
+    setCategorySearch('');
   };
 
   const quickAmounts = [
@@ -241,6 +252,25 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
           {/* Category Grid */}
           <div key={`category-${type}`} className="space-y-2">
             <span className="text-xs font-semibold text-muted-foreground">دسته‌بندی</span>
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+              <Input
+                type="text"
+                placeholder="جستجوی دسته‌بندی..."
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                className="pr-9 h-10 rounded-xl bg-muted/20 border-border/20 text-sm placeholder:text-muted-foreground/40"
+              />
+              {categorySearch && (
+                <button
+                  type="button"
+                  onClick={() => setCategorySearch('')}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center bg-muted/40 active:bg-muted"
+                >
+                  <X className="w-3 h-3 text-muted-foreground" />
+                </button>
+              )}
+            </div>
             {currentCategories.length > 0 ? (
               <div className="grid grid-cols-3 gap-1.5 max-h-[180px] overflow-y-auto scrollbar-hide">
                 {currentCategories.map((cat) => {
