@@ -297,7 +297,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                         className="w-9 h-9 rounded-xl flex items-center justify-center"
                         style={{ backgroundColor: cat.color + '18' }}
                       >
-                        <CatIcon className="w-4.5 h-4.5" style={{ color: cat.color }} strokeWidth={2} />
+                        <CatIcon className="w-5 h-5" style={{ color: cat.color }} strokeWidth={2} />
                       </div>
                       <span className={cn(
                         "text-[10px] font-medium text-center leading-tight line-clamp-2",
