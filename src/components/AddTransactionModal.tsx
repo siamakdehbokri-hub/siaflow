@@ -428,7 +428,7 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
           <Button 
             type="button"
             onClick={() => handleSubmit()}
-            className="w-full h-13 rounded-2xl font-bold text-sm text-white shadow-xl active:scale-[0.98] transition-transform border-0"
+            className="w-full h-14 rounded-2xl font-bold text-sm text-white shadow-xl active:scale-[0.98] transition-transform border-0"
             style={{ background: accentColor }}
             disabled={!amount || !category || isSubmitting}
           >
