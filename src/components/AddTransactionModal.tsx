@@ -259,6 +259,8 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
               <Input
                 type="text"
+                enterKeyHint="search"
+                autoComplete="off"
                 placeholder="جستجوی دسته‌بندی..."
                 value={categorySearch}
                 onChange={(e) => setCategorySearch(e.target.value)}
