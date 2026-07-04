@@ -207,20 +207,23 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
 
           {/* Amount Section */}
           <div className="space-y-3">
-            <div className="relative">
+            <div
+              className="relative rounded-2xl bg-muted/20 border border-border/20 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-colors"
+              style={{ '--tw-ring-color': `hsl(var(${config.colorVar}) / 0.12)` } as React.CSSProperties}
+            >
               <Input
                 type="text"
                 inputMode="numeric"
-                placeholder="مبلغ"
+                enterKeyHint="done"
+                autoComplete="off"
+                placeholder="۰"
                 value={amount}
                 onChange={(e) => handleAmountChange(e.target.value)}
-                onFocus={(e) => {
-                  // Delay scroll until keyboard animation begins
-                  setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
-                }}
-                className="text-2xl font-bold text-center h-16 rounded-2xl bg-muted/20 border-border/20 focus:border-primary/50 focus:ring-2 focus:ring-primary/10 placeholder:text-muted-foreground/40 placeholder:text-lg"
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                className="text-3xl font-extrabold text-center h-16 rounded-2xl bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 tabular-nums placeholder:text-muted-foreground/25 placeholder:font-bold"
+                style={{ color: amount ? accentColor : undefined }}
               />
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/60 font-medium">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground/60 font-semibold pointer-events-none">
                 {currencyInfo.name}
               </span>
             </div>
