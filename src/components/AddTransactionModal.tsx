@@ -264,6 +264,12 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 placeholder="جستجوی دسته‌بندی..."
                 value={categorySearch}
                 onChange={(e) => setCategorySearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                }}
                 className="pr-9 h-10 rounded-xl bg-muted/20 border-border/20 text-sm placeholder:text-muted-foreground/40"
               />
               {categorySearch && (
@@ -368,7 +374,14 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
                 <Textarea
                   placeholder="مثلا: خرید از فروشگاه..."
                   value={description}
+                  enterKeyHint="done"
                   onChange={(e) => setDescription(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                  }}
                   onFocus={(e) => {
                     setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
                   }}
