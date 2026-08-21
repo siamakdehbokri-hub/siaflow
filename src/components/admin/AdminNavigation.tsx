@@ -1,11 +1,12 @@
 import { 
   Users, CreditCard, Tag, Banknote, Target, 
-  Wallet, Settings
+  Wallet, Settings, LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 export type AdminTabValue = 
+  | 'overview'
   | 'users' 
   | 'transactions' 
   | 'categories' 
@@ -28,6 +29,7 @@ interface AdminNavigationProps {
 }
 
 const NAV_ITEMS: { id: AdminTabValue; label: string; icon: React.ElementType }[] = [
+  { id: 'overview', label: 'داشبورد', icon: LayoutDashboard },
   { id: 'users', label: 'کاربران', icon: Users },
   { id: 'transactions', label: 'تراکنش', icon: CreditCard },
   { id: 'categories', label: 'دسته‌ها', icon: Tag },
@@ -39,7 +41,7 @@ const NAV_ITEMS: { id: AdminTabValue; label: string; icon: React.ElementType }[]
 
 export function AdminNavigation({ activeTab, onTabChange, counts }: AdminNavigationProps) {
   return (
-    <div className="overflow-x-auto -mx-4 px-4" dir="rtl">
+    <div className="sticky top-0 z-20 overflow-x-auto -mx-4 px-4 py-1.5 bg-background/70 backdrop-blur-xl scrollbar-hide" dir="rtl">
       <div className="flex gap-2 min-w-max pb-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
