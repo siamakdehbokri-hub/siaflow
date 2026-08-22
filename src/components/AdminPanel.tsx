@@ -658,13 +658,24 @@ export function AdminPanel() {
 
         {/* Categories Tab */}
         <TabsContent value="categories" className="mt-4 space-y-3">
+          <div className="glass rounded-xl p-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="جستجوی دسته‌بندی..."
+                value={catSearch}
+                onChange={(e) => setCatSearch(e.target.value)}
+                className="pr-10 rounded-xl h-11"
+              />
+            </div>
+          </div>
           {/* Header with count */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Tag className="w-4 h-4 text-primary" />
               دسته‌بندی‌ها
             </div>
-            <Badge variant="outline" className="font-mono text-xs">{categories.length}</Badge>
+            <Badge variant="outline" className="font-mono text-xs">{filteredCategories.length} / {categories.length}</Badge>
           </div>
 
           {/* Category Cards */}
@@ -672,14 +683,14 @@ export function AdminPanel() {
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : categories.length === 0 ? (
+          ) : filteredCategories.length === 0 ? (
             <div className="text-center py-12 glass rounded-xl">
               <Tag className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">دسته‌بندی‌ای یافت نشد</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {categories.map((cat) => (
+              {filteredCategories.map((cat) => (
                 <MobileCategoryCard
                   key={cat.id}
                   category={cat}
@@ -692,13 +703,24 @@ export function AdminPanel() {
 
         {/* Debts Tab */}
         <TabsContent value="debts" className="mt-4 space-y-3">
+          <div className="glass rounded-xl p-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="جستجوی بدهی..."
+                value={debtSearch}
+                onChange={(e) => setDebtSearch(e.target.value)}
+                className="pr-10 rounded-xl h-11"
+              />
+            </div>
+          </div>
           {/* Header with count */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Banknote className="w-4 h-4 text-primary" />
               بدهی‌ها
             </div>
-            <Badge variant="outline" className="font-mono text-xs">{debts.length}</Badge>
+            <Badge variant="outline" className="font-mono text-xs">{filteredDebts.length} / {debts.length}</Badge>
           </div>
 
           {/* Debt Cards */}
@@ -706,14 +728,14 @@ export function AdminPanel() {
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : debts.length === 0 ? (
+          ) : filteredDebts.length === 0 ? (
             <div className="text-center py-12 glass rounded-xl">
               <Banknote className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">بدهی‌ای یافت نشد</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {debts.map((debt) => (
+              {filteredDebts.map((debt) => (
                 <MobileDebtCard
                   key={debt.id}
                   debt={debt}
@@ -726,13 +748,24 @@ export function AdminPanel() {
 
         {/* Goals Tab */}
         <TabsContent value="goals" className="mt-4 space-y-3">
+          <div className="glass rounded-xl p-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="جستجوی هدف..."
+                value={goalSearch}
+                onChange={(e) => setGoalSearch(e.target.value)}
+                className="pr-10 rounded-xl h-11"
+              />
+            </div>
+          </div>
           {/* Header with count */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Target className="w-4 h-4 text-primary" />
               اهداف پس‌انداز
             </div>
-            <Badge variant="outline" className="font-mono text-xs">{goals.length}</Badge>
+            <Badge variant="outline" className="font-mono text-xs">{filteredGoals.length} / {goals.length}</Badge>
           </div>
 
           {/* Goal Cards */}
@@ -740,14 +773,14 @@ export function AdminPanel() {
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : goals.length === 0 ? (
+          ) : filteredGoals.length === 0 ? (
             <div className="text-center py-12 glass rounded-xl">
               <Target className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">هدفی یافت نشد</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {goals.map((goal) => (
+              {filteredGoals.map((goal) => (
                 <MobileGoalCard
                   key={goal.id}
                   goal={goal}
@@ -760,13 +793,24 @@ export function AdminPanel() {
 
         {/* Accounts Tab */}
         <TabsContent value="accounts" className="mt-4 space-y-3">
+          <div className="glass rounded-xl p-3">
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="جستجوی حساب..."
+                value={accSearch}
+                onChange={(e) => setAccSearch(e.target.value)}
+                className="pr-10 rounded-xl h-11"
+              />
+            </div>
+          </div>
           {/* Header with count */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Wallet className="w-4 h-4 text-primary" />
               حساب‌ها
             </div>
-            <Badge variant="outline" className="font-mono text-xs">{accounts.length}</Badge>
+            <Badge variant="outline" className="font-mono text-xs">{filteredAccounts.length} / {accounts.length}</Badge>
           </div>
 
           {/* Account Cards */}
@@ -774,14 +818,14 @@ export function AdminPanel() {
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : accounts.length === 0 ? (
+          ) : filteredAccounts.length === 0 ? (
             <div className="text-center py-12 glass rounded-xl">
               <Wallet className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground">حسابی یافت نشد</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {accounts.map((acc) => (
+              {filteredAccounts.map((acc) => (
                 <MobileAccountCard
                   key={acc.id}
                   account={acc}
