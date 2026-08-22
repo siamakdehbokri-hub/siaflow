@@ -126,6 +126,11 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
 
       {/* Income vs Expense */}
       <ChartCard icon={TrendingUp} title="درآمد و هزینه">
+        {daily.every(d => d.count === 0) ? (
+          <p className="text-[11px] text-muted-foreground text-center py-10">
+            در این بازه تراکنشی ثبت نشده است
+          </p>
+        ) : (
         <ResponsiveContainer width="100%" height={190}>
           <AreaChart data={daily} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
             <defs>
@@ -146,6 +151,7 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
             <Area type="monotone" dataKey="expense" stroke="hsl(var(--destructive))" strokeWidth={2} fill="url(#adm-exp)" name="هزینه" />
           </AreaChart>
         </ResponsiveContainer>
+        )}
       </ChartCard>
 
       {/* User growth */}
