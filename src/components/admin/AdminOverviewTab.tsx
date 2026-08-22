@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -18,17 +18,22 @@ interface Props {
   isLoading: boolean;
 }
 
-const DAYS = 14;
+const RANGES = [
+  { days: 14, label: '۱۴ روز' },
+  { days: 30, label: '۳۰ روز' },
+  { days: 90, label: '۹۰ روز' },
+] as const;
 
 function dayKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export function AdminOverviewTab({ users, transactions, stats, financialSummary, isLoading }: Props) {
+  const [days, setDays] = useState<number>(30);
   const daily = useMemo(() => {
     const buckets: { key: string; label: string; income: number; expense: number; count: number }[] = [];
     const index = new Map<string, number>();
-    for (let i = DAYS - 1; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const key = dayKey(d);
@@ -43,14 +48,14 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
       else if (t.type === 'expense') buckets[i].expense += t.amount;
     });
     return buckets;
-  }, [transactions]);
+  }, [transactions, days]);
 
   const growth = useMemo(() => {
     const buckets: { label: string; total: number }[] = [];
     const sorted = [...users]
       .filter((u) => u.createdAt)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    for (let i = DAYS - 1; i >= 0; i--) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setHours(23, 59, 59, 999);
       d.setDate(d.getDate() - i);
@@ -58,7 +63,7 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
       buckets.push({ label: formatPersianDateShort(dayKey(d)), total });
     }
     return buckets;
-  }, [users]);
+  }, [users, days]);
 
   const typeBreakdown = useMemo(() => {
     const acc = { income: 0, expense: 0, saving: 0 };
@@ -102,8 +107,25 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
         <Kpi label="میانگین تراکنش/کاربر" value={avgTxPerUser} tone="muted" />
       </div>
 
+      {/* Range selector */}
+      <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-muted/30">
+        {RANGES.map((r) => (
+          <button
+            key={r.days}
+            type="button"
+            onClick={() => setDays(r.days)}
+            className={cn(
+              'py-2 rounded-xl text-[11px] font-semibold transition-all active:scale-[0.98]',
+              days === r.days ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground'
+            )}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+
       {/* Income vs Expense */}
-      <ChartCard icon={TrendingUp} title="درآمد و هزینه (۱۴ روز اخیر)">
+      <ChartCard icon={TrendingUp} title="درآمد و هزینه">
         <ResponsiveContainer width="100%" height={190}>
           <AreaChart data={daily} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
             <defs>
@@ -117,7 +139,7 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={2} />
+            <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={24} />
             <YAxis hide />
             <Tooltip content={<CurrencyTooltip />} />
             <Area type="monotone" dataKey="income" stroke="hsl(var(--success))" strokeWidth={2} fill="url(#adm-inc)" name="درآمد" />
@@ -131,7 +153,7 @@ export function AdminOverviewTab({ users, transactions, stats, financialSummary,
         <ResponsiveContainer width="100%" height={160}>
           <BarChart data={growth} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={2} />
+            <XAxis dataKey="label" tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={24} />
             <YAxis hide />
             <Tooltip content={<CountTooltip suffix="کاربر" />} />
             <Bar dataKey="total" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} name="کاربران" />
