@@ -71,6 +71,7 @@ import { MobileCategoryCard } from '@/components/admin/MobileCategoryCard';
 import { MobileDebtCard } from '@/components/admin/MobileDebtCard';
 import { MobileGoalCard } from '@/components/admin/MobileGoalCard';
 import { MobileAccountCard } from '@/components/admin/MobileAccountCard';
+import { AdminOverviewTab } from '@/components/admin/AdminOverviewTab';
 
 export function AdminPanel() {
   const navigate = useNavigate();
@@ -119,12 +120,19 @@ export function AdminPanel() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [userSort, setUserSort] = useState<'recent' | 'transactions' | 'name'>('recent');
   
   // Filter states for transactions
   const [txSearchQuery, setTxSearchQuery] = useState('');
   const [txTypeFilter, setTxTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
   const [txUserFilter, setTxUserFilter] = useState<string>('all');
+
+  // Search states for data tabs
+  const [catSearch, setCatSearch] = useState('');
+  const [debtSearch, setDebtSearch] = useState('');
+  const [goalSearch, setGoalSearch] = useState('');
+  const [accSearch, setAccSearch] = useState('');
 
   // Delete confirm states
   const [deleteConfirmTx, setDeleteConfirmTx] = useState<AdminTransaction | null>(null);
@@ -145,6 +153,9 @@ export function AdminPanel() {
     if (!isAdmin) return;
     
     switch (activeTab) {
+      case 'overview':
+        if (transactions.length === 0) fetchAllTransactions();
+        break;
       case 'transactions':
         if (transactions.length === 0) fetchAllTransactions();
         break;
@@ -181,8 +192,35 @@ export function AdminPanel() {
         (roleFilter === 'user' && !u.roles.includes('admin'));
       
       return matchesSearch && matchesStatus && matchesRole;
+    }).sort((a, b) => {
+      if (userSort === 'transactions') return b.transactionCount - a.transactionCount;
+      if (userSort === 'name') return (a.displayName || '').localeCompare(b.displayName || '', 'fa');
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
-  }, [users, searchQuery, statusFilter, roleFilter]);
+  }, [users, searchQuery, statusFilter, roleFilter, userSort]);
+
+  const matches = (q: string, ...fields: (string | undefined | null)[]) => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return true;
+    return fields.some(f => (f || '').toLowerCase().includes(needle));
+  };
+
+  const filteredCategories = useMemo(
+    () => categories.filter(c => matches(catSearch, c.name, c.userName)),
+    [categories, catSearch]
+  );
+  const filteredDebts = useMemo(
+    () => debts.filter(d => matches(debtSearch, d.name, d.creditor, d.userName)),
+    [debts, debtSearch]
+  );
+  const filteredGoals = useMemo(
+    () => goals.filter(g => matches(goalSearch, g.name, g.userName)),
+    [goals, goalSearch]
+  );
+  const filteredAccounts = useMemo(
+    () => accounts.filter(a => matches(accSearch, a.name, a.type, a.userName)),
+    [accounts, accSearch]
+  );
 
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
@@ -422,6 +460,17 @@ export function AdminPanel() {
       {/* Tab Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
 
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="mt-4 space-y-3">
+          <AdminOverviewTab
+            users={users}
+            transactions={transactions}
+            stats={stats}
+            financialSummary={financialSummary}
+            isLoading={transactionsLoading || usersLoading}
+          />
+        </TabsContent>
+
         {/* Users Tab */}
         <TabsContent value="users" className="mt-4 space-y-3">
           {/* Search & Filters */}
@@ -456,6 +505,17 @@ export function AdminPanel() {
                     <SelectItem value="all">همه نقش‌ها</SelectItem>
                     <SelectItem value="admin">ادمین</SelectItem>
                     <SelectItem value="user">کاربر</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={userSort} onValueChange={(v: 'recent' | 'transactions' | 'name') => setUserSort(v)}>
+                  <SelectTrigger className="flex-1 min-w-[110px] rounded-xl h-11">
+                    <SelectValue placeholder="مرتب‌سازی" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">جدیدترین</SelectItem>
+                    <SelectItem value="transactions">بیشترین تراکنش</SelectItem>
+                    <SelectItem value="name">نام (الفبا)</SelectItem>
                   </SelectContent>
                 </Select>
 
