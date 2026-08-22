@@ -7,6 +7,7 @@ interface FinancialSummary {
   totalExpense: number;
   totalAccountBalance: number;
   totalGoalProgress: number;
+  netBalance?: number;
 }
 
 interface Stats {
@@ -14,6 +15,10 @@ interface Stats {
   activeUsers: number;
   totalTransactions: number;
   totalCategories: number;
+  totalDebts?: number;
+  totalGoals?: number;
+  totalAccounts?: number;
+  totalTransfers?: number;
 }
 
 interface AdminMetricsProps {
@@ -31,12 +36,24 @@ export function AdminMetrics({ financialSummary, stats, isLoading }: AdminMetric
           <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
             <Wallet className="w-6 h-6 text-primary" strokeWidth={2} />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-xs text-muted-foreground font-medium">موجودی کل سیستم</p>
-            <p className="text-2xl font-bold text-foreground font-mono" dir="ltr">
+            <p className="text-2xl font-bold text-foreground font-mono truncate" dir="ltr">
               {isLoading ? '...' : formatCurrency(financialSummary?.totalAccountBalance ?? 0)}
             </p>
           </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-border/30 flex items-center justify-between">
+          <span className="text-[11px] text-muted-foreground font-medium">تراز خالص سیستم</span>
+          <span
+            className={cn(
+              "text-sm font-bold font-mono",
+              (financialSummary?.netBalance ?? 0) >= 0 ? "text-success" : "text-destructive"
+            )}
+            dir="ltr"
+          >
+            {isLoading ? '...' : formatCurrency(financialSummary?.netBalance ?? 0)}
+          </span>
         </div>
       </div>
 
@@ -64,6 +81,10 @@ export function AdminMetrics({ financialSummary, stats, isLoading }: AdminMetric
         <CompactStat label="فعال" value={stats?.activeUsers ?? 0} variant="success" isLoading={isLoading} />
         <CompactStat label="تراکنش" value={stats?.totalTransactions ?? 0} isLoading={isLoading} />
         <CompactStat label="دسته" value={stats?.totalCategories ?? 0} isLoading={isLoading} />
+        <CompactStat label="حساب" value={stats?.totalAccounts ?? 0} isLoading={isLoading} />
+        <CompactStat label="بدهی" value={stats?.totalDebts ?? 0} isLoading={isLoading} />
+        <CompactStat label="هدف" value={stats?.totalGoals ?? 0} isLoading={isLoading} />
+        <CompactStat label="انتقال" value={stats?.totalTransfers ?? 0} isLoading={isLoading} />
       </div>
     </div>
   );
