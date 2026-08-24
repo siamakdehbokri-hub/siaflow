@@ -228,7 +228,22 @@
     padding-right: env(safe-area-inset-right);
     min-height: 100vh;
     min-height: 100dvh;
+    /* App-like lock: vertical scrolling only, no pinch-zoom, no rubber-band */
+    max-width: 100%;
+    touch-action: pan-y;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
+
+  html {
+    touch-action: pan-y;
+    overscroll-behavior: none;
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
 
   h1, h2, h3, h4, h5, h6 {
     line-height: 1.4;
@@ -711,4 +726,24 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .dark body::after { will-change: auto; }
+}
+
+/* ─── App-like input lock ─────────────────────────────────────
+   Body is locked to vertical panning only (no pinch-zoom, no
+   horizontal page drag). Horizontal scrollers opt back in. */
+@layer utilities {
+  .overflow-x-auto,
+  .overflow-x-scroll,
+  [data-allow-pan-x="true"] {
+    touch-action: pan-x pan-y;
+    overscroll-behavior-x: contain;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    touch-action: auto;
+  }
 }
