@@ -228,7 +228,22 @@
     padding-right: env(safe-area-inset-right);
     min-height: 100vh;
     min-height: 100dvh;
+    /* App-like lock: vertical scrolling only, no pinch-zoom, no rubber-band */
+    max-width: 100%;
+    touch-action: pan-y;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
+
+  html {
+    touch-action: pan-y;
+    overscroll-behavior: none;
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
 
   h1, h2, h3, h4, h5, h6 {
     line-height: 1.4;
