@@ -727,3 +727,23 @@
 @media (prefers-reduced-motion: no-preference) {
   .dark body::after { will-change: auto; }
 }
+
+/* ─── App-like input lock ─────────────────────────────────────
+   Body is locked to vertical panning only (no pinch-zoom, no
+   horizontal page drag). Horizontal scrollers opt back in. */
+@layer utilities {
+  .overflow-x-auto,
+  .overflow-x-scroll,
+  [data-allow-pan-x="true"] {
+    touch-action: pan-x pan-y;
+    overscroll-behavior-x: contain;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    touch-action: auto;
+  }
+}
