@@ -33,11 +33,17 @@ import "./index.css";
     "touchend",
     (e) => {
       const now = Date.now();
-      if (now - lastTouchEnd < 300) e.preventDefault();
+      const target = e.target as HTMLElement | null;
+      // Never block real taps on interactive controls
+      const interactive = target?.closest(
+        'button, a, input, textarea, select, label, [role="button"], [role="tab"], [contenteditable="true"]'
+      );
+      if (now - lastTouchEnd < 300 && !interactive) e.preventDefault();
       lastTouchEnd = now;
     },
     { passive: false }
   );
+
 
   // Ctrl/⌘ +/-/0 keyboard zoom
   document.addEventListener(
