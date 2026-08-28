@@ -167,6 +167,110 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recurring_rules: {
+        Row: {
+          account_id: string | null
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          frequency: string
+          id: string
+          interval_count: number
+          is_active: boolean
+          last_run_date: string | null
+          name: string
+          next_run_date: string
+          start_date: string
+          subcategory: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          interval_count?: number
+          is_active?: boolean
+          last_run_date?: string | null
+          name: string
+          next_run_date?: string
+          start_date?: string
+          subcategory?: string | null
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          interval_count?: number
+          is_active?: boolean
+          last_run_date?: string | null
+          name?: string
+          next_run_date?: string
+          start_date?: string
+          subcategory?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_rules_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saving_goal_transactions: {
         Row: {
           amount: number
@@ -253,6 +357,7 @@ export type Database = {
           description: string | null
           id: string
           is_recurring: boolean | null
+          recurring_rule_id: string | null
           subcategory: string | null
           tags: string[] | null
           type: string
@@ -267,6 +372,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean | null
+          recurring_rule_id?: string | null
           subcategory?: string | null
           tags?: string[] | null
           type: string
@@ -281,13 +387,22 @@ export type Database = {
           description?: string | null
           id?: string
           is_recurring?: boolean | null
+          recurring_rule_id?: string | null
           subcategory?: string | null
           tags?: string[] | null
           type?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transactions_recurring_rule_id_fkey"
+            columns: ["recurring_rule_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_rules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transfers: {
         Row: {
