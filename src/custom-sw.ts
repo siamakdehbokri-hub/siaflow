@@ -280,3 +280,41 @@ self.addEventListener('activate', (event) => {
 // the update (UpdateNotifier → updateServiceWorker(true) → SKIP_WAITING message).
 // Auto-activating mid-session swaps hashed assets out from under the running
 // page and can blank the screen.
+
+// ─── Web Push ────────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  let payload: { title?: string; body?: string; url?: string } = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data?.text() };
+  }
+
+  const title = payload.title || 'SiaFlow';
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: payload.body || '',
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
+      dir: 'rtl',
+      lang: 'fa',
+      data: { url: payload.url || '/' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data as { url?: string })?.url || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          (client as WindowClient).navigate(url);
+          return (client as WindowClient).focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
