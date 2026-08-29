@@ -294,8 +294,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: payload.body || '',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-192x192.png',
       dir: 'rtl',
       lang: 'fa',
       data: { url: payload.url || '/' },
