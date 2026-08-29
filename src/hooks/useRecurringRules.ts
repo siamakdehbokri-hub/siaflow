@@ -120,7 +120,10 @@ export function useRecurringRules() {
       if (input.endDate !== undefined) payload.end_date = input.endDate ?? null;
       if (input.nextRunDate !== undefined) payload.next_run_date = input.nextRunDate;
       if (input.isActive !== undefined) payload.is_active = input.isActive;
-      const { error } = await supabase.from('recurring_rules').update(payload).eq('id', id);
+      const { error } = await supabase
+        .from('recurring_rules')
+        .update(payload as never)
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: invalidate,
