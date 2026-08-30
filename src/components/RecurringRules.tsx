@@ -18,7 +18,7 @@ import { useRecurringRules, RecurringFrequency } from '@/hooks/useRecurringRules
 import { useCategories } from '@/hooks/useCategories';
 import { useAccounts } from '@/hooks/useAccounts';
 import { formatCurrency, formatPersianDateShort } from '@/utils/persianDate';
-import { n as parseAmount } from '@/utils/numberUtils';
+import { parseAmount } from '@/utils/numberUtils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
