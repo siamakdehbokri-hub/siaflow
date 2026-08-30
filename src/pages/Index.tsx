@@ -10,6 +10,7 @@ import { useDebts } from '@/hooks/useDebts';
 import { useAutoSavings } from '@/hooks/useAutoSavings';
 import { useAuth } from '@/hooks/useAuth';
 import { useReminders } from '@/hooks/useReminders';
+import { useRecurringRunner } from '@/hooks/useRecurringRules';
 import { useDebtReminders } from '@/hooks/useDebtReminders';
 import { Transaction } from '@/types/expense';
 import { supabase } from '@/integrations/supabase/client';
