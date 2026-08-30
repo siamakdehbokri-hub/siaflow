@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { 
   UserCircle, Palette, Layers, LifeBuoy, LogOut, ChevronLeft, Moon, Sun, Monitor,
   Trash2, AlertTriangle, Loader2, ShieldCheck, Info, Mail, Lock, Download, 
-  Calendar, Globe, Database, Bell, FileText, FileSpreadsheet, FileDown, Wifi, WifiOff, Smartphone
+  Calendar, Globe, Database, Bell, FileText, FileSpreadsheet, FileDown, Wifi, WifiOff, Smartphone, BellRing, Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useNotificationPrefs } from '@/hooks/useNotificationPrefs';
+import { useWebPush } from '@/hooks/useWebPush';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { exportToCSV, exportToExcel, exportToPDF } from '@/utils/exportUtils';
 import type { Transaction } from '@/types/expense';
@@ -112,6 +113,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const { currency, setCurrency, currencyInfo, exchangeRates, ratesLoading, refreshRates } = useCurrency();
   const navigate = useNavigate();
   const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, permission, requestPermission } = useNotificationPrefs();
+  const webPush = useWebPush();
   const { online } = useNetworkStatus();
   const appVersion = APP_VERSION_FA;
 
@@ -500,7 +502,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
           title="اعلان‌های یادآوری"
           subtitle="یادآور سررسید بدهی‌ها و اقساط"
           showChevron={false}
-          isLast={true}
+          isLast={!webPush.supported}
           trailing={
             <Switch
               checked={notificationsEnabled}
@@ -509,6 +511,39 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
             />
           }
         />
+        {webPush.supported && (
+          <>
+            <SettingRow
+              icon={BellRing}
+              iconBg="bg-success/10"
+              iconColor="text-success"
+              title="نوتیفیکیشن مرورگر (Push)"
+              subtitle="دریافت اعلان حتی وقتی برنامه بسته است"
+              showChevron={false}
+              trailing={
+                <Switch
+                  checked={webPush.subscribed}
+                  disabled={webPush.busy}
+                  onCheckedChange={(checked) =>
+                    checked ? webPush.subscribe() : webPush.unsubscribe()
+                  }
+                  aria-label="فعال‌سازی نوتیفیکیشن مرورگر"
+                />
+              }
+            />
+            {webPush.subscribed && (
+              <SettingRow
+                icon={Send}
+                iconBg="bg-muted"
+                iconColor="text-foreground"
+                title="ارسال نوتیفیکیشن آزمایشی"
+                subtitle="بررسی صحت تنظیمات"
+                onClick={() => webPush.sendTest()}
+                isLast={true}
+              />
+            )}
+          </>
+        )}
       </SettingsSection>
 
       {/* ─── Security ─── */}

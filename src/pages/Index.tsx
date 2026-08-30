@@ -10,6 +10,7 @@ import { useDebts } from '@/hooks/useDebts';
 import { useAutoSavings } from '@/hooks/useAutoSavings';
 import { useAuth } from '@/hooks/useAuth';
 import { useReminders } from '@/hooks/useReminders';
+import { useRecurringRunner } from '@/hooks/useRecurringRules';
 import { useDebtReminders } from '@/hooks/useDebtReminders';
 import { Transaction } from '@/types/expense';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,8 +30,9 @@ const DebtManagement = lazy(() => lazyRetryNamed(() => import('@/components/Debt
 const TransferManagement = lazy(() => lazyRetryNamed(() => import('@/components/TransferManagement'), 'TransferManagement'));
 const AutoSavingsSheet = lazy(() => lazyRetryNamed(() => import('@/components/home/AutoSavingsSheet'), 'AutoSavingsSheet'));
 const HelpGuide = lazy(() => lazyRetryNamed(() => import('@/components/HelpGuide'), 'HelpGuide'));
+const RecurringRules = lazy(() => lazyRetryNamed(() => import('@/components/RecurringRules'), 'RecurringRules'));
 
-type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'help';
+type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'recurring' | 'help';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -64,6 +66,7 @@ const Index = () => {
   const { reminders: debtReminders, dismissReminder: dismissDebtReminder, requestNotificationPermission } = useDebtReminders(debts);
   const { suggestion: autoSavingsSuggestion, shouldShow: showAutoSavings, prefs: autoSavingsPrefs, acceptSuggestion, declineSuggestion, enableAutoTransfer } = useAutoSavings(transactions);
   const [autoSavingsOpen, setAutoSavingsOpen] = useState(false);
+  useRecurringRunner();
   const categoriesWithSpent = useMemo(() => {
     // Pre-compute spending map in a single pass over transactions
     const spendingMap = new Map<string, number>();
@@ -106,6 +109,7 @@ const Index = () => {
     if (subView === 'goals') return 'اهداف پس‌انداز';
     if (subView === 'debts') return 'مدیریت بدهی';
     if (subView === 'transfers') return 'انتقال پول';
+    if (subView === 'recurring') return 'تراکنش‌های تکرارشونده';
     if (subView === 'help') return 'راهنمای استفاده';
     switch (activeTab) {
       case 'home': return 'داشبورد';
@@ -208,6 +212,8 @@ const Index = () => {
               goals={goals} 
               onTransferToGoal={async (goalId, amount) => { await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب'); }} 
             />
+          ) : subView === 'recurring' ? (
+            <RecurringRules />
           ) : subView === 'help' ? (
             <HelpGuide onBack={() => setSubView('main')} />
           ) : (
