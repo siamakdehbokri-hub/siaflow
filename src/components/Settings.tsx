@@ -500,7 +500,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
           title="اعلان‌های یادآوری"
           subtitle="یادآور سررسید بدهی‌ها و اقساط"
           showChevron={false}
-          isLast={true}
+          isLast={!webPush.supported}
           trailing={
             <Switch
               checked={notificationsEnabled}
@@ -509,6 +509,39 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
             />
           }
         />
+        {webPush.supported && (
+          <>
+            <SettingRow
+              icon={BellRing}
+              iconBg="bg-success/10"
+              iconColor="text-success"
+              title="نوتیفیکیشن مرورگر (Push)"
+              subtitle="دریافت اعلان حتی وقتی برنامه بسته است"
+              showChevron={false}
+              trailing={
+                <Switch
+                  checked={webPush.subscribed}
+                  disabled={webPush.busy}
+                  onCheckedChange={(checked) =>
+                    checked ? webPush.subscribe() : webPush.unsubscribe()
+                  }
+                  aria-label="فعال‌سازی نوتیفیکیشن مرورگر"
+                />
+              }
+            />
+            {webPush.subscribed && (
+              <SettingRow
+                icon={Send}
+                iconBg="bg-muted"
+                iconColor="text-foreground"
+                title="ارسال نوتیفیکیشن آزمایشی"
+                subtitle="بررسی صحت تنظیمات"
+                onClick={() => webPush.sendTest()}
+                isLast={true}
+              />
+            )}
+          </>
+        )}
       </SettingsSection>
 
       {/* ─── Security ─── */}
