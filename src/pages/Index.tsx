@@ -107,6 +107,7 @@ const Index = () => {
     if (subView === 'goals') return 'اهداف پس‌انداز';
     if (subView === 'debts') return 'مدیریت بدهی';
     if (subView === 'transfers') return 'انتقال پول';
+    if (subView === 'recurring') return 'تراکنش‌های تکرارشونده';
     if (subView === 'help') return 'راهنمای استفاده';
     switch (activeTab) {
       case 'home': return 'داشبورد';
