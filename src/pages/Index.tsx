@@ -210,6 +210,8 @@ const Index = () => {
               goals={goals} 
               onTransferToGoal={async (goalId, amount) => { await updateGoalAmount(goalId, amount, 'deposit', 'انتقال از حساب'); }} 
             />
+          ) : subView === 'recurring' ? (
+            <RecurringRules />
           ) : subView === 'help' ? (
             <HelpGuide onBack={() => setSubView('main')} />
           ) : (
