@@ -12,6 +12,7 @@ import {
   ShieldCheck, 
   LifeBuoy,
   Download,
+  Repeat,
   type LucideIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { useAdmin } from '@/hooks/useAdmin';
 import { NavTab } from '@/components/navigation/BottomNav';
 
-type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers';
+type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'recurring' | 'help';
 
 interface AppMenuProps {
   isOpen: boolean;
@@ -132,6 +133,13 @@ export function AppMenu({
             امکانات اصلی
           </p>
           
+          <MenuItem
+            icon={Repeat}
+            label="تراکنش‌های تکرارشونده"
+            description="قبض، اجاره و حقوق به‌صورت خودکار"
+            onClick={() => handleNavigation('recurring')}
+          />
+
           <MenuItem
             icon={Layers}
             label="دسته‌بندی‌ها"
