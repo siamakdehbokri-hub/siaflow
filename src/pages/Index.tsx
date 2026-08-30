@@ -65,6 +65,7 @@ const Index = () => {
   const { reminders: debtReminders, dismissReminder: dismissDebtReminder, requestNotificationPermission } = useDebtReminders(debts);
   const { suggestion: autoSavingsSuggestion, shouldShow: showAutoSavings, prefs: autoSavingsPrefs, acceptSuggestion, declineSuggestion, enableAutoTransfer } = useAutoSavings(transactions);
   const [autoSavingsOpen, setAutoSavingsOpen] = useState(false);
+  useRecurringRunner();
   const categoriesWithSpent = useMemo(() => {
     // Pre-compute spending map in a single pass over transactions
     const spendingMap = new Map<string, number>();
