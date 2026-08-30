@@ -29,8 +29,9 @@ const DebtManagement = lazy(() => lazyRetryNamed(() => import('@/components/Debt
 const TransferManagement = lazy(() => lazyRetryNamed(() => import('@/components/TransferManagement'), 'TransferManagement'));
 const AutoSavingsSheet = lazy(() => lazyRetryNamed(() => import('@/components/home/AutoSavingsSheet'), 'AutoSavingsSheet'));
 const HelpGuide = lazy(() => lazyRetryNamed(() => import('@/components/HelpGuide'), 'HelpGuide'));
+const RecurringRules = lazy(() => lazyRetryNamed(() => import('@/components/RecurringRules'), 'RecurringRules'));
 
-type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'help';
+type SubView = 'main' | 'categories' | 'goals' | 'debts' | 'transfers' | 'recurring' | 'help';
 
 const Index = () => {
   const navigate = useNavigate();
