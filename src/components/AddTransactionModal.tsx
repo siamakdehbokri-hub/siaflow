@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
-import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote, Search } from 'lucide-react';
+import { useState, useMemo, useCallback, useRef } from 'react';
+import { X, Plus, Minus, Calendar, RefreshCw, ChevronDown, PiggyBank, Check, StickyNote, Search, Camera, Loader2 } from 'lucide-react';
 import { getCategoryIcon } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import { PersianDatePicker } from './PersianDatePicker';
 import { formatAmountInput, parseAmount } from '@/utils/numberUtils';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useKeyboardInset } from '@/hooks/useKeyboardInset';
+import { useReceiptScan } from '@/hooks/useReceiptScan';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
