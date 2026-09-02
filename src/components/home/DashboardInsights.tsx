@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { PieChart as PieIcon, TrendingUp, CalendarRange } from 'lucide-react';
 import { startOfMonth, endOfMonth, subMonths, startOfYear } from 'date-fns-jalali';
 import { Transaction, Category } from '@/types/expense';
-import { toLocalISODateString, parseLocalDate } from '@/utils/dateUtils';
+import { toLocalISODateString } from '@/utils/dateUtils';
 import { SpendingChart } from '@/components/SpendingChart';
 import { TrendChart } from '@/components/TrendChart';
 import { DateRangeFilter } from '@/components/DateRangeFilter';
