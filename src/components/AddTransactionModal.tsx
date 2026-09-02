@@ -209,7 +209,40 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
           className="flex-1 overflow-y-auto overscroll-contain px-5 pb-4 space-y-5"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
-          
+
+          {/* Receipt OCR */}
+          <div className="space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleReceiptFile}
+            />
+            <button
+              type="button"
+              disabled={scanning}
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-sm font-bold active:scale-[0.99] transition-all disabled:opacity-60"
+            >
+              {scanning ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2.5} />
+                  در حال خواندن فیش...
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4" strokeWidth={2.5} />
+                  ثبت با عکس فیش
+                </>
+              )}
+            </button>
+            {scanNote && (
+              <p className="text-[11px] text-muted-foreground text-center leading-relaxed">{scanNote}</p>
+            )}
+          </div>
+
           {/* Type Segmented Control */}
           <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-muted/40">
             {(Object.keys(TYPE_CONFIG) as Array<keyof typeof TYPE_CONFIG>).map((t) => {
