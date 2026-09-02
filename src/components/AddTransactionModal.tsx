@@ -61,6 +61,36 @@ export function AddTransactionModal({ isOpen, onClose, onAdd, categories }: AddT
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
+  const [scanNote, setScanNote] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { scan, scanning } = useReceiptScan();
+
+  const handleReceiptFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const result = await scan(file, categories.map(c => c.name));
+    if (!result) return;
+
+    setType(result.type);
+    if (result.amount > 0) setAmount(formatAmountInput(String(result.amount)));
+    if (result.date) setDate(result.date);
+    if (result.description) {
+      setDescription(result.description);
+      setShowMore(true);
+    }
+    if (result.category && categories.some(c => c.name === result.category)) {
+      setCategory(result.category);
+      setSubcategory('');
+    }
+    setScanNote(
+      result.confidence !== null && result.confidence < 0.6
+        ? 'اطلاعات با اطمینان پایین استخراج شد؛ لطفاً بررسی کنید.'
+        : 'اطلاعات از روی فیش پر شد؛ در صورت نیاز ویرایش کنید.'
+    );
+  };
+
 
   const currentCategories = useMemo(() => {
     const list = categories.filter(c => c.type === type);
