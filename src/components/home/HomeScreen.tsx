@@ -8,6 +8,7 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
 import { useMonthlyCarryOver } from '@/hooks/useMonthlyCarryOver';
 import { CarryOverCard } from '@/components/home/CarryOverCard';
+import { DashboardInsights } from '@/components/home/DashboardInsights';
 
 interface HomeScreenProps {
   transactions: Transaction[];
