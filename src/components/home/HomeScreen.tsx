@@ -8,6 +8,7 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { PWAInstallBanner } from '@/components/PWAInstallBanner';
 import { useMonthlyCarryOver } from '@/hooks/useMonthlyCarryOver';
 import { CarryOverCard } from '@/components/home/CarryOverCard';
+import { DashboardInsights } from '@/components/home/DashboardInsights';
 
 interface HomeScreenProps {
   transactions: Transaction[];
@@ -272,6 +273,9 @@ export function HomeScreen({
           <ChevronLeft className="w-5 h-5 text-muted-foreground shrink-0" strokeWidth={2} />
         </button>
       )}
+
+      {/* Smart dashboard insights */}
+      <DashboardInsights transactions={transactions} categories={categories} />
 
       {/* ====== REDESIGNED RECENT ACTIVITY ====== */}
       <div className="space-y-3">
