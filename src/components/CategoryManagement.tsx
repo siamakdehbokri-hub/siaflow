@@ -181,7 +181,7 @@ export function CategoryManagement({
         open={isExpanded}
         onOpenChange={() => hasSubcategories && toggleExpanded(category.id)}
       >
-        <div className="bg-card border-2 border-border rounded-2xl overflow-hidden active:bg-accent/50 transition-colors">
+        <div className="bg-card/60 backdrop-blur-xl border border-border/60 rounded-2xl overflow-hidden active:bg-accent/40 transition-colors">
           {/* Main Row */}
           <div className="flex items-center gap-2 p-3">
             {/* Tree Toggle - Mobile Optimized */}
