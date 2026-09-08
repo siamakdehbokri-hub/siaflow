@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        iransans: ["Vazirmatn", "Tahoma", "Segoe UI", "system-ui", "Arial", "sans-serif"],
+        iransans: ["IRANSansX", "Tahoma", "Segoe UI", "system-ui", "Arial", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

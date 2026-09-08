@@ -23,9 +23,9 @@ export default defineConfig(({ mode }) => ({
         "favicon.ico",
         "robots.txt",
         "favicon.png",
-        "fonts/Vazirmatn-Regular.woff2",
-        "fonts/Vazirmatn-Medium.woff2",
-        "fonts/Vazirmatn-Bold.woff2",
+        "fonts/IRANSansX-Regular.woff2",
+        "fonts/IRANSansX-Medium.woff2",
+        "fonts/IRANSansX-Bold.woff2",
       ],
       manifest: false,
       injectManifest: {
