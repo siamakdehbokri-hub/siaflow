@@ -65,7 +65,9 @@ export const exportToPDF = (transactions: Transaction[], filename: string = 'tra
       <meta charset="UTF-8">
       <title>گزارش مالی - SiaFlow</title>
       <style>
-        * { font-family: Tahoma, Arial, sans-serif; box-sizing: border-box; }
+        @font-face { font-family: 'IRANSansX'; font-weight: 400; src: url('${location.origin}/fonts/IRANSansX-Regular.woff2') format('woff2'); }
+        @font-face { font-family: 'IRANSansX'; font-weight: 700; src: url('${location.origin}/fonts/IRANSansX-Bold.woff2') format('woff2'); }
+        * { font-family: 'IRANSansX', Tahoma, Arial, sans-serif; box-sizing: border-box; }
         body { padding: 20px; direction: rtl; background: #fff; color: #333; }
         .header { text-align: center; margin-bottom: 24px; border-bottom: 2px solid #14b8a6; padding-bottom: 16px; }
         .header h1 { color: #14b8a6; margin: 0 0 8px 0; font-size: 24px; }
@@ -171,7 +173,9 @@ export const exportCategoryReport = (categories: { name: string; spent: number; 
       <meta charset="UTF-8">
       <title>گزارش بودجه - SiaFlow</title>
       <style>
-        * { font-family: Tahoma, Arial, sans-serif; box-sizing: border-box; }
+        @font-face { font-family: 'IRANSansX'; font-weight: 400; src: url('${location.origin}/fonts/IRANSansX-Regular.woff2') format('woff2'); }
+        @font-face { font-family: 'IRANSansX'; font-weight: 700; src: url('${location.origin}/fonts/IRANSansX-Bold.woff2') format('woff2'); }
+        * { font-family: 'IRANSansX', Tahoma, Arial, sans-serif; box-sizing: border-box; }
         body { padding: 20px; direction: rtl; background: #fff; color: #333; }
         .header { text-align: center; margin-bottom: 24px; border-bottom: 2px solid #14b8a6; padding-bottom: 16px; }
         .header h1 { color: #14b8a6; margin: 0 0 8px 0; font-size: 24px; }
