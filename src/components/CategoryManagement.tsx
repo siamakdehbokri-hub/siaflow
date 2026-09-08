@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree, Receipt, Wallet, PiggyBank } from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronDown, ChevronRight, FolderTree, Receipt, Wallet, PiggyBank, Search } from 'lucide-react';
 import { getCategoryIcon, categoryIconOptions } from '@/utils/categoryIcons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +63,8 @@ export function CategoryManagement({
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'expense' | 'income' | 'saving'>('expense');
   
   const [name, setName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('Receipt');
@@ -304,24 +306,43 @@ export function CategoryManagement({
     );
   };
 
+  const tabs = [
+    { key: 'expense' as const, label: 'هزینه', items: expenseCategories, dot: 'bg-destructive', empty: 'هنوز دسته‌بندی هزینه‌ای ندارید', Icon: Receipt },
+    { key: 'income' as const, label: 'درآمد', items: incomeCategories, dot: 'bg-success', empty: 'هنوز دسته‌بندی درآمدی ندارید', Icon: Wallet },
+    { key: 'saving' as const, label: 'پس‌انداز', items: savingCategories, dot: 'bg-primary', empty: 'هنوز دسته‌بندی پس‌اندازی ندارید', Icon: PiggyBank },
+  ];
+  const activeTabData = tabs.find((t) => t.key === activeTab) ?? tabs[0];
+  const query = search.trim().toLowerCase();
+  const visibleItems = query
+    ? activeTabData.items.filter((c) => {
+        const subs = (c.subcategories || []).map((s) => (typeof s === 'string' ? s : s.name));
+        return (
+          c.name.toLowerCase().includes(query) ||
+          subs.some((s) => s.toLowerCase().includes(query))
+        );
+      })
+    : activeTabData.items;
+  const EmptyIcon = activeTabData.Icon;
+
   return (
-    <div className="space-y-4 animate-fade-in">
-      {/* Header - Mobile Optimized */}
-      <div className="bg-primary rounded-2xl p-4 text-primary-foreground">
-        <div className="flex items-center justify-between gap-3">
+    <div className="space-y-3 animate-fade-in">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-bl from-primary/25 via-primary/10 to-transparent p-4 backdrop-blur-xl">
+        <div className="absolute -top-10 -left-8 h-28 w-28 rounded-full bg-primary/25 blur-3xl" aria-hidden />
+        <div className="relative flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <FolderTree className="w-5 h-5" />
+            <div className="w-11 h-11 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+              <FolderTree className="w-5 h-5 text-primary" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-base font-bold truncate">مدیریت دسته‌بندی‌ها</h2>
-              <p className="text-xs text-primary-foreground/70">{categories.length} دسته‌بندی</p>
+              <h2 className="text-base font-bold truncate text-foreground">مدیریت دسته‌بندی‌ها</h2>
+              <p className="text-xs text-muted-foreground">{categories.length} دسته‌بندی فعال</p>
             </div>
           </div>
-          <Button 
-            onClick={openAddModal} 
-            size="sm" 
-            className="rounded-xl bg-white text-primary hover:bg-white/90 font-bold h-10 px-4 shrink-0"
+          <Button
+            onClick={openAddModal}
+            size="sm"
+            className="rounded-2xl font-bold h-11 px-4 shrink-0 shadow-lg shadow-primary/20"
           >
             <Plus className="w-4 h-4 ml-1" />
             جدید
@@ -329,80 +350,54 @@ export function CategoryManagement({
         </div>
       </div>
 
-      {/* Expense Categories Card - Mobile Optimized */}
-      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
-        <div className="p-3 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-destructive" />
-            <h3 className="font-bold text-foreground text-sm">دسته‌بندی هزینه‌ها</h3>
-          </div>
-          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground text-xs">
-            {expenseCategories.length}
-          </Badge>
-        </div>
-        <div className="p-3 space-y-2">
-          {expenseCategories.length === 0 ? (
-            <div className="text-center py-6">
-              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-2 flex items-center justify-center">
-                <Receipt className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground text-sm">هنوز دسته‌بندی هزینه‌ای ندارید</p>
-            </div>
-          ) : (
-            expenseCategories.map(renderCategoryItem)
-          )}
-        </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="جستجوی دسته یا زیردسته..."
+          className="h-12 rounded-2xl pr-10 bg-card/60 border-border/60 text-sm"
+        />
       </div>
 
-      {/* Income Categories Card - Mobile Optimized */}
-      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
-        <div className="p-3 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-success" />
-            <h3 className="font-bold text-foreground text-sm">دسته‌بندی درآمدها</h3>
-          </div>
-          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground text-xs">
-            {incomeCategories.length}
-          </Badge>
-        </div>
-        <div className="p-3 space-y-2">
-          {incomeCategories.length === 0 ? (
-            <div className="text-center py-6">
-              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-2 flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground text-sm">هنوز دسته‌بندی درآمدی ندارید</p>
-            </div>
-          ) : (
-            incomeCategories.map(renderCategoryItem)
-          )}
-        </div>
+      {/* Segmented tabs */}
+      <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-card/60 border border-border/60">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => setActiveTab(tab.key)}
+            className={cn(
+              'h-11 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 transition-colors',
+              activeTab === tab.key
+                ? 'bg-primary/15 text-foreground border border-primary/30'
+                : 'text-muted-foreground'
+            )}
+          >
+            <span className={cn('w-2 h-2 rounded-full', tab.dot)} />
+            {tab.label}
+            <span className="text-[10px] opacity-70">{tab.items.length}</span>
+          </button>
+        ))}
       </div>
 
-      {/* Saving Categories Card */}
-      <div className="bg-card rounded-2xl border-2 border-border overflow-hidden">
-        <div className="p-3 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-            <h3 className="font-bold text-foreground text-sm">دسته‌بندی پس‌انداز</h3>
-          </div>
-          <Badge variant="outline" className="rounded-lg border-border text-muted-foreground text-xs">
-            {savingCategories.length}
-          </Badge>
-        </div>
-        <div className="p-3 space-y-2">
-          {savingCategories.length === 0 ? (
-            <div className="text-center py-6">
-              <div className="w-12 h-12 rounded-2xl bg-accent mx-auto mb-2 flex items-center justify-center">
-                <PiggyBank className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground text-sm">هنوز دسته‌بندی پس‌اندازی ندارید</p>
+      {/* List */}
+      <div className="space-y-2">
+        {visibleItems.length === 0 ? (
+          <div className="text-center py-10 rounded-3xl border border-dashed border-border/60 bg-card/40">
+            <div className="w-14 h-14 rounded-2xl bg-accent/60 mx-auto mb-3 flex items-center justify-center">
+              <EmptyIcon className="w-6 h-6 text-muted-foreground" />
             </div>
-          ) : (
-            savingCategories.map(renderCategoryItem)
-          )}
-        </div>
+            <p className="text-muted-foreground text-sm">
+              {query ? 'نتیجه‌ای پیدا نشد' : activeTabData.empty}
+            </p>
+          </div>
+        ) : (
+          visibleItems.map(renderCategoryItem)
+        )}
       </div>
+
 
       {/* Add/Edit Modal - Full Mobile Sheet Style */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
