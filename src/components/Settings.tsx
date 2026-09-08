@@ -588,7 +588,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground leading-relaxed">ارتباط با ما</p>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5" dir="ltr">siamakflow@gmail.com</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5" dir="ltr">siamakdehbokri@gmail.com</p>
             </div>
           </div>
         </div>
