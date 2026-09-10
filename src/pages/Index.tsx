@@ -133,7 +133,7 @@ const Index = () => {
   }
 
   return (
-    <div className="h-screen-dvh bg-background flex flex-col relative overflow-hidden">
+    <div className="h-screen-dvh w-full max-w-full bg-background flex flex-col relative overflow-hidden overscroll-x-none touch-pan-y">
       {/* Ambient background blobs for glassmorphism */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div className="absolute rounded-full" style={{ top: '-80px', right: '-60px', width: '340px', height: '340px', background: 'rgba(90,68,200,0.24)', filter: 'blur(80px)' }} />
@@ -181,8 +181,8 @@ const Index = () => {
       {/* Notification badges - moved to header */}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pb-nav-safe mobile-scroll">
-        <div className="max-w-2xl mx-auto px-4 py-4">
+      <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto pb-nav-safe mobile-scroll">
+        <div className="w-full min-w-0 max-w-2xl mx-auto px-4 py-4">
           <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
           {subView === 'categories' ? (
             <CategoryManagement 

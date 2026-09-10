@@ -27,6 +27,38 @@ import "./index.css";
     { passive: false }
   );
 
+  // Keep the app shell from drifting sideways while preserving intentional
+  // horizontal scrollers and swipe actions inside marked controls.
+  let panStartX = 0;
+  let panStartY = 0;
+  document.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 1) return;
+      panStartX = e.touches[0].clientX;
+      panStartY = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    "touchmove",
+    (e) => {
+      if (e.touches.length !== 1) return;
+      const target = e.target as HTMLElement | null;
+      const allowsHorizontalPan = target?.closest(
+        '.overflow-x-auto, .overflow-x-scroll, [data-allow-pan-x="true"]'
+      );
+      if (allowsHorizontalPan) return;
+
+      const deltaX = e.touches[0].clientX - panStartX;
+      const deltaY = e.touches[0].clientY - panStartY;
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 6) {
+        e.preventDefault();
+      }
+    },
+    { passive: false }
+  );
+
   // Double-tap zoom
   let lastTouchEnd = 0;
   document.addEventListener(

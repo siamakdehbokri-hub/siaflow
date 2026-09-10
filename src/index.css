@@ -219,7 +219,10 @@
     font-feature-settings: "ss01", "ss02";
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    width: 100%;
+    max-width: 100vw;
     overflow-x: hidden;
+    overflow-x: clip;
     line-height: 1.7;
     letter-spacing: 0.01em;
     /* Safe-area handled at component level (AppHeader pt-safe, BottomNav pb-safe)
@@ -229,19 +232,22 @@
     min-height: 100vh;
     min-height: 100dvh;
     /* App-like lock: vertical scrolling only, no pinch-zoom, no rubber-band */
-    max-width: 100%;
     touch-action: pan-y;
-    overscroll-behavior: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
 
   html {
+    width: 100%;
+    max-width: 100vw;
     touch-action: pan-y;
-    overscroll-behavior: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
     overflow-x: hidden;
-    max-width: 100%;
+    overflow-x: clip;
   }
 
 
@@ -262,9 +268,12 @@
 
   #root {
     width: 100%;
+    max-width: 100vw;
     min-height: 100vh;
     min-height: 100dvh;
     overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
   }
 
   ::-webkit-scrollbar {
@@ -697,7 +706,9 @@
 
   .mobile-scroll {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
   }
 
   .mobile-card-padding {

@@ -125,6 +125,7 @@ function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: Swipea
     <div 
       ref={containerRef}
       className="relative overflow-hidden rounded-xl"
+      data-allow-pan-x="true"
       onMouseLeave={handleMouseLeave}
     >
       {/* Actions on the LEFT side (revealed by swiping RIGHT in RTL) */}
