@@ -4,6 +4,7 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const CRON_SECRET = Deno.env.get("CRON_SECRET") || "";
 
 interface Rule {
   id: string;
@@ -68,9 +69,11 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization") || "";
     const token = authHeader.replace("Bearer ", "").trim();
+    const cronSecret = req.headers.get("x-cron-secret") || "";
+    const isCron = !!CRON_SECRET && cronSecret === CRON_SECRET;
 
     let scopedUserId: string | null = null;
-    if (token && token !== SERVICE_ROLE) {
+    if (!isCron && token && token !== SERVICE_ROLE) {
       const { data, error } = await admin.auth.getUser(token);
       if (error || !data.user) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
