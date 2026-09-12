@@ -110,8 +110,11 @@ export function AppMenu({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-[85vw] max-w-[360px] p-0">
-        <SheetHeader className="p-6 pb-4 border-b border-border bg-primary text-primary-foreground">
+      <SheetContent side="right" className="w-[85vw] max-w-[360px] p-0 flex flex-col">
+        <SheetHeader
+          className="px-6 pb-4 border-b border-border bg-primary text-primary-foreground"
+          style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+        >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
               <span className="text-2xl font-black">SF</span>
@@ -127,7 +130,7 @@ export function AppMenu({
           </div>
         </SheetHeader>
 
-        <div className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-180px)] pb-24">
+        <div className="flex-1 p-4 space-y-2 overflow-y-auto pb-4">
           {/* Main Features */}
           <p className="text-xs font-semibold text-muted-foreground px-1 pt-2 pb-1">
             امکانات اصلی
@@ -216,7 +219,10 @@ export function AppMenu({
         </div>
 
         {/* Version Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
+        <div
+          className="shrink-0 px-4 pt-3 border-t border-border bg-card"
+          style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           <p className="text-[11px] text-center text-muted-foreground">
             نسخه {APP_VERSION_FA}
           </p>
