@@ -110,10 +110,12 @@ export function AppMenu({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-[85vw] max-w-[360px] p-0 flex flex-col">
+      <SheetContent
+        side="right"
+        className="w-[85vw] max-w-[360px] p-0 flex flex-col top-[env(safe-area-inset-top,0px)] bottom-[env(safe-area-inset-bottom,0px)] h-auto"
+      >
         <SheetHeader
-          className="px-6 pb-4 border-b border-border bg-primary text-primary-foreground"
-          style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+          className="px-6 pt-6 pb-4 border-b border-border bg-primary text-primary-foreground"
         >
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
