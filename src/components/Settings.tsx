@@ -587,7 +587,10 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
             <ChevronLeft className="w-4.5 h-4.5 text-muted-foreground/60 shrink-0" strokeWidth={2} />
           </div>
         </button>
-        <div className="px-4 py-3.5">
+        <button
+          onClick={() => setShowContactDialog(true)}
+          className="w-full px-4 py-3.5 relative text-right active:bg-accent/40 transition-colors"
+        >
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
               <Mail className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
@@ -596,8 +599,9 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
               <p className="text-sm font-semibold text-foreground leading-relaxed">ارتباط با ما</p>
               <p className="text-xs text-muted-foreground leading-relaxed mt-0.5" dir="ltr">siamakdehbokri@gmail.com</p>
             </div>
+            <ChevronLeft className="w-4.5 h-4.5 text-muted-foreground/60 shrink-0" strokeWidth={2} />
           </div>
-        </div>
+        </button>
         <div className="px-4 py-3.5 relative">
           <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/60 to-transparent" />
           <div className="flex items-center gap-3.5">
