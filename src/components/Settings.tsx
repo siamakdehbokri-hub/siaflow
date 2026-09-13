@@ -649,6 +649,60 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
         SiaFlow نسخه {APP_VERSION_FA}
       </p>
 
+      {/* About Dialog */}
+      <Dialog open={showAboutDialog} onOpenChange={setShowAboutDialog}>
+        <DialogContent className="max-w-sm mx-auto rounded-2xl text-center">
+          <DialogHeader className="text-center">
+            <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Info className="w-7 h-7 text-primary" strokeWidth={2} />
+            </div>
+            <DialogTitle className="text-lg">درباره SiaFlow</DialogTitle>
+            <DialogDescription className="text-center leading-relaxed">
+              نسخه {appVersion}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-sm text-foreground/90">
+            <div className="flex flex-col gap-1">
+              <span className="text-muted-foreground text-xs">سازنده</span>
+              <span className="font-semibold">سیامک دهبکری</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-muted-foreground text-xs">ارتباط با سازنده</span>
+              <a
+                href="mailto:siamakdehbokri@gmail.com"
+                className="font-semibold text-primary hover:underline ltr"
+                dir="ltr"
+              >
+                siamakdehbokri@gmail.com
+              </a>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-muted-foreground text-xs">وب‌سایت</span>
+              <a
+                href="https://www.siamakdh.ir"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:underline ltr"
+                dir="ltr"
+              >
+                www.siamakdh.ir
+              </a>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="w-full h-12"
+              onClick={() => setShowAboutDialog(false)}
+            >
+              بستن
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Account Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-sm mx-auto rounded-2xl">
