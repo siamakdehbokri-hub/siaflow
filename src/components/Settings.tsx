@@ -570,7 +570,10 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
           subtitle="آموزش کار با اپلیکیشن"
           onClick={() => setCurrentView('help')}
         />
-        <div className="px-4 py-3.5 relative">
+        <button
+          onClick={() => setShowAboutDialog(true)}
+          className="w-full px-4 py-3.5 relative text-right active:bg-accent/40 transition-colors"
+        >
           <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-l from-transparent via-border/60 to-transparent" />
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
@@ -580,8 +583,9 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
               <p className="text-sm font-semibold text-foreground leading-relaxed">درباره ما</p>
               <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">طراحی و توسعه توسط Siamak.D</p>
             </div>
+            <ChevronLeft className="w-4.5 h-4.5 text-muted-foreground/60 shrink-0" strokeWidth={2} />
           </div>
-        </div>
+        </button>
         <div className="px-4 py-3.5">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
