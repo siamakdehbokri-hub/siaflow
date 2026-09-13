@@ -104,6 +104,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const [currentView, setCurrentView] = useState<SettingsView>('main');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
