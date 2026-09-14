@@ -92,15 +92,59 @@ export type Database = {
         }
         Relationships: []
       }
+      debt_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          debt_id: string
+          id: string
+          note: string | null
+          paid_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          debt_id: string
+          id?: string
+          note?: string | null
+          paid_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          debt_id?: string
+          id?: string
+          note?: string | null
+          paid_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_payments_debt_id_fkey"
+            columns: ["debt_id"]
+            isOneToOne: false
+            referencedRelation: "debts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       debts: {
         Row: {
           created_at: string
           creditor: string
           due_date: string | null
+          frequency: string
           id: string
+          installment_amount: number | null
+          installment_count: number | null
+          interest_rate: number
           name: string
+          next_due_date: string | null
           paid_amount: number
           reason: string | null
+          start_date: string | null
           total_amount: number
           updated_at: string
           user_id: string
@@ -109,10 +153,16 @@ export type Database = {
           created_at?: string
           creditor: string
           due_date?: string | null
+          frequency?: string
           id?: string
+          installment_amount?: number | null
+          installment_count?: number | null
+          interest_rate?: number
           name: string
+          next_due_date?: string | null
           paid_amount?: number
           reason?: string | null
+          start_date?: string | null
           total_amount: number
           updated_at?: string
           user_id: string
@@ -121,10 +171,16 @@ export type Database = {
           created_at?: string
           creditor?: string
           due_date?: string | null
+          frequency?: string
           id?: string
+          installment_amount?: number | null
+          installment_count?: number | null
+          interest_rate?: number
           name?: string
+          next_due_date?: string | null
           paid_amount?: number
           reason?: string | null
+          start_date?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
@@ -496,6 +552,15 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      pay_debt_installment: {
+        Args: {
+          _amount: number
+          _debt_id: string
+          _note?: string
+          _paid_at?: string
+        }
+        Returns: Json
+      }
       transfer_between_accounts: {
         Args: {
           _amount: number
