@@ -61,7 +61,7 @@ const Index = () => {
   const { transactions, loading: transactionsLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { categories, loading: categoriesLoading, addCategory, updateCategory, deleteCategory } = useCategories();
   const { goals, loading: goalsLoading, addGoal, updateGoalAmount, deleteGoal } = useSavingGoals();
-  const { debts, loading: debtsLoading, addDebt, updateDebt, deleteDebt, addPayment, stats: debtStats } = useDebts();
+  const { debts, payments: debtPayments, loading: debtsLoading, addDebt, updateDebt, deleteDebt, addPayment, deletePayment, stats: debtStats } = useDebts();
   const { reminders, dismissReminder } = useReminders(transactions);
   const { reminders: debtReminders, dismissReminder: dismissDebtReminder, requestNotificationPermission } = useDebtReminders(debts);
   const { suggestion: autoSavingsSuggestion, shouldShow: showAutoSavings, prefs: autoSavingsPrefs, acceptSuggestion, declineSuggestion, enableAutoTransfer } = useAutoSavings(transactions);
@@ -201,11 +201,13 @@ const Index = () => {
           ) : subView === 'debts' ? (
             <DebtManagement 
               debts={debts} 
+              payments={debtPayments}
               stats={debtStats} 
               onAddDebt={addDebt} 
               onUpdateDebt={updateDebt} 
               onDeleteDebt={deleteDebt} 
               onAddPayment={addPayment} 
+              onDeletePayment={deletePayment}
             />
           ) : subView === 'transfers' ? (
             <TransferManagement 
