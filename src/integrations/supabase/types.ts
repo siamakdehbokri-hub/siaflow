@@ -135,15 +135,19 @@ export type Database = {
           created_at: string
           creditor: string
           due_date: string | null
+          due_day: number | null
           frequency: string
           id: string
           installment_amount: number | null
           installment_count: number | null
           interest_rate: number
+          kind: string
           name: string
           next_due_date: string | null
           paid_amount: number
+          principal_amount: number | null
           reason: string | null
+          reminder_days: number
           start_date: string | null
           total_amount: number
           updated_at: string
@@ -153,15 +157,19 @@ export type Database = {
           created_at?: string
           creditor: string
           due_date?: string | null
+          due_day?: number | null
           frequency?: string
           id?: string
           installment_amount?: number | null
           installment_count?: number | null
           interest_rate?: number
+          kind?: string
           name: string
           next_due_date?: string | null
           paid_amount?: number
+          principal_amount?: number | null
           reason?: string | null
+          reminder_days?: number
           start_date?: string | null
           total_amount: number
           updated_at?: string
@@ -171,15 +179,19 @@ export type Database = {
           created_at?: string
           creditor?: string
           due_date?: string | null
+          due_day?: number | null
           frequency?: string
           id?: string
           installment_amount?: number | null
           installment_count?: number | null
           interest_rate?: number
+          kind?: string
           name?: string
           next_due_date?: string | null
           paid_amount?: number
+          principal_amount?: number | null
           reason?: string | null
+          reminder_days?: number
           start_date?: string | null
           total_amount?: number
           updated_at?: string
