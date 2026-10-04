@@ -24,8 +24,9 @@ import { Debt, DebtPayment, DebtFrequency } from '@/hooks/useDebts';
 import { formatCurrency, formatPersianDateShort, toPersianNum } from '@/utils/persianDate';
 import { toLocalISODateString } from '@/utils/dateUtils';
 import { cn } from '@/lib/utils';
+import { firstLoanDue, loanInstallment } from '@/utils/loanUtils';
 
-type DebtInput = Omit<Debt, 'id' | 'createdAt' | 'updatedAt'>;
+type DebtInput = Omit<Debt, 'id' | 'createdAt' | 'updatedAt' | 'kind' | 'reminderDays'> & { kind?: 'debt' | 'loan'; reminderDays?: number };
 
 interface DebtManagementProps {
   debts: Debt[];
@@ -122,6 +123,10 @@ export function DebtManagement({
   const [startDate, setStartDate] = useState('');
   const [nextDueDate, setNextDueDate] = useState('');
   const [interestRate, setInterestRate] = useState('');
+  const [isLoan, setIsLoan] = useState(false);
+  const [principal, setPrincipal] = useState('');
+  const [dueDay, setDueDay] = useState('');
+  const [reminderDays, setReminderDays] = useState('3');
 
   // Payment form
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -132,6 +137,7 @@ export function DebtManagement({
     setName(''); setTotalAmount(''); setPaidAmount(''); setCreditor(''); setReason('');
     setDueDate(''); setIsInstallment(false); setInstallmentCount(''); setInstallmentAmount('');
     setFrequency('monthly'); setStartDate(''); setNextDueDate(''); setInterestRate('');
+    setIsLoan(false); setPrincipal(''); setDueDay(''); setReminderDays('3');
   };
 
   const openEditModal = (debt: Debt) => {
@@ -149,6 +155,10 @@ export function DebtManagement({
     setStartDate(debt.startDate || '');
     setNextDueDate(debt.nextDueDate || '');
     setInterestRate(debt.interestRate ? String(debt.interestRate) : '');
+    setIsLoan(debt.kind === 'loan');
+    setPrincipal(debt.principalAmount ? fmtInput(String(debt.principalAmount)) : '');
+    setDueDay(debt.dueDay ? String(debt.dueDay) : '');
+    setReminderDays(String(debt.reminderDays ?? 3));
   };
 
   // Auto-calc installment amount from total / count
@@ -162,6 +172,7 @@ export function DebtManagement({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoan) { submitLoan(); return; }
     const total = toNum(totalAmount);
     if (total <= 0) return;
     const inst = isInstallment ? toNum(installmentAmount) : 0;
@@ -180,6 +191,10 @@ export function DebtManagement({
       startDate: start || undefined,
       nextDueDate: next || undefined,
       interestRate: parseFloat(interestRate) || 0,
+      kind: 'debt',
+      dueDay: 0,
+      principalAmount: 0,
+      reminderDays: parseInt(reminderDays, 10) || 3,
     };
     if (editingDebt) {
       onUpdateDebt(editingDebt.id, {
@@ -196,6 +211,44 @@ export function DebtManagement({
     } else {
       onAddDebt(data);
     }
+    setIsAddModalOpen(false);
+    resetForm();
+  };
+
+  // Loan calculations
+  const loanP = toNum(principal);
+  const loanN = parseInt(installmentCount, 10) || 0;
+  const loanRate = parseFloat(interestRate) || 0;
+  const loanDay = Math.min(31, Math.max(0, parseInt(dueDay, 10) || 0));
+  const loanInst = loanInstallment(loanP, loanRate, loanN);
+  const loanTotal = loanInst * loanN;
+  const loanStart = startDate || toLocalISODateString(new Date());
+  const loanFirstDue = loanDay ? firstLoanDue(loanStart, loanDay) : '';
+
+  const submitLoan = () => {
+    if (loanP <= 0 || loanN <= 0 || !loanDay) return;
+    const total = loanTotal;
+    const paid = Math.min(toNum(paidAmount), total);
+    const data: DebtInput = {
+      name: name.trim(),
+      creditor: creditor.trim(),
+      kind: 'loan',
+      principalAmount: loanP,
+      totalAmount: total,
+      paidAmount: paid,
+      installmentCount: loanN,
+      installmentAmount: loanInst,
+      frequency: 'monthly',
+      interestRate: loanRate,
+      dueDay: loanDay,
+      startDate: loanStart,
+      nextDueDate: nextDueDate || loanFirstDue,
+      dueDate: '',
+      reason: reason.trim(),
+      reminderDays: parseInt(reminderDays, 10) || 3,
+    };
+    if (editingDebt) { onUpdateDebt(editingDebt.id, data); setEditingDebt(null); }
+    else onAddDebt(data);
     setIsAddModalOpen(false);
     resetForm();
   };
@@ -383,6 +436,8 @@ export function DebtManagement({
                           <Badge className="bg-success text-success-foreground text-[10px] shrink-0">تسویه شد</Badge>
                         ) : a.isOverdue ? (
                           <Badge variant="destructive" className="text-[10px] shrink-0">معوق</Badge>
+                        ) : debt.kind === 'loan' ? (
+                          <Badge className="bg-primary/15 text-primary border border-primary/20 text-[10px] shrink-0">وام</Badge>
                         ) : a.instAmount ? (
                           <Badge variant="outline" className="text-[10px] shrink-0">{FREQ_LABEL[debt.frequency]}</Badge>
                         ) : null}
@@ -390,6 +445,8 @@ export function DebtManagement({
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><UserRound className="w-3 h-3" />{debt.creditor}</span>
                         {debt.interestRate > 0 && <span>• سود {toPersianNum(debt.interestRate)}٪</span>}
+                        {debt.dueDay ? <span>• هر ماه روز {toPersianNum(debt.dueDay)}</span> : null}
+                        {debt.kind === 'loan' && debt.principalAmount ? <span>• دریافتی {formatCurrency(debt.principalAmount)}</span> : null}
                       </div>
                       {debt.reason && <p className="text-xs text-muted-foreground/80 mt-1 line-clamp-1">{debt.reason}</p>}
                     </div>
@@ -482,7 +539,7 @@ export function DebtManagement({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Landmark className="w-5 h-5 text-destructive" />
-              {editingDebt ? 'ویرایش بدهی' : 'ثبت بدهی جدید'}
+              {editingDebt ? (isLoan ? 'ویرایش وام' : 'ویرایش بدهی') : (isLoan ? 'ثبت وام دریافتی' : 'ثبت بدهی جدید')}
             </DialogTitle>
           </DialogHeader>
 
@@ -497,6 +554,65 @@ export function DebtManagement({
               <Input value={creditor} onChange={(e) => setCreditor(e.target.value)} placeholder="مثلاً: بانک ملی" className="h-11 rounded-xl" required />
             </div>
 
+            {/* Type toggle */}
+            <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-muted/40 border border-border">
+              {([['single', 'یک‌جا'], ['inst', 'قسطی'], ['loan', 'وام دریافتی']] as const).map(([k, label]) => {
+                const active = k === 'loan' ? isLoan : !isLoan && (k === 'inst' ? isInstallment : !isInstallment);
+                return (
+                  <button key={k} type="button"
+                    onClick={() => { setIsLoan(k === 'loan'); setIsInstallment(k !== 'single'); }}
+                    className={cn('h-10 rounded-xl text-sm', active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground')}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {isLoan ? (
+              <div className="space-y-3 rounded-2xl border border-primary/20 p-3 bg-primary/5">
+                <div className="space-y-2">
+                  <Label>مبلغ وام دریافتی (تومان)</Label>
+                  <Input inputMode="numeric" value={principal} onChange={(e) => setPrincipal(fmtInput(e.target.value))} placeholder="مثلاً 100,000,000" className="h-11 rounded-xl" required />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>تعداد اقساط (ماه)</Label>
+                    <Input inputMode="numeric" value={installmentCount} onChange={(e) => setInstallmentCount(fmtInput(e.target.value).replace(/,/g, ''))} placeholder="مثلاً ۳۶" className="h-11 rounded-xl" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>سود سالانه ٪</Label>
+                    <Input inputMode="decimal" value={interestRate} onChange={(e) => setInterestRate(e.target.value.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[^\d.]/g, ''))} placeholder="مثلاً ۲۳" className="h-11 rounded-xl" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>روز سررسید ماهانه</Label>
+                    <Input inputMode="numeric" value={dueDay} onChange={(e) => { const v = fmtInput(e.target.value).replace(/,/g, ''); setDueDay(v && Number(v) > 31 ? '31' : v); }} placeholder="مثلاً ۱۵" className="h-11 rounded-xl" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>یادآوری (روز قبل)</Label>
+                    <Input inputMode="numeric" value={reminderDays} onChange={(e) => setReminderDays(fmtInput(e.target.value).replace(/,/g, '').slice(0, 2))} placeholder="3" className="h-11 rounded-xl" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>تاریخ دریافت وام</Label>
+                  <PersianDatePicker value={startDate} onChange={setStartDate} placeholder="امروز" />
+                </div>
+                <div className="space-y-2">
+                  <Label>اقساط پرداخت‌شده تاکنون (تومان)</Label>
+                  <Input inputMode="numeric" value={paidAmount} onChange={(e) => setPaidAmount(fmtInput(e.target.value))} placeholder="0" className="h-11 rounded-xl" />
+                </div>
+                {loanInst > 0 && (
+                  <div className="rounded-xl bg-background/60 p-3 space-y-1.5 text-xs">
+                    <div className="flex justify-between"><span className="text-muted-foreground">مبلغ هر قسط</span><strong className="text-foreground">{formatCurrency(loanInst)}</strong></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">کل بازپرداخت</span><strong className="text-foreground">{formatCurrency(loanTotal)}</strong></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">مجموع سود</span><strong className="text-destructive">{formatCurrency(Math.max(0, loanTotal - loanP))}</strong></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">مدت</span><strong className="text-foreground">{toPersianNum(loanN)} ماه{loanN >= 12 ? ` (${toPersianNum(Math.floor(loanN / 12))} سال${loanN % 12 ? ` و ${toPersianNum(loanN % 12)} ماه` : ''})` : ''}</strong></div>
+                    {loanFirstDue && <div className="flex justify-between"><span className="text-muted-foreground">اولین قسط</span><strong className="text-foreground">{formatPersianDateShort(nextDueDate || loanFirstDue)}</strong></div>}
+                  </div>
+                )}
+              </div>
+            ) : (<>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>مبلغ کل (تومان)</Label>
@@ -508,17 +624,6 @@ export function DebtManagement({
               </div>
             </div>
 
-            {/* Type toggle */}
-            <div className="grid grid-cols-2 gap-1 p-1 rounded-2xl bg-muted/40 border border-border">
-              <button type="button" onClick={() => setIsInstallment(false)}
-                className={cn('h-10 rounded-xl text-sm', !isInstallment ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground')}>
-                یک‌جا
-              </button>
-              <button type="button" onClick={() => setIsInstallment(true)}
-                className={cn('h-10 rounded-xl text-sm', isInstallment ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground')}>
-                قسطی / بلندمدت
-              </button>
-            </div>
 
             {isInstallment ? (
               <div className="space-y-3 rounded-2xl border border-border p-3 bg-muted/20">
@@ -570,6 +675,11 @@ export function DebtManagement({
                 <PersianDatePicker value={dueDate} onChange={setDueDate} placeholder="انتخاب تاریخ سررسید" />
               </div>
             )}
+            <div className="space-y-2">
+              <Label>یادآوری چند روز قبل از سررسید</Label>
+              <Input inputMode="numeric" value={reminderDays} onChange={(e) => setReminderDays(fmtInput(e.target.value).replace(/,/g, '').slice(0, 2))} placeholder="3" className="h-11 rounded-xl" />
+            </div>
+            </>)}
 
             <div className="space-y-2">
               <Label>توضیحات (اختیاری)</Label>
@@ -577,7 +687,7 @@ export function DebtManagement({
             </div>
 
             <Button type="submit" size="lg" className="w-full h-12 rounded-xl">
-              {editingDebt ? 'ذخیره تغییرات' : 'ثبت بدهی'}
+              {editingDebt ? 'ذخیره تغییرات' : isLoan ? 'ثبت وام' : 'ثبت بدهی'}
             </Button>
           </form>
         </DialogContent>

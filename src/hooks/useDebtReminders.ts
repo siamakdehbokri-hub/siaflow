@@ -30,27 +30,30 @@ export function useDebtReminders(debts: Debt[]) {
     today.setHours(0, 0, 0, 0);
 
     const upcomingReminders: DebtReminder[] = debts
-      .filter(d => d.dueDate && d.paidAmount < d.totalAmount)
+      .filter(d => (d.nextDueDate || d.dueDate) && d.paidAmount < d.totalAmount)
       .map(d => {
-        const dueDate = new Date(d.dueDate!);
+        const due = (d.nextDueDate || d.dueDate)!;
+        const [y, m, dd] = due.split('-').map(Number);
+        const dueDate = new Date(y, m - 1, dd);
         dueDate.setHours(0, 0, 0, 0);
         
         const diffTime = dueDate.getTime() - today.getTime();
         const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const isOverdue = daysUntil < 0;
 
-        const reminderId = `${d.id}-${d.dueDate}`;
+        const reminderId = `${d.id}-${due}`;
+        const windowDays = d.reminderDays ?? 3;
         
         // Show reminder if within 7 days or overdue, and not dismissed
-        if ((daysUntil <= 7 || isOverdue) && !dismissed.includes(reminderId)) {
+        if ((daysUntil <= windowDays || isOverdue) && !dismissed.includes(reminderId)) {
           return {
             id: reminderId,
             debtId: d.id,
             name: d.name,
             creditor: d.creditor,
             totalAmount: d.totalAmount,
-            remainingAmount: d.totalAmount - d.paidAmount,
-            dueDate: d.dueDate!,
+            remainingAmount: d.installmentAmount ? Math.min(d.installmentAmount, d.totalAmount - d.paidAmount) : d.totalAmount - d.paidAmount,
+            dueDate: due,
             daysUntilDue: daysUntil,
             isOverdue,
           };
