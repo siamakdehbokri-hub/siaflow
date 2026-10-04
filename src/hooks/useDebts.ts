@@ -26,6 +26,14 @@ export interface Debt {
   nextDueDate?: string;
   /** Yearly interest / profit rate in percent. */
   interestRate: number;
+  /** 'debt' (owed) or 'loan' (received bank/personal loan). */
+  kind: 'debt' | 'loan';
+  /** Loan principal actually received. */
+  principalAmount?: number;
+  /** Day of month (1-31) the installment is due. */
+  dueDay?: number;
+  /** Days before due date to remind. */
+  reminderDays: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,6 +69,10 @@ function mapDebt(d: Record<string, unknown>): Debt {
     startDate: (d.start_date as string) || undefined,
     nextDueDate: (d.next_due_date as string) || undefined,
     interestRate: d.interest_rate != null ? Number(d.interest_rate) : 0,
+    kind: d.kind === 'loan' ? 'loan' : 'debt',
+    principalAmount: d.principal_amount != null ? Number(d.principal_amount) : undefined,
+    dueDay: d.due_day != null ? Number(d.due_day) : undefined,
+    reminderDays: d.reminder_days != null ? Number(d.reminder_days) : 3,
     createdAt: d.created_at as string,
     updatedAt: d.updated_at as string,
   };
@@ -77,9 +89,11 @@ function mapPayment(p: Record<string, unknown>): DebtPayment {
   };
 }
 
-type DebtInput = Omit<Debt, 'id' | 'createdAt' | 'updatedAt' | 'frequency' | 'interestRate'> & {
+type DebtInput = Omit<Debt, 'id' | 'createdAt' | 'updatedAt' | 'frequency' | 'interestRate' | 'kind' | 'reminderDays'> & {
   frequency?: DebtFrequency;
   interestRate?: number;
+  kind?: 'debt' | 'loan';
+  reminderDays?: number;
 };
 
 function toDbRow(debt: Partial<DebtInput>): Record<string, unknown> {
@@ -96,6 +110,10 @@ function toDbRow(debt: Partial<DebtInput>): Record<string, unknown> {
   if (debt.startDate !== undefined) row.start_date = debt.startDate || null;
   if (debt.nextDueDate !== undefined) row.next_due_date = debt.nextDueDate || null;
   if (debt.interestRate !== undefined) row.interest_rate = debt.interestRate ?? 0;
+  if (debt.kind !== undefined) row.kind = debt.kind;
+  if (debt.principalAmount !== undefined) row.principal_amount = debt.principalAmount || null;
+  if (debt.dueDay !== undefined) row.due_day = debt.dueDay || null;
+  if (debt.reminderDays !== undefined) row.reminder_days = debt.reminderDays ?? 3;
   return row;
 }
 
@@ -171,6 +189,8 @@ export function useDebts() {
           const optimistic: Debt = {
             frequency: 'monthly',
             interestRate: 0,
+            kind: 'debt',
+            reminderDays: 3,
             ...debt,
             id: `offline-${Date.now()}`,
             createdAt: new Date().toISOString(),
