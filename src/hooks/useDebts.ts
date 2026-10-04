@@ -1,3 +1,4 @@
+import { jalaliDueOn } from '@/utils/loanUtils';
 import { shouldQueueOffline, isOfflineId } from '@/lib/networkUtils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -309,7 +310,14 @@ export function useDebts() {
         _note: note || undefined,
       });
       if (error) throw error;
-      return data as { paid_amount: number; next_due_date: string | null };
+      const res = data as { paid_amount: number; next_due_date: string | null };
+      // Loans: keep the next due date pinned to the Jalali day-of-month
+      const debt = debts.find(d => d.id === id);
+      if (debt?.kind === 'loan' && debt.dueDay && debt.nextDueDate && res.paid_amount < debt.totalAmount) {
+        const next = jalaliDueOn(debt.nextDueDate, debt.dueDay, 1);
+        await supabase.from('debts').update({ next_due_date: next } as never).eq('id', id).eq('user_id', user.id);
+      }
+      return res;
     },
     onSuccess: (result, { id }) => {
       queryClient.invalidateQueries({ queryKey: [DEBTS_KEY, user?.id] });
