@@ -66,7 +66,7 @@ export async function addTransaction(
   if (!Number.isSafeInteger(data.amount) || data.amount <= 0) {
     throw new Error('مبلغ باید عدد صحیح مثبت باشد.');
   }
-  if (!data.category.trim() || !/^\\d{4}-\\d{2}-\\d{2}$/.test(data.date)) {
+  if (!data.category.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
     throw new Error('دسته‌بندی یا تاریخ معتبر نیست.');
   }
   const db = await getDatabase();
