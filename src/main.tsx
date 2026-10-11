@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
+import { Capacitor } from "@capacitor/core";
 import "./index.css";
 
 // ─── App-like lock: no pinch-zoom, no double-tap zoom ──────
@@ -118,4 +118,19 @@ if ("serviceWorker" in navigator && !isPreviewHost && !isInIframe) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Keep the Supabase-powered web application out of the native bundle's runtime.
+// Capacitor loads bundled assets locally, never the deployed website.
+async function bootstrap() {
+  const root = createRoot(document.getElementById("root")!);
+  if (Capacitor.isNativePlatform()) {
+    const { default: OfflineApp } = await import("./offline/OfflineApp");
+    root.render(<OfflineApp />);
+  } else {
+    const { default: App } = await import("./App");
+    root.render(<App />);
+  }
+}
+
+bootstrap().catch(() => {
+  document.getElementById("root")!.textContent = "خطا در راه‌اندازی برنامه";
+});
