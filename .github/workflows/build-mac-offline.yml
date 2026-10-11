@@ -1,0 +1,32 @@
+name: Siaflow Mac DMG
+on:
+  push:
+    branches: [mac-offline]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build local Mac interface
+        run: npm run mac:build
+      - name: Package Apple Silicon and Intel
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --config electron-builder.yml --mac dmg zip --publish never
+      - name: Upload DMG and ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: siaflow-mac-offline
+          path: |
+            release/*.dmg
+            release/*.zip
+          if-no-files-found: error
