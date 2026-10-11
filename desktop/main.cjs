@@ -82,7 +82,7 @@ app.whenReady().then(() => {
   mainWindow.webContents.on('will-navigate', event => event.preventDefault());
   mainWindow.on('minimize',()=>{unlocked=false;mainWindow.webContents.send('siaflow:locked')});
   mainWindow.once('ready-to-show', () => mainWindow.show());
-  mainWindow.loadFile(path.join(__dirname, '..', 'dist-desktop', 'index.html')).catch(err => {
+  mainWindow.loadFile(path.join(__dirname, '..', 'dist-desktop', 'desktop', 'index.html')).catch(err => {
     dialog.showErrorBox('Siaflow', 'خطا در بارگذاری رابط برنامه: ' + err.message);
   });
   mainWindow.on('closed', () => { unlocked = false; mainWindow = null; });
