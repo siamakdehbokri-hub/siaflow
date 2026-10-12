@@ -60,7 +60,7 @@ const Index = () => {
   }, [user?.id]);
   const { transactions, loading: transactionsLoading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { categories, loading: categoriesLoading, addCategory, updateCategory, deleteCategory } = useCategories();
-  const { goals, loading: goalsLoading, addGoal, updateGoalAmount, deleteGoal } = useSavingGoals();
+  const { goals, goalTransactions, loading: goalsLoading, addGoal, updateGoal, updateGoalAmount, deleteGoal } = useSavingGoals();
   const { debts, payments: debtPayments, loading: debtsLoading, addDebt, updateDebt, deleteDebt, addPayment, deletePayment, stats: debtStats } = useDebts();
   const { reminders, dismissReminder } = useReminders(transactions);
   const { reminders: debtReminders, dismissReminder: dismissDebtReminder, requestNotificationPermission } = useDebtReminders(debts);
@@ -194,7 +194,9 @@ const Index = () => {
           ) : subView === 'goals' ? (
             <SavingGoals 
               goals={goals} 
+              transactions={goalTransactions}
               onAddGoal={addGoal} 
+              onUpdateGoal={updateGoal}
               onUpdateAmount={updateGoalAmount} 
               onDeleteGoal={deleteGoal} 
             />
