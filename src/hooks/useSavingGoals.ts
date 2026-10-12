@@ -30,6 +30,8 @@ const GOALS_KEY = 'saving-goals';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 const EMPTY_GOALS: SavingGoal[] = [];
+const GOAL_TX_KEY = 'saving-goal-transactions';
+const EMPTY_TX: GoalTransaction[] = [];
 
 function mapGoal(g: Record<string, unknown>): SavingGoal {
   return {
@@ -74,6 +76,51 @@ export function useSavingGoals() {
     },
     enabled: !!user,
     staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: goalTransactions = EMPTY_TX } = useQuery({
+    queryKey: [GOAL_TX_KEY, user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('saving_goal_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1000);
+      if (error) throw error;
+      return (data || []).map((t: Record<string, unknown>) => ({
+        id: t.id as string,
+        goalId: t.goal_id as string,
+        amount: Number(t.amount),
+        type: (t.type === 'withdraw' ? 'withdraw' : 'deposit') as 'deposit' | 'withdraw',
+        note: (t.note as string) || undefined,
+        createdAt: t.created_at as string,
+      }));
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const updateGoalMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pick<SavingGoal, 'name' | 'targetAmount' | 'color' | 'icon' | 'deadline'>> }) => {
+      if (!user) throw new Error('Not authenticated');
+      if (isOfflineId(id)) throw new Error('OFFLINE_PENDING');
+      const row: Record<string, unknown> = {};
+      if (updates.name !== undefined) row.name = updates.name;
+      if (updates.targetAmount !== undefined) row.target_amount = updates.targetAmount;
+      if (updates.color !== undefined) row.color = updates.color;
+      if (updates.icon !== undefined) row.icon = updates.icon;
+      if (updates.deadline !== undefined) row.deadline = updates.deadline || null;
+      const { error } = await supabase.from('saving_goals').update(row as never).eq('id', id).eq('user_id', user.id);
+      if (error) throw error;
+      return { id, updates };
+    },
+    onSuccess: ({ id, updates }) => {
+      queryClient.setQueryData<SavingGoal[]>([GOALS_KEY, user?.id], (old = []) => old.map(g => g.id === id ? { ...g, ...updates } : g));
+      toast.success('هدف بروزرسانی شد');
+    },
+    onError: () => toast.error('خطا در بروزرسانی هدف'),
   });
 
   const addMutation = useMutation({
@@ -176,6 +223,7 @@ export function useSavingGoals() {
       }
     },
     onSuccess: ({ goalId, newAmount, type, targetAmount, queued }) => {
+      queryClient.invalidateQueries({ queryKey: [GOAL_TX_KEY, user?.id] });
       queryClient.setQueryData<SavingGoal[]>(
         [GOALS_KEY, user?.id],
         (old = []) => old.map(g => g.id === goalId ? { ...g, currentAmount: newAmount } : g)
@@ -237,7 +285,10 @@ export function useSavingGoals() {
 
   return {
     goals,
+    goalTransactions,
     loading,
+    updateGoal: (id: string, updates: Partial<Pick<SavingGoal, 'name' | 'targetAmount' | 'color' | 'icon' | 'deadline'>>) =>
+      updateGoalMutation.mutateAsync({ id, updates }),
     addGoal: (g: Omit<SavingGoal, 'id' | 'createdAt' | 'updatedAt' | 'currentAmount'>) => addMutation.mutateAsync(g),
     updateGoalAmount: (goalId: string, amount: number, type: 'deposit' | 'withdraw', note?: string) =>
       updateAmountMutation.mutateAsync({ goalId, amount, type, note }),
