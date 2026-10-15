@@ -67,6 +67,11 @@ export function getOrInitActivationDate(): string {
   return today;
 }
 
+export function setActivationDate(date: string): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(ACTIVATION_DATE_KEY, date);
+}
+
 /**
  * Compute carry-over data for the current Jalali month.
  * Pure-ish: only side effect is the lazy initialization of the activation date.
