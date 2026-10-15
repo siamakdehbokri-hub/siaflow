@@ -13,6 +13,7 @@ import { exportToCSV, exportToExcel, exportToPDF } from '@/utils/exportUtils';
 import type { Transaction } from '@/types/expense';
 import { useAuth } from '@/hooks/useAuth';
 import { APP_VERSION_FA } from '@/lib/version';
+import { applyUpdate, checkForUpdate } from '@/lib/pwaUpdate';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
@@ -118,6 +119,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const webPush = useWebPush();
   const { online } = useNetworkStatus();
   const appVersion = APP_VERSION_FA;
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
 
   const handleToggleNotifications = async (value: boolean) => {
     if (value && permission === 'default') {
@@ -649,10 +651,31 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
         </div>
       </details>
 
-      {/* Version */}
-      <p className="text-center text-[11px] text-muted-foreground/50 pb-2">
-        SiaFlow نسخه {APP_VERSION_FA}
-      </p>
+      {/* Version + manual update check */}
+      <div className="flex flex-col items-center gap-2 pb-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-xl h-11"
+          disabled={checkingUpdate}
+          onClick={async () => {
+            setCheckingUpdate(true);
+            const found = await checkForUpdate();
+            setCheckingUpdate(false);
+            if (found) {
+              toast.success('نسخه جدید پیدا شد، در حال به‌روزرسانی...');
+              applyUpdate();
+            } else {
+              toast('شما آخرین نسخه را دارید');
+            }
+          }}
+        >
+          {checkingUpdate ? 'در حال بررسی...' : 'بررسی به‌روزرسانی'}
+        </Button>
+        <p className="text-center text-[11px] text-muted-foreground/50">
+          SiaFlow نسخه {APP_VERSION_FA}
+        </p>
+      </div>
 
       {/* About Dialog */}
       <Dialog open={showAboutDialog} onOpenChange={setShowAboutDialog}>
