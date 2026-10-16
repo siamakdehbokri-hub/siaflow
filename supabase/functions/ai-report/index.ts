@@ -102,6 +102,10 @@ function outputLooksUnsafe(text: string): boolean {
   return /lovable_api_key|supabase_(anon_key|url)|authorization\s*:|bearer\s+/i.test(text);
 }
 
+// Iran inflation assumption (estimate; update when official figures change)
+const INFLATION_ANNUAL = Number(Deno.env.get('IRAN_INFLATION_ANNUAL') || '40');
+const INFLATION_MONTHLY = Math.round((Math.pow(1 + INFLATION_ANNUAL / 100, 1 / 12) - 1) * 1000) / 10;
+
 // Format number in Persian
 function fmtNum(n: number): string {
   return n.toLocaleString('fa-IR');
@@ -222,13 +226,26 @@ serve(async (req) => {
 ۳. مجموع دسته‌بندی‌ها باید دقیقاً برابر با مجموع کل ماه باشد (بررسی یکپارچگی).
 ۴. اعداد را دقیق بنویس. از گرد کردن بیش‌ازحد خودداری کن.
 ۵. درصدها، میانگین‌ها و مقایسه‌ها باید عددمحور و قابل استناد باشند.
+۶. ماه جاری ناقص است؛ آن را با ماه‌های کامل مقایسه نکن. برای ماه جاری فقط «پیش‌بینی تا پایان ماه» را که داده شده استفاده کن.
+۷. فقط از اعداد آماده‌شده در داده استفاده کن و میانگین‌ها را دوباره حساب نکن. اگر داده کم است (کمتر از ۲ ماه کامل) صریحاً بگو تحلیل روند قابل اتکا نیست.
+
+بافت اقتصاد ایران (حتماً لحاظ کن):
+- تورم سالانه نقطه‌ای حدود ${INFLATION_ANNUAL}٪ (تقریباً ${INFLATION_MONTHLY}٪ در ماه) فرض شود. این عدد تخمینی است و در گزارش بگو «با فرض تورم حدود ${INFLATION_ANNUAL}٪».
+- رشد اسمی درآمد را با تورم مقایسه کن: اگر درآمد ماهانه کمتر از ${INFLATION_MONTHLY}٪ رشد کرده، قدرت خرید کاربر کم شده («رشد واقعی» = رشد اسمی منهای تورم ماهانه).
+- افزایش هزینه‌ها تا حد تورم طبیعی است؛ فقط افزایش بیش از تورم را «افزایش واقعی مصرف» بدان.
+- نگهداری پس‌انداز به صورت نقد ریالی یعنی از دست رفتن ارزش؛ پیشنهادهای حفظ ارزش متناسب با ایران بده (طلا/سکه، صندوق‌های درآمد ثابت و طلا، ارز) بدون توصیه قطعی خرید.
+- استاندارد ۵۰/۳۰/۲۰ را برای ایران واقع‌بینانه تعدیل کن: نیازهای ضروری تا ۶۰٪ قابل قبول است.
 
 شخصیت و لحن:
 - مثل یک مدیر مالی باتجربه صحبت کن. صمیمی اما قاطع.
 - اگر وضعیت بد است، مستقیم بگو. تعارف نکن.
 - از اصطلاحات تخصصی مالی به زبان ساده استفاده کن.
 
-ساختار پاسخ:
+ساختار پاسخ (با عنوان‌های مشخص و کوتاه):
+- خلاصه یک‌خطی وضعیت (🔴🟡🟢)
+- جدول یا فهرست عددی ماه‌ها: درآمد، هزینه، پس‌انداز، مانده، نرخ پس‌انداز
+- میانگین و میانه درآمد (و تعداد ماه‌هایی که مبنای آن‌اند) — شفاف بگو بر اساس چند ماه
+- اثر تورم بر درآمد و هزینه
 - ابتدا تشخیص کلی (🔴🟡🟢)
 - سپس تحلیل ماه‌به‌ماه با اعداد دقیق
 - نسبت هزینه به درآمد، نرخ پس‌انداز
@@ -288,8 +305,12 @@ ${(m.budgetStatus || []).filter((b: any) => b.status !== 'normal').map((b: any) 
 `).join('\n')}
 
 📊 روند کلی: ${sanitizeText(String(monthlyData.overall?.trend || 'stable'), 20)}
-- میانگین درآمد ماهانه: ${fmtNum(monthlyData.overall?.avgMonthlyIncome || 0)} تومان
-- میانگین هزینه ماهانه: ${fmtNum(monthlyData.overall?.avgMonthlyExpense || 0)} تومان
+- ماه‌های کامل: ${fmtNum(monthlyData.overall?.completedMonths || 0)} | ماه‌های دارای درآمد: ${fmtNum(monthlyData.overall?.incomeMonths || 0)}
+- میانگین درآمد ماهانه (فقط ماه‌های کامل دارای درآمد): ${fmtNum(monthlyData.overall?.avgMonthlyIncome || 0)} تومان
+- میانه درآمد ماهانه: ${fmtNum(monthlyData.overall?.medianMonthlyIncome || 0)} تومان
+- میانگین هزینه ماهانه (ماه‌های کامل): ${fmtNum(monthlyData.overall?.avgMonthlyExpense || 0)} تومان
+- میانه هزینه ماهانه: ${fmtNum(monthlyData.overall?.medianMonthlyExpense || 0)} تومان
+${monthlyData.overall?.currentMonth ? `- ماه جاری (${sanitizeText(String(monthlyData.overall.currentMonth.label), 50)}) ناقص است: روز ${fmtNum(monthlyData.overall.currentMonth.daysPassed)} از ${fmtNum(monthlyData.overall.currentMonth.daysTotal)}، هزینه تا امروز ${fmtNum(monthlyData.overall.currentMonth.expenseSoFar)} تومان، پیش‌بینی هزینه تا پایان ماه ${fmtNum(monthlyData.overall.currentMonth.projectedExpense)} تومان` : ''}
 
 لطفاً:
 ۱. هر ماه را جداگانه ارزیابی کن (سبز/زرد/قرمز)
@@ -418,7 +439,7 @@ ${budgetCategories.map(c => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-3-pro-preview",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
