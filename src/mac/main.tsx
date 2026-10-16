@@ -1,0 +1,1 @@
+import {createRoot} from 'react-dom/client';import MacApp from './MacApp';import '../index.css';createRoot(document.getElementById('root')!).render(<MacApp/>);
