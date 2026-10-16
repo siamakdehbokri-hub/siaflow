@@ -65,7 +65,7 @@ export function AIReport({ transactions, categories }: AIReportProps) {
 
     try {
       // Prepare month-isolated data using financial engine
-      const monthlyData = prepareAIMonthlyData(transactions, categories, 3);
+      const monthlyData = prepareAIMonthlyData(transactions, categories, 6);
 
       const { data, error: invokeError } = await supabase.functions.invoke('ai-report', {
         body: { 

@@ -326,8 +326,13 @@ export function prepareAIMonthlyData(
   }>;
   overall: {
     totalMonths: number;
+    completedMonths: number;
+    incomeMonths: number;
     avgMonthlyIncome: number;
+    medianMonthlyIncome: number;
     avgMonthlyExpense: number;
+    medianMonthlyExpense: number;
+    currentMonth?: { label: string; daysPassed: number; daysTotal: number; expenseSoFar: number; projectedExpense: number; incomeSoFar: number };
     trend: 'improving' | 'declining' | 'stable';
   };
 } {
@@ -393,19 +398,49 @@ export function prepareAIMonthlyData(
     };
   });
 
-  // Overall trend
-  const avgIncome = activeSummaries.length > 0
-    ? Math.round(activeSummaries.reduce((s, m) => s + m.totalIncome, 0) / activeSummaries.length)
-    : 0;
-  const avgExpense = activeSummaries.length > 0
-    ? Math.round(activeSummaries.reduce((s, m) => s + m.totalExpense, 0) / activeSummaries.length)
-    : 0;
+  // ── Accurate averages ──
+  // The current month is partial, and months with zero income (e.g. only
+  // expenses logged) would drag the income average down. Average income over
+  // COMPLETED months that actually have income; expenses over completed months.
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isCurrent = (s: { startDate: string; endDate: string }) => s.startDate <= todayIso && s.endDate >= todayIso;
+  const completed = activeSummaries.filter(s => !isCurrent(s));
+  const basis = completed.length > 0 ? completed : activeSummaries;
+  const incomeMonths = basis.filter(s => s.totalIncome > 0);
+  const avg = (arr: number[]) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0);
+  const median = (arr: number[]) => {
+    if (!arr.length) return 0;
+    const s = [...arr].sort((a, b) => a - b);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+  };
+  const avgIncome = avg(incomeMonths.map(s => s.totalIncome));
+  const avgExpense = avg(basis.map(s => s.totalExpense));
 
-  // Determine trend from last 2 months
+  // Current-month progress & projection
+  const current = activeSummaries.find(isCurrent);
+  let currentMonth: { label: string; daysPassed: number; daysTotal: number; expenseSoFar: number; projectedExpense: number; incomeSoFar: number } | undefined;
+  if (current) {
+    const start = new Date(current.startDate + 'T00:00:00');
+    const end = new Date(current.endDate + 'T00:00:00');
+    const daysTotal = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+    const daysPassed = Math.min(daysTotal, Math.max(1, Math.round((new Date(todayIso + 'T00:00:00').getTime() - start.getTime()) / 86400000) + 1));
+    currentMonth = {
+      label: current.monthLabel,
+      daysPassed,
+      daysTotal,
+      expenseSoFar: current.totalExpense,
+      incomeSoFar: current.totalIncome,
+      projectedExpense: Math.round((current.totalExpense / daysPassed) * daysTotal),
+    };
+  }
+
+  // Trend from the last two completed months (partial month would skew it)
   let trend: 'improving' | 'declining' | 'stable' = 'stable';
-  if (activeSummaries.length >= 2) {
-    const last = activeSummaries[activeSummaries.length - 1];
-    const prev = activeSummaries[activeSummaries.length - 2];
+  if (basis.length >= 2) {
+    const last = basis[basis.length - 1];
+    const prev = basis[basis.length - 2];
     if (last.netBalance > prev.netBalance) trend = 'improving';
     else if (last.netBalance < prev.netBalance) trend = 'declining';
   }
@@ -414,8 +449,13 @@ export function prepareAIMonthlyData(
     months,
     overall: {
       totalMonths: activeSummaries.length,
+      completedMonths: completed.length,
+      incomeMonths: incomeMonths.length,
       avgMonthlyIncome: avgIncome,
+      medianMonthlyIncome: median(incomeMonths.map(s => s.totalIncome)),
       avgMonthlyExpense: avgExpense,
+      medianMonthlyExpense: median(basis.map(s => s.totalExpense)),
+      currentMonth,
       trend,
     },
   };
