@@ -37,7 +37,7 @@ interface SavingGoalsProps {
   onAddGoal: (goal: Omit<SavingGoal, 'id' | 'createdAt' | 'updatedAt' | 'currentAmount'>) => void;
   onUpdateGoal?: (id: string, updates: GoalUpdates) => void;
   onUpdateAmount: (goalId: string, amount: number, type: 'deposit' | 'withdraw', note?: string) => void;
-  onDeleteGoal: (id: string) => void;
+  onDeleteGoal: (id: string) => unknown;
 }
 
 interface GoalStats {
@@ -108,6 +108,20 @@ export function SavingGoals({ goals, transactions = [], onAddGoal, onUpdateGoal,
   const [txModal, setTxModal] = useState<{ goal: SavingGoal; type: 'deposit' | 'withdraw' } | null>(null);
   const [historyGoal, setHistoryGoal] = useState<SavingGoal | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const handleDelete = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!deleteId || deleting) return;
+    setDeleting(true);
+    try {
+      await onDeleteGoal(deleteId);
+      setDeleteId(null);
+    } catch {
+      // Mutation reports failure; preserve confirmation for retry.
+    } finally {
+      setDeleting(false);
+    }
+  };
   const [filter, setFilter] = useState<Filter>('active');
 
   const [name, setName] = useState('');
@@ -592,16 +606,16 @@ export function SavingGoals({ goals, transactions = [], onAddGoal, onUpdateGoal,
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={() => { if (!deleting) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>حذف هدف پس‌انداز</AlertDialogTitle>
             <AlertDialogDescription>آیا مطمئنید؟ این هدف و تاریخچه آن حذف می‌شود.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>انصراف</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (deleteId) onDeleteGoal(deleteId); setDeleteId(null); }} className="bg-destructive hover:bg-destructive/90">
-              حذف
+            <AlertDialogCancel disabled={deleting}>انصراف</AlertDialogCancel>
+            <AlertDialogAction disabled={deleting} onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              {deleting ? 'در حال حذف…' : 'حذف'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

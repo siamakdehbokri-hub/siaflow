@@ -107,6 +107,20 @@ export function DebtManagement({
   const [paymentDebt, setPaymentDebt] = useState<Debt | null>(null);
   const [historyDebt, setHistoryDebt] = useState<Debt | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const handleDelete = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!deleteId || deleting) return;
+    setDeleting(true);
+    try {
+      await onDeleteDebt(deleteId);
+      setDeleteId(null);
+    } catch {
+      // Mutation reports failure; preserve confirmation for retry.
+    } finally {
+      setDeleting(false);
+    }
+  };
   const [filter, setFilter] = useState<Filter>('active');
 
   // Form
@@ -776,7 +790,10 @@ export function DebtManagement({
                   {onDeletePayment && historyDebt && (
                     <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive"
                       aria-label="حذف پرداخت"
-                      onClick={() => onDeletePayment(p.id, historyDebt.id, p.amount)}>
+                      onClick={async () => {
+                        try { await onDeletePayment(p.id, historyDebt.id, p.amount); }
+                        catch { /* Mutation displays the error. */ }
+                      }}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
@@ -788,16 +805,16 @@ export function DebtManagement({
       </Dialog>
 
       {/* Delete */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={() => { if (!deleting) setDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>حذف بدهی</AlertDialogTitle>
             <AlertDialogDescription>این بدهی و تمام تاریخچه پرداخت آن حذف می‌شود. قابل بازگشت نیست.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>انصراف</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (deleteId) onDeleteDebt(deleteId); setDeleteId(null); }} className="bg-destructive hover:bg-destructive/90">
-              حذف
+            <AlertDialogCancel disabled={deleting}>انصراف</AlertDialogCancel>
+            <AlertDialogAction disabled={deleting} onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              {deleting ? 'در حال حذف…' : 'حذف'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

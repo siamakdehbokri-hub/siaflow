@@ -50,7 +50,7 @@ interface CategoryManagementProps {
   categories: Category[];
   onAddCategory: (category: Category) => void;
   onEditCategory: (category: Category) => void;
-  onDeleteCategory: (id: string) => void;
+  onDeleteCategory: (id: string) => unknown;
 }
 
 export function CategoryManagement({ 
@@ -62,6 +62,7 @@ export function CategoryManagement({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'expense' | 'income' | 'saving'>('expense');
@@ -147,11 +148,17 @@ export function CategoryManagement({
     resetForm();
   };
 
-  const handleDelete = () => {
-    if (deleteId) {
-      onDeleteCategory(deleteId);
-      toast.success('دسته‌بندی با موفقیت حذف شد');
+  const handleDelete = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!deleteId || deleting) return;
+    setDeleting(true);
+    try {
+      await onDeleteCategory(deleteId);
       setDeleteId(null);
+    } catch {
+      // Mutation reports the error; leave confirmation open for retry.
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -572,7 +579,7 @@ export function CategoryManagement({
       </Dialog>
 
       {/* Delete Confirmation - Mobile Optimized */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={() => { if (!deleting) setDeleteId(null); }}>
         <AlertDialogContent className="rounded-2xl max-w-[90vw]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-bold text-base">حذف دسته‌بندی</AlertDialogTitle>
@@ -581,12 +588,13 @@ export function CategoryManagement({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 flex-row">
-            <AlertDialogCancel className="rounded-xl border-2 flex-1 h-11">انصراف</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting} className="rounded-xl border-2 flex-1 h-11">انصراف</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
+              disabled={deleting}
               className="bg-destructive hover:bg-destructive/90 rounded-xl flex-1 h-11"
             >
-              حذف
+              {deleting ? 'در حال حذف…' : 'حذف'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

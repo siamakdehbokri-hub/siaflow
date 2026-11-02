@@ -117,7 +117,7 @@ export function Settings({ onOpenCategories, transactions = [] }: SettingsProps)
   const navigate = useNavigate();
   const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, permission, requestPermission } = useNotificationPrefs();
   const webPush = useWebPush();
-  const { online } = useNetworkStatus();
+  const { online } = useNetworkStatus(false);
   const appVersion = APP_VERSION_FA;
   const [checkingUpdate, setCheckingUpdate] = useState(false);
 

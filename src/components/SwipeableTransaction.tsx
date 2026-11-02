@@ -8,7 +8,7 @@ import { isOfflineId } from '@/lib/networkUtils';
 interface SwipeableTransactionProps {
   transaction: Transaction;
   onEdit: (transaction: Transaction) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => unknown;
 }
 
 function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: SwipeableTransactionProps) {
@@ -149,10 +149,11 @@ function SwipeableTransactionComponent({ transaction, onEdit, onDelete }: Swipea
         </button>
         <button
           disabled={pending}
-          onClick={() => {
+          onClick={async () => {
             if (pending) return;
-            onDelete(transaction.id);
             resetSwipe();
+            try { await onDelete(transaction.id); }
+            catch { /* Mutation displays the error; avoid unhandled rejection. */ }
           }}
           className="w-[60px] sm:w-[70px] flex items-center justify-center bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 transition-colors touch-target disabled:opacity-50"
         >
