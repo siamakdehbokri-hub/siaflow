@@ -5,6 +5,7 @@ import { Transaction } from '@/types/expense';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { enqueueRequest } from '@/lib/offlineDb';
+import { offlineMutation, getAccessToken } from '@/lib/offlineMutation';
 
 const TRANSACTIONS_KEY = 'transactions';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -174,27 +175,13 @@ export function useTransactions() {
         throw new Error('OFFLINE_PENDING');
       }
 
-      try {
-        const { error } = await supabase
-          .from('transactions')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
-        if (error) throw error;
-        return { id, queued: false };
-      } catch (err) {
-        if (shouldQueueOffline(err)) {
-          const headers = await getAuthHeaders();
-          await enqueueRequest({
-            endpoint: `${SUPABASE_URL}/rest/v1/transactions?id=eq.${id}&user_id=eq.${user.id}`,
-            method: 'DELETE',
-            payload: null,
-            headers,
-          });
-          return { id, queued: true };
-        }
-        throw err;
-      }
+      const { queued } = await offlineMutation({
+        table: 'transactions',
+        method: 'DELETE',
+        filters: { id: `eq.${id}`, user_id: `eq.${user.id}` },
+        returning: false,
+      }, navigator.onLine ? await getAccessToken() : undefined);
+      return { id, queued };
     },
     onSuccess: ({ id, queued }) => {
       queryClient.setQueryData<Transaction[]>(

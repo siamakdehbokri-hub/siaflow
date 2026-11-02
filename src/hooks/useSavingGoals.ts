@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { enqueueRequest } from '@/lib/offlineDb';
+import { offlineMutation, getAccessToken } from '@/lib/offlineMutation';
 
 export interface SavingGoal {
   id: string;
@@ -251,33 +252,21 @@ export function useSavingGoals() {
         toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
         throw new Error('OFFLINE_PENDING');
       }
-      try {
-        const { error } = await supabase
-          .from('saving_goals')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
-        if (error) throw error;
-        return { id, queued: false };
-      } catch (err) {
-        if (shouldQueueOffline(err)) {
-          const headers = await getAuthHeaders();
-          await enqueueRequest({
-            endpoint: `${SUPABASE_URL}/rest/v1/saving_goals?id=eq.${id}&user_id=eq.${user.id}`,
-            method: 'DELETE',
-            payload: null,
-            headers,
-          });
-          return { id, queued: true };
-        }
-        throw err;
-      }
+      const { queued } = await offlineMutation({
+        table: 'saving_goals',
+        method: 'DELETE',
+        filters: { id: `eq.${id}`, user_id: `eq.${user.id}` },
+        returning: false,
+      }, navigator.onLine ? await getAccessToken() : undefined);
+      return { id, queued };
     },
     onSuccess: ({ id, queued }) => {
       queryClient.setQueryData<SavingGoal[]>(
         [GOALS_KEY, user?.id],
         (old = []) => old.filter(g => g.id !== id)
       );
+      queryClient.setQueryData<GoalTransaction[]>([GOAL_TX_KEY, user?.id],
+        (old = []) => old.filter(t => t.goalId !== id));
       toast.success(queued ? 'ذخیره آفلاین شد.' : 'هدف پس‌انداز با موفقیت حذف شد');
     },
     onError: () => toast.error('خطا در حذف هدف'),
