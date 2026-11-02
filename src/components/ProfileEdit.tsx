@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageCropper } from './ImageCropper';
+import { withTimeout } from '@/lib/requestTimeout';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -180,29 +181,29 @@ export function ProfileEdit({ onBack }: ProfileEditProps) {
   };
 
   const handleDeleteAvatar = async () => {
-    if (!user) return;
-    
+    if (!user || uploading) return;
+
     setDeleteDialogOpen(false);
     setUploading(true);
 
     try {
       // Delete from storage
-      const { error: deleteError } = await supabase.storage
+      const { error: deleteError } = await withTimeout(supabase.storage
         .from('avatars')
-        .remove([`${user.id}/avatar.png`]);
+        .remove([`${user.id}/avatar.png`]));
 
       if (deleteError) {
-        console.warn('Error deleting avatar file:', deleteError);
+        throw deleteError;
       }
 
       // Update profile in database
-      const { error: profileError } = await supabase
+      const { error: profileError } = await withTimeout(supabase
         .from('profiles')
         .update({
           avatar_url: null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id);
+        .eq('id', user.id));
 
       if (profileError) throw profileError;
 
