@@ -11,7 +11,7 @@ import { getPendingCount, getFailedCount, subscribeToOfflineQueue } from '@/lib/
 
 export type NetworkState = 'online' | 'offline' | 'syncing';
 
-export function useNetworkStatus() {
+export function useNetworkStatus(manageSync = true) {
   const [online, setOnline] = useState(navigator.onLine);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [pendingCount, setPendingCount] = useState(0);
@@ -29,7 +29,7 @@ export function useNetworkStatus() {
   useEffect(() => {
     const goOnline = () => {
       setOnline(true);
-      processQueue();
+      if (manageSync) void processQueue();
     };
     const goOffline = () => {
       setOnline(false);
@@ -42,7 +42,7 @@ export function useNetworkStatus() {
       window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };
-  }, [refreshPendingCount]);
+  }, [refreshPendingCount, manageSync]);
 
   // Listen to sync status changes
   useEffect(() => {
@@ -55,28 +55,30 @@ export function useNetworkStatus() {
 
   // Invalidate all queries when sync completes
   useEffect(() => {
+    if (!manageSync) return;
     const unsub = onSyncComplete(() => {
       queryClient.invalidateQueries();
     });
     return () => { unsub(); };
-  }, [queryClient]);
+  }, [queryClient, manageSync]);
 
   // Listen for SW Background Sync completion messages
   useEffect(() => {
+    if (!manageSync) return;
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'SYNC_COMPLETE') {
-        queryClient.invalidateQueries();
+        void processQueue();
         refreshPendingCount();
       }
     };
     navigator.serviceWorker?.addEventListener('message', handler);
     return () => navigator.serviceWorker?.removeEventListener('message', handler);
-  }, [queryClient, refreshPendingCount]);
+  }, [queryClient, refreshPendingCount, manageSync]);
 
   // Initial pending count + resume sync when app opens online
   useEffect(() => {
     refreshPendingCount().then((count) => {
-      if (navigator.onLine && count > 0) {
+      if (manageSync && navigator.onLine && count > 0) {
         processQueue();
       }
     });
@@ -88,7 +90,7 @@ export function useNetworkStatus() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && navigator.onLine) {
         refreshPendingCount().then((count) => {
-          if (count > 0) processQueue();
+          if (manageSync && count > 0) void processQueue();
         });
       }
     };
@@ -99,7 +101,7 @@ export function useNetworkStatus() {
       unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [refreshPendingCount]);
+  }, [refreshPendingCount, manageSync]);
 
   const networkState: NetworkState = !online
     ? 'offline'

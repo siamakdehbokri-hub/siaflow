@@ -10,10 +10,9 @@ import {
   removeQueuedRequest,
   type QueuedRequest,
 } from './offlineDb';
+import { fetchWithTimeout, withTimeout, requestBackgroundSync } from './requestTimeout';
 
 const MAX_RETRIES = 5;
-const BASE_DELAY_MS = 1000;
-const MAX_DELAY_MS = 30000;
 
 export type SyncStatus = 'idle' | 'syncing' | 'done' | 'error';
 
@@ -45,18 +44,6 @@ export function onSyncComplete(fn: SyncCompleteCallback) {
   return () => completeCallbacks.delete(fn);
 }
 
-/** Try to register Background Sync via SW */
-async function requestBackgroundSync(): Promise<void> {
-  try {
-    const reg = await navigator.serviceWorker?.ready;
-    if (reg && 'sync' in reg) {
-      await (reg as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register('offline-mutations');
-    }
-  } catch {
-    // Background Sync not available; fall back to manual
-  }
-}
-
 /** Process the offline queue sequentially (prevents race conditions) */
 export async function processQueue(): Promise<void> {
   if (isSyncing) return;
@@ -66,6 +53,9 @@ export async function processQueue(): Promise<void> {
   }
 
   isSyncing = true;
+  let remaining = 0;
+  let synced = 0;
+  try {
   const pending = await getPendingRequests();
 
   if (pending.length === 0) {
@@ -75,9 +65,17 @@ export async function processQueue(): Promise<void> {
   }
 
   emit('syncing', pending.length);
-  let remaining = pending.length;
+  remaining = pending.length;
+  // Resolve auth once per pass, not once for every queued item.
+  const { supabase } = await import('@/integrations/supabase/client');
+  const { data } = await withTimeout(supabase.auth.getSession());
+  const accessToken = data.session?.access_token;
+  if (!accessToken) throw new Error('No active session — will retry');
+  const deadline = Date.now() + 30000;
 
   for (const item of pending) {
+    if (!navigator.onLine || Date.now() >= deadline) break;
+    if (item.id === undefined) continue;
     // Skip items already in terminal failed state — they need user action
     if (item.status === 'failed') {
       remaining--;
@@ -85,12 +83,13 @@ export async function processQueue(): Promise<void> {
     }
 
     // Mark as processing to prevent duplicate pickup
-    await updateQueuedRequest(item.id!, { status: 'processing' as QueuedRequest['status'] });
+    await updateQueuedRequest(item.id, { status: 'processing' as QueuedRequest['status'] });
 
     try {
-      await replayRequest(item);
-      await removeQueuedRequest(item.id!);
+      await replayRequest(item, accessToken);
+      await removeQueuedRequest(item.id);
       remaining--;
+      synced++;
       emit('syncing', remaining);
     } catch (err) {
       const isPermanent = err instanceof Error && err.message.startsWith('PERMANENT:');
@@ -98,7 +97,7 @@ export async function processQueue(): Promise<void> {
 
       if (isPermanent || newRetry >= MAX_RETRIES) {
         // Terminal failure — surface to user, do NOT retry forever
-        await updateQueuedRequest(item.id!, {
+        await updateQueuedRequest(item.id, {
           status: 'failed',
           retryCount: newRetry,
           errorMessage: err instanceof Error ? err.message : 'Unknown error',
@@ -114,47 +113,38 @@ export async function processQueue(): Promise<void> {
         // (online event / SW SYNC_COMPLETE / manual trigger) retry it.
         // We intentionally do NOT sleep here: sleeping inside the loop would
         // stall every following item in the queue for up to MAX_DELAY_MS.
-        await updateQueuedRequest(item.id!, {
+        await updateQueuedRequest(item.id, {
           status: 'pending',
           retryCount: newRetry,
           errorMessage: err instanceof Error ? err.message : 'Unknown error',
         });
+        // Do not send later dependent mutations after a network failure.
+        break;
       }
     }
   }
 
-  isSyncing = false;
   emit(remaining === 0 ? 'done' : 'error', remaining);
 
-  if (remaining === 0) {
+  if (synced > 0) {
     completeCallbacks.forEach((fn) => fn());
+  }
+  if (remaining === 0) {
     setTimeout(() => {
       if (currentStatus === 'done') emit('idle', 0);
     }, 3000);
   }
+  } catch (error) {
+    console.error('[SyncManager] Sync interrupted:', error);
+    emit('error', remaining);
+  } finally {
+    // IndexedDB, session, or listener errors must never lock future syncs.
+    isSyncing = false;
+  }
 }
 
 /** Replay a single queued request — attaches a fresh bearer token at send time */
-async function replayRequest(item: QueuedRequest): Promise<void> {
-  // Fetch a fresh access token at replay time. Tokens are never persisted.
-  let accessToken: string | undefined;
-  try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    const { data } = await supabase.auth.getSession();
-    accessToken = data.session?.access_token;
-  } catch {
-    // Transient failure fetching the session (network/IndexedDB hiccup).
-    // Throw a NON-permanent error so the item stays queued and retries later,
-    // instead of being sent token-less → 401 → permanently dropped.
-    throw new Error('Session fetch failed — will retry');
-  }
-
-  // No active session yet (e.g. still restoring auth). Retry later rather than
-  // sending an unauthenticated request that 401s and is dropped permanently.
-  if (!accessToken) {
-    throw new Error('No active session — will retry');
-  }
-
+async function replayRequest(item: QueuedRequest, accessToken: string): Promise<void> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(item.headers || {}),
@@ -164,7 +154,7 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
   delete headers['authorization'];
   headers['Authorization'] = `Bearer ${accessToken}`;
 
-  const response = await fetch(item.endpoint, {
+  const response = await fetchWithTimeout(item.endpoint, {
     method: item.method,
     headers,
     body: item.payload ? JSON.stringify(item.payload) : undefined,
@@ -180,7 +170,7 @@ async function replayRequest(item: QueuedRequest): Promise<void> {
     }
 
     // 400/401/403/404/422 = permanent — do not retry forever
-    if ([400, 401, 403, 404, 422].includes(response.status)) {
+    if ([400, 403, 404, 422].includes(response.status)) {
       throw new Error(`PERMANENT: HTTP ${response.status}: ${text}`);
     }
 

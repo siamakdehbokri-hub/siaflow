@@ -31,8 +31,8 @@ interface EditTransactionModalProps {
   isOpen: boolean;
   transaction: Transaction | null;
   onClose: () => void;
-  onSave: (transaction: Transaction) => void;
-  onDelete: (id: string) => void;
+  onSave: (transaction: Transaction) => unknown;
+  onDelete: (id: string) => unknown;
   categories: Category[];
 }
 
@@ -74,6 +74,7 @@ export function EditTransactionModal({
   const [date, setDate] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const currentCategories = useMemo(() => 
     categories.filter(c => c.type === type), 
@@ -102,11 +103,13 @@ export function EditTransactionModal({
     }
   }, [transaction]);
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!transaction || !amount || !category) return;
+    if (!transaction || !amount || !category || busy) return;
+    setBusy(true);
+    try {
     
-    onSave({
+    await onSave({
       ...transaction,
       type,
       amount: parseAmount(amount),
@@ -118,13 +121,25 @@ export function EditTransactionModal({
       tags: [],
     });
     onClose();
+    } catch {
+      // Mutation displays the error; keep the form available for retry.
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const handleDelete = () => {
-    if (transaction) {
-      onDelete(transaction.id);
+  const handleDelete = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!transaction || busy) return;
+    setBusy(true);
+    try {
+      await onDelete(transaction.id);
       setShowDeleteDialog(false);
       onClose();
+    } catch {
+      // The mutation reports failure; do not close or report success.
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -152,14 +167,15 @@ export function EditTransactionModal({
 
   const keyboardInset = useKeyboardInset();
 
-  if (!transaction) return null;
+  // Keep the controlled roots mounted during close so both scroll/focus locks
+  // unwind, including when deleting clears the selected transaction.
 
   const config = TYPE_CONFIG[type];
   const accentColor = `hsl(var(${config.colorVar}))`;
 
   return (
     <>
-      <Drawer open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <Drawer open={isOpen} onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
         <DrawerContent
           className="flex flex-col border-0 bg-background/95 backdrop-blur-2xl"
           style={{ maxHeight: '94dvh', height: '94dvh' }}
@@ -174,6 +190,8 @@ export function EditTransactionModal({
             <div className="flex items-center gap-1.5">
               <button 
                 type="button"
+                aria-label="حذف تراکنش"
+                disabled={busy}
                 onClick={() => setShowDeleteDialog(true)}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-destructive/10 active:bg-destructive/20 transition-colors"
               >
@@ -401,7 +419,7 @@ export function EditTransactionModal({
               onClick={() => handleSubmit()}
               className="w-full h-13 rounded-2xl font-bold text-sm text-white shadow-xl active:scale-[0.98] transition-transform border-0"
               style={{ background: accentColor }}
-              disabled={!amount || !category}
+              disabled={!amount || !category || busy}
             >
               <Check className="w-4 h-4 ml-2" />
               {config.submitLabel}
@@ -410,7 +428,7 @@ export function EditTransactionModal({
         </DrawerContent>
       </Drawer>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={(open) => { if (!busy) setShowDeleteDialog(open); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>حذف تراکنش</AlertDialogTitle>
@@ -419,12 +437,13 @@ export function EditTransactionModal({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-xl">انصراف</AlertDialogCancel>
+            <AlertDialogCancel disabled={busy} className="rounded-xl">انصراف</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
+              disabled={busy}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
             >
-              حذف
+              {busy ? 'در حال حذف…' : 'حذف'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { enqueueRequest } from '@/lib/offlineDb';
+import { offlineMutation, getAccessToken } from '@/lib/offlineMutation';
 
 export type DebtFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
 
@@ -260,27 +261,13 @@ export function useDebts() {
         toast.warning('این آیتم هنوز همگام‌سازی نشده. لطفاً پس از اتصال دوباره تلاش کنید.');
         throw new Error('OFFLINE_PENDING');
       }
-      try {
-        const { error } = await supabase
-          .from('debts')
-          .delete()
-          .eq('id', id)
-          .eq('user_id', user.id);
-        if (error) throw error;
-        return { id, queued: false };
-      } catch (err) {
-        if (shouldQueueOffline(err)) {
-          const headers = await getAuthHeaders();
-          await enqueueRequest({
-            endpoint: `${SUPABASE_URL}/rest/v1/debts?id=eq.${id}&user_id=eq.${user.id}`,
-            method: 'DELETE',
-            payload: null,
-            headers,
-          });
-          return { id, queued: true };
-        }
-        throw err;
-      }
+      const { queued } = await offlineMutation({
+        table: 'debts',
+        method: 'DELETE',
+        filters: { id: `eq.${id}`, user_id: `eq.${user.id}` },
+        returning: false,
+      }, navigator.onLine ? await getAccessToken() : undefined);
+      return { id, queued };
     },
     onSuccess: ({ id, queued }) => {
       queryClient.setQueryData<Debt[]>(

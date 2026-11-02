@@ -6,6 +6,7 @@ export function isNetworkError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
   if (err instanceof TypeError && err.message.toLowerCase().includes('fetch')) return true;
   if (err.name === 'AbortError') return true;
+  if (err.name === 'TimeoutError') return true;
   if (err.name === 'NetworkError') return true;
   const networkCodes = ['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'ERR_NETWORK'];
   const code = (err as { code?: string }).code;
