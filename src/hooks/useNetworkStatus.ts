@@ -65,7 +65,7 @@ export function useNetworkStatus() {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'SYNC_COMPLETE') {
-        queryClient.invalidateQueries();
+        void processQueue();
         refreshPendingCount();
       }
     };

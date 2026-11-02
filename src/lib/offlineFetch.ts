@@ -6,6 +6,7 @@
 
 import { enqueueRequest } from './offlineDb';
 import { processQueue } from './syncManager';
+import { fetchWithTimeout } from './requestTimeout';
 
 const MUTATION_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
@@ -29,7 +30,7 @@ export async function offlineFetch(
   // Mutation request – try online first
   if (navigator.onLine) {
     try {
-      const res = await fetch(url, options);
+      const res = await fetchWithTimeout(url, options);
       // If fetch succeeded, also try to flush any queued items
       if (res.ok) {
         processQueue().catch(() => {}); // fire-and-forget
@@ -37,7 +38,7 @@ export async function offlineFetch(
       return res;
     } catch (err) {
       // Network error despite onLine – fall through to queue
-      if (!(err instanceof TypeError)) throw err;
+      if (!(err instanceof TypeError) && !(err instanceof DOMException && ['AbortError', 'TimeoutError'].includes(err.name))) throw err;
     }
   }
 
@@ -55,9 +56,6 @@ export async function offlineFetch(
   const headers: Record<string, string> = {};
   if (options.headers) {
     const h = options.headers as Record<string, string>;
-    if (h['Authorization'] || h['authorization']) {
-      headers['Authorization'] = h['Authorization'] || h['authorization'];
-    }
     if (h['apikey']) {
       headers['apikey'] = h['apikey'];
     }

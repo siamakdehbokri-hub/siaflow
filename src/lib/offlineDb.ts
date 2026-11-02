@@ -131,8 +131,10 @@ export async function getPendingRequests(): Promise<QueuedRequest[]> {
     const index = store.index('timestamp');
     const request = index.getAll();
     request.onsuccess = () => {
+      // A page may close mid-replay. The single-flight manager owns processing,
+      // so interrupted items must be picked up again after reopening the app.
       const all = (request.result as QueuedRequest[]).filter(
-        (r) => r.status === 'pending'
+        (r) => r.status === 'pending' || r.status === 'processing'
       );
       resolve(all);
     };
@@ -157,6 +159,8 @@ export async function updateQueuedRequest(
       store.put({ ...existing, ...updates });
     };
     getReq.onerror = () => reject(getReq.error);
+    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.onabort = () => { db.close(); reject(tx.error ?? new Error('Queue update aborted')); };
     tx.oncomplete = () => {
       db.close();
       notifyQueueChanged();

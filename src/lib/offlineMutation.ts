@@ -10,6 +10,7 @@
 import { enqueueRequest } from './offlineDb';
 import { isNetworkError } from './networkUtils';
 import { toast } from 'sonner';
+import { fetchWithTimeout, requestBackgroundSync, withTimeout } from './requestTimeout';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -47,7 +48,7 @@ export async function offlineMutation<T = unknown>(
 
   if (navigator.onLine) {
     try {
-      const res = await fetch(url, {
+      const res = await fetchWithTimeout(url, {
         method,
         headers: liveHeaders,
         body: body ? JSON.stringify(body) : undefined,
@@ -85,14 +86,7 @@ export async function offlineMutation<T = unknown>(
   });
 
   // Try Background Sync registration
-  try {
-    const reg = await navigator.serviceWorker?.ready;
-    if (reg && 'sync' in reg) {
-      await (reg as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register('offline-mutations');
-    }
-  } catch {
-    // Not supported
-  }
+  void requestBackgroundSync();
 
   toast.info('ذخیره آفلاین شد. پس از اتصال همگام‌سازی می‌شود.');
   return { data: null, queued: true };
@@ -101,7 +95,7 @@ export async function offlineMutation<T = unknown>(
 export async function getAccessToken(): Promise<string | undefined> {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
-    const { data } = await supabase.auth.getSession();
+    const { data } = await withTimeout(supabase.auth.getSession());
     return data.session?.access_token;
   } catch {
     return undefined;

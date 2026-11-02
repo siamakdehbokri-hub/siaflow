@@ -8,7 +8,6 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { CurrencyProvider } from "@/hooks/useCurrency";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { NetworkStatusIndicator } from "@/components/NetworkStatusIndicator";
-import { processQueue, onSyncComplete } from "@/lib/syncManager";
 import { persistQueryCache, restoreQueryCache } from "@/lib/queryPersist";
 import { lazyRetry } from "@/lib/lazyRetry";
 import { UpdateNotifier } from "@/components/UpdateNotifier";
@@ -87,24 +86,8 @@ function ThemeInitializer() {
     };
     mediaQuery.addEventListener('change', handler);
 
-    // Listen for SW sync-complete messages to process queue
-    const onSwMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'SYNC_COMPLETE') {
-        processQueue();
-      }
-    };
-    navigator.serviceWorker?.addEventListener('message', onSwMessage);
-
-    // After offline mutations replay, refetch all queries so optimistic
-    // offline IDs are reconciled with real database IDs returned by the server.
-    const offSyncDone = onSyncComplete(() => {
-      queryClient.invalidateQueries();
-    });
-
     return () => {
       mediaQuery.removeEventListener('change', handler);
-      navigator.serviceWorker?.removeEventListener('message', onSwMessage);
-      offSyncDone();
     };
   }, []);
 
