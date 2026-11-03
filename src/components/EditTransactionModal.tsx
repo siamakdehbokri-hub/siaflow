@@ -74,6 +74,7 @@ export function EditTransactionModal({
   const [date, setDate] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const currentCategories = useMemo(() => 
@@ -130,11 +131,12 @@ export function EditTransactionModal({
 
   const handleDelete = async (event: React.MouseEvent) => {
     event.preventDefault();
-    if (!transaction || busy) return;
+    if (!deleteTargetId || busy) return;
     setBusy(true);
     try {
-      await onDelete(transaction.id);
+      await onDelete(deleteTargetId);
       setShowDeleteDialog(false);
+      setDeleteTargetId(null);
       onClose();
     } catch {
       // The mutation reports failure; do not close or report success.
@@ -175,8 +177,14 @@ export function EditTransactionModal({
 
   return (
     <>
-      <Drawer open={isOpen} onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
+      <Drawer open={isOpen} onOpenChange={(open) => {
+        // The confirmation lives in another portal. Clicking it is not a
+        // dismissal of the edit drawer or its selected transaction.
+        if (!open && !busy && !showDeleteDialog) onClose();
+      }}>
         <DrawerContent
+          onPointerDownOutside={(event) => { if (showDeleteDialog) event.preventDefault(); }}
+          onInteractOutside={(event) => { if (showDeleteDialog) event.preventDefault(); }}
           className="flex flex-col border-0 bg-background/95 backdrop-blur-2xl"
           style={{ maxHeight: '94dvh', height: '94dvh' }}
         >
@@ -192,7 +200,11 @@ export function EditTransactionModal({
                 type="button"
                 aria-label="حذف تراکنش"
                 disabled={busy}
-                onClick={() => setShowDeleteDialog(true)}
+                onClick={() => {
+                  if (!transaction) return;
+                  setDeleteTargetId(transaction.id);
+                  setShowDeleteDialog(true);
+                }}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-destructive/10 active:bg-destructive/20 transition-colors"
               >
                 <Trash2 className="w-4 h-4 text-destructive" />
