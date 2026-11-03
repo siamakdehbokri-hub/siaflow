@@ -175,8 +175,14 @@ export function EditTransactionModal({
 
   return (
     <>
-      <Drawer open={isOpen} onOpenChange={(open) => { if (!open && !busy) onClose(); }}>
+      <Drawer open={isOpen} onOpenChange={(open) => {
+        // The confirmation lives in another portal. Clicking it is not a
+        // dismissal of the edit drawer or its selected transaction.
+        if (!open && !busy && !showDeleteDialog) onClose();
+      }}>
         <DrawerContent
+          onPointerDownOutside={(event) => { if (showDeleteDialog) event.preventDefault(); }}
+          onInteractOutside={(event) => { if (showDeleteDialog) event.preventDefault(); }}
           className="flex flex-col border-0 bg-background/95 backdrop-blur-2xl"
           style={{ maxHeight: '94dvh', height: '94dvh' }}
         >
