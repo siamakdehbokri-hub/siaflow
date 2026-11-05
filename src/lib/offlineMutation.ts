@@ -51,7 +51,7 @@ export async function offlineMutation<T = unknown>(
   const liveHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
-    'Prefer': 'return=representation',
+    'Prefer': prefer,
   };
   if (accessToken) liveHeaders['Authorization'] = `Bearer ${accessToken}`;
 
@@ -84,7 +84,7 @@ export async function offlineMutation<T = unknown>(
   const queuedHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
-    'Prefer': 'return=representation',
+    'Prefer': prefer,
   };
 
   await enqueueRequest({
