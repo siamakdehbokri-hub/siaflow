@@ -61,7 +61,11 @@ export function useTransactions() {
     mutationFn: async (transaction: Omit<Transaction, 'id'>) => {
       if (!user) throw new Error('Not authenticated');
 
+      // Client-generated id: if the request reaches the server but the
+      // response is lost (timeout/offline), the queued replay re-uses the
+      // same id with resolution=ignore-duplicates, so no duplicate row.
       const dbRow = {
+        id: crypto.randomUUID(),
         user_id: user.id,
         amount: transaction.amount,
         type: transaction.type,
@@ -88,12 +92,12 @@ export function useTransactions() {
             endpoint: `${SUPABASE_URL}/rest/v1/transactions?select=*`,
             method: 'POST',
             payload: dbRow,
-            headers: { ...headers, 'Prefer': 'return=representation' },
+            headers: { ...headers, 'Prefer': 'return=representation,resolution=ignore-duplicates' },
           });
-          // Return optimistic data
+          // Return optimistic data with the real id (matches the replayed row)
           const optimistic: Transaction = {
             ...transaction,
-            id: `offline-${Date.now()}`,
+            id: dbRow.id,
           };
           return { tx: optimistic, queued: true };
         }

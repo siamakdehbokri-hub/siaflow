@@ -27,7 +27,16 @@ export async function offlineMutation<T = unknown>(
   options: OfflineMutationOptions,
   accessToken?: string
 ): Promise<{ data: T | null; queued: boolean }> {
-  const { table, method, body, filters, returning } = options;
+  const { table, method, filters, returning } = options;
+
+  // Idempotency: give POSTs a client-generated id so a replay after a lost
+  // response inserts the same row (ignored as duplicate) instead of a copy.
+  const body = method === 'POST' && options.body && options.body.id == null
+    ? { ...options.body, id: crypto.randomUUID() }
+    : options.body;
+  const prefer = method === 'POST'
+    ? 'return=representation,resolution=ignore-duplicates'
+    : 'return=representation';
 
   let url = `${SUPABASE_URL}/rest/v1/${table}`;
   const params = new URLSearchParams();
@@ -42,7 +51,7 @@ export async function offlineMutation<T = unknown>(
   const liveHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
-    'Prefer': 'return=representation',
+    'Prefer': prefer,
   };
   if (accessToken) liveHeaders['Authorization'] = `Bearer ${accessToken}`;
 
@@ -75,7 +84,7 @@ export async function offlineMutation<T = unknown>(
   const queuedHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_KEY,
-    'Prefer': 'return=representation',
+    'Prefer': prefer,
   };
 
   await enqueueRequest({
